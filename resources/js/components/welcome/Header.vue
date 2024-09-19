@@ -8,7 +8,7 @@
                 <div class="col-span-2 relative z-20  sm:col-span-1">
                     <h1
                         class="text-[1.75rem] leading-8 text-white m-0 [text-wrap:balance] md:text-[2rem] lg:text-5xl lg:leading-[3.5rem]">
-                        Serviço de Captação, Tratamento, Envazamento, distribuição de águas Alcalinas</h1>
+                        Serviço de Captação, Envazamento, distribuição de águas Alcalinas</h1>
                     <div class="mt-5 md:mt-7 lg:text-lg lg:mt-8">
                         <p class="p1">
                             Presta o serviço de tratamento, envase e distribuição de águas alcalinas de qualidade
@@ -28,15 +28,26 @@
                     </div>
                 </div>
                 <div class="col-span-3 inline-flex items-start gap-x-3 relative z-20 sm:col-span-1">
-                    <a href="#QuemSomos" class="btn">
-                        Quem Somos </a>
-                    <a href="#contact" class="btn btn--primary">
-                        Fale Conosco <i class="icon icon--chevron-right text-base"><svg
+                    <Button href="#QuemSomos">
+                        Quem Somos
+                    </Button>
+                    <!-- <a href="#QuemSomos" class="btn">
+
+                    </a> -->
+                    <Button href="#informations" class="btn--primary" >
+                        Informações
+                    </Button>
+                    <!-- <a href="#contact" class="btn btn--primary">
+                        Fale Conosco
+                        <i class="icon icon--chevron-right text-base">
+                            <svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 11 20">
                                 <path fill="none" stroke="currentColor" vector-effect="non-scaling-stroke"
                                     stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m1 19 9-9-9-9">
                                 </path>
-                            </svg></i> </a>
+                            </svg>
+                        </i>
+                    </a> -->
                 </div>
             </div>
         </div>
@@ -45,4 +56,5 @@
 
 <script setup>
 import AtsLogo from '@/../../public/images/ats-logo.svg?raw';
+import Button from '@/components/Button.vue'
 </script>

@@ -1,7 +1,7 @@
 <template>
-    <section class="flex [&>*]:flex-1 gap-4 px-64 mt-20 py-10" id="QuemSomos">
-        <div class="flex items-center justify-center">
-            <img src="/images/empresa-interno.png" class="max-w-min  h-full" />
+    <section class="container flex [&>*]:flex-1 gap-4 xl:px-64 mt-20 py-10" id="QuemSomos">
+        <div class="items-center justify-center hidden md:flex ">
+            <img src="/images/empresa-interno.png" class="max-w-min " />
         </div>
         <div class="flex gap-7 flex-col items-center">
             <img src="/images/quem_somos.png" class="w-min" />

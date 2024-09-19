@@ -1,5 +1,5 @@
 <template>
-    <section class="py-10 lg:py-[6.25rem] bg-grey-100">
+    <section class="py-10 lg:py-[6.25rem] bg-grey-100" id="informations">
         <div class="container lg:grid lg:grid-cols-12 lg:gap-x-10">
             <div class="mb-10 lg:col-span-5 lg:pr-[3.75rem] text-slate-700">
                 <h2 class="m-0">Informações e Notícias</h2>

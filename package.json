@@ -21,8 +21,10 @@
         "vue-remix-icons": "^3.12.0"
     },
     "dependencies": {
+        "@vueuse/core": "^11.1.0",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
+        "embla-carousel-vue": "^8.3.0",
         "lucide-vue-next": "^0.441.0",
         "radix-vue": "^1.9.5",
         "tailwind-merge": "^2.5.2",

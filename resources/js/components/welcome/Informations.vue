@@ -74,7 +74,7 @@ const accordionItems = [
         subTitle: 'Poderosa em composição',
         content: /*html*/`
         <p class="w-full text-center text-blue-800 font-semibold">Por atender a todos os requisitos de uma boa água</p>
-        <ul class="[&>li]:opacity-80 cursor-default [&_p]:text-blue-800 flex flex-col gap-4 ">
+        <ul class="[&>li]:opacity-80 cursor-default [&_p]:text-blue-800 [&_p]:font-semibold flex flex-col gap-4 ">
             <li class="hover:opacity-100">
                 <p>Alcalinidade</p>
                 O seu pH de 8,5 facilita a condução dos nutrientes na circulação sanguínea, a eliminação de ácidos e o equilibrio dos radicais livres.

@@ -1,6 +1,5 @@
 <script setup>
 import { Button } from '@/components/ui/button'
-import {Link} from '@inertiajs/vue3'
 const props = defineProps({
     'href': { type: String, required: false },
 })

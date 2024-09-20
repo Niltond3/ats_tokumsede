@@ -1,3 +1,12 @@
+<script setup>
+import AtsLogo from '@/../../public/images/ats-logo.svg?raw';
+import Button from '@/components/Button.vue'
+import { RiArrowRightWideLine as ArrowRightIcon } from "vue-remix-icons";
+import { RiShoppingCartLine as ShoppingCart } from "vue-remix-icons";
+import { RiInformation2Line as InformationIcon } from "vue-remix-icons";
+
+</script>
+
 <template>
     <div
         class="relative overflow-hidden pt-7 pb-10 bg-blue-900 text-blue-100 after:absolute after:w-full after:z-10 after:h-20 after:bottom-[-1px] after:bg-no-repeat after:bg-[length:100%_100%] after:bg-hero-mobile md:pt-10 md:pb-0 lg:pt-12 lg:after:h-[14.75rem] lg:after:bg-hero-desktop">
@@ -51,12 +60,3 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import AtsLogo from '@/../../public/images/ats-logo.svg?raw';
-import Button from '@/components/Button.vue'
-import { RiArrowRightWideLine as ArrowRightIcon } from "vue-remix-icons";
-import { RiShoppingCartLine as ShoppingCart } from "vue-remix-icons";
-import { RiInformation2Line as InformationIcon } from "vue-remix-icons";
-
-</script>

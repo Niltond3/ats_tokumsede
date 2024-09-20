@@ -24,7 +24,7 @@
                         srcset="https://www.advancedwaterinfrastructure.co.uk/wp-content/uploads/2023/08/reservoir-613x840.jpg 613w, https://www.advancedwaterinfrastructure.co.uk/wp-content/uploads/2023/08/reservoir-505x692.jpg 505w"
                         sizes="(max-width: 613px) 100vw, 613px">
                     <div
-                        class="bg-hero-backdrop bg-no-repeat bg-contain absolute left-0 bottom-0 w-auto h-[var(--awin-hero-backdrop-height)] aspect-[1024/1600] z-10 -translate-x-1/4 translate-y-[var(--awin-hero-backdrop-translate-y)] sm:left-10 sm:h-[calc(var(--awin-hero-backdrop-height)+18.5rem)] md:h-[calc(var(--awin-hero-backdrop-height)+22.5rem)] lg:left-[3.55rem] lg:-bottom-[9.5rem] lg:h-[calc(var(--awin-hero-backdrop-height)+67.75rem)]">
+                        class="bg-hero-backdrop bg-no-repeat bg-contain absolute left-0 bottom-0 w-auto h-[var(--ats-hero-backdrop-height)] aspect-[1024/1600] z-10 -translate-x-1/4 translate-y-[var(--ats-hero-backdrop-translate-y)] sm:left-10 sm:h-[calc(var(--ats-hero-backdrop-height)+18.5rem)] md:h-[calc(var(--ats-hero-backdrop-height)+22.5rem)] lg:left-[3.55rem] lg:-bottom-[9.5rem] lg:h-[calc(var(--ats-hero-backdrop-height)+67.75rem)]">
                     </div>
                 </div>
                 <div class="col-span-3 inline-flex items-start gap-x-3 relative z-20 sm:col-span-1">
@@ -34,8 +34,11 @@
                     <!-- <a href="#QuemSomos" class="btn">
 
                     </a> -->
-                    <Button href="#informations" class="btn--primary" >
+                    <Button href="#informations" class="btn--primary">
                         Informações
+                        <i class="icon icon--chevron-right text-xl">
+                            <ArrowRightIcon />
+                        </i>
                     </Button>
                     <!-- <a href="#contact" class="btn btn--primary">
                         Fale Conosco
@@ -57,4 +60,6 @@
 <script setup>
 import AtsLogo from '@/../../public/images/ats-logo.svg?raw';
 import Button from '@/components/Button.vue'
+import { RiArrowRightWideLine as ArrowRightIcon } from "vue-remix-icons";
+
 </script>

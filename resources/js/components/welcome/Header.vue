@@ -8,7 +8,7 @@
                 <div class="col-span-2 relative z-20  sm:col-span-1">
                     <h1
                         class="text-[1.75rem] leading-8 text-white m-0 [text-wrap:balance] md:text-[2rem] lg:text-5xl lg:leading-[3.5rem]">
-                        Serviço de Captação, Envazamento, distribuição de águas Alcalinas</h1>
+                        Serviço de Captação, Envazamento e distribuição de águas Alcalinas</h1>
                     <div class="mt-5 md:mt-7 lg:text-lg lg:mt-8">
                         <p class="p1">
                             Presta o serviço de tratamento, envase e distribuição de águas alcalinas de qualidade
@@ -28,29 +28,24 @@
                     </div>
                 </div>
                 <div class="col-span-3 inline-flex items-start gap-x-3 relative z-20 sm:col-span-1">
-                    <Button href="#QuemSomos">
+                    <Button href="#quemsomos">
                         Quem Somos
                     </Button>
-                    <!-- <a href="#QuemSomos" class="btn">
-
-                    </a> -->
-                    <Button href="#informations" class="btn--primary">
-                        Informações
+                    <Button :href="route('dashboard')" class="btn--primary">
                         <i class="icon icon--chevron-right text-xl">
+                            <ShoppingCart/>
+                        </i>
+                        <span class="hidden min-[768px]:block">Peça já</span>
+                    </Button>
+                    <Button href="#informations" class="btn">
+                        <span class="hidden min-[425px]:block">Informações</span>
+                        <i class="icon icon--chevron-right text-xl hidden min-[425px]:block">
                             <ArrowRightIcon />
                         </i>
-                    </Button>
-                    <!-- <a href="#contact" class="btn btn--primary">
-                        Fale Conosco
-                        <i class="icon icon--chevron-right text-base">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 11 20">
-                                <path fill="none" stroke="currentColor" vector-effect="non-scaling-stroke"
-                                    stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m1 19 9-9-9-9">
-                                </path>
-                            </svg>
+                        <i class="icon block text-xl min-[425px]:hidden">
+                            <InformationIcon />
                         </i>
-                    </a> -->
+                    </Button>
                 </div>
             </div>
         </div>
@@ -61,5 +56,7 @@
 import AtsLogo from '@/../../public/images/ats-logo.svg?raw';
 import Button from '@/components/Button.vue'
 import { RiArrowRightWideLine as ArrowRightIcon } from "vue-remix-icons";
+import { RiShoppingCartLine as ShoppingCart } from "vue-remix-icons";
+import { RiInformation2Line as InformationIcon } from "vue-remix-icons";
 
 </script>

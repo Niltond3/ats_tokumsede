@@ -1,5 +1,5 @@
 <template>
-    <section class="container flex [&>*]:flex-1 gap-4 xl:px-64 mt-20 py-10" id="QuemSomos">
+    <section class="container flex [&>*]:flex-1 gap-4 xl:px-64 mt-20 py-10" id="quemsomos">
         <div class="items-center justify-center hidden md:flex ">
             <img src="/images/empresa-interno.png" class="max-w-min " />
         </div>

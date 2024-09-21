@@ -5,6 +5,7 @@ import { RiPagesLine as WebIcon } from "vue-remix-icons";
 import { RiShoppingCartLine as CartIcon } from "vue-remix-icons";
 import { RiEBike2Fill as BikeIcon } from "vue-remix-icons";
 import { RiFlashlightFill as FlashIcon } from "vue-remix-icons";
+import CertificatesCarousel from './CertificatesCarousel.vue';
 
 </script>
 
@@ -50,14 +51,13 @@ import { RiFlashlightFill as FlashIcon } from "vue-remix-icons";
                     <div>
                         <h4>Passo 2</h4>
                         <p class="flex items-center flex-wrap">
-                            <span class="flex items-center gap-3 ">
-                                Faça seu cadastro! É Rápido.
+                            <span class="flex items-center">Faça seu <a :href="route('register')">Cadastro</a>! É Rápido.
                                 <i class="icon text-yellow-600">
                                     <FlashIcon />
                                 </i>
                             </span>
 
-                            <span>Ou faça Login</span>
+                            <span>Ou faça <a :href="route('login')">Login</a></span>
                         </p>
 
                     </div>
@@ -96,7 +96,7 @@ import { RiFlashlightFill as FlashIcon } from "vue-remix-icons";
 
             </div>
             <div class="gap-4 flex flex-col text-slate-900">
-                <h3>Licenças e Certificados</h3>
+                <h2 class="my-8 text-slate-700">Licenças e Certificados</h2>
                 <p>
                     Transparecemos as nossas Licenças e Certificações!
                 </p>
@@ -107,6 +107,7 @@ import { RiFlashlightFill as FlashIcon } from "vue-remix-icons";
                     concedidos a essa empresa dando ciência de sua habilidade para o fabrico de águas envasadas. Para
                     vista dos interessados e órgãos competentes.
                 </p>
+                <CertificatesCarousel />
             </div>
         </div>
     </section>

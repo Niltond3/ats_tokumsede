@@ -42,12 +42,12 @@ import { RiInformation2Line as InformationIcon } from "vue-remix-icons";
                     </Button>
                     <Button :href="route('dashboard')" class="btn--primary">
                         <i class="icon icon--chevron-right text-xl">
-                            <ShoppingCart/>
+                            <ShoppingCart />
                         </i>
                         <span class="hidden min-[768px]:block">Peça já</span>
                     </Button>
                     <Button href="#informations" class="btn">
-                        <span class="hidden min-[425px]:block">Informações</span>
+                        <span class="hidden min-[768px]:block">Informações</span>
                         <i class="icon icon--chevron-right text-xl hidden min-[425px]:block">
                             <ArrowRightIcon />
                         </i>

@@ -4,6 +4,7 @@ import '../css/app.css';
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { autoAnimatePlugin } from '@formkit/auto-animate/vue'
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
 
@@ -17,6 +18,7 @@ createInertiaApp({
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
+            .use(autoAnimatePlugin)
             .mount(el);
     },
     progress: {

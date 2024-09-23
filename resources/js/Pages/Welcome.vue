@@ -4,6 +4,7 @@ import Header from '@/components/welcome/Header.vue';
 import AboutUs from '@/components/welcome/AboutUs.vue';
 import Informations from '@/components/welcome/Informations.vue';
 import Support from '@/components/welcome/Support.vue';
+import GetInTouch from '@/components/welcome/GetInTouch.vue';
 import Footer from '@/components/welcome/Footer.vue';
 
 defineProps({
@@ -40,6 +41,7 @@ function handleImageError() {
         <AboutUs />
         <Informations />
         <Support />
+        <GetInTouch />
         <Footer />
     </div>
 </template>

@@ -20,7 +20,7 @@ import axios from 'axios';
 
 
 const formSchema = toTypedSchema(z.object({
-    name: z.string({ required_error: 'Nome obrigatório' }).min(5).max(50).refine(validator.isAlpha, { message: 'Nome inválido' }),
+    name: z.string({ required_error: 'Nome obrigatório' }).min(5).max(50),
     email: z.string({ required_error: 'Email obrigatório' }).refine(validator.isEmail, { message: 'Email inválido' }),
     phone: z.string({ required_error: 'Número de telefone obrigatório' }).refine(validator.isMobilePhone, { message: 'Número de telefone inválido' }),
     messager: z.string({ required_error: 'Menssagem obrigatória' }).min(10, { message: 'Menssagem muito curta, seja mais eloquente' }).max(100, { message: 'Menssagem muito longa, seja mais conciso' }),
@@ -31,10 +31,13 @@ const { handleSubmit } = useForm({
 })
 
 const onSubmit = handleSubmit((values) => {
-    console.log(values)
-    axios.post('app/Controllers/Api/IndexController.php/enviaEmail', querystring.stringify(values)).then(res => {
+    axios.post('http://127.0.0.1:8000/api/sendEmail', querystring.stringify(values)).then(res => {
         console.log(res)
-    });
+    }).catch(
+        res => {
+            console.log(res)
+        }
+    );
 
     toast({
         title: 'You submitted the following values:',

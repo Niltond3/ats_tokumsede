@@ -87,10 +87,13 @@ module.exports = {
                 "collapsible-down": "collapsible-down 0.2s ease-in-out",
                 "collapsible-up": "collapsible-up 0.2s ease-in-out",
             },
-            backgroundImage:{
-                "hero-desktop":'url("/images/bg-hero-desktop.svg")',
-                "hero-mobile":'url("/images/bg-hero-mobile.svg")',
-                "hero-backdrop":'url("/images/bg-hero-backdrop.svg")',
+            backgroundImage: {
+                "hero-desktop": 'url("/images/bg-hero-desktop.svg")',
+                "hero-mobile": 'url("/images/bg-hero-mobile.svg")',
+                "hero-backdrop": 'url("/images/bg-hero-backdrop.svg")',
+            },
+            transitionProperty: {
+                'width': 'width'
             },
         },
     },

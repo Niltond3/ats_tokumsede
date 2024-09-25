@@ -33,9 +33,10 @@ const { handleSubmit } = useForm({
 
 const onSubmit = handleSubmit((values) => {
     console.log(values)
-    axios.post(route('contact'), values)
+    axios.post(route('contact'), { body: values.body, name: values.name, email: values.email, phone: values.phone })
         .then((response) => {
             console.log(response)
+
         }).catch((error) => {
             console.error(error.response.data);
         })

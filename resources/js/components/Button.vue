@@ -8,7 +8,7 @@ const props = defineProps({
 <!-- dashboard -->
 
 <template>
-    <Button v-if="href !== undefined" class="" as-child="True" variant="ghost">
+    <Button v-if="href !== undefined" class="" as-child variant="ghost">
         <a :href="href">
             <slot />
         </a>

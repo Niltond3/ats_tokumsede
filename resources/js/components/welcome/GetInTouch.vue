@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { h } from 'vue'
-import validator from 'validator';
+import validator from 'validator'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import querystring from 'querystring'
@@ -23,21 +23,23 @@ const formSchema = toTypedSchema(z.object({
     name: z.string({ required_error: 'Nome obrigatório' }).min(5).max(50),
     email: z.string({ required_error: 'Email obrigatório' }).refine(validator.isEmail, { message: 'Email inválido' }),
     phone: z.string({ required_error: 'Número de telefone obrigatório' }).refine(validator.isMobilePhone, { message: 'Número de telefone inválido' }),
-    messager: z.string({ required_error: 'Menssagem obrigatória' }).min(10, { message: 'Menssagem muito curta, seja mais eloquente' }).max(100, { message: 'Menssagem muito longa, seja mais conciso' }),
+    body: z.string({ required_error: 'Menssagem obrigatória' }).min(10, { message: 'Menssagem muito curta, seja mais eloquente' }).max(100, { message: 'Menssagem muito longa, seja mais conciso' }),
 }))
 
 const { handleSubmit } = useForm({
     validationSchema: formSchema,
 })
 
+
 const onSubmit = handleSubmit((values) => {
-    axios.post('http://127.0.0.1:8000/api/sendEmail', querystring.stringify(values)).then(res => {
-        console.log(res)
-    }).catch(
-        res => {
-            console.log(res)
-        }
-    );
+    console.log(values)
+    axios.post(route('contact'), values)
+        .then((response) => {
+            console.log(response)
+        }).catch((error) => {
+            console.error(error.response.data);
+        })
+
 
     toast({
         title: 'You submitted the following values:',
@@ -82,7 +84,7 @@ const onSubmit = handleSubmit((values) => {
                     <FormMessage />
                 </FormItem>
             </FormField>
-            <FormField v-slot="{ componentField }" name="messager">
+            <FormField v-slot="{ componentField }" name="body">
                 <FormItem v-auto-animate>
                     <FormLabel>Mensságem</FormLabel>
                     <FormControl>

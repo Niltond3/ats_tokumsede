@@ -27,7 +27,3 @@ use App\Http\Controllers\Api\UtilController;
   });
   Route::apiResource('index', IndexController::class);
     Route::apiResource('util', UtilController::class);
-    Route::get('sendEmail','Api\UtilController@sendEmail');
-
-
-

@@ -3,8 +3,9 @@ import { h } from 'vue'
 import validator from 'validator'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import querystring from 'querystring'
 import * as z from 'zod'
+import axios from 'axios';
+import {RiMailSendLine as MailIcon} from 'vue-remix-icons';
 
 import Button from '../Button.vue';
 import {
@@ -14,9 +15,17 @@ import {
     FormLabel,
     FormMessage
 } from '@/components/ui/form'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogClose,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/toast'
-import axios from 'axios';
 
 
 const formSchema = toTypedSchema(z.object({
@@ -26,7 +35,7 @@ const formSchema = toTypedSchema(z.object({
     body: z.string({ required_error: 'Menssagem obrigatória' }).min(10, { message: 'Menssagem muito curta, seja mais eloquente' }).max(100, { message: 'Menssagem muito longa, seja mais conciso' }),
 }))
 
-const { handleSubmit } = useForm({
+const { handleSubmit, resetForm } = useForm({
     validationSchema: formSchema,
 })
 
@@ -36,7 +45,7 @@ const onSubmit = handleSubmit((values) => {
     axios.post(route('contact'), { body: values.body, name: values.name, email: values.email, phone: values.phone })
         .then((response) => {
             console.log(response)
-
+            resetForm()
         }).catch((error) => {
             console.error(error.response.data);
         })
@@ -50,9 +59,23 @@ const onSubmit = handleSubmit((values) => {
 </script>
 
 <template>
-    <section class="container flex [&_label]:text-slate-700 [&>*]:flex-1 flex-col gap-4 xl:px-64 mt-20 py-10"
-        id="faleconosco">
-        <h2 class="my-8 text-slate-700">Fale Conosco</h2>
+    <Dialog>
+        <DialogTrigger as-child class="fixed right-1 bottom-4 z-20">
+            <Button >
+                <i class="icon text-xl">
+                    <MailIcon></MailIcon>
+                </i>
+                Fale Conosco
+            </Button>
+        </DialogTrigger>
+
+      <DialogContent class="container flex [&_label]:text-slate-700 [&>*]:flex-1 flex-col gap-4">
+        <DialogHeader>
+          <DialogTitle>Fale Conosco</DialogTitle>
+          <DialogDescription>
+            Preencha o formulário para enviar-nos uma menságem.
+          </DialogDescription>
+        </DialogHeader>
         <form class="w-2/3 space-y-6" @submit="onSubmit" ref="form">
             <FormField v-slot="{ componentField }" name="name">
                 <FormItem v-auto-animate>
@@ -95,10 +118,12 @@ const onSubmit = handleSubmit((values) => {
                     <FormMessage />
                 </FormItem>
             </FormField>
-            <Button type="submit">
-                Submit
-            </Button>
+            <DialogClose as-child>
+                <Button type="submit">
+                    Submit
+                </Button>
+            </DialogClose>
         </form>
-    </section>
-
+      </DialogContent>
+    </Dialog>
 </template>

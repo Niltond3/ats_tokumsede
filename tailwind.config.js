@@ -91,6 +91,8 @@ module.exports = {
                 "hero-desktop": 'url("/images/bg-hero-desktop.svg")',
                 "hero-mobile": 'url("/images/bg-hero-mobile.svg")',
                 "hero-backdrop": 'url("/images/bg-hero-backdrop.svg")',
+                "water-desktop": 'url("/images/bg-water.png")',
+                "clean-desktop": 'url("/images/bg-clean.png")',
             },
             transitionProperty: {
                 'width': 'width'

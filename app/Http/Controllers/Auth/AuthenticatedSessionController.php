@@ -10,14 +10,22 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+function debug_to_console($data) {
+    $output = $data;
+    if (is_array($output)) $output = json_encode(implode(',', $output));
+    else $output = json_encode( $output);
+    echo "<script>console.log('Debug Objects: " . $output . "' );</script>";
+}
 
 class AuthenticatedSessionController extends Controller
 {
+
     /**
      * Display the login view.
      */
     public function create(): Response
     {
+        debug_to_console('create');
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
@@ -29,6 +37,9 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        debug_to_console('store');
+        debug_to_console($request);
+
         $request->authenticate();
 
         $request->session()->regenerate();
@@ -41,6 +52,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        debug_to_console('destroy');
+        debug_to_console($request);
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\Administrador;
+
+
 
 class LoginRequest extends FormRequest
 {
@@ -27,8 +30,8 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
+            'login' => ['required', 'string'],
+            'senha' => ['required', 'string'],
         ];
     }
 
@@ -39,18 +42,45 @@ class LoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
-        $this->ensureIsNotRateLimited();
+        function debug_to_console($data) {
+            $output = $data;
+            if (is_array($output)) $output = json_encode(implode(',', $output));
+            else $output = json_encode( $output);
+            echo "<script>console.log('Debug Objects: " . $output . "' );</script>";
+        }
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+                debug_to_console('authenticate');
+                $this->ensureIsNotRateLimited();
+
+        $administrador = Administrador::where('status','Ativo')
+				->where("senha", $this->only("senha"))
+                ->where("login", $this->only("login"))
+				->first();
+
+                debug_to_console($administrador);
+        if ($administrador) {
+            Auth::loginUsingId($administrador->id);
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'login' => trans('auth.failed'),
             ]);
         }
 
         RateLimiter::clear($this->throttleKey());
     }
+    //     $this->ensureIsNotRateLimited();
+
+
+    //     if (! Auth::attempt($this->only('login', 'senha'), $this->boolean('remember'))) {
+    //         RateLimiter::hit($this->throttleKey());
+
+    //         throw ValidationException::withMessages([
+    //             'login' => trans('auth.failed'),
+    //         ]);
+    //     }
+
+    //     RateLimiter::clear($this->throttleKey());
+    // }
 
     /**
      * Ensure the login request is not rate limited.
@@ -68,7 +98,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'login' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),

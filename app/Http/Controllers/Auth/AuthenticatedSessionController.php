@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use Barryvdh\Debugbar\Facades\Debugbar;
+
 function debug_to_console($data) {
     $output = $data;
     if (is_array($output)) $output = json_encode(implode(',', $output));
@@ -26,6 +28,7 @@ class AuthenticatedSessionController extends Controller
     public function create(): Response
     {
         debug_to_console('create');
+        Debugbar::info('create');
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
@@ -37,8 +40,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        debug_to_console('store');
-        debug_to_console($request);
+        Debugbar::info('store');
+        Debugbar::info($request);
 
         $request->authenticate();
 

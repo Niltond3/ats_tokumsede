@@ -9,11 +9,12 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use App\Models\Administrador;
-
-
+use App\Models\Cliente;
+use Barryvdh\Debugbar\Facades\Debugbar;
 
 class LoginRequest extends FormRequest
 {
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -42,24 +43,24 @@ class LoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
-        function debug_to_console($data) {
-            $output = $data;
-            if (is_array($output)) $output = json_encode(implode(',', $output));
-            else $output = json_encode( $output);
-            echo "<script>console.log('Debug Objects: " . $output . "' );</script>";
-        }
+                Debugbar::info('authenticate');
 
-                debug_to_console('authenticate');
                 $this->ensureIsNotRateLimited();
 
-        $administrador = Administrador::where('status','Ativo')
-				->where("senha", $this->only("senha"))
-                ->where("login", $this->only("login"))
-				->first();
 
-                debug_to_console($administrador);
-        if ($administrador) {
-            Auth::loginUsingId($administrador->id);
+                if ($this->boolean('isPhone')) {
+                    $user = Cliente::where("senha", $this->string("senha"))
+                    ->where("telefone", $this->string("login"))
+                    ->first();
+                }else {
+                    $user = Administrador::where('status','Ativo')
+                    ->where("senha", $this->string("senha"))
+                    ->where("login", $this->string("login"))
+                    ->first();
+                }
+
+        if ($user) {
+            Auth::guard($this->boolean('isPhone')?'cliente':'administrador')->loginUsingId($user->id,$this->boolean('remember'));
 
             throw ValidationException::withMessages([
                 'login' => trans('auth.failed'),
@@ -68,19 +69,6 @@ class LoginRequest extends FormRequest
 
         RateLimiter::clear($this->throttleKey());
     }
-    //     $this->ensureIsNotRateLimited();
-
-
-    //     if (! Auth::attempt($this->only('login', 'senha'), $this->boolean('remember'))) {
-    //         RateLimiter::hit($this->throttleKey());
-
-    //         throw ValidationException::withMessages([
-    //             'login' => trans('auth.failed'),
-    //         ]);
-    //     }
-
-    //     RateLimiter::clear($this->throttleKey());
-    // }
 
     /**
      * Ensure the login request is not rate limited.

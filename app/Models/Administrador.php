@@ -42,7 +42,6 @@ class Administrador extends Authenticatable
      */
     public function getAuthPassword()
     {
-        // return bcrypt($this->senha);
         return $this->senha;
     }
 

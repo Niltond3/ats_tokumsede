@@ -40,7 +40,7 @@ import { RiInformation2Line as InformationIcon } from "vue-remix-icons";
                     <Button href="#quemsomos">
                         Quem Somos
                     </Button>
-                    <Button :href="route('dashboard')" class="btn--primary">
+                    <Button :href="route('cliente.dashboard')" class="btn--primary">
                         <i class="icon icon--chevron-right text-xl">
                             <ShoppingCart />
                         </i>

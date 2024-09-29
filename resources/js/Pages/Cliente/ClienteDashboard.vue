@@ -1,14 +1,15 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import AuthenticatedLayout from '@/Layouts/ClienteAuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
 
-console.log('dashboard')
+console.log('cliente dashboard')
+
 </script>
 
 <template>
 
-    <Head title="Dashboard" />
+    <Head title="Cliente Dashboard" />
 
     <AuthenticatedLayout>
         <template #header>

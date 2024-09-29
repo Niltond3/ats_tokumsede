@@ -5,7 +5,7 @@ import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import axios from 'axios';
-import {RiMailSendLine as MailIcon} from 'vue-remix-icons';
+import { RiMailSendLine as MailIcon } from 'vue-remix-icons';
 
 import Button from '../Button.vue';
 import {
@@ -16,13 +16,13 @@ import {
     FormMessage
 } from '@/components/ui/form'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogClose,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogClose,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/toast'
@@ -61,7 +61,7 @@ const onSubmit = handleSubmit((values) => {
 <template>
     <Dialog>
         <DialogTrigger as-child class="fixed right-1 bottom-4 z-20">
-            <Button >
+            <Button>
                 <i class="icon text-xl">
                     <MailIcon></MailIcon>
                 </i>
@@ -69,61 +69,61 @@ const onSubmit = handleSubmit((values) => {
             </Button>
         </DialogTrigger>
 
-      <DialogContent class="container flex [&_label]:text-slate-700 [&>*]:flex-1 flex-col gap-4">
-        <DialogHeader>
-          <DialogTitle>Fale Conosco</DialogTitle>
-          <DialogDescription>
-            Preencha o formulário para enviar-nos uma menságem.
-          </DialogDescription>
-        </DialogHeader>
-        <form class="w-2/3 space-y-6" @submit="onSubmit" ref="form">
-            <FormField v-slot="{ componentField }" name="name">
-                <FormItem v-auto-animate>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                        <Input class="focus-visible:ring-slate-500" type="text" placeholder="Nome completo"
-                            v-bind="componentField" />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            </FormField>
-            <FormField v-slot="{ componentField }" name="email">
-                <FormItem v-auto-animate>
-                    <FormLabel>E-Mail</FormLabel>
-                    <FormControl>
-                        <Input class="focus-visible:ring-slate-500" type="text" placeholder="e-mail válido"
-                            v-bind="componentField" />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            </FormField>
-            <FormField v-slot="{ componentField }" name="phone">
-                <FormItem v-auto-animate>
-                    <FormLabel>Telefone</FormLabel>
-                    <FormControl>
-                        <Input class="focus-visible:ring-slate-500" type="tel"
-                            v-mask="['(##) ####-####', '(##) #####-####']" placeholder="Número de telefone"
-                            v-bind="componentField" />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            </FormField>
-            <FormField v-slot="{ componentField }" name="body">
-                <FormItem v-auto-animate>
-                    <FormLabel>Mensságem</FormLabel>
-                    <FormControl>
-                        <Input class="focus-visible:ring-slate-500" type="text" placeholder="Digite aqui sua menságem"
-                            v-bind="componentField" />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            </FormField>
-            <DialogClose as-child>
-                <Button type="submit">
-                    Submit
-                </Button>
-            </DialogClose>
-        </form>
-      </DialogContent>
+        <DialogContent class="container flex [&_label]:text-slate-700 [&>*]:flex-1 flex-col gap-4">
+            <DialogHeader>
+                <DialogTitle>Fale Conosco</DialogTitle>
+                <DialogDescription>
+                    Preencha o formulário para enviar-nos uma menságem.
+                </DialogDescription>
+            </DialogHeader>
+            <form class="w-2/3 space-y-6" @submit="onSubmit" ref="form">
+                <FormField v-slot="{ componentField }" name="name">
+                    <FormItem v-auto-animate>
+                        <FormLabel>Nome</FormLabel>
+                        <FormControl>
+                            <Input class="focus-visible:ring-slate-500" type="text" placeholder="Nome completo"
+                                v-bind="componentField" />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                </FormField>
+                <FormField v-slot="{ componentField }" name="email">
+                    <FormItem v-auto-animate>
+                        <FormLabel>E-Mail</FormLabel>
+                        <FormControl>
+                            <Input class="focus-visible:ring-slate-500" type="text" placeholder="e-mail válido"
+                                v-bind="componentField" />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                </FormField>
+                <FormField v-slot="{ componentField }" name="phone">
+                    <FormItem v-auto-animate>
+                        <FormLabel>Telefone</FormLabel>
+                        <FormControl>
+                            <Input class="focus-visible:ring-slate-500" type="tel"
+                                v-mask="['(##) ####-####', '(##) #####-####']" placeholder="Número de telefone"
+                                v-bind="componentField" />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                </FormField>
+                <FormField v-slot="{ componentField }" name="body">
+                    <FormItem v-auto-animate>
+                        <FormLabel>Mensságem</FormLabel>
+                        <FormControl>
+                            <Input class="focus-visible:ring-slate-500" type="text"
+                                placeholder="Digite aqui sua menságem" v-bind="componentField" />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                </FormField>
+                <DialogClose as-child>
+                    <Button type="submit">
+                        Submit
+                    </Button>
+                </DialogClose>
+            </form>
+        </DialogContent>
     </Dialog>
 </template>

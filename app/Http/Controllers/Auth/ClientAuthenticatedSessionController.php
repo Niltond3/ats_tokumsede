@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\ClientLoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,35 +12,38 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Barryvdh\Debugbar\Facades\Debugbar;
 
-class AuthenticatedSessionController extends Controller
+class ClientAuthenticatedSessionController extends Controller
 {
-
+    protected $redirectTo = '/cliente';
+    protected $guard = 'cliente';
     /**
      * Display the login view.
      */
     public function create(): Response
     {
+        Debugbar::info('ClientAuthenticatedSessionController');
         Debugbar::info('create');
-        Debugbar::info('AuthenticatedSessionController');
-        return Inertia::render('Auth/Login', [
+        return Inertia::render('Cliente/Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
         ]);
     }
 
-    /**
+     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(ClientLoginRequest $request): RedirectResponse
     {
         Debugbar::info('store');
         Debugbar::info($request);
+
+        dd("h");
 
         $request->authenticate();
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('cliente.dashboard', absolute: false));
     }
 
     /**
@@ -48,7 +51,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
+        Auth::guard('cliente')->logout();
 
         $request->session()->invalidate();
 

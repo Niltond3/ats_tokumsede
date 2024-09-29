@@ -9,9 +9,10 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use App\Models\Administrador;
+use App\Models\Cliente;
 use Barryvdh\Debugbar\Facades\Debugbar;
 
-class LoginRequest extends FormRequest
+class ClientLoginRequest extends FormRequest
 {
 
     /**
@@ -30,7 +31,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'login' => ['required', 'string'],
+            'telefone' => ['required', 'string'],
             'senha' => ['required', 'string'],
         ];
     }
@@ -46,13 +47,14 @@ class LoginRequest extends FormRequest
 
                 $this->ensureIsNotRateLimited();
 
-                $user = Administrador::where('status','Ativo')
+
+                $user = Cliente::where('status','1')
                     ->where("senha", $this->string("senha"))
-                    ->where("login", $this->string("login"))
+                    ->where("telefone", $this->string("login"))
                     ->first();
 
         if ($user) {
-            Auth::guard('administrador')->loginUsingId($user->id,$this->boolean('remember'));
+            Auth::guard('cliente')->loginUsingId($user->id,$this->boolean('remember'));
 
             throw ValidationException::withMessages([
                 'login' => trans('auth.failed'),

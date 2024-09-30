@@ -31,6 +31,7 @@ class ClientLoginRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'ddd'=>['required','string'],
             'telefone' => ['required', 'string'],
             'senha' => ['required', 'string'],
         ];
@@ -47,10 +48,9 @@ class ClientLoginRequest extends FormRequest
 
                 $this->ensureIsNotRateLimited();
 
-
-                $user = Cliente::where('status','1')
-                    ->where("senha", $this->string("senha"))
-                    ->where("telefone", $this->string("login"))
+                $user = Cliente::where("senha", $this->only("senha"))
+                    ->where('dddTelefone', $this->only('ddd'))
+                    ->where("telefone", $this->only("telefone"))
                     ->first();
 
         if ($user) {

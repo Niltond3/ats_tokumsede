@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use App\Models\Administrador;
 use App\Models\Cliente;
 use Barryvdh\Debugbar\Facades\Debugbar;
+use Illuminate\Support\Facades\Redirect;
 
 class ClientLoginRequest extends FormRequest
 {
@@ -37,7 +37,7 @@ class ClientLoginRequest extends FormRequest
         ];
     }
 
-    /**
+     /**
      * Attempt to authenticate the request's credentials.
      *
      * @throws \Illuminate\Validation\ValidationException
@@ -48,18 +48,18 @@ class ClientLoginRequest extends FormRequest
 
                 $this->ensureIsNotRateLimited();
 
-                $user = Cliente::where("senha", $this->only("senha"))
-                    ->where('dddTelefone', $this->only('ddd'))
-                    ->where("telefone", $this->only("telefone"))
+                $user = Cliente::where('status','1')
+                    ->where("senha", $this->string("senha"))
+                    ->where("telefone", $this->string("telefone"))
                     ->first();
 
-        if ($user) {
-            Auth::guard('cliente')->loginUsingId($user->id,$this->boolean('remember'));
-
+        if (!$user) {
+            RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
                 'login' => trans('auth.failed'),
             ]);
         }
+        Auth::guard('cliente')->loginUsingId($user->id,$this->boolean('remember'));
 
         RateLimiter::clear($this->throttleKey());
     }

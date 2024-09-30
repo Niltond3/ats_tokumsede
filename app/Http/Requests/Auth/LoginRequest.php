@@ -51,13 +51,12 @@ class LoginRequest extends FormRequest
                     ->where("login", $this->string("login"))
                     ->first();
 
-        if ($user) {
-            Auth::guard('administrador')->loginUsingId($user->id,$this->boolean('remember'));
-
+        if (!$user) {
             throw ValidationException::withMessages([
                 'login' => trans('auth.failed'),
             ]);
         }
+        Auth::guard('administrador')->loginUsingId($user->id,$this->boolean('remember'));
 
         RateLimiter::clear($this->throttleKey());
     }

@@ -14,15 +14,13 @@ use Barryvdh\Debugbar\Facades\Debugbar;
 
 class ClientAuthenticatedSessionController extends Controller
 {
-    protected $redirectTo = '/cliente';
-    protected $guard = 'cliente';
     /**
      * Display the login view.
      */
     public function create(): Response
     {
-        Debugbar::info('ClientAuthenticatedSessionController');
         Debugbar::info('create');
+        Debugbar::info('ClientAuthenticatedSessionController');
         return Inertia::render('Cliente/Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
@@ -36,8 +34,6 @@ class ClientAuthenticatedSessionController extends Controller
     {
         Debugbar::info('store');
         Debugbar::info($request);
-
-        dd("h");
 
         $request->authenticate();
 

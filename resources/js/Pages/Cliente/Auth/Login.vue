@@ -56,7 +56,6 @@ const onSubmit = handleSubmit((values, { resetField }) => {
         senha: values.senha,
         remember: values.remember
     }
-    console.log(payload)
 
     axios.post(route('cliente.login'), payload)
         .then((response) => {

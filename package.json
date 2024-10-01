@@ -34,6 +34,7 @@
         "tailwindcss-animate": "^1.0.7",
         "validator": "^13.12.0",
         "vee-validate": "^4.13.2",
+        "vue-router": "^4.4.5",
         "vue-the-mask": "^0.11.1",
         "zod": "^3.23.8"
     }

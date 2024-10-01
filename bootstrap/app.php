@@ -17,7 +17,6 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
         $middleware->redirectGuestsTo('/cliente/login');
-
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {

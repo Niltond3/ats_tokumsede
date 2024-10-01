@@ -39,7 +39,7 @@ class ClientAuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('cliente.dashboard', absolute: false));
+        return redirect('/');
     }
 
     /**

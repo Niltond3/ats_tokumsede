@@ -62,6 +62,7 @@ const onSubmit = handleSubmit((values, { resetField }) => {
             console.log('response')
             console.log(response)
             resetField('senha')
+            location.reload();
         }).catch((error) => {
             console.error(error);
             resetField('senha')
@@ -111,11 +112,11 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                 </FormItem>
             </FormField>
             <FormField v-slot="{ componentField, value, handleChange }" name="remember" type="checkbox">
-                <FormItem v-auto-animate>
+                <FormItem v-auto-animate class="gap-2 flex items-center">
                     <FormControl>
                         <Checkbox v-bind="componentField" :checked="value" @update:checked="handleChange" />
                     </FormControl>
-                    <FormLabel>Lembrar-se</FormLabel>
+                    <FormLabel class="!m-0">Lembrar-se</FormLabel>
                 </FormItem>
             </FormField>
             <div class="flex gap-4p">

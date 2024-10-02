@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'guest' => RedirectIfAuthenticated::class,
-            // 'auth' => Authenticate::class
+            'auth' => Authenticate::class
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,

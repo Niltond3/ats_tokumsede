@@ -8,8 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
-use Barryvdh\Debugbar\Facades\Debugbar;
-
+use Illuminate\Support\Facades\Redirect;
 
 class RedirectIfAuthenticated
 {
@@ -25,9 +24,8 @@ class RedirectIfAuthenticated
         foreach ($guards as $guard) {
             #check if guards is authenticated
             if (Auth::guard($guard)->check()) {
-                Debugbar::info($guard);
                 if($guard === 'cliente' && Route::is('cliente.*')) {
-                    return redirect()->route('cliente.dashboard');
+                    return Redirect::route('cliente.dashboard');
                 }else{
                     return redirect()->route( 'dashboard');
                 }

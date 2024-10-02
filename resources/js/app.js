@@ -7,7 +7,6 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { autoAnimatePlugin } from '@formkit/auto-animate/vue'
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import VueTheMask from 'vue-the-mask'
-import router from './router'
 
 
 
@@ -22,7 +21,6 @@ createInertiaApp({
             .use(ZiggyVue)
             .use(autoAnimatePlugin)
             .use(VueTheMask)
-            .use(router)
             .mount(el);
     },
     progress: {

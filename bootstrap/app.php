@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\Authenticate;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,11 +14,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'guest' => RedirectIfAuthenticated::class,
+            // 'auth' => Authenticate::class
+        ]);
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
-        $middleware->redirectGuestsTo('/cliente/login');
+
+        // $middleware->redirectGuestsTo('/cliente/login');
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -53,6 +53,10 @@ class ClientLoginRequest extends FormRequest
                     ->where("telefone", $this->string("telefone"))
                     ->first();
 
+
+                Debugbar::info($user);
+
+
         if (!$user) {
             RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([

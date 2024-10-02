@@ -62,7 +62,7 @@ const showingNavigationDropdown = ref(false);
                                     </template>
 
                                     <template #content>
-                                        <DropdownLink :href="route('profile.edit')"> Profile </DropdownLink>
+                                        <DropdownLink :href="route('cliente.profile.edit')"> Profile </DropdownLink>
                                         <DropdownLink :href="route('cliente.logout')" method="post" as="button">
                                             Log Out
                                         </DropdownLink>

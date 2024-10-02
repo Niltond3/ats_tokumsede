@@ -31,13 +31,4 @@ Route::middleware('auth')->group(function () {
 
 
 require __DIR__.'/auth.php';
-require __DIR__.'/clienteAuth.php';
-
-
-Route::middleware('auth:cliente')->group(function () {
-    Route::get('/cliente/dashboard', function () {
-        return Inertia::render('Cliente/ClienteDashboard');
-    })->name('cliente.dashboard');
-
-    // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-});
+require __DIR__.'/cliente.php';

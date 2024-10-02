@@ -1,18 +1,18 @@
 <?php
 
-use App\Http\Controllers\Auth\ClientAuthenticatedSessionController;
+use App\Http\Controllers\Cliente\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest:cliente')->group(function () {
 
-    Route::get('cliente/login', [ClientAuthenticatedSessionController::class, 'create'])
+    Route::get('cliente/login', [AuthenticatedSessionController::class, 'create'])
                 ->name('cliente.login');
 
-    Route::post('cliente/login', [ClientAuthenticatedSessionController::class, 'store']);
+    Route::post('cliente/login', [AuthenticatedSessionController::class, 'store']);
 
 });
 
 Route::middleware('auth:cliente')->group(function () {
-    Route::post('cliente/logout', [ClientAuthenticatedSessionController::class, 'destroy'])
+    Route::post('cliente/logout', [AuthenticatedSessionController::class, 'destroy'])
                 ->name('cliente.logout');
 });

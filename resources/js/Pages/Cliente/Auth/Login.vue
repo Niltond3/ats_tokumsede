@@ -10,7 +10,6 @@ import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import axios from 'axios';
-import { useRouter } from "vue-router";
 import {
     FormControl,
     FormDescription,
@@ -21,8 +20,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-
-const router = useRouter();
 
 defineProps({
     canResetPassword: {
@@ -62,17 +59,8 @@ const onSubmit = handleSubmit((values, { resetField }) => {
 
     axios.post(route('cliente.login'), payload)
         .then((response) => {
-            // console.log('response')
+            console.log('response')
             console.log(response)
-            router.replace('/cliente/dashboard')
-                .then((response) => {
-                    console.log('response')
-                    console.log(response)
-                    resetField('senha')
-                }).catch((error) => {
-                    console.log('error')
-                    console.error(error);
-                })
             resetField('senha')
         }).catch((error) => {
             console.error(error);

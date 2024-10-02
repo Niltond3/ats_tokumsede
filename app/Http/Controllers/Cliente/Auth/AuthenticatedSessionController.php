@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\Cliente\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ClientLoginRequest;
@@ -12,22 +12,23 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Barryvdh\Debugbar\Facades\Debugbar;
 
-class ClientAuthenticatedSessionController extends Controller
+class AuthenticatedSessionController extends Controller
 {
+
     /**
      * Display the login view.
      */
     public function create(): Response
     {
         Debugbar::info('create');
-        Debugbar::info('ClientAuthenticatedSessionController');
+        Debugbar::info('AuthenticatedSessionController');
         return Inertia::render('Cliente/Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
         ]);
     }
 
-     /**
+    /**
      * Handle an incoming authentication request.
      */
     public function store(ClientLoginRequest $request): RedirectResponse
@@ -39,7 +40,7 @@ class ClientAuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect('/');
+        return redirect()->intended(route('cliente.dashboard', absolute: false));
     }
 
     /**
@@ -49,10 +50,10 @@ class ClientAuthenticatedSessionController extends Controller
     {
         Auth::guard('cliente')->logout();
 
-        $request->session()->invalidate();
+        // $request->session()->invalidate();
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('cliente.login');
     }
 }

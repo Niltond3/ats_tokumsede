@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Cliente;
 
-use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Requests\ClienteProfileUpdateRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -10,17 +10,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Http\Controllers\Controller;
 
-class ClienteProfileController extends Controller
+class ProfileController extends Controller
 {
     /**
      * Display the user's profile form.
      */
     public function edit(Request $request): Response
     {
-        debug_to_console('edit');
-        debug_to_console($request);
-        return Inertia::render('Profile/Edit', [
+        return Inertia::render('Cliente/Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
         ]);
@@ -29,10 +28,8 @@ class ClienteProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ClienteProfileUpdateRequest $request): RedirectResponse
     {
-        debug_to_console('update');
-        debug_to_console($request);
         $request->user()->fill($request->validated());
 
         if ($request->user()->isDirty('email')) {
@@ -41,7 +38,7 @@ class ClienteProfileController extends Controller
 
         $request->user()->save();
 
-        return Redirect::route('profile.edit');
+        return Redirect::route('cliente.profile.edit');
     }
 
     /**
@@ -49,21 +46,19 @@ class ClienteProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        debug_to_console('destroy');
-        debug_to_console($request);
         $request->validate([
-            'password' => ['required', 'current_password'],
+            'senha' => ['required', 'current_password'],
         ]);
 
         $user = $request->user();
 
-        Auth::logout();
+        Auth::guard('cliente')->logout();
 
         $user->delete();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Redirect::to('/');
+        return Redirect::to('/cliente/login');
     }
 }

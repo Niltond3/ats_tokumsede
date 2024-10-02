@@ -15,10 +15,10 @@ use Inertia\Inertia;
 
 Route::prefix('cliente')->name('cliente.')->group(function (){
     Route::middleware('guest:cliente')->group(function () {
-        // Route::get('register', [RegisteredUserController::class, 'create'])
-        //             ->name('register');
+        Route::get('register', [RegisteredUserController::class, 'create'])
+                    ->name('register');
 
-        // Route::post('register', [RegisteredUserController::class, 'store']);
+        Route::post('register', [RegisteredUserController::class, 'store']);
 
         Route::get('login', [AuthenticatedSessionController::class, 'create'])
                     ->name('login');

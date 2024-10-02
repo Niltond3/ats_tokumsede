@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\Cliente\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -20,7 +20,7 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Cliente/Auth/Register');
     }
 
     /**
@@ -31,15 +31,32 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'nome' => 'required|string|max:50',
+            'dddTelefone' => 'required|string|max:2',
+            'telefone' => 'required|string|max:9|unique:'.User::class,
+            'sexo' => 'nullable|int',
+            'dataNascimento' => 'nullable|date',
+            'email' => 'required|string|lowercase|email|max:255|:',
+            'senha' => ['required', 'confirmed', Rules\Password::defaults()],
+            'tipoPessoa' => 'required|string',
+            'cpf' => 'nullable|string',
+            'cnpj' => 'nullable|string',
+            'outrosContatos' => 'nullable|string',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
+            'nome' => $request->nome,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'senha' => Hash::make($request->senha),
+            'dddTelefone' => $request->dddTelefone,
+            'telefone' => $request->telefone,
+            'sexo' => $request->sexo,
+            'dataNascimento' => $request->dataNascimento,
+            'tipoPessoa' => $request->tipoPessoa,
+            'cpf' => $request->cpf,
+            'cnpj' => $request->cnpj,
+            'outrosContatos' => $request->outrosContatos,
+
         ]);
 
         event(new Registered($user));

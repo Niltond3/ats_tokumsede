@@ -1,4 +1,6 @@
 <script setup>
+import { computed } from 'vue'
+import { CalendarRoot, useDateFormatter, useForwardPropsEmits } from 'radix-vue'
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import Button from '@/components/Button.vue';
 import { Head, Link } from '@inertiajs/vue3';
@@ -29,6 +31,7 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Input } from '@/components/ui/input'
 import { Calendar } from '@/components/ui/calendar'
+import DatePicker from '../components/datePicker/datePicker.vue'
 
 
 defineProps({
@@ -151,13 +154,12 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                 </FormItem>
             </FormField>
             <FormField v-slot="{ componentField }" type="radio" name="sexo">
-                <FormItem v-auto-animate>
+                <FormItem v-auto-animate class="flex flex-col">
                     <FormLabel>selecione seu sexo</FormLabel>
-
                     <FormControl>
                         <Popover>
                             <PopoverTrigger as-child>
-                                <Button variant="outline">
+                                <Button variant="outline" class="text-slate-500 text-sm !p-2 min-h-[22px] !rounded-sm font-normal flex justify-start !px-3">
                                     {{ values.sexo }}
                                 </Button>
                             </PopoverTrigger>
@@ -193,16 +195,16 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                         <PopoverTrigger as-child>
                             <FormControl>
                                 <Button variant="outline" :class="cn(
-                                    'w-[240px] ps-3 text-start font-normal',
+                                    'text-slate-500 text-sm !p-2 min-h-[22px] !rounded-sm font-normal flex justify-start !px-3',
                                     !value && 'text-muted-foreground',
                                 )">
-                                    <span>{{ value ? format(value, "PPP") : "Pick a date" }}</span>
+                                    <span>{{ values.dataNascimento ? format(values.dataNascimento, "PPP") : "Pick a date" }}</span>
                                     <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
                                 </Button>
                             </FormControl>
                         </PopoverTrigger>
                         <PopoverContent class="p-0">
-                            <Calendar v-bind="componentField" />
+                            <DatePicker v-bind="componentField" />
                         </PopoverContent>
                     </Popover>
                     <FormDescription>

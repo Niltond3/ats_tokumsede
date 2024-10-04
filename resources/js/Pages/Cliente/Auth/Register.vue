@@ -1,12 +1,12 @@
 <script setup>
 import { computed, h, ref } from 'vue';
-import { CalendarDate, DateFormatter, getLocalTimeZone, parseDate, today } from '@internationalized/date';
+import { CalendarDate, DateFormatter, getLocalTimeZone, parseDate } from '@internationalized/date';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import Button from '@/components/Button.vue';
 import { Head } from '@inertiajs/vue3';
 import { RiLoginBoxLine as LoginIcon } from "vue-remix-icons";
 import { RiCalendarLine as CalendarIcon } from "vue-remix-icons";
-import { format } from 'date-fns';
+import { format, parseISO} from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import validator from 'validator'
 import { useForm } from 'vee-validate'
@@ -57,7 +57,7 @@ const formSchema = toTypedSchema(z.object({
     senha: z.string({ required_error: 'Senha obrigatória' }).min(4),
     confirmSenha: z.string({ required_error: 'Confirme sua senha' }).min(4),
     sexo: z.enum(['0', '1', '2']).default('0'),
-    dataNascimento: z.date(),
+    dataNascimento: z.object(),
     email: z.string({ required_error: "e-mail obrigatório" }),
     tipoPessoa: z.string(),
 }).superRefine(({ confirmSenha, senha }, ctx) => {
@@ -70,7 +70,7 @@ const formSchema = toTypedSchema(z.object({
     }
 }));
 
-const { handleSubmit, isSubmitting, values } = useForm({
+const { handleSubmit, isSubmitting, values, setFieldValue} = useForm({
     validationSchema: formSchema,
     initialValues: {
         sexo: 0
@@ -80,7 +80,7 @@ const { handleSubmit, isSubmitting, values } = useForm({
 const getDataFormat = (data) => {
     console.log(data)
     console.log(values)
-    return format(data, "dd'º de' MMM',' yyyy", { locale: ptBR })
+    return format(parseISO(data.toString()), "dd'º de' MMM',' yyyy", { locale: ptBR })
 }
 
 const getDataNascValue = computed({
@@ -207,7 +207,7 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                     <FormMessage />
                 </FormItem>
             </FormField>
-            <FormField v-slot="{ componentField, value }" name="dataNascimento">
+            <FormField v-slot="{ componentField, value, setValue }" name="dataNascimento">
                 <FormItem class="flex flex-col">
                     <FormLabel>Data de Nascimento</FormLabel>
                     <Popover>
@@ -218,13 +218,17 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                                     !value && 'text-muted-foreground',
                                 )">
                                     <span>{{ values.dataNascimento ? getDataFormat(values.dataNascimento) : `Selecione
-                                        uma data` }}</span>
+                                        uma data` }}
+                                    </span>
                                     <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
                                 </Button>
                             </FormControl>
                         </PopoverTrigger>
                         <PopoverContent class="p-0">
-                            <DatePicker v-bind="componentField" />
+                            <DatePicker v-bind="componentField"
+                            @update:model-value="(v) => {
+                                console.log(v)
+                            }"/>
                         </PopoverContent>
                     </Popover>
                     <FormMessage />

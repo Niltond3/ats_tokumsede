@@ -1,13 +1,13 @@
 <script setup>
-import { computed } from 'vue'
-import { CalendarRoot, useDateFormatter, useForwardPropsEmits } from 'radix-vue'
+import { computed, h, ref } from 'vue';
+import { CalendarDate, DateFormatter, getLocalTimeZone, parseDate, today } from '@internationalized/date';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import Button from '@/components/Button.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { RiLoginBoxLine as LoginIcon } from "vue-remix-icons";
-import { RiArrowRightWideLine as ArrowRightIcon } from "vue-remix-icons";
 import { RiCalendarLine as CalendarIcon } from "vue-remix-icons";
-import { format } from 'date-fns'
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 import validator from 'validator'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 import axios from 'axios';
 import {
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -30,7 +29,6 @@ import {
 } from '@/components/ui/popover'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Input } from '@/components/ui/input'
-import { Calendar } from '@/components/ui/calendar'
 import DatePicker from '../components/datePicker/datePicker.vue'
 
 
@@ -43,15 +41,25 @@ defineProps({
     },
 });
 
+const getSexo = {
+    0: 'Não Informado',
+    1: 'Masculino',
+    2: 'Feminino',
+}
+
+const getTipoPessoa = {
+    1: 'Pessoa Física',
+    2: 'Pessoa Jurídica',
+}
 const formSchema = toTypedSchema(z.object({
     nome: z.string({ required_error: 'Informar seu nome é obrigatório' }),
     telefone: z.string({ required_error: 'Número de telefone obrigatório' }).refine(validator.isMobilePhone, { message: 'Número de telefone inválido' }),
     senha: z.string({ required_error: 'Senha obrigatória' }).min(4),
     confirmSenha: z.string({ required_error: 'Confirme sua senha' }).min(4),
-    sexo: z.enum(['0', '1', '2']),
+    sexo: z.enum(['0', '1', '2']).default('0'),
     dataNascimento: z.date(),
     email: z.string({ required_error: "e-mail obrigatório" }),
-    tipoPessoa: z.enum(),
+    tipoPessoa: z.string(),
 }).superRefine(({ confirmSenha, senha }, ctx) => {
     if (confirmSenha !== senha) {
         ctx.addIssue({
@@ -65,10 +73,20 @@ const formSchema = toTypedSchema(z.object({
 const { handleSubmit, isSubmitting, values } = useForm({
     validationSchema: formSchema,
     initialValues: {
-        remember: false
+        sexo: 0
     }
 })
 
+const getDataFormat = (data) => {
+    console.log(data)
+    console.log(values)
+    return format(data, "dd'º de' MMM',' yyyy", { locale: ptBR })
+}
+
+const getDataNascValue = computed({
+    get: () => values.dataNascimento ? parseDate(values.dataNascimento) : undefined,
+    set: val => val,
+})
 
 const onSubmit = handleSubmit((values, { resetField }) => {
     const phoneRaw = values.telefone.replace(/\D/g, '')
@@ -159,8 +177,9 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                     <FormControl>
                         <Popover>
                             <PopoverTrigger as-child>
-                                <Button variant="outline" class="text-slate-500 text-sm !p-2 min-h-[22px] !rounded-sm font-normal flex justify-start !px-3">
-                                    {{ values.sexo }}
+                                <Button variant="outline"
+                                    class="text-slate-500 text-sm !p-2 min-h-[22px] !rounded-sm font-normal flex justify-start !px-3">
+                                    {{ getSexo[values.sexo] }}
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent class="w-80">
@@ -169,7 +188,7 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                                         <RadioGroup default-value="0" v-bind="componentField">
                                             <div class="flex items-center space-x-2">
                                                 <RadioGroupItem id="r1" value="0" />
-                                                <Label for="r1">Não Informar</Label>
+                                                <Label for="r1">Não Informado</Label>
                                             </div>
                                             <div class="flex items-center space-x-2">
                                                 <RadioGroupItem id="r2" value="1" />
@@ -198,7 +217,8 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                                     'text-slate-500 text-sm !p-2 min-h-[22px] !rounded-sm font-normal flex justify-start !px-3',
                                     !value && 'text-muted-foreground',
                                 )">
-                                    <span>{{ values.dataNascimento ? format(values.dataNascimento, "PPP") : "Pick a date" }}</span>
+                                    <span>{{ values.dataNascimento ? getDataFormat(values.dataNascimento) : `Selecione
+                                        uma data` }}</span>
                                     <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
                                 </Button>
                             </FormControl>
@@ -207,9 +227,6 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                             <DatePicker v-bind="componentField" />
                         </PopoverContent>
                     </Popover>
-                    <FormDescription>
-                        Sua data de Nascimento é usada para calcular sua idade
-                    </FormDescription>
                     <FormMessage />
                 </FormItem>
             </FormField>
@@ -220,9 +237,6 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                         <Input class="focus-visible:ring-slate-500" type="email" placeholder="E-mail válido"
                             v-bind="componentField" autocomplete="username" />
                     </FormControl>
-                    <FormDescription>
-                        Coloque aqui o seu número de telefone cadastrado
-                    </FormDescription>
                     <FormMessage />
                 </FormItem>
             </FormField>
@@ -238,13 +252,11 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                 </FormItem>
             </FormField>
             <div class="flex gap-4p">
-                <Button type="submit" :class="{ 'opacity-25': isSubmitting }" :disabled="isSubmitting">
-                    <i class="icon text-xl">
-                        <LoginIcon />
-                    </i>
+                <Button type="submit" class="icon text-xl" :class="{ 'opacity-25': isSubmitting }"
+                    :disabled="isSubmitting">
+                    <LoginIcon />
                     Cadastrar
                 </Button>
-
             </div>
         </form>
     </GuestLayout>

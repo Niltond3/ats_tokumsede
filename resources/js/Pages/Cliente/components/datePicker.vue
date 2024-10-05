@@ -24,6 +24,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { cn } from "@/lib/utils";
+import { FormItem, FormMessage, FormLabel, FormControl } from '@/components/ui/form/';
 
 
 const props = withDefaults(defineProps(), {
@@ -57,16 +58,19 @@ const formatter = useDateFormatter('pt-br')
         :class="cn('rounded-md border p-3', props.class)">
         <CalendarHeader>
             <CalendarHeading class="flex w-full items-center justify-between gap-2">
-                <Select :default-value="placeholder.month.toString()" @update:model-value="(v) => {
+                <FormItem>
+                    <Select :default-value="placeholder.month.toString()" @update:model-value="(v) => {
                     if (!v || !placeholder) return;
                     if (Number(v) === placeholder?.month) return;
                     placeholder = placeholder.set({
                         month: Number(v),
                     })
                 }">
-                    <SelectTrigger aria-label="Select month" class="w-[60%]">
+                    <FormControl>
+                        <SelectTrigger aria-label="Select month" class="w-[60%]">
                         <SelectValue placeholder="Select month" />
                     </SelectTrigger>
+                    </FormControl>
                     <SelectContent class="max-h-[200px]">
                         <SelectItem v-for="month in createYear({ dateObj: date })" :key="month.toString()"
                             :value="month.month.toString()">
@@ -74,17 +78,21 @@ const formatter = useDateFormatter('pt-br')
                         </SelectItem>
                     </SelectContent>
                 </Select>
+                </FormItem>
 
-                <Select :default-value="placeholder.year.toString()" @update:model-value="(v) => {
+                <FormItem>
+                    <Select :default-value="placeholder.year.toString()" @update:model-value="(v) => {
                     if (!v || !placeholder) return;
                     if (Number(v) === placeholder?.year) return;
                     placeholder = placeholder.set({
                         year: Number(v),
                     })
                 }">
-                    <SelectTrigger aria-label="Select year" class="w-[40%]">
+                    <FormControl>
+                        <SelectTrigger aria-label="Select year" class="w-[40%]">
                         <SelectValue placeholder="Select year" />
                     </SelectTrigger>
+                    </FormControl>
                     <SelectContent class="max-h-[200px]">
                         <SelectItem v-for="yearValue in createDecade({ dateObj: date, startIndex: -100, endIndex: 1 })"
                             :key="yearValue.toString()" :value="yearValue.year.toString()">
@@ -92,6 +100,8 @@ const formatter = useDateFormatter('pt-br')
                         </SelectItem>
                     </SelectContent>
                 </Select>
+                </FormItem>
+
             </CalendarHeading>
         </CalendarHeader>
 

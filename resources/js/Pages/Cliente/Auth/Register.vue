@@ -6,7 +6,7 @@ import Button from '@/components/Button.vue';
 import { Head } from '@inertiajs/vue3';
 import { RiLoginBoxLine as LoginIcon } from "vue-remix-icons";
 import { RiCalendarLine as CalendarIcon } from "vue-remix-icons";
-import { format, parseISO} from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import validator from 'validator'
 import { useForm } from 'vee-validate'
@@ -57,7 +57,7 @@ const formSchema = toTypedSchema(z.object({
     senha: z.string({ required_error: 'Senha obrigatória' }).min(4),
     confirmSenha: z.string({ required_error: 'Confirme sua senha' }).min(4),
     sexo: z.enum(['0', '1', '2']).default('0'),
-    dataNascimento: z.object(),
+    // dataNascimento: z.object(),
     email: z.string({ required_error: "e-mail obrigatório" }),
     tipoPessoa: z.string(),
 }).superRefine(({ confirmSenha, senha }, ctx) => {
@@ -70,10 +70,10 @@ const formSchema = toTypedSchema(z.object({
     }
 }));
 
-const { handleSubmit, isSubmitting, values, setFieldValue} = useForm({
+const { handleSubmit, isSubmitting, values, setFieldValue } = useForm({
     validationSchema: formSchema,
     initialValues: {
-        sexo: 0
+        sexo: '0'
     }
 })
 
@@ -82,11 +82,6 @@ const getDataFormat = (data) => {
     console.log(values)
     return format(parseISO(data.toString()), "dd'º de' MMM',' yyyy", { locale: ptBR })
 }
-
-const getDataNascValue = computed({
-    get: () => values.dataNascimento ? parseDate(values.dataNascimento) : undefined,
-    set: val => val,
-})
 
 const onSubmit = handleSubmit((values, { resetField }) => {
     const phoneRaw = values.telefone.replace(/\D/g, '')
@@ -99,7 +94,7 @@ const onSubmit = handleSubmit((values, { resetField }) => {
         telefone,
         senha: values.senha,
         sexo: values.sexo,
-        dataNascimento: values.dataNascimento,
+        // dataNascimento: values.dataNascimento,
         email: values.email,
         tipoPessoa: values.tipoPessoa
     }
@@ -171,43 +166,47 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                     <FormMessage />
                 </FormItem>
             </FormField>
-            <FormField v-slot="{ componentField }" type="radio" name="sexo">
+            <FormField v-slot="{ componentField }" name="sexo">
                 <FormItem v-auto-animate class="flex flex-col">
                     <FormLabel>selecione seu sexo</FormLabel>
-                    <FormControl>
-                        <Popover>
-                            <PopoverTrigger as-child>
+                    <Popover>
+                        <PopoverTrigger as-child>
+                            <FormControl>
                                 <Button variant="outline"
                                     class="text-slate-500 text-sm !p-2 min-h-[22px] !rounded-sm font-normal flex justify-start !px-3">
                                     {{ getSexo[values.sexo] }}
                                 </Button>
-                            </PopoverTrigger>
-                            <PopoverContent class="w-80">
-                                <div class="grid gap-4">
-                                    <div class="grid gap-2">
-                                        <RadioGroup default-value="0" v-bind="componentField">
-                                            <div class="flex items-center space-x-2">
-                                                <RadioGroupItem id="r1" value="0" />
-                                                <Label for="r1">Não Informado</Label>
-                                            </div>
-                                            <div class="flex items-center space-x-2">
-                                                <RadioGroupItem id="r2" value="1" />
-                                                <Label for="r2">Másculino</Label>
-                                            </div>
-                                            <div class="flex items-center space-x-2">
-                                                <RadioGroupItem id="r3" value="2" />
-                                                <Label for="r3">Feminino</Label>
-                                            </div>
-                                        </RadioGroup>
-                                    </div>
-                                </div>
-                            </PopoverContent>
-                        </Popover>
-                    </FormControl>
+                            </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent class="w-80">
+                            <FormControl>
+                                <RadioGroup default-value="0" v-bind="componentField">
+                                    <FormItem class="flex items-center space-x-2">
+                                        <FormControl>
+                                            <RadioGroupItem value="0" />
+                                        </FormControl>
+                                        <FormLabel>Não Informado</FormLabel>
+                                    </FormItem>
+                                    <FormItem class="flex items-center space-x-2">
+                                        <FormControl>
+                                            <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel>Másculino</FormLabel>
+                                    </FormItem>
+                                    <FormItem class="flex items-center space-x-2">
+                                        <FormControl>
+                                            <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel>Feminino</FormLabel>
+                                    </FormItem>
+                                </RadioGroup>
+                            </FormControl>
+                        </PopoverContent>
+                    </Popover>
                     <FormMessage />
                 </FormItem>
             </FormField>
-            <FormField v-slot="{ componentField, value, setValue }" name="dataNascimento">
+            <!-- <FormField v-slot="{ componentField, value, setValue }" name="dataNascimento">
                 <FormItem class="flex flex-col">
                     <FormLabel>Data de Nascimento</FormLabel>
                     <Popover>
@@ -225,15 +224,14 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                             </FormControl>
                         </PopoverTrigger>
                         <PopoverContent class="p-0">
-                            <DatePicker v-bind="componentField"
-                            @update:model-value="(v) => {
+                            <DatePicker v-bind="componentField" @update:model-value="(v) => {
                                 console.log(v)
-                            }"/>
+                            }" />
                         </PopoverContent>
                     </Popover>
                     <FormMessage />
                 </FormItem>
-            </FormField>
+            </FormField> -->
             <FormField v-slot="{ componentField }" name="email">
                 <FormItem v-auto-animate>
                     <FormLabel>E-mail</FormLabel>

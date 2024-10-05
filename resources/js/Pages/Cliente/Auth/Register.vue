@@ -1,11 +1,8 @@
 <script setup>
-import { computed, h, ref } from 'vue';
-import { CalendarDate, DateFormatter, getLocalTimeZone, parseDate } from '@internationalized/date';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import Button from '@/components/Button.vue';
 import { Head } from '@inertiajs/vue3';
 import { RiLoginBoxLine as LoginIcon } from "vue-remix-icons";
-import { RiCalendarLine as CalendarIcon } from "vue-remix-icons";
 import { format, parseISO } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import validator from 'validator'
@@ -29,7 +26,8 @@ import {
 } from '@/components/ui/popover'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Input } from '@/components/ui/input'
-import DatePicker from '../components/datePicker/datePicker.vue'
+import DatePicker from '../components/datePicker.vue';
+import { RiCalendarLine as CalendarIcon } from "vue-remix-icons";
 
 
 defineProps({
@@ -57,7 +55,7 @@ const formSchema = toTypedSchema(z.object({
     senha: z.string({ required_error: 'Senha obrigatória' }).min(4),
     confirmSenha: z.string({ required_error: 'Confirme sua senha' }).min(4),
     sexo: z.enum(['0', '1', '2']).default('0'),
-    // dataNascimento: z.object(),
+    dataNascimento: z.object().nullable(),
     email: z.string({ required_error: "e-mail obrigatório" }),
     tipoPessoa: z.string(),
 }).superRefine(({ confirmSenha, senha }, ctx) => {
@@ -94,7 +92,7 @@ const onSubmit = handleSubmit((values, { resetField }) => {
         telefone,
         senha: values.senha,
         sexo: values.sexo,
-        // dataNascimento: values.dataNascimento,
+        dataNascimento: values.dataNascimento,
         email: values.email,
         tipoPessoa: values.tipoPessoa
     }
@@ -206,7 +204,13 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                     <FormMessage />
                 </FormItem>
             </FormField>
-            <!-- <FormField v-slot="{ componentField, value, setValue }" name="dataNascimento">
+            <!-- Begin of Callendar componnent -->
+            <!-- <FormField v-slot="{ componentField }" name="dataNascimento">
+                <NewDatePicker v-bind="componentField"></NewDatePicker>
+            </FormField> -->
+
+            <!-- End of Callendar componnent -->
+            <FormField v-slot="{ componentField, value }" name="dataNascimento">
                 <FormItem class="flex flex-col">
                     <FormLabel>Data de Nascimento</FormLabel>
                     <Popover>
@@ -231,7 +235,7 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                     </Popover>
                     <FormMessage />
                 </FormItem>
-            </FormField> -->
+            </FormField>
             <FormField v-slot="{ componentField }" name="email">
                 <FormItem v-auto-animate>
                     <FormLabel>E-mail</FormLabel>

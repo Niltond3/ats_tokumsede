@@ -1,8 +1,11 @@
 <script setup>
+import { computed, h, ref } from 'vue'
+import { get, useWindowSize } from '@vueuse/core';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import Button from '@/components/Button.vue';
 import { Head } from '@inertiajs/vue3';
-import { RiLoginBoxLine as LoginIcon } from "vue-remix-icons";
+import { CalendarDate, getLocalTimeZone, parseDate, today } from '@internationalized/date'
+import { RiLoginBoxLine as LoginIcon, RiGenderlessLine as GenderlessIcon } from "vue-remix-icons";
 import { format, parseISO } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import validator from 'validator'
@@ -27,6 +30,8 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Input } from '@/components/ui/input'
 import DatePicker from '../components/datePicker.vue';
+import { Calendar } from '@/components/ui/calendar'
+
 import { RiCalendarLine as CalendarIcon } from "vue-remix-icons";
 
 
@@ -39,25 +44,33 @@ defineProps({
     },
 });
 
+const { width } = useWindowSize()
+
 const getSexo = {
-    0: 'Não Informado',
-    1: 'Masculino',
-    2: 'Feminino',
+    mobile: {
+        1: 'Masculino',
+        2: 'Feminino',
+    },
+    desktop: {
+        1: 'M',
+        2: 'F',
+    }
 }
 
 const getTipoPessoa = {
     1: 'Pessoa Física',
     2: 'Pessoa Jurídica',
 }
+
 const formSchema = toTypedSchema(z.object({
     nome: z.string({ required_error: 'Informar seu nome é obrigatório' }),
     telefone: z.string({ required_error: 'Número de telefone obrigatório' }).refine(validator.isMobilePhone, { message: 'Número de telefone inválido' }),
     senha: z.string({ required_error: 'Senha obrigatória' }).min(4),
     confirmSenha: z.string({ required_error: 'Confirme sua senha' }).min(4),
-    sexo: z.enum(['0', '1', '2']).default('0'),
-    dataNascimento: z.object().nullable(),
+    sexo: z.enum(['1', '2']).nullable().optional(),
+    dataNascimento: z.string().nullable().optional(),
+    tipoPessoa: z.string().nullable().optional(),
     email: z.string({ required_error: "e-mail obrigatório" }),
-    tipoPessoa: z.string(),
 }).superRefine(({ confirmSenha, senha }, ctx) => {
     if (confirmSenha !== senha) {
         ctx.addIssue({
@@ -71,14 +84,30 @@ const formSchema = toTypedSchema(z.object({
 const { handleSubmit, isSubmitting, values, setFieldValue } = useForm({
     validationSchema: formSchema,
     initialValues: {
-        sexo: '0'
+        //
     }
 })
 
-const getDataFormat = (data) => {
-    console.log(data)
-    console.log(values)
-    return format(parseISO(data.toString()), "dd'º de' MMM',' yyyy", { locale: ptBR })
+const formatMask = width > 639 ? "dd'º de' MMM',' yyyy" : 'dd/MM/yyyy'
+
+const dateToIso = (date) => parseISO(date.toString());
+
+const getDataFormat = (date) => format(dateToIso(date), formatMask, { locale: ptBR })
+
+const value = computed({
+    get: () => values.dataNascimento ? parseDate(values.dataNascimento) : undefined,
+    set: val => val,
+})
+
+const getTipoPessoaPayload = (documentValue) => {
+    return {
+        tipoPessoa: documentValue.lenght,
+        documento: {
+            'CPF': documentValue,
+            'CNPJ': documentValue
+        }
+    }
+
 }
 
 const onSubmit = handleSubmit((values, { resetField }) => {
@@ -87,6 +116,8 @@ const onSubmit = handleSubmit((values, { resetField }) => {
     const ddd = phoneRaw.slice(0, 2);
     const telefone = phoneRaw.slice(2);
 
+    const { tipoPessoa, documento } = getTipoPessoaPayload(values.tipoPessoa);
+
     const payload = {
         ddd,
         telefone,
@@ -94,7 +125,9 @@ const onSubmit = handleSubmit((values, { resetField }) => {
         sexo: values.sexo,
         dataNascimento: values.dataNascimento,
         email: values.email,
-        tipoPessoa: values.tipoPessoa
+        tipoPessoa,
+        cpf: documento['CPF'],
+        cnpj: documento['CNPJ'],
     }
     console.log(payload)
 
@@ -122,9 +155,9 @@ const onSubmit = handleSubmit((values, { resetField }) => {
             {{ status }}
         </div>
 
-        <form class="space-y-6" @submit="onSubmit">
+        <form class="space-y-6 sm:grid sm:grid-cols-6 sm:gap-4 sm:space-y-0" @submit="onSubmit">
             <FormField v-slot="{ componentField }" name="nome">
-                <FormItem v-auto-animate>
+                <FormItem v-auto-animate class="sm:col-span-5">
                     <FormLabel>Nome</FormLabel>
                     <FormControl>
                         <Input class="focus-visible:ring-slate-500" type="tel" placeholder="Nome completo"
@@ -133,58 +166,27 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                     <FormMessage />
                 </FormItem>
             </FormField>
-            <FormField v-slot="{ componentField }" name="telefone">
-                <FormItem v-auto-animate>
-                    <FormLabel>Telefone</FormLabel>
-                    <FormControl>
-                        <Input class="focus-visible:ring-slate-500" type="tel"
-                            v-mask="['(##) ####-####', '(##) #####-####']" placeholder="Número de telefone"
-                            v-bind="componentField" autocomplete="username" />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            </FormField>
-            <FormField v-slot="{ componentField }" name="senha">
-                <FormItem v-auto-animate>
-                    <FormLabel>Senha</FormLabel>
-                    <FormControl>
-                        <Input type="password" placeholder="Senha" v-bind="componentField"
-                            autocomplete="new-password" />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            </FormField>
-            <FormField v-slot="{ componentField }" name="confirmSenha">
-                <FormItem v-auto-animate>
-                    <FormLabel>Confirmação de senha</FormLabel>
-                    <FormControl>
-                        <Input type="password" placeholder="Confirme sua senha" v-bind="componentField"
-                            autocomplete="new-password" />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            </FormField>
             <FormField v-slot="{ componentField }" name="sexo">
-                <FormItem v-auto-animate class="flex flex-col">
-                    <FormLabel>selecione seu sexo</FormLabel>
+                <FormItem v-auto-animate class="sm:col-span-1">
+                    <FormLabel> <span class="sm:hidden">selecione seu </span>sexo</FormLabel>
                     <Popover>
                         <PopoverTrigger as-child>
                             <FormControl>
                                 <Button variant="outline"
-                                    class="text-slate-500 text-sm !p-2 min-h-[22px] !rounded-sm font-normal flex justify-start !px-3">
-                                    {{ getSexo[values.sexo] }}
+                                    class="relative text-slate-500 text-sm !p-2 min-h-[22px] !rounded-sm font-normal flex justify-start !px-3">
+                                    <span v-if="values.sexo === undefined" class="icon text-xl">
+                                        <GenderlessIcon />
+                                    </span>
+                                    <span v-if="values.sexo != undefined && width > 639">{{ getSexo.desktop[values.sexo]
+                                        }}</span>
+                                    <span v-if="values.sexo != undefined && width < 640">{{ getSexo.mobile[values.sexo]
+                                        }}</span>
                                 </Button>
                             </FormControl>
                         </PopoverTrigger>
                         <PopoverContent class="w-80">
                             <FormControl>
-                                <RadioGroup default-value="0" v-bind="componentField">
-                                    <FormItem class="flex items-center space-x-2">
-                                        <FormControl>
-                                            <RadioGroupItem value="0" />
-                                        </FormControl>
-                                        <FormLabel>Não Informado</FormLabel>
-                                    </FormItem>
+                                <RadioGroup v-bind="componentField">
                                     <FormItem class="flex items-center space-x-2">
                                         <FormControl>
                                             <RadioGroupItem value="1" />
@@ -204,50 +206,19 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                     <FormMessage />
                 </FormItem>
             </FormField>
-            <!-- Begin of Callendar componnent -->
-            <!-- <FormField v-slot="{ componentField }" name="dataNascimento">
-                <NewDatePicker v-bind="componentField"></NewDatePicker>
-            </FormField> -->
-
-            <!-- End of Callendar componnent -->
-            <FormField v-slot="{ componentField, value }" name="dataNascimento">
-                <FormItem class="flex flex-col">
-                    <FormLabel>Data de Nascimento</FormLabel>
-                    <Popover>
-                        <PopoverTrigger as-child>
-                            <FormControl>
-                                <Button variant="outline" :class="cn(
-                                    'text-slate-500 text-sm !p-2 min-h-[22px] !rounded-sm font-normal flex justify-start !px-3',
-                                    !value && 'text-muted-foreground',
-                                )">
-                                    <span>{{ values.dataNascimento ? getDataFormat(values.dataNascimento) : `Selecione
-                                        uma data` }}
-                                    </span>
-                                    <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
-                                </Button>
-                            </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent class="p-0">
-                            <DatePicker v-bind="componentField" @update:model-value="(v) => {
-                                console.log(v)
-                            }" />
-                        </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                </FormItem>
-            </FormField>
-            <FormField v-slot="{ componentField }" name="email">
-                <FormItem v-auto-animate>
-                    <FormLabel>E-mail</FormLabel>
+            <FormField v-slot="{ componentField }" name="telefone">
+                <FormItem v-auto-animate class="sm:col-span-3">
+                    <FormLabel>Telefone</FormLabel>
                     <FormControl>
-                        <Input class="focus-visible:ring-slate-500" type="email" placeholder="E-mail válido"
+                        <Input class="focus-visible:ring-slate-500" type="tel"
+                            v-mask="['(##) ####-####', '(##) #####-####']" placeholder="Número de telefone"
                             v-bind="componentField" autocomplete="username" />
                     </FormControl>
                     <FormMessage />
                 </FormItem>
             </FormField>
             <FormField v-slot="{ componentField }" name="tipoPessoa">
-                <FormItem v-auto-animate>
+                <FormItem v-auto-animate class="sm:col-span-3">
                     <FormLabel>CPF/CNPJ</FormLabel>
                     <FormControl>
                         <Input class="focus-visible:ring-slate-500" type="text"
@@ -257,7 +228,77 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                     <FormMessage />
                 </FormItem>
             </FormField>
-            <div class="flex gap-4p">
+            <FormField v-slot="{ componentField }" name="email">
+                <FormItem v-auto-animate class="sm:col-span-4">
+                    <FormLabel>E-mail</FormLabel>
+                    <FormControl>
+                        <Input class="focus-visible:ring-slate-500" type="email" placeholder="E-mail válido"
+                            v-bind="componentField" autocomplete="username" />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            </FormField>
+            <FormField name="dataNascimento">
+                <FormItem class="flex flex-col sm:col-span-2">
+                    <FormLabel>Data de Nascimento</FormLabel>
+                    <Popover>
+                        <PopoverTrigger as-child>
+                            <FormControl>
+                                <Button variant="outline" :class="cn(
+                                    'text-slate-500 text-sm !p-2 min-h-[22px] !rounded-sm font-normal flex justify-start !px-3',
+                                    !value && 'text-muted-foreground',
+                                )">
+                                    <span>
+                                        {{ values.dataNascimento && getDataFormat(values.dataNascimento) }}
+                                    </span>
+                                    <span v-if="width < 640">Selecione uma data</span>
+                                    <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
+                                </Button>
+                            </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent class="p-0">
+                            <DatePicker v-model="value" calendar-label="Data de Nascimento" initial-focus
+                                :min-value="new CalendarDate(1900, 1, 1)" :max-value="today(getLocalTimeZone())"
+                                @update:model-value="(v) => {
+                                    if (v) setFieldValue('dataNascimento', v.toString())
+                                    else setFieldValue('dataNascimento', undefined)
+                                }" />
+                            <!--<Calendar v-model:placeholder="placeholder" v-model="value" calendar-label="Date of birth"
+                                initial-focus :min-value="new CalendarDate(1900, 1, 1)"
+                                :max-value="today(getLocalTimeZone())" @update:model-value="(v) => {
+                                    if (v) {
+                                        setFieldValue('dataNascimento', v.toString())
+                                    }
+                                    else {
+                                        setFieldValue('dataNascimento', undefined)
+                                    }
+                                }" />-->
+                        </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                </FormItem>
+            </FormField>
+            <FormField v-slot="{ componentField }" name="senha">
+                <FormItem v-auto-animate class="sm:col-span-3">
+                    <FormLabel>Senha</FormLabel>
+                    <FormControl>
+                        <Input type="password" placeholder="Senha" v-bind="componentField"
+                            autocomplete="new-password" />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            </FormField>
+            <FormField v-slot="{ componentField }" name="confirmSenha">
+                <FormItem v-auto-animate class="sm:col-span-3">
+                    <FormLabel>Confirmação de senha</FormLabel>
+                    <FormControl>
+                        <Input type="password" placeholder="Confirme sua senha" v-bind="componentField"
+                            autocomplete="new-password" />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            </FormField>
+            <div class="flex  gap-4p sm:col-end-7 sm:col-span-3 sm:justify-end">
                 <Button type="submit" class="icon text-xl" :class="{ 'opacity-25': isSubmitting }"
                     :disabled="isSubmitting">
                     <LoginIcon />

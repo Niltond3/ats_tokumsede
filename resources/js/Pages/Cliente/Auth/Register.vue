@@ -1,11 +1,16 @@
 <script setup>
-import { computed, h, ref } from 'vue'
+import { computed, h, ref} from 'vue'
 import { get, useWindowSize } from '@vueuse/core';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import Button from '@/components/Button.vue';
 import { Head } from '@inertiajs/vue3';
 import { CalendarDate, getLocalTimeZone, parseDate, today } from '@internationalized/date'
-import { RiLoginBoxLine as LoginIcon, RiGenderlessLine as GenderlessIcon } from "vue-remix-icons";
+import {
+    RiLoginBoxLine as LoginIcon,
+    RiGenderlessLine as GenderlessIcon,
+    RiCalendarLine as CalendarIcon
+} from "vue-remix-icons";
+import { CheckIcon, CircleIcon, DotIcon } from '@radix-icons/vue'
 import { format, parseISO } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import validator from 'validator'
@@ -30,9 +35,15 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Input } from '@/components/ui/input'
 import DatePicker from '../components/datePicker.vue';
-import { Calendar } from '@/components/ui/calendar'
-
-import { RiCalendarLine as CalendarIcon } from "vue-remix-icons";
+import { Stepper, StepperDescription, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from '@/components/ui/stepper'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 
 defineProps({
@@ -100,10 +111,22 @@ const value = computed({
 })
 
 const getTipoPessoaPayload = (documentValue) => {
+
+    if (documentValue.length <= 14) {
+        return {
+            tipoPessoa: '1',
+            documento: {
+                'CPF': documentValue,
+            'CNPJ': null
+
+            }
+        }
+    }
+
     return {
-        tipoPessoa: documentValue.lenght,
+        tipoPessoa: '2',
         documento: {
-            'CPF': documentValue,
+            'CPF': null,
             'CNPJ': documentValue
         }
     }

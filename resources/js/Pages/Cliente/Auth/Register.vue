@@ -1,34 +1,27 @@
 <script setup>
-import { computed, h, ref } from 'vue'
-import { useWindowSize } from '@vueuse/core';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
+import { ref } from 'vue'
 import { Head } from '@inertiajs/vue3';
-import { CalendarDate, getLocalTimeZone, parseDate, today } from '@internationalized/date'
-import {
-    RiLoginBoxLine as LoginIcon,
-    RiGenderlessLine as GenderlessIcon,
-    RiCalendarLine as CalendarIcon
-} from "vue-remix-icons";
+import { RiLoginBoxLine as LoginIcon } from "vue-remix-icons";
 import { CheckIcon, CircleIcon, DotIcon } from '@radix-icons/vue'
-import { format, parseISO } from 'date-fns';
-import ptBR from 'date-fns/locale/pt-BR';
-import validator from 'validator'
 import { useForm } from 'vee-validate'
+import validator from 'validator'
 import { toTypedSchema } from '@vee-validate/zod'
+import GuestLayout from '@/Layouts/GuestLayout.vue';
 import * as z from 'zod'
-import { vAutoAnimate } from '@formkit/auto-animate/vue'
-import { cn } from "@/lib/utils";
-import axios from 'axios';
-
+import { Form, FormLabel, FormControl, FormMessage, FormItem, FormField } from '@/components/ui/form'
 import { Stepper, StepperDescription, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from '@/components/ui/stepper'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Input } from '@/components/ui/input'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+    SelectGroup
+} from '@/components/ui/select'
 import Button from '@/components/Button.vue';
-import DatePicker from '../components/datePicker.vue';
-
+import PersonalDetails from '../components/personalDetails.vue';
+import axios from 'axios';
+import AdressDetails from '../components/adressDetails.vue';
 
 defineProps({
     canResetPassword: {
@@ -38,19 +31,6 @@ defineProps({
         type: String,
     },
 });
-
-const { width } = useWindowSize()
-
-const getSexo = {
-    mobile: {
-        1: 'Masculino',
-        2: 'Feminino',
-    },
-    desktop: {
-        1: 'M',
-        2: 'F',
-    }
-}
 
 const formSchema = [
     z.object({
@@ -70,7 +50,22 @@ const formSchema = [
                 path: ['confirmSenha']
             });
         }
-    })
+    }),
+    z.object({
+        password: z.string().min(2).max(50),
+        confirmPassword: z.string(),
+    }).refine(
+        (values) => {
+            return values.password === values.confirmPassword
+        },
+        {
+            message: 'Passwords must match!',
+            path: ['confirmPassword'],
+        },
+    ),
+    z.object({
+        favoriteDrink: z.union([z.literal('coffee'), z.literal('tea'), z.literal('soda')]),
+    }),
 ];
 
 const stepIndex = ref(1)
@@ -78,18 +73,15 @@ const stepIndex = ref(1)
 const steps = [
     {
         step: 1,
-        title: 'Your details',
-        description: 'Provide your name and email',
+        title: 'Seus dados',
     },
     {
         step: 2,
-        title: 'Your password',
-        description: 'Choose a password',
+        title: 'Seu endereço',
     },
     {
         step: 3,
-        title: 'Your Favorite Drink',
-        description: 'Choose a drink',
+        title: 'Revisão',
     },
 ]
 
@@ -98,17 +90,6 @@ const { handleSubmit, isSubmitting, values, setFieldValue } = useForm({
     initialValues: {
         //
     }
-})
-
-const formatMask = width > 639 ? "dd'º de' MMM',' yyyy" : 'dd/MM/yyyy'
-
-const dateToIso = (date) => parseISO(date.toString());
-
-const getDataFormat = (date) => format(dateToIso(date), formatMask, { locale: ptBR })
-
-const value = computed({
-    get: () => values.dataNascimento ? parseDate(values.dataNascimento) : undefined,
-    set: val => val,
 })
 
 const getTipoPessoaPayload = (documentValue) => {
@@ -221,151 +202,39 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                         </StepperItem>
                     </div>
                     <div class="flex flex-col gap-4 mt-4 space-y-6 sm:grid sm:grid-cols-6 sm:gap-4 sm:space-y-0">
-                        <template v-if="stepIndex === 1">
-                            <FormField v-slot="{ componentField }" name="nome">
-                                <FormItem v-auto-animate class="sm:col-span-5">
-                                    <FormLabel>Nome</FormLabel>
-                                    <FormControl>
-                                        <Input class="focus-visible:ring-slate-500" type="tel"
-                                            placeholder="Nome completo" v-bind="componentField" autocomplete="name" />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            </FormField>
-                            <FormField v-slot="{ componentField }" name="sexo">
-                                <FormItem v-auto-animate class="sm:col-span-1">
-                                    <FormLabel> <span class="sm:hidden">selecione seu </span>sexo</FormLabel>
-                                    <Popover>
-                                        <PopoverTrigger as-child>
-                                            <FormControl>
-                                                <Button variant="outline"
-                                                    class="relative text-slate-500 text-sm !p-2 min-h-[22px] !rounded-sm font-normal flex justify-start !px-3">
-                                                    <span v-if="values.sexo === undefined" class="icon text-xl">
-                                                        <GenderlessIcon />
-                                                    </span>
-                                                    <span v-if="values.sexo != undefined && width > 639">{{
-                                                        getSexo.desktop[values.sexo]
-                                                        }}</span>
-                                                    <span v-if="values.sexo != undefined && width < 640">{{
-                                                        getSexo.mobile[values.sexo]
-                                                        }}</span>
-                                                </Button>
-                                            </FormControl>
-                                        </PopoverTrigger>
-                                        <PopoverContent class="w-80">
-                                            <FormControl>
-                                                <RadioGroup v-bind="componentField">
-                                                    <FormItem class="flex items-center space-x-2">
-                                                        <FormControl>
-                                                            <RadioGroupItem value="1" />
-                                                        </FormControl>
-                                                        <FormLabel>Másculino</FormLabel>
-                                                    </FormItem>
-                                                    <FormItem class="flex items-center space-x-2">
-                                                        <FormControl>
-                                                            <RadioGroupItem value="2" />
-                                                        </FormControl>
-                                                        <FormLabel>Feminino</FormLabel>
-                                                    </FormItem>
-                                                </RadioGroup>
-                                            </FormControl>
-                                        </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                </FormItem>
-                            </FormField>
-                            <FormField v-slot="{ componentField }" name="telefone">
-                                <FormItem v-auto-animate class="sm:col-span-3">
-                                    <FormLabel>Telefone</FormLabel>
-                                    <FormControl>
-                                        <Input class="focus-visible:ring-slate-500" type="tel"
-                                            v-mask="['(##) ####-####', '(##) #####-####']"
-                                            placeholder="Número de telefone" v-bind="componentField"
-                                            autocomplete="username" />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            </FormField>
-                            <FormField v-slot="{ componentField }" name="tipoPessoa">
-                                <FormItem v-auto-animate class="sm:col-span-3">
-                                    <FormLabel>CPF/CNPJ</FormLabel>
-                                    <FormControl>
-                                        <Input class="focus-visible:ring-slate-500" type="text"
-                                            v-mask="['###.###.###-##', '##.###.###/####-##']"
-                                            placeholder="Número de telefone" v-bind="componentField" />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            </FormField>
-                            <FormField v-slot="{ componentField }" name="email">
-                                <FormItem v-auto-animate class="sm:col-span-4">
-                                    <FormLabel>E-mail</FormLabel>
-                                    <FormControl>
-                                        <Input class="focus-visible:ring-slate-500" type="email"
-                                            placeholder="E-mail válido" v-bind="componentField"
-                                            autocomplete="username" />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            </FormField>
-                            <FormField name="dataNascimento">
-                                <FormItem class="flex flex-col sm:col-span-2">
-                                    <FormLabel>Data de Nascimento</FormLabel>
-                                    <Popover>
-                                        <PopoverTrigger as-child>
-                                            <FormControl>
-                                                <Button variant="outline" :class="cn(
-                                                    'text-slate-500 text-sm !p-2 min-h-[22px] !rounded-sm font-normal flex justify-start !px-3',
-                                                    !value && 'text-muted-foreground',
-                                                )">
-                                                    <span>
-                                                        {{ values.dataNascimento && getDataFormat(values.dataNascimento)
-                                                        }}
-                                                    </span>
-                                                    <span v-if="width < 640">Selecione uma data</span>
-                                                    <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
-                                                </Button>
-                                            </FormControl>
-                                        </PopoverTrigger>
-                                        <PopoverContent class="p-0">
-                                            <DatePicker v-model="value" calendar-label="Data de Nascimento"
-                                                initial-focus :min-value="new CalendarDate(1900, 1, 1)"
-                                                :max-value="today(getLocalTimeZone())" @update:model-value="(v) => {
-                                                    if (v) setFieldValue('dataNascimento', v.toString())
-                                                    else setFieldValue('dataNascimento', undefined)
-                                                }" />
-                                            <!--<Calendar v-model:placeholder="placeholder" v-model="value" calendar-label="Date of birth"
-                                initial-focus :min-value="new CalendarDate(1900, 1, 1)"
-                                :max-value="today(getLocalTimeZone())" @update:model-value="(v) => {
-                                    if (v) {
-                                        setFieldValue('dataNascimento', v.toString())
-                                    }
-                                    else {
-                                        setFieldValue('dataNascimento', undefined)
-                                    }
-                                }" />-->
-                                        </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                </FormItem>
-                            </FormField>
-                            <FormField v-slot="{ componentField }" name="senha">
-                                <FormItem v-auto-animate class="sm:col-span-3">
-                                    <FormLabel>Senha</FormLabel>
-                                    <FormControl>
-                                        <Input type="password" placeholder="Senha" v-bind="componentField"
-                                            autocomplete="new-password" />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            </FormField>
-                            <FormField v-slot="{ componentField }" name="confirmSenha">
-                                <FormItem v-auto-animate class="sm:col-span-3">
-                                    <FormLabel>Confirmação de senha</FormLabel>
-                                    <FormControl>
-                                        <Input type="password" placeholder="Confirme sua senha" v-bind="componentField"
-                                            autocomplete="new-password" />
-                                    </FormControl>
+                        <PersonalDetails v-if="stepIndex === 1" :values="values" @get-field-value="(dataValue) => {
+                            if (dataValue) setFieldValue('dataNascimento', dataValue.toString())
+                            else setFieldValue('dataNascimento', undefined)
+                        }" />
+
+                        <AdressDetails v-if="stepIndex === 2" />
+
+
+                        <template v-if="stepIndex === 3">
+                            <FormField v-slot="{ componentField }" name="favoriteDrink">
+                                <FormItem>
+                                    <FormLabel>Drink</FormLabel>
+
+                                    <Select v-bind="componentField">
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a drink" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectItem value="coffee">
+                                                    Coffe
+                                                </SelectItem>
+                                                <SelectItem value="tea">
+                                                    Tea
+                                                </SelectItem>
+                                                <SelectItem value="soda">
+                                                    Soda
+                                                </SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             </FormField>
@@ -387,9 +256,6 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                     </div>
                 </form>
             </Stepper>
-
         </Form>
-
-
     </GuestLayout>
 </template>

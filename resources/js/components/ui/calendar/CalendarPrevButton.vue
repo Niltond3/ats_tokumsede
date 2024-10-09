@@ -6,35 +6,31 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
 const props = defineProps({
-  step: { type: String, required: false },
-  prevPage: { type: Function, required: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: null, required: false },
-  class: { type: null, required: false },
+    step: { type: String, required: false },
+    prevPage: { type: Function, required: false },
+    asChild: { type: Boolean, required: false },
+    as: { type: null, required: false },
+    class: { type: null, required: false },
 });
 
 const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props;
+    const { class: _, ...delegated } = props;
 
-  return delegated;
+    return delegated;
 });
 
 const forwardedProps = useForwardProps(delegatedProps);
 </script>
 
 <template>
-  <CalendarPrev
-    :class="
-      cn(
+    <CalendarPrev :class="cn(
         buttonVariants({ variant: 'outline' }),
         'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100',
         props.class,
-      )
-    "
-    v-bind="forwardedProps"
-  >
-    <slot>
-      <ChevronLeft class="h-4 w-4" />
-    </slot>
-  </CalendarPrev>
+    )
+        " v-bind="forwardedProps">
+        <slot>
+            <ChevronLeft class="h-4 w-4" />
+        </slot>
+    </CalendarPrev>
 </template>

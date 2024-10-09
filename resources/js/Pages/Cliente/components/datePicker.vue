@@ -64,6 +64,7 @@ const delegatedProps = computed(() => {
     return delegated
 })
 
+
 const placeholder = useVModel(props, 'modelValue', emits, {
     passive: true,
     defaultValue: today(getLocalTimeZone()),
@@ -135,7 +136,7 @@ const formatter = useDateFormatter('pt-br')
                         </CalendarHeadCell>
                     </CalendarGridRow>
                 </CalendarGridHead>
-                <CalendarGridBody class="grid">
+                <CalendarGridBody>
                     <CalendarGridRow v-for="(weekDates, index) in month.rows" :key="`weekDate-${index}`"
                         class="mt-2 w-full">
                         <CalendarCell v-for="weekDate in weekDates" :key="weekDate.toString()" :date="weekDate">

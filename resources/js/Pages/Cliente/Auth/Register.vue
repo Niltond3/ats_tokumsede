@@ -52,17 +52,17 @@ const formSchema = [
         }
     }),
     z.object({
-        password: z.string().min(2).max(50),
-        confirmPassword: z.string(),
-    }).refine(
-        (values) => {
-            return values.password === values.confirmPassword
-        },
-        {
-            message: 'Passwords must match!',
-            path: ['confirmPassword'],
-        },
-    ),
+        cep: z.string().nullable().optional(),
+        cidade: z.string(),
+        estado: z.string(),
+        apelido: z.string().nullable().optional(),
+        logradouro: z.string(),
+        numero: z.string(),
+        bairro: z.string(),
+        complemento: z.string().nullable().optional(),
+        referencia: z.string().nullable().optional(),
+        observacao: z.string().nullable().optional(),
+    }),
     z.object({
         favoriteDrink: z.union([z.literal('coffee'), z.literal('tea'), z.literal('soda')]),
     }),
@@ -201,7 +201,7 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                             </div>
                         </StepperItem>
                     </div>
-                    <div class="flex flex-col gap-4 mt-4 space-y-6 sm:grid sm:grid-cols-6 sm:gap-4 sm:space-y-0">
+                    <div class="">
                         <PersonalDetails v-if="stepIndex === 1" :values="values" @get-field-value="(dataValue) => {
                             if (dataValue) setFieldValue('dataNascimento', dataValue.toString())
                             else setFieldValue('dataNascimento', undefined)

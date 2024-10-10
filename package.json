@@ -21,6 +21,7 @@
         "vue-remix-icons": "^3.12.0"
     },
     "dependencies": {
+        "@fawmi/vue-google-maps": "^0.9.79",
         "@formkit/auto-animate": "^0.8.2",
         "@googlemaps/js-api-loader": "^1.16.8",
         "@internationalized/date": "^3.5.6",

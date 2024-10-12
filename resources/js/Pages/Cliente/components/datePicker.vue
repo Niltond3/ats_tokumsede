@@ -82,46 +82,47 @@ const formatter = useDateFormatter('pt-br')
             <CalendarHeading class="flex w-full items-center justify-between gap-2">
                 <FormItem>
                     <Select :default-value="placeholder.month.toString()" @update:model-value="(v) => {
-                    if (!v || !placeholder) return;
-                    if (Number(v) === placeholder?.month) return;
-                    placeholder = placeholder.set({
-                        month: Number(v),
-                    })
-                }">
-                    <FormControl>
-                        <SelectTrigger aria-label="Select month" class="w-[60%]">
-                        <SelectValue placeholder="Select month" />
-                    </SelectTrigger>
-                    </FormControl>
-                    <SelectContent class="max-h-[200px]">
-                        <SelectItem v-for="month in createYear({ dateObj: date })" :key="month.toString()"
-                            :value="month.month.toString()">
-                            {{ formatter.custom(toDate(month), { month: 'long' }) }}
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
+                        if (!v || !placeholder) return;
+                        if (Number(v) === placeholder?.month) return;
+                        placeholder = placeholder.set({
+                            month: Number(v),
+                        })
+                    }">
+                        <FormControl>
+                            <SelectTrigger aria-label="Select month">
+                                <SelectValue placeholder="Select month" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent class="max-h-[200px]">
+                            <SelectItem v-for="month in createYear({ dateObj: date })" :key="month.toString()"
+                                :value="month.month.toString()">
+                                {{ formatter.custom(toDate(month), { month: 'long' }) }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
                 </FormItem>
 
                 <FormItem>
                     <Select :default-value="placeholder.year.toString()" @update:model-value="(v) => {
-                    if (!v || !placeholder) return;
-                    if (Number(v) === placeholder?.year) return;
-                    placeholder = placeholder.set({
-                        year: Number(v),
-                    })
-                }">
-                    <FormControl>
-                        <SelectTrigger aria-label="Select year" class="w-[40%]">
-                        <SelectValue placeholder="Select year" />
-                    </SelectTrigger>
-                    </FormControl>
-                    <SelectContent class="max-h-[200px]">
-                        <SelectItem v-for="yearValue in createDecade({ dateObj: date, startIndex: -100, endIndex: 1 })"
-                            :key="yearValue.toString()" :value="yearValue.year.toString()">
-                            {{ yearValue.year }}
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
+                        if (!v || !placeholder) return;
+                        if (Number(v) === placeholder?.year) return;
+                        placeholder = placeholder.set({
+                            year: Number(v),
+                        })
+                    }">
+                        <FormControl>
+                            <SelectTrigger aria-label="Select year">
+                                <SelectValue placeholder="Select year" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent class="max-h-[200px]">
+                            <SelectItem
+                                v-for="yearValue in createDecade({ dateObj: date, startIndex: -100, endIndex: 1 })"
+                                :key="yearValue.toString()" :value="yearValue.year.toString()">
+                                {{ yearValue.year }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
                 </FormItem>
 
             </CalendarHeading>

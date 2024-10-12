@@ -23,6 +23,7 @@ import PersonalDetails from '../components/personalDetails.vue';
 import axios from 'axios';
 import AdressDetails from '../components/adressDetails.vue';
 
+
 defineProps({
     canResetPassword: {
         type: Boolean,
@@ -52,6 +53,7 @@ const formSchema = [
         }
     }),
     z.object({
+        search: z.string().nullable().optional(),
         cep: z.string().nullable().optional(),
         cidade: z.string(),
         estado: z.string(),
@@ -85,7 +87,7 @@ const steps = [
     },
 ]
 
-const { handleSubmit, isSubmitting, values, setFieldValue } = useForm({
+const { handleSubmit, isSubmitting } = useForm({
     validationSchema: formSchema,
     initialValues: {
         //
@@ -160,8 +162,9 @@ const onSubmit = handleSubmit((values, { resetField }) => {
             {{ status }}
         </div>
 
-        <Form v-slot="{ meta, validate }" as="" keep-values
+        <Form v-slot="{ meta, validate, setFieldValue, values, setValues }" as="" keep-values
             :validation-schema="toTypedSchema(formSchema[stepIndex - 1])">
+
             <Stepper v-slot="{ isNextDisabled, isPrevDisabled, nextStep, prevStep }" v-model="stepIndex"
                 class="block w-full">
                 <form form @submit="(e) => {
@@ -201,13 +204,21 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                             </div>
                         </StepperItem>
                     </div>
-                    <div class="">
+                    <div>
                         <PersonalDetails v-if="stepIndex === 1" :values="values" @get-field-value="(dataValue) => {
-                            if (dataValue) setFieldValue('dataNascimento', dataValue.toString())
-                            else setFieldValue('dataNascimento', undefined)
+                            if (!dataValue) return
+                            setFieldValue('dataNascimento', dataValue.toString())
                         }" />
 
-                        <AdressDetails v-if="stepIndex === 2" />
+                        <AdressDetails v-if="stepIndex === 2" @update:address-value="(addressValue) => setValues({
+                            'search': addressValue.formattedAddress && addressValue.formattedAddress,
+                            'cep': addressValue.cep && addressValue.cep,
+                            'cidade': addressValue.cidade && addressValue.cidade,
+                            'estado': addressValue.estado && addressValue.estado,
+                            'logradouro': addressValue.logradouro && addressValue.logradouro,
+                            'numero': addressValue.numero && addressValue.numero,
+                            'bairro': addressValue.bairro && addressValue.bairro
+                        })" />
 
 
                         <template v-if="stepIndex === 3">

@@ -1,7 +1,4 @@
 <script setup>
-import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
-import { useGeolocation } from '@vueuse/core'
-import { Loader } from '@googlemaps/js-api-loader'
 import { RiMapPinLine as MapPinIcon } from 'vue-remix-icons'
 import { Input } from '@/components/ui/input'
 import { FormLabel, FormControl, FormMessage, FormItem, FormField } from '@/components/ui/form'
@@ -9,49 +6,88 @@ import Button from '@/components/Button.vue'
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyD3A65oIloNfr-TA3EK8vERo2nnWEi1fxg'
 
-// Get users' current location
+const emit = defineEmits(['update:addressValue'])
+
+const getTypes = {
+    "street_number": (object, value) => {
+        return { ...object, numero: value }
+    }, // 123
+    "route": (object, value) => {
+        return { ...object, logradouro: value }
+    }, // "Avenida Valdemar Naziazeno" | "Av. Valdemar Naziazeno"
+    "sublocality_level_1": (object, value) => {
+        return { ...object, bairro: value }
+    }, // "Ernesto Geisel"
+    "administrative_area_level_2": (object, value) => {
+        return { ...object, cidade: value }
+    }, // "João Pessoa"
+    "administrative_area_level_1": (object, value) => {
+        return { ...object, estado: value }
+    }, // "Paraíba" | "PB"
+    "postal_code": (object, value) => {
+        return { ...object, cep: value }
+    }, // "58075-000"
+    "country": (object, value) => {
+        return { ...object, pais: value }
+    }, // "Brazil"
+}
+
+const handleChange = (value) => {
+    emit('update:addressValue', value)
+}
+const setPlace = (place) => {
+    const { address_components, formatted_address } = place
+    const addressComp = address_components.reduce((prev, addressItem) => {
+        const { short_name, types } = addressItem
+
+        const type = types[0]
+
+        const typeGetted = getTypes[type]
+
+        if (!!typeGetted) return typeGetted(prev, short_name)
+        return prev
+
+    }, {});
+    console.log(addressComp)
+    handleChange({ ...addressComp, search: formatted_address })
+}
+
 const getUserLocation = () => {
     // Check if geolocation is supported by the browser
     const isSupported = 'navigator' in window && 'geolocation' in navigator
     if (isSupported) {
         // Retrieve the user's current position
         navigator.geolocation.getCurrentPosition((position) => {
-            coords.value.lat = position.coords.latitude
-            coords.value.lng = position.coords.longitude
+
+            const latlng = {
+                lat: parseFloat(position.coords.latitude),
+                lng: parseFloat(position.coords.longitude),
+            };
+
+            const geocoder = new google.maps.Geocoder();
+
+            geocoder
+                .geocode({ location: latlng })
+                .then((response) => {
+                    if (response.results[0]) setPlace(response.results[0])
+                    else window.alert("No results found");
+                })
+                .catch((e) => window.alert("Geocoder failed due to: " + e));
         })
     }
 }
 
-const setPlace = (place) => {
-    const { address_components, formatted_address } = place
 
-    console.log(address_components)
-    console.log(formatted_address)
-}
 
 const handleLocatorButton = (event) => {
     event.preventDefault();
-    console.log(coords.value.latitude)
-    console.log(coords.value.longitude)
-    console.log(error.value)
-    // if (navigator.geolocation) {
-    //     navigator.geolocation.getCurrentPosition(showPosition, showPositionError, { timeout: 30000 });
-    // } else {
-    //     console.log("Geolocation is not supported by this browser.")
-
-    // }
-
-    // function showPosition(position) {
-    //     console.log("Latitude: " + position.coords.latitude +
-    //         "Longitude: " + position.coords.longitude)
-    // }
-    // function showPositionError(error) {
-    //     console.log(error)
-    // }
+    getUserLocation()
 }
 
+
+const mask = ['^ [0 - 9]{ 1, 6 } (\\.\\d{ 1, 2 })?$']
 </script>
-//
+
 <template>
     <section class="flex flex-col gap-4 mt-4 space-y-6 sm:grid sm:grid-cols-12 sm:gap-4 sm:space-y-0">
         <FormField v-slot="{ componentField }" name="search">
@@ -59,7 +95,7 @@ const handleLocatorButton = (event) => {
                 <FormLabel>Pesquisar endereço</FormLabel>
                 <FormControl>
                     <!-- <Input class="pr-14" v-bind="componentField" /> -->
-                    <GMapAutocomplete
+                    <GMapAutocomplete v-bind="componentField"
                         class="pr-14 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         placeholder="Search for a location" @place_changed="setPlace">
                     </GMapAutocomplete>
@@ -71,28 +107,19 @@ const handleLocatorButton = (event) => {
                 <FormMessage />
             </FormItem>
         </FormField>
-        <!--
-        <GMapMap :center="{ lat: 51.5072, lng: 0.1276 }" :zoom="3" map-type-id="terrain"
-            class="sm:col-span-12 w-full h-64" :options="{
-                zoomControl: true,
-                mapTypeControl: true,
-                scaleControl: true,
-                streetViewControl: true,
-                rotateControl: true,
-                fullscreenControl: true
-            }" /> -->
+
         <FormField v-slot="{ componentField }" name="cep">
             <FormItem class="sm:col-span-3">
                 <FormLabel>CEP</FormLabel>
                 <FormControl>
-                    <Input v-bind="componentField" />
+                    <Input v-bind="componentField" type="text" v-mask="['#####-###']" />
                 </FormControl>
                 <FormMessage />
             </FormItem>
         </FormField>
 
         <FormField v-slot="{ componentField }" name="cidade">
-            <FormItem class="sm:col-span-5">
+            <FormItem v-auto-animate class="sm:col-span-5">
                 <FormLabel>Cidade</FormLabel>
                 <FormControl>
                     <Input v-bind="componentField" />
@@ -135,7 +162,7 @@ const handleLocatorButton = (event) => {
             <FormItem class="sm:col-span-2">
                 <FormLabel>Nº</FormLabel>
                 <FormControl>
-                    <Input type="number" v-bind="componentField" />
+                    <Input v-bind="componentField" type="text" v-mask="['####']" />
                 </FormControl>
                 <FormMessage />
             </FormItem>

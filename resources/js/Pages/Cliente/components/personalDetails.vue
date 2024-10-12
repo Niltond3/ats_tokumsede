@@ -39,7 +39,6 @@ const formatMask = width > 639 ? "dd'º de' MMM',' yyyy" : 'dd/MM/yyyy'
 const dateToIso = (date) => parseISO(date.toString());
 
 const getDataFormat = (date) => format(dateToIso(date), formatMask, { locale: ptBR })
-
 const value = computed({
     get: () => values.dataNascimento ? parseDate(values.dataNascimento) : undefined,
     set: val => val,
@@ -56,8 +55,8 @@ const handleChange = (value) => {
             <FormItem v-auto-animate class="sm:col-span-5">
                 <FormLabel>Nome</FormLabel>
                 <FormControl>
-                    <Input class="focus-visible:ring-slate-500" type="tel" placeholder="Nome completo"
-                        v-bind="componentField" autocomplete="name" />
+                    <Input class="focus-visible:ring-slate-500" placeholder="Nome completo" v-bind="componentField"
+                        autocomplete="name" />
                 </FormControl>
                 <FormMessage />
             </FormItem>

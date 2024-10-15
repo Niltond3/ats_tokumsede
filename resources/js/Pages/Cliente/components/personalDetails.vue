@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { CalendarDate, getLocalTimeZone, parseDate, today } from '@internationalized/date'
 import { useWindowSize } from '@vueuse/core';
+import { useClientFormat } from "@/useClientFormat";
 import {
     RiLoginBoxLine as LoginIcon,
     RiGenderlessLine as GenderlessIcon,
@@ -19,34 +20,24 @@ import DatePicker from './datePicker.vue';
 import Button from '@/components/Button.vue';
 
 const { values } = defineProps({ values: Object })
-const emit = defineEmits(['getFieldValue'])
+const emit = defineEmits(['update:birthDatePicker'])
 
 const { width } = useWindowSize()
 
-const getSexo = {
-    mobile: {
-        1: 'Masculino',
-        2: 'Feminino',
-    },
-    desktop: {
-        1: 'M',
-        2: 'F',
-    }
-}
+const { getSexo } = useClientFormat();
 
 const formatMask = width > 639 ? "dd'º de' MMM',' yyyy" : 'dd/MM/yyyy'
 
 const dateToIso = (date) => parseISO(date.toString());
 
 const getDataFormat = (date) => format(dateToIso(date), formatMask, { locale: ptBR })
+
 const value = computed({
     get: () => values.dataNascimento ? parseDate(values.dataNascimento) : undefined,
     set: val => val,
 })
 
-const handleChange = (value) => {
-    emit('getFieldValue', value)
-}
+const handleBirthDateChange = (value) => emit('update:birthDatePicker', value)
 
 </script>
 <template>
@@ -156,7 +147,7 @@ const handleChange = (value) => {
                     <PopoverContent class="p-0">
                         <DatePicker v-model="value" calendar-label="Data de Nascimento" initial-focus
                             :min-value="new CalendarDate(1900, 1, 1)" :max-value="today(getLocalTimeZone())"
-                            @update:model-value="(v) => handleChange(v)" />
+                            @update:model-value="(v) => handleBirthDateChange(v)" />
                     </PopoverContent>
                 </Popover>
                 <FormMessage />

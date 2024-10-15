@@ -4,8 +4,6 @@ import { Input } from '@/components/ui/input'
 import { FormLabel, FormControl, FormMessage, FormItem, FormField } from '@/components/ui/form'
 import Button from '@/components/Button.vue'
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyD3A65oIloNfr-TA3EK8vERo2nnWEi1fxg'
-
 const emit = defineEmits(['update:addressValue'])
 
 const getTypes = {
@@ -48,7 +46,6 @@ const setPlace = (place) => {
         return prev
 
     }, {});
-    console.log(addressComp)
     handleChange({ ...addressComp, search: formatted_address })
 }
 
@@ -77,15 +74,10 @@ const getUserLocation = () => {
     }
 }
 
-
-
 const handleLocatorButton = (event) => {
     event.preventDefault();
     getUserLocation()
 }
-
-
-const mask = ['^ [0 - 9]{ 1, 6 } (\\.\\d{ 1, 2 })?$']
 </script>
 
 <template>

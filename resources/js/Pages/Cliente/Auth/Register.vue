@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Head } from '@inertiajs/vue3';
+import { useClientFormat } from "@/useClientFormat";
 import { RiLoginBoxLine as LoginIcon } from "vue-remix-icons";
 import { CheckIcon, CircleIcon, DotIcon } from '@radix-icons/vue'
 import { useForm } from 'vee-validate'
@@ -8,20 +9,13 @@ import validator from 'validator'
 import { toTypedSchema } from '@vee-validate/zod'
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import * as z from 'zod'
-import { Form, FormLabel, FormControl, FormMessage, FormItem, FormField } from '@/components/ui/form'
+import { Form } from '@/components/ui/form'
 import { Stepper, StepperDescription, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from '@/components/ui/stepper'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-    SelectGroup
-} from '@/components/ui/select'
 import Button from '@/components/Button.vue';
 import PersonalDetails from '../components/personalDetails.vue';
 import axios from 'axios';
 import AdressDetails from '../components/adressDetails.vue';
+import ConfirmClient from '../components/confirmClient.vue';
 
 
 defineProps({
@@ -35,14 +29,22 @@ defineProps({
 
 const formSchema = [
     z.object({
-        nome: z.string({ required_error: 'Informar seu nome é obrigatório' }),
+        nome: z.string({ required_error: 'Informar seu nome é obrigatório' }).min(4, { message: 'Nome muito curto' }),
         telefone: z.string({ required_error: 'Número de telefone obrigatório' }).refine(validator.isMobilePhone, { message: 'Número de telefone inválido' }),
-        senha: z.string({ required_error: 'Senha obrigatória' }).min(4),
-        confirmSenha: z.string({ required_error: 'Confirme sua senha' }).min(4),
+        senha: z.string({ required_error: 'Senha obrigatória' }).refine(value => validator.isStrongPassword(value,
+            { minLength: 5, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 0, returnScore: false, pointsPerUnique: 1, pointsPerRepeat: 0.5, pointsForContainingLower: 10, pointsForContainingUpper: 10, pointsForContainingNumber: 10, pointsForContainingSymbol: 10 }
+        ), {
+            message: 'Senha fraca: precisa conter 5 caractéres, letra maiúscula e minúscula um número.'
+        }),
+        confirmSenha: z.string({ required_error: 'Confirme sua senha' }).refine(value => validator.isStrongPassword(value,
+            { minLength: 5, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 0, returnScore: false, pointsPerUnique: 1, pointsPerRepeat: 0.5, pointsForContainingLower: 10, pointsForContainingUpper: 10, pointsForContainingNumber: 10, pointsForContainingSymbol: 10 }
+        ), {
+            message: 'Senha fraca: precisa conter 5 caractéres, letra maiúscula e minúscula um número.'
+        }),
         sexo: z.enum(['1', '2']).nullable().optional(),
         dataNascimento: z.string().nullable().optional(),
         tipoPessoa: z.string().nullable().optional(),
-        email: z.string({ required_error: "e-mail obrigatório" }),
+        email: z.string({ required_error: "e-mail obrigatório" }).refine(validator.isEmail, { message: 'e-mail inválido' }),
     }).superRefine(({ confirmSenha, senha }, ctx) => {
         if (confirmSenha !== senha) {
             ctx.addIssue({
@@ -66,7 +68,12 @@ const formSchema = [
         observacao: z.string().nullable().optional(),
     }),
     z.object({
-        favoriteDrink: z.union([z.literal('coffee'), z.literal('tea'), z.literal('soda')]),
+        validateInformations: z.boolean().refine(
+            (value) => value === true,
+            {
+                message: 'Confirme os dados para prosseguir',
+            },
+        ),
     }),
 ];
 
@@ -87,37 +94,11 @@ const steps = [
     },
 ]
 
-const { handleSubmit, isSubmitting } = useForm({
-    validationSchema: formSchema,
-    initialValues: {
-        //
-    }
-})
+const { getTipoPessoaPayload } = useClientFormat();
 
-const getTipoPessoaPayload = (documentValue) => {
 
-    if (documentValue.length <= 14) {
-        return {
-            tipoPessoa: '1',
-            documento: {
-                'CPF': documentValue,
-                'CNPJ': null
 
-            }
-        }
-    }
-
-    return {
-        tipoPessoa: '2',
-        documento: {
-            'CPF': null,
-            'CNPJ': documentValue
-        }
-    }
-
-}
-
-const onSubmit = handleSubmit((values, { resetField }) => {
+const onSubmit = (values) => {
     const phoneRaw = values.telefone.replace(/\D/g, '')
 
     const ddd = phoneRaw.slice(0, 2);
@@ -142,13 +123,37 @@ const onSubmit = handleSubmit((values, { resetField }) => {
     //     .then((response) => {
     //         console.log('response')
     //         console.log(response)
-    //         resetField('senha')
     //         location.reload();
     //     }).catch((error) => {
     //         console.error(error);
     //         resetField('senha')
     //     })
 
+}
+
+
+const handleSubmit = (event, values, validate) => {
+    event.preventDefault()
+    validate()
+
+    if (stepIndex === steps.length && meta.valid) onSubmit(values)
+}
+
+
+const handleUpdateDatePicker = (dataValue, setFieldValue) => {
+    if (!dataValue) return
+    setFieldValue('dataNascimento', dataValue.toString())
+}
+
+
+const handleUpdateAddress = (addressValue, setValues) => setValues({
+    'search': addressValue.formattedAddress && addressValue.formattedAddress,
+    'cep': addressValue.cep && addressValue.cep,
+    'cidade': addressValue.cidade && addressValue.cidade,
+    'estado': addressValue.estado && addressValue.estado,
+    'logradouro': addressValue.logradouro && addressValue.logradouro,
+    'numero': addressValue.numero && addressValue.numero,
+    'bairro': addressValue.bairro && addressValue.bairro
 })
 
 </script>
@@ -167,14 +172,7 @@ const onSubmit = handleSubmit((values, { resetField }) => {
 
             <Stepper v-slot="{ isNextDisabled, isPrevDisabled, nextStep, prevStep }" v-model="stepIndex"
                 class="block w-full">
-                <form form @submit="(e) => {
-                    e.preventDefault()
-                    validate()
-
-                    if (stepIndex === steps.length && meta.valid) {
-                        onSubmit(values)
-                    }
-                }">
+                <form form @submit="(event) => handleSubmit(event, values, validate)">
                     <div class="flex w-full flex-start gap-2">
                         <StepperItem v-for="step in steps" :key="step.step" v-slot="{ state }"
                             class="relative flex w-full flex-col items-center justify-center" :step="step.step">
@@ -205,51 +203,14 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                         </StepperItem>
                     </div>
                     <div>
-                        <PersonalDetails v-if="stepIndex === 1" :values="values" @get-field-value="(dataValue) => {
-                            if (!dataValue) return
-                            setFieldValue('dataNascimento', dataValue.toString())
-                        }" />
+                        <PersonalDetails v-if="stepIndex === 1" :values="values"
+                            @update:birth-date-picker="(dataValue) => handleUpdateDatePicker(dataValue, setFieldValue)" />
 
-                        <AdressDetails v-if="stepIndex === 2" @update:address-value="(addressValue) => setValues({
-                            'search': addressValue.formattedAddress && addressValue.formattedAddress,
-                            'cep': addressValue.cep && addressValue.cep,
-                            'cidade': addressValue.cidade && addressValue.cidade,
-                            'estado': addressValue.estado && addressValue.estado,
-                            'logradouro': addressValue.logradouro && addressValue.logradouro,
-                            'numero': addressValue.numero && addressValue.numero,
-                            'bairro': addressValue.bairro && addressValue.bairro
-                        })" />
+                        <AdressDetails v-if="stepIndex === 2"
+                            @update:address-value="(addressValue) => handleUpdateAddress(addressValue, setValues)" />
 
+                        <ConfirmClient v-if="stepIndex === 3" :values="values" />
 
-                        <template v-if="stepIndex === 3">
-                            <FormField v-slot="{ componentField }" name="favoriteDrink">
-                                <FormItem>
-                                    <FormLabel>Drink</FormLabel>
-
-                                    <Select v-bind="componentField">
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a drink" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                <SelectItem value="coffee">
-                                                    Coffe
-                                                </SelectItem>
-                                                <SelectItem value="tea">
-                                                    Tea
-                                                </SelectItem>
-                                                <SelectItem value="soda">
-                                                    Soda
-                                                </SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            </FormField>
-                        </template>
                     </div>
                     <div class="flex items-center justify-between mt-4">
                         <Button :disabled="isPrevDisabled" variant="outline" size="sm" @click="prevStep()">

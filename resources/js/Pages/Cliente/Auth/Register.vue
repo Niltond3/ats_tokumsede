@@ -132,8 +132,8 @@ const onSubmit = (values) => {
 
     const payload = {
         nome: values.nome,
-        sexo: values.nome,
-        dataNascimento: values.nome,
+        sexo: values.sexo,
+        dataNascimento: values.dataNascimento,
         tipoPessoa,
         cpf: documento['CPF'],
         cnpj: documento['CNPJ'],
@@ -153,15 +153,14 @@ const onSubmit = (values) => {
     }
     console.log(payload)
 
-    // axios.post(route('cliente.register'), payload)
-    //     .then((response) => {
-    //         console.log('response')
-    //         console.log(response)
-    //         location.reload();
-    //     }).catch((error) => {
-    //         console.error(error);
-    //         resetField('senha')
-    //     })
+    axios.post(route('cliente.register'), payload)
+        .then((response) => {
+            console.log('response')
+            console.log(response)
+            location.reload();
+        }).catch((error) => {
+            console.error(error);
+        })
 
 }
 

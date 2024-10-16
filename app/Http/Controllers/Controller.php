@@ -300,8 +300,8 @@ abstract class Controller extends BaseController
 		$productionIos = "arn:aws:sns:sa-east-1:174353285667:app/APNS/ToKumSede";
 		$client = SnsClient::factory(array(
 		    'credentials' => array(
-		        'key'    => 'AKIAIMSSBBU4DIULP74Q',
-		        'secret' => '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',
+		        'key'    => env('AWS_ACCESS_KEY_ID' ),
+		        'secret' => env('AWS_SECRET_ACCESS_KEY' ),
 			),
 			'version' => 'latest',
 			'region'  => 'sa-east-1',

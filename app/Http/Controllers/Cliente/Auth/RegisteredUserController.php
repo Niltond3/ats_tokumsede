@@ -44,25 +44,56 @@ class RegisteredUserController extends Controller
             'outrosContatos' => 'nullable|string',
         ]);
 
-        $cliente = Cliente::create([
-            'nome' => $request->nome,
-            'email' => $request->email,
-            'senha' => Hash::make($request->senha),
-            'dddTelefone' => $request->dddTelefone,
-            'telefone' => $request->telefone,
-            'sexo' => $request->sexo,
-            'dataNascimento' => $request->dataNascimento,
-            'tipoPessoa' => $request->tipoPessoa,
-            'cpf' => $request->cpf,
-            'cnpj' => $request->cnpj,
-            'outrosContatos' => $request->outrosContatos,
-        ]);
+        // $cliente = Cliente::create([
+        //     'nome' => $request->nome,
+        //     'email' => $request->email,
+        //     'senha' => Hash::make($request->senha),
+        //     'dddTelefone' => $request->dddTelefone,
+        //     'telefone' => $request->telefone,
+        //     'sexo' => $request->sexo,
+        //     'dataNascimento' => $request->dataNascimento,
+        //     'tipoPessoa' => $request->tipoPessoa,
+        //     'cpf' => $request->cpf,
+        //     'cnpj' => $request->cnpj,
+        //     'outrosContatos' => $request->outrosContatos,
+        // ]);
 
-        event(new Registered($cliente));
-
-        Auth::guard('cliente')->login($cliente);
-
-        return redirect(route('cliente.dashboard', absolute: false));
+        $cliente = new Cliente($request->all());
+        $cliente->rating = 0;
+        $cliente->status = Cliente::ATIVO;
+        $telefone = explode(" ", str_replace("-", "", $request->telefone));
+        $formatacaoTelefone = array("(", ")");
+        $cliente->dddTelefone = str_replace($formatacaoTelefone, "", $telefone[0]);
+        $cliente->telefone = $telefone[1];
+        $cliente->dataNascimento = $request->dataNascimento == "" ? null : implode("-", array_reverse(explode("/", $request->dataNascimento)));
+        // event(new Registered($cliente));
+        $v = Cliente::get()->where('email', 'like ',$request->email);
+        if ($v->count() == 0 || strcmp($request->email, "") == 0) {
+            if ($cliente->save()) {
+                $enderecoCliente = new Enderecocliente($request->all());
+                $enderecoCliente->referencia = $request->referencia?$request->referencia:"";
+                $enderecoCliente->complemento = $request->complemento?$request->complemento:"";
+                $enderecoCliente->cep = str_replace('-','',$request->cep);
+                $enderecoCliente->idCliente = $cliente->id;
+                $coordenadas = $this->buscarLatitudeLongitude($enderecoCliente->logradouro, $enderecoCliente->numero, $enderecoCliente->cidade, $enderecoCliente->estado, $enderecoCliente->cep);
+                $enderecoCliente->latitude = $coordenadas[0];
+                $enderecoCliente->longitude = $coordenadas[1];
+                $enderecoCliente->status = EnderecoCliente::ATIVO;
+                if ($enderecoCliente->save()) {
+                    Auth::guard('cliente')->login($cliente);
+                    // return $enderecoCliente->id;
+                    // return response("Cliente cadastrado com sucesso.", 200);
+                    return redirect(route('cliente.dashboard', absolute: false));
+                } else {
+                    return response("Erro ao cadastrar o cliente. Tente novamente ou contate o cliente.", 400);
+                }
+            } else {
+                return response("Erro ao cadastrar o cliente. Tente novamente ou contate o cliente.", 400);
+            }
+        } else {
+            return response('Email já cadastrado.', 200);
+        }
+        //CADASTRA CLIENTE
     }
 
     function buscarLatitudeLongitude($logradouro, $numero, $cidade, $estado, $cep) {

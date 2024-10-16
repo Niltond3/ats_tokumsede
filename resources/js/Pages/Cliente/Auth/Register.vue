@@ -96,7 +96,30 @@ const steps = [
 
 const { getTipoPessoaPayload } = useClientFormat();
 
+/*
 
+nome: $("#formCliente_Nome").val(),
+sexo: $("#formCliente_Sexo").val(),
+dataNascimento: $("#formCliente_DataNascimento").val(),
+tipoPessoa: $("#formCliente_TipoPessoa").val(),
+cnpj: $("#formCliente_Cnpj").val().replace(/\D+/g, ''),
+cpf: $("#formCliente_Cpf").val().replace(/\D+/g, ''),
+logradouro: $("#formCliente_Logradouro").val(),
+numero: $("#formCliente_Numero").val(),
+bairro: $("#formCliente_Bairro").val(),
+complemento: $("#formCliente_Complemento").val(),
+cep: $("#formCliente_Cep").val(),
+cidade: $("#formCliente_Cidade").val(),
+estado: $("#formCliente_Estado").val(),
+referencia: $("#formCliente_Referencia").val(),
+apelido: $("#formCliente_Apelido").val(),
+observacao: $("#formCliente_Observacao").val(),
+telefone: $("#formCliente_Telefone").val(),
+outrosContatos: $("#formCliente_Outros").val(),
+email: $("#formCliente_Email").val(),
+senha: $("#formCliente_Senha").val()
+
+*/
 
 const onSubmit = (values) => {
     const phoneRaw = values.telefone.replace(/\D/g, '')
@@ -106,16 +129,27 @@ const onSubmit = (values) => {
 
     const { tipoPessoa, documento } = getTipoPessoaPayload(values.tipoPessoa);
 
+
     const payload = {
-        ddd,
-        telefone,
-        senha: values.senha,
-        sexo: values.sexo,
-        dataNascimento: values.dataNascimento,
-        email: values.email,
+        nome: values.nome,
+        sexo: values.nome,
+        dataNascimento: values.nome,
         tipoPessoa,
         cpf: documento['CPF'],
         cnpj: documento['CNPJ'],
+        logradouro: values.logradouro,
+        numero: values.numero,
+        bairro: values.bairro,
+        complemento: values.complemento,
+        cep: values.cep,
+        cidade: values.cidade,
+        estado: values.estado,
+        referencia: values.referencia,
+        apelido: values.apelido,
+        observacao: values.observacao,
+        telefone: values.telefone,
+        email: values.email,
+        senha: values.senha,
     }
     console.log(payload)
 
@@ -129,14 +163,6 @@ const onSubmit = (values) => {
     //         resetField('senha')
     //     })
 
-}
-
-
-const handleSubmit = (event, values, validate) => {
-    event.preventDefault()
-    validate()
-
-    if (stepIndex === steps.length && meta.valid) onSubmit(values)
 }
 
 
@@ -172,7 +198,12 @@ const handleUpdateAddress = (addressValue, setValues) => setValues({
 
             <Stepper v-slot="{ isNextDisabled, isPrevDisabled, nextStep, prevStep }" v-model="stepIndex"
                 class="block w-full">
-                <form form @submit="(event) => handleSubmit(event, values, validate)">
+                <form form @submit="(event) => {
+                    event.preventDefault()
+                    validate()
+
+                    if (stepIndex === steps.length && meta.valid) onSubmit(values)
+                }">
                     <div class="flex w-full flex-start gap-2">
                         <StepperItem v-for="step in steps" :key="step.step" v-slot="{ state }"
                             class="relative flex w-full flex-col items-center justify-center" :step="step.step">

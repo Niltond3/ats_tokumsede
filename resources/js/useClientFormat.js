@@ -16,7 +16,7 @@ export function useClientFormat() {
         if (!documentValue) return {
             tipoPessoa: '1',
             documento: {
-                'CPF': '',
+                'CPF': null,
                 'CNPJ': null
 
             }

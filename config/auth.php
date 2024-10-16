@@ -73,6 +73,7 @@ return [
         //     'model' => env('AUTH_MODEL', App\Models\User::class),
         // ],
         Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
+        Yajra\DataTables\DataTablesServiceProvider::class,
         'administrador' => [
             'driver' => 'eloquent',
             'model' => App\Models\Administrador::class,

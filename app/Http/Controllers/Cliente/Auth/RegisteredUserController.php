@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cliente\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cliente;
+use App\Models\EnderecoCliente;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -62,9 +63,13 @@ class RegisteredUserController extends Controller
         $cliente->dddTelefone = str_replace($formatacaoTelefone, "", $telefone[0]);
         $cliente->telefone = $telefone[1];
         $cliente->dataNascimento = $request->dataNascimento == "" ? null : implode("-", array_reverse(explode("/", $request->dataNascimento)));
-        // event(new Registered($cliente));
-        $v = Cliente::get()->where('email', 'like ',$request->email);
-        if ($v->count() == 0 || strcmp($request->email, "") == 0) {
+
+        $veryfyEmailExist = Cliente::get()->where('email', 'like ',$request->email);
+        $veryfyPhoneExist = Cliente::get()
+        ->where('telefone', 'like ',$request->telefone)
+        ->where('dddTelefone', 'like ',$cliente->dddTelefone);
+
+        if ($veryfyEmailExist->count() == 0 || strcmp($request->email, "") == 0) {
             if ($cliente->save()) {
                 $enderecoCliente = new Enderecocliente($request->all());
                 $enderecoCliente->referencia = $request->referencia?$request->referencia:"";
@@ -76,10 +81,12 @@ class RegisteredUserController extends Controller
                 $enderecoCliente->longitude = $coordenadas[1];
                 $enderecoCliente->status = EnderecoCliente::ATIVO;
                 if ($enderecoCliente->save()) {
+
                     Auth::guard('cliente')->login($cliente);
-                    // return $enderecoCliente->id;
-                    // return response("Cliente cadastrado com sucesso.", 200);
+
                     return redirect(route('cliente.dashboard', absolute: false));
+                    // return $enderecoCliente->id;
+                    //return response("Cliente cadastrado com sucesso.", 200);
                 } else {
                     return response("Erro ao cadastrar o cliente. Tente novamente ou contate o cliente.", 400);
                 }
@@ -89,7 +96,10 @@ class RegisteredUserController extends Controller
         } else {
             return response('Email já cadastrado.', 200);
         }
-        //CADASTRA CLIENTE
+
+        // event(new Registered($cliente));
+
+
     }
 
     function buscarLatitudeLongitude($logradouro, $numero, $cidade, $estado, $cep) {

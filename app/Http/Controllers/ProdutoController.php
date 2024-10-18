@@ -15,6 +15,7 @@ use App\Models\TaxaEntrega;
 use App\Models\Estoque;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use \Barryvdh\Debugbar\Facades\Debugbar;
 
 class ProdutoController extends Controller
 {
@@ -32,8 +33,6 @@ class ProdutoController extends Controller
         }
         return $produtos;
     }
-
-
     /**
      * Store a newly created resource in storage.
      *
@@ -201,7 +200,7 @@ class ProdutoController extends Controller
                     ])
                     ->where(function ($query) {
                         $query->where('preco.inicioValidade', '=', NULL)
-                            ->orWhereRaw('preco.inicioValidade', '<=', DB::raw('curdate()'));
+                            ->orWhere('preco.inicioValidade', '<=', DB::raw('curdate()'));
                     })
                     ->where(function ($query) {
                         $query->where('preco.fimValidade', '=', NULL)

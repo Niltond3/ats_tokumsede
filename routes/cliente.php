@@ -10,6 +10,7 @@ use App\Http\Controllers\Cliente\Auth\PasswordController;
 use App\Http\Controllers\Cliente\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Cliente\Auth\RegisteredUserController;
 use App\Http\Controllers\Cliente\Auth\VerifyEmailController;
+use App\Http\Controllers\ProdutoController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -67,5 +68,11 @@ Route::prefix('cliente')->name('cliente.')->group(function (){
 
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
                     ->name('logout');
+
+                    //PRODUTOS
+Route::prefix('produtos')->name('produtos.')->group(function(){
+    Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class, 'listarProdutos']);
+    Route::get('{idEnderecoCliente}', [ProdutoController::class, 'show']);
+});
     });
 });

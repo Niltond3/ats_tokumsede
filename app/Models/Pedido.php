@@ -67,19 +67,19 @@ class Pedido extends Model
     //RELACIONAMENTO
     public function distribuidor()
     {
-        return $this->belongsTo('App\Distribuidor', 'idDistribuidor');
+        return $this->belongsTo('App\Models\Distribuidor', 'idDistribuidor');
     }
     public function endereco()
     {
-        return $this->belongsTo('App\EnderecoCliente', 'idEndereco')->with('cliente');
+        return $this->belongsTo('App\Models\EnderecoCliente', 'idEndereco')->with('cliente');
     }
     public function entregador()
     {
-        return $this->belongsTo('App\Entregador', 'idEntregador');
+        return $this->belongsTo('App\Models\Entregador', 'idEntregador');
     }
     public function itens()
     {
-        return $this->hasMany('App\ItemPedido', 'idPedido');
+        return $this->hasMany('App\Models\ItemPedido', 'idPedido');
     }
 
     public function getClienteAttribute() {

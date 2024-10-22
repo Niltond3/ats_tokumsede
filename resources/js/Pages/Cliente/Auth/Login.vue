@@ -126,7 +126,7 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                     </i>
                     Entrar
                 </Button>
-                <Button :href="route('cliente.register')"  class="ms-4" :disabled="isSubmitting">
+                <Button :href="route('cliente.register')" class="ms-4" :disabled="isSubmitting">
                     <span class="hidden min-[768px]:block text-zinc-700">Registrar-se</span>
                     <i class="icon icon--chevron-right text-xl hidden min-[425px]:block">
                         <ArrowRightIcon />

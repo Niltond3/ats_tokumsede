@@ -1,11 +1,24 @@
 <script setup>
-import Checkbox from '@/components/Checkbox.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/components/InputError.vue';
-import InputLabel from '@/components/InputLabel.vue';
-import Button from '@/components/Button.vue';
 import TextInput from '@/components/TextInput.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
+import { useForm } from 'vee-validate';
+import * as z from 'zod'
+import validator from 'validator';
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
+import axios from 'axios';
+import {
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import Button from '@/components/Button.vue';
+import { toTypedSchema } from '@vee-validate/zod'
 import { RiLoginBoxLine as LoginIcon } from "vue-remix-icons";
 import { RiArrowRightWideLine as ArrowRightIcon } from "vue-remix-icons";
 
@@ -19,21 +32,35 @@ defineProps({
     },
 });
 
-const form = useForm({
-    login: '',
-    senha: '',
-    remember: false,
-});
 
+const formSchema = toTypedSchema(z.object({
+    login: z.string({ required_error: 'Informe seu login' }),
+    senha: z.string({ required_error: 'Senha obrigatória' }),
+    remember: z.boolean().default(false).optional(),
+}))
 
+const { handleSubmit, isSubmitting } = useForm({
+    validationSchema: formSchema,
+    initialValues: {
+        remember: false
+    }
+})
 
+const onSubmit = handleSubmit((values, { resetField }) => {
 
-const submit = () => {
-    console.log(form.data())
-    form.post(route('login'), {
-        onFinish: () => form.reset('senha'),
-    });
-};
+    axios.post(route('login'), values)
+        .then((response) => {
+            console.log('response')
+            console.log(response)
+            resetField('senha')
+            location.reload();
+        }).catch((error) => {
+            console.error(error);
+            resetField('senha')
+        })
+
+})
+
 </script>
 
 <template>
@@ -45,55 +72,62 @@ const submit = () => {
             {{ status }}
         </div>
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="login" value="Login" />
-
-                <TextInput id="login" type="login" class="mt-1 block w-full" v-model="form.login" required autofocus
-                    autocomplete="username" />
-
-                <InputError class="mt-2" :message="form.errors.login" />
-            </div>
-
-            <div class="mt-4">
-                <InputLabel for="senha" value="Senha" />
-
-                <TextInput id="senha" type="password" class="mt-1 block w-full" v-model="form.senha" required
-                    autocomplete="current-password" />
-
-                <InputError class="mt-2" :message="form.errors.senha" />
-            </div>
-
-            <div class="block mt-4">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
-                </label>
-            </div>
-            <div class="flex items-center justify-end mt-4">
-                <Button class="ms-4 btn--primary" :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing">
+        <form class="space-y-6" @submit="onSubmit">
+            <FormField v-slot="{ componentField }" name="login">
+                <FormItem v-auto-animate>
+                    <FormLabel>Login</FormLabel>
+                    <FormControl>
+                        <Input class="focus-visible:ring-slate-500" type="text" placeholder="Login"
+                            v-bind="componentField" autocomplete="username" />
+                    </FormControl>
+                    <FormDescription>
+                        Informe seu Login
+                    </FormDescription>
+                    <FormMessage />
+                </FormItem>
+            </FormField>
+            <FormField v-slot="{ componentField }" name="senha">
+                <FormItem v-auto-animate>
+                    <FormLabel>Senha</FormLabel>
+                    <FormControl>
+                        <Input type="password" placeholder="Senha" v-bind="componentField"
+                            autocomplete="current-password" />
+                    </FormControl>
+                    <FormDescription>
+                        Digite sua senha
+                    </FormDescription>
+                    <FormMessage />
+                </FormItem>
+            </FormField>
+            <FormField v-slot="{ componentField, value, handleChange }" name="remember" type="checkbox">
+                <FormItem v-auto-animate class="gap-2 flex items-center">
+                    <FormControl>
+                        <Checkbox v-bind="componentField" :checked="value" @update:checked="handleChange" />
+                    </FormControl>
+                    <FormLabel class="!m-0">Lembrar-se</FormLabel>
+                </FormItem>
+            </FormField>
+            <div class="flex gap-4p">
+                <Button type="submit" :class="{ 'opacity-25': isSubmitting }" :disabled="isSubmitting">
                     <i class="icon text-xl">
                         <LoginIcon />
                     </i>
-                    <span class="hidden min-[768px]:block">Log in</span>
+                    Entrar
                 </Button>
-
-
-                <Button href="#informations" class="ms-4" :disabled="form.processing">
+                <Button :href="route('cliente.register')" class="ms-4" :disabled="isSubmitting">
                     <span class="hidden min-[768px]:block text-zinc-700">Registrar-se</span>
                     <i class="icon icon--chevron-right text-xl hidden min-[425px]:block">
                         <ArrowRightIcon />
                     </i>
                 </Button>
             </div>
-
-            <div class="flex items-center justify-end mt-4">
-                <Link v-if="canResetPassword" :href="route('password.request')"
-                    class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                Esqueceu sua senha?
-                </Link>
-            </div>
         </form>
+
+        <div class="flex items-center justify-end mt-4">
+            <Link v-if="canResetPassword" :href="route('password.request')"
+                class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+            Esqueceu sua senha?
+            </Link>
+        </div>
     </GuestLayout>
 </template>

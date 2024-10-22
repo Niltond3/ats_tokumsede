@@ -1,4 +1,32 @@
+<script setup>
+import { RiWallet3Line as WalletIcon } from 'vue-remix-icons';
+import { DashboardCard, DashboardColumn, DashboardProgressBar, DashboardAvatar, DashboardDonutChart } from '@/components/dashboardColumn';
+</script>
+
 <script>
+import { format } from 'v-money3';
+
+const config = {
+    debug: false,
+    masked: false,
+    prefix: 'R$',
+    suffix: '',
+    thousands: '.',
+    decimal: ',',
+    precision: 2,
+    disableNegative: false,
+    disabled: false,
+    min: null,
+    max: null,
+    allowBlank: false,
+    minimumNumberOfCharacters: 0,
+    modelModifiers: {
+        number: false,
+    },
+    shouldRound: true,
+    focusOnRight: false,
+};
+
 export default {
     data() {
         return {
@@ -9,23 +37,46 @@ export default {
         getHomepage: function () {
             var url = '/homepage';
             axios.get(url).then(response => {
-                this.total = response.data,
-                    this.total.faturamentoAno > this.total.faturamentoAnoPassado ? $('#setaAno').addClass('ti-arrow-up') : $('#setaAno').addClass('ti-arrow-down'),
-                    this.total.faturamentoMes > this.total.faturamentoMesPassado ? $('#setaMes').addClass('ti-arrow-up') : $('#setaMes').addClass('ti-arrow-down'),
-                    this.total.faturamentoSemana > this.total.faturamentoSemanaPassada ? $('#setaSemana').addClass('ti-arrow-up') : $('#setaSemana').addClass('ti-arrow-down'),
-                    this.total.faturamentoDia > this.total.faturamentoDiaPassado ? $('#setaDia').addClass('ti-arrow-up') : $('#setaDia').addClass('ti-arrow-down'),
-                    this.total.faturamentoAno = this.formataDinheiro(this.total.faturamentoAno),
-                    this.total.faturamentoMes = this.formataDinheiro(this.total.faturamentoMes),
-                    this.total.faturamentoSemana = this.formataDinheiro(this.total.faturamentoSemana),
-                    this.total.faturamentoDia = this.formataDinheiro(this.total.faturamentoDia),
-                    this.total.faturamentoAnoPassado = this.formataDinheiro(this.total.faturamentoAnoPassado),
-                    this.total.faturamentoMesPassado = this.formataDinheiro(this.total.faturamentoMesPassado),
-                    this.total.faturamentoSemanaPassada = this.formataDinheiro(this.total.faturamentoSemanaPassada),
-                    this.total.faturamentoDiaPassado = this.formataDinheiro(this.total.faturamentoDiaPassado)
-                // //this.clima = response.data[4],
-                // //moment.defineLocale('pt-BR', {months : 'janeiro_fevereiro_março_abril_maio_junho_julho_agosto_setembro_outubro_novembro_dezembro'.split('_'),weekdays : 'domingo_segunda-feira_terça-feira_quarta-feira_quinta-feira_sexta-feira_sábado'.split('_'),}),
-                // //this.clima.data.date = moment(this.clima.data.date).format('LLLL'),
+                this.total = response.data;
+
+                // this.total.faturamentoAno > this.total.faturamentoAnoPassado ? $('#setaAno').addClass('ti-arrow-up') : $('#setaAno').addClass('ti-arrow-down'),
+                // this.total.faturamentoMes > this.total.faturamentoMesPassado ? $('#setaMes').addClass('ti-arrow-up') : $('#setaMes').addClass('ti-arrow-down'),
+                // this.total.faturamentoSemana > this.total.faturamentoSemanaPassada ? $('#setaSemana').addClass('ti-arrow-up') : $('#setaSemana').addClass('ti-arrow-down'),
+                // this.total.faturamentoDia > this.total.faturamentoDiaPassado ? $('#setaDia').addClass('ti-arrow-up') : $('#setaDia').addClass('ti-arrow-down'),
+                const totalPedidos = this.total.pedidosPlataforma + this.total.pedidosAndroid + this.total.pedidosIos;
+
+
+                this.total.faturamentoAno = this.formataDinheiro(this.total.faturamentoAno);
+                this.total.faturamentoMes = this.formataDinheiro(this.total.faturamentoMes);
+                this.total.faturamentoSemana = this.formataDinheiro(this.total.faturamentoSemana);
+                this.total.faturamentoDia = this.formataDinheiro(this.total.faturamentoDia);
+                this.total.faturamentoAnoPassado = this.formataDinheiro(this.total.faturamentoAnoPassado);
+                this.total.faturamentoMesPassado = this.formataDinheiro(this.total.faturamentoMesPassado);
+                this.total.faturamentoSemanaPassada = this.formataDinheiro(this.total.faturamentoSemanaPassada);
+                this.total.faturamentoDiaPassado = this.formataDinheiro(this.total.faturamentoDiaPassado);
+
+                this.total.percentualPlataforma = ((this.total.pedidosPlataforma * 100) / totalPedidos).toFixed(2) + '%';
+                this.total.percentualAndroid = ((this.total.pedidosAndroid * 100) / totalPedidos).toFixed(2) + '%';
+                this.total.percentualIOS = ((this.total.pedidosIos * 100) / totalPedidos).toFixed(2) + '%';
+
+                this.total.chartDataPlatform = [
+                    { name: 'Outros', total: totalPedidos - this.total.pedidosPlataforma, predicted: totalPedidos },
+                    { name: 'Pedidos Gerenciador', total: this.total.pedidosPlataforma, predicted: this.total.pedidosPlataforma },
+                ];;
+
+                this.total.chartDataAndroid = [
+                    { name: 'Outros', total: totalPedidos - this.total.pedidosAndroid, predicted: totalPedidos },
+                    { name: 'Pedidos Android', total: this.total.pedidosAndroid, predicted: this.total.pedidosAndroid },
+                ];;
+
+                this.total.chartDataIos = [
+                    { name: 'Outros', total: totalPedidos - this.total.pedidosIos, predicted: totalPedidos },
+                    { name: 'Pedidos Ios', total: this.total.pedidosIos, predicted: this.total.pedidosIos },
+                ];;
+
+                console.log(this.total);
             }).catch(error => {
+                console.log(error)
                 this.errors = error.response.data;
                 console.log(error)
                 Swal.fire({
@@ -38,9 +89,7 @@ export default {
                 });
             });
         },
-        formataDinheiro: function (n) {
-            return "R$" + n.toFixed(2).replace('.', ',').replace(/(\d)(?=(\d{3})+\,)/g, "$1.");
-        },
+        formataDinheiro: (n) => format(n, config),
     },
     mounted: function () {
         // window.location.href = '/#/';
@@ -58,352 +107,319 @@ export default {
 <template>
     <div class="container p-0">
         <!-- Row -->
-        <div v-if="total.faturamento" class="row">
+        <div v-if="total.faturamento" class="flex flex-wrap -mx-4">
             <!-- Column -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card m-0">
-                    <div class="d-flex flex-row">
-                        <div class="p-10 bg-info">
-                            <h3 class="text-white box m-b-0"><i class="ti-wallet"></i></h3>
+            <DashboardColumn variant="md">
+                <DashboardCard class="!m-0">
+                    <div class="flex flex-row">
+                        <div class="p-3 bg-info">
+                            <h3 class="text-white rounded-sm p-3 mb-0"><i class="ti-wallet"></i></h3>
                         </div>
-                        <div class="align-self-center m-l-20">
-                            <h3 class="m-b-0 text-info">{{ total.faturamentoAnoPassado }}</h3>
-                            <h5 class="text-muted m-b-0">Ano Passado</h5>
+                        <div class="self-center ml-5">
+                            <h3 class="mb-0 text-xl font-medium text-info">{{ total.faturamentoAnoPassado }}</h3>
+                            <h5 class="text-gray-400 font-medium mb-0">Ano Passado</h5>
                         </div>
                     </div>
-                </div>
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">Faturamento Anual</h4>
-                        <div class="text-right"><i id="setaAno" class="text-info"></i><span class="text-muted">Neste
+                </DashboardCard>
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <h4 class="mb-3 text-lg font-normal">Faturamento Anual</h4>
+                        <div class="text-right"><i id="setaAno" class="text-info"></i><span
+                                class="text-gray-400 font-medium">Neste
                                 Ano</span>
-                            <h2 class="font-light"><sup></sup>{{ total.faturamentoAno }}</h2>
+                            <h2 class="font-light text-2xl text-gray-700"><sup></sup>{{ total.faturamentoAno }}</h2>
                         </div>
                         <span class="text-info">{{ total.percentualAno }}%</span>
-                        <div class="progress">
-                            <div class="progress-bar bg-info" role="progressbar"
-                                :style="{ width: total.percentualAno + '%', height: '6px' }" aria-valuenow="25"
-                                aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
+                        <DashboardProgressBar :percentual="total.percentualAno" />
                     </div>
-                </div>
-            </div>
+                </DashboardCard>
+            </DashboardColumn>
             <!-- Column -->
             <!-- Column -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card m-0">
-                    <div class="d-flex flex-row">
-                        <div class="p-10 bg-success">
-                            <h3 class="text-white box m-b-0"><i class="ti-wallet"></i></h3>
+            <DashboardColumn variant="md">
+                <DashboardCard class="!m-0">
+                    <div class="flex flex-row">
+                        <div class="p-3 bg-success">
+                            <h3 class="text-white rounded-sm p-3 mb-0"><i class="ti-wallet"></i></h3>
                         </div>
-                        <div class="align-self-center m-l-20">
-                            <h3 class="m-b-0 text-success">{{ total.faturamentoMesPassado }}</h3>
-                            <h5 class="text-muted m-b-0">Mês Passado</h5>
+                        <div class="self-center ml-5">
+                            <h3 class="mb-0 text-xl font-medium text-success">{{ total.faturamentoMesPassado }}</h3>
+                            <h5 class="text-gray-400 font-medium mb-0">Mês Passado</h5>
                         </div>
                     </div>
-                </div>
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">Faturamento Mensal</h4>
-                        <div class="text-right"><i id="setaMes" class="text-success"></i><span class="text-muted">Neste
+                </DashboardCard>
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <h4 class="mb-3 text-lg font-normal">Faturamento Mensal</h4>
+                        <div class="text-right"><i id="setaMes" class="text-success"></i><span
+                                class="text-gray-400 font-medium">Neste
                                 Mês</span>
-                            <h2 class="font-light"><sup></sup>{{ total.faturamentoMes }}</h2>
+                            <h2 class="font-light text-2xl text-gray-700"><sup></sup>{{ total.faturamentoMes }}</h2>
                         </div>
                         <span class="text-success">{{ total.percentualMes }}%</span>
-                        <div class="progress">
-                            <div class="progress-bar bg-success" role="progressbar"
-                                :style="{ width: total.percentualMes + '%', height: '6px' }" aria-valuenow="25"
-                                aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
+                        <DashboardProgressBar :percentual="total.percentualMes" variant="success" />
                     </div>
-                </div>
-            </div>
+                </DashboardCard>
+            </DashboardColumn>
             <!-- Column -->
             <!-- Column -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card m-0">
-                    <div class="d-flex flex-row">
-                        <div class="p-10 bg-inverse">
-                            <h3 class="text-white box m-b-0"><i class="ti-wallet"></i></h3>
+            <DashboardColumn variant="md">
+                <DashboardCard class="!m-0">
+                    <div class="flex flex-row">
+                        <div class="p-3 bg-inverse">
+                            <h3 class="text-white rounded-sm p-3 mb-0"><i class="ti-wallet"></i></h3>
                         </div>
-                        <div class="align-self-center m-l-20">
-                            <h3 class="m-b-0">{{ total.faturamentoSemanaPassada }}</h3>
-                            <h5 class="text-muted m-b-0">Semana Passada</h5>
+                        <div class="self-center ml-5">
+                            <h3 class="mb-0 text-xl font-medium ">{{ total.faturamentoSemanaPassada }}</h3>
+                            <h5 class="text-gray-400 font-medium mb-0">Semana Passada</h5>
                         </div>
                     </div>
-                </div>
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">Faturamento Semanal</h4>
+                </DashboardCard>
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <h4 class="mb-3 text-lg font-normal">Faturamento Semanal</h4>
                         <div class="text-right"><i id="setaSemana" class="text-inverse"></i><span
-                                class="text-muted">Nesta Semana</span>
-                            <h2 class="font-light"><sup></sup>{{ total.faturamentoSemana }}</h2>
+                                class="text-gray-400 font-medium">Nesta Semana</span>
+                            <h2 class="font-light text-2xl text-gray-700"><sup></sup>{{ total.faturamentoSemana }}</h2>
                         </div>
                         <span class="text-inverse">{{ total.percentualSemana }}%</span>
-                        <div class="progress">
-                            <div class="progress-bar bg-inverse" role="progressbar"
-                                :style="{ width: total.percentualSemana + '%', height: '6px' }" aria-valuenow="25"
-                                aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
+                        <DashboardProgressBar :percentual="total.percentualSemana" variant="inverse" />
                     </div>
-                </div>
-            </div>
+                </DashboardCard>
+            </DashboardColumn>
             <!-- Column -->
             <!-- Column -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card m-0">
-                    <div class="d-flex flex-row">
-                        <div class="p-10 bg-warning">
-                            <h3 class="text-white box m-b-0"><i class="ti-wallet"></i></h3>
+            <DashboardColumn variant="md">
+                <DashboardCard class="!m-0">
+                    <div class="flex flex-row">
+                        <div class="p-3 bg-warning">
+                            <h3 class="text-white rounded-sm p-3 mb-0"><i class="ti-wallet"></i></h3>
                         </div>
-                        <div class="align-self-center m-l-20">
-                            <h3 class="m-b-0 text-warning">{{ total.faturamentoDiaPassado }}</h3>
-                            <h5 class="text-muted m-b-0">Ontem</h5>
+                        <div class="self-center ml-5">
+                            <h3 class="mb-0 text-xl font-medium text-warning">{{ total.faturamentoDiaPassado }}</h3>
+                            <h5 class="text-gray-400 font-medium mb-0">Ontem</h5>
                         </div>
                     </div>
-                </div>
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">Faturamento Diário</h4>
+                </DashboardCard>
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <h4 class="mb-3 text-lg font-normal">Faturamento Diário</h4>
                         <div class="text-right"><i id="setaDia" class="text-warning"></i><span
-                                class="text-muted">Hoje</span>
-                            <h2 class="font-light"><sup></sup>{{ total.faturamentoDia }}</h2>
+                                class="text-gray-400 font-medium">Hoje</span>
+                            <h2 class="font-light text-2xl text-gray-700"><sup></sup>{{ total.faturamentoDia }}</h2>
                         </div>
                         <span class="text-warning">{{ total.percentualDia }}%</span>
-                        <div class="progress">
-                            <div class="progress-bar bg-warning" role="progressbar"
-                                :style="{ width: total.percentualDia + '%', height: '6px' }" aria-valuenow="25"
-                                aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
+                        <DashboardProgressBar :percentual="total.percentualDia" variant="warning" />
+
                     </div>
-                </div>
-            </div>
+                </DashboardCard>
+            </DashboardColumn>
             <!-- Column -->
         </div>
         <!-- Row -->
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
             <!-- Column -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex flex-row">
-                            <div class="round round-lg align-self-center round-info"><i
-                                    class="mdi mdi-account-star"></i></div>
-                            <div class="m-l-10 align-self-center">
-                                <h3 class="m-b-0 font-light" id="totalClientes">{{ total.clientesAtivos }}</h3>
-                                <h5 class="text-muted m-b-0">Clientes Ativos</h5>
+            <DashboardColumn variant="md">
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <div class="flex flex-row">
+                            <DashboardAvatar class="bg-info"><i class="mdi mdi-account-star"></i>
+                            </DashboardAvatar>
+                            <div class="ml-3 self-center">
+                                <h3 class="mb-0 font-light text-xl" id="totalClientes">{{ total.clientesAtivos }}</h3>
+                                <h5 class="text-gray-400 font-medium mb-0">Clientes Ativos</h5>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </DashboardCard>
+            </DashboardColumn>
             <!-- Column -->
             <!-- Column -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex flex-row">
-                            <div class="round round-lg align-self-center round-info"><i class="mdi mdi-motorbike"></i>
-                            </div>
-                            <div class="m-l-10 align-self-center">
-                                <h3 class="m-b-0 font-lgiht">{{ total.entregadoresAtivos }}</h3>
-                                <h5 class="text-muted m-b-0">Entregadores Ativos</h5>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Column -->
-            <!-- Column -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex flex-row">
-                            <div class="round round-lg align-self-center round-primary"><i
-                                    class="fas fa-clipboard-check"></i></div>
-                            <div class="m-l-10 align-self-center">
-                                <h3 class="m-b-0 font-lgiht">{{ total.pedidosEntregues }}</h3>
-                                <h5 class="text-muted m-b-0">Pedidos Entregues</h5>
+            <DashboardColumn variant="md">
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <div class="flex flex-row">
+                            <DashboardAvatar class="bg-info"><i class="mdi mdi-motorbike"></i>
+                            </DashboardAvatar>
+                            <div class="ml-3 self-center">
+                                <h3 class="mb-0 font-light text-xl">{{ total.entregadoresAtivos }}</h3>
+                                <h5 class="text-gray-400 font-medium mb-0">Entregadores Ativos</h5>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </DashboardCard>
+            </DashboardColumn>
             <!-- Column -->
             <!-- Column -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex flex-row">
-                            <div class="round round-lg align-self-center round-danger"><i
-                                    class="fas fa-exclamation-triangle"></i></div>
-                            <div class="m-l-10 align-self-center">
-                                <h3 class="m-b-0 font-lgiht">{{ total.pedidosAceitos }}</h3>
-                                <h5 class="text-muted m-b-0">Pedidos à Entregar</h5>
+            <DashboardColumn variant="md">
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <div class="flex flex-row">
+                            <DashboardAvatar class="bg-primary"><i class="fas fa-clipboard-check"></i>
+                            </DashboardAvatar>
+                            <div class="ml-3 self-center">
+                                <h3 class="mb-0 font-light text-xl">{{ total.pedidosEntregues }}</h3>
+                                <h5 class="text-gray-400 font-medium mb-0">Pedidos Entregues</h5>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </DashboardCard>
+            </DashboardColumn>
             <!-- Column -->
             <!-- Column -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex flex-row">
-                            <div class="round round-lg align-self-center round-info"><i
-                                    class="fas fa-clipboard-list"></i></div>
-                            <div class="m-l-10 align-self-center">
-                                <h3 class="m-b-0 font-lgiht">{{ total.pedidosAno }}</h3>
-                                <h5 class="text-muted m-b-0">Pedidos no Ano</h5>
+            <DashboardColumn variant="md">
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <div class="flex flex-row">
+                            <DashboardAvatar class="bg-danger"><i class="fas fa-exclamation-triangle"></i>
+                            </DashboardAvatar>
+                            <div class="ml-3 self-center">
+                                <h3 class="mb-0 font-light text-xl">{{ total.pedidosAceitos }}</h3>
+                                <h5 class="text-gray-400 font-medium mb-0">Pedidos à Entregar</h5>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </DashboardCard>
+            </DashboardColumn>
             <!-- Column -->
             <!-- Column -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex flex-row">
-                            <div class="round round-lg align-self-center round-success"><i
-                                    class="fas fa-clipboard-list"></i></div>
-                            <div class="m-l-10 align-self-center">
-                                <h3 class="m-b-0 font-lgiht">{{ total.pedidosMes }}</h3>
-                                <h5 class="text-muted m-b-0">Pedidos no Mês</h5>
+            <DashboardColumn variant="md">
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <div class="flex flex-row">
+                            <DashboardAvatar class="bg-info"><i class="fas fa-clipboard-list"></i>
+                            </DashboardAvatar>
+                            <div class="ml-3 self-center">
+                                <h3 class="mb-0 font-light text-xl">{{ total.pedidosAno }}</h3>
+                                <h5 class="text-gray-400 font-medium mb-0">Pedidos no Ano</h5>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </DashboardCard>
+            </DashboardColumn>
             <!-- Column -->
             <!-- Column -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex flex-row">
-                            <div class="round round-lg align-self-center bg-inverse"><i
-                                    class="fas fa-clipboard-list"></i></div>
-                            <div class="m-l-10 align-self-center">
-                                <h3 class="m-b-0 font-lgiht">{{ total.pedidosSemana }}</h3>
-                                <h5 class="text-muted m-b-0">Pedidos na Semana</h5>
+            <DashboardColumn variant="md">
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <div class="flex flex-row">
+                            <DashboardAvatar class="bg-success"><i class="fas fa-clipboard-list"></i>
+                            </DashboardAvatar>
+                            <div class="ml-3 self-center">
+                                <h3 class="mb-0 font-light text-xl">{{ total.pedidosMes }}</h3>
+                                <h5 class="text-gray-400 font-medium mb-0">Pedidos no Mês</h5>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </DashboardCard>
+            </DashboardColumn>
             <!-- Column -->
             <!-- Column -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex flex-row">
-                            <div class="round round-lg align-self-center round-warning"><i
-                                    class="fas fa-clipboard-list"></i></div>
-                            <div class="m-l-10 align-self-center">
-                                <h3 class="m-b-0 font-lgiht">{{ total.pedidosDia }}</h3>
-                                <h5 class="text-muted m-b-0">Pedidos Hoje</h5>
+            <DashboardColumn variant="md">
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <div class="flex flex-row">
+                            <DashboardAvatar class="bg-inverse"><i class="fas fa-clipboard-list"></i>
+                            </DashboardAvatar>
+                            <div class="ml-3 self-center">
+                                <h3 class="mb-0 font-light text-xl">{{ total.pedidosSemana }}</h3>
+                                <h5 class="text-gray-400 font-medium mb-0">Pedidos na Semana</h5>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </DashboardCard>
+            </DashboardColumn>
             <!-- Column -->
-            <!-- <div class="col-lg-6 col-md-12">
-            <div class="card">
-                <img class="" src="/vendor/wrappixel/material-pro/4.1.0/assets/images/background/weatherbg.jpg" alt="Card image cap">
-                <div class="card-img-overlay" style="height:110px;">
-                    <h3 class="card-title text-white m-b-0 dl">{{clima.name}}-{{clima.state}}</h3>
-                    <div class="clearfix"></div>
-                    <small class="card-text text-white font-light" id="data">{{clima.data.date}}</small>
-                </div>
-                <div class="card-body weather-small">
-                    <div class="row">
-                        <div class="col-8 b-r align-self-center">
-                            <div class="d-flex">
-                                <div class="display-6 text-info"><i class="wi wi-day-rain-wind"></i></div>
-                                <div class="m-l-20">
-                                    <h1 class="font-light text-info m-b-0">{{clima.data.temperature}}<sup>0</sup></h1>
-                                    <small>{{clima.data.condition}}</small>
-                                </div>
+            <!-- Column -->
+            <DashboardColumn variant="md">
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <div class="flex flex-row">
+                            <DashboardAvatar class="bg-warning"><i class="fas fa-clipboard-list"></i>
+                            </DashboardAvatar>
+                            <div class="ml-3 self-center">
+                                <h3 class="mb-0 font-light text-xl">{{ total.pedidosDia }}</h3>
+                                <h5 class="text-gray-400 font-medium mb-0">Pedidos Hoje</h5>
                             </div>
                         </div>
-                        <div class="col-4 text-center">
-                            <h1 class="font-light m-b-0">25<sup>0</sup></h1>
-                            <small>Tonight</small>
-                        </div>
                     </div>
-                </div>
-            </div>
-        </div> -->
+                </DashboardCard>
+            </DashboardColumn>
         </div>
         <!-- Row -->
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
             <!-- Column -->
-            <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row p-t-10 p-b-10">
+            <DashboardColumn variant="lg">
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <div class="flex flex-wrap -mx-4 py-3">
                             <!-- Column -->
-                            <div class="col p-r-0">
-                                <h1 class="font-light">{{ total.pedidosPlataforma }}</h1>
-                                <h6 class="text-muted">Pedidos Através do Gerenciador</h6>
-                            </div>
+                            <DashboardColumn variant="base" class="pr-0 !bg-white">
+                                <h1 class="font-light">{{ total.percentualPlataforma }}</h1>
+                                <h6 class="text-gray-400 font-medium">Pedidos Através do Gerenciador</h6>
+                            </DashboardColumn>
                             <!-- Column -->
-                            <div class="col text-right align-self-center">
-                                <div :data-label="total.percentualPlataforma + '%'"
-                                    :class="'css-bar m-b-0 css-bar-info css-bar-' + total.percentualPlataforma"><i
-                                        class="fab fa-chrome"></i></div>
-                            </div>
+                            <DashboardColumn variant="base" class="text-right self-center !bg-white">
+                                <DashboardDonutChart :data="total.chartDataPlatform ? total.chartDataPlatform : []" />
+                            </DashboardColumn>
                         </div>
                     </div>
-                </div>
-            </div>
+                </DashboardCard>
+            </DashboardColumn>
             <!-- Column -->
             <!-- Column -->
-            <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row p-t-10 p-b-10">
+            <DashboardColumn variant="lg">
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <div class="flex flex-wrap -mx-4 py-3">
                             <!-- Column -->
-                            <div class="col p-r-0">
-                                <h1 class="font-light">{{ total.pedidosAndroid }}</h1>
-                                <h6 class="text-muted">Pedidos Através do App Android</h6>
-                            </div>
+                            <DashboardColumn variant="base" class="pr-0 !bg-white">
+                                <h1 class="font-light">{{ total.percentualAndroid }}</h1>
+                                <h6 class="text-gray-400 font-medium">Pedidos Através do App Android</h6>
+                            </DashboardColumn>
                             <!-- Column -->
-                            <div class="col text-right align-self-center">
-                                <div :data-label="total.percentualAndroid + '%'"
-                                    :class="'css-bar m-b-0 css-bar-success css-bar-' + total.percentualAndroid"><i
-                                        class="mdi mdi-android"></i></div>
-                            </div>
+                            <DashboardColumn variant="base" class="text-right self-center !bg-white">
+                                <DashboardDonutChart :data="total.chartDataAndroid ? total.chartDataAndroid : []" />
+                            </DashboardColumn>
                         </div>
                     </div>
-                </div>
-            </div>
+                </DashboardCard>
+            </DashboardColumn>
             <!-- Column -->
             <!-- Column -->
-            <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row p-t-10 p-b-10">
-                            <!-- Column -->
-                            <div class="col p-r-0">
-                                <h1 class="font-light">{{ total.pedidosIos }}</h1>
-                                <h6 class="text-muted">Pedidos Através do App IOS</h6>
-                            </div>
-                            <!-- Column -->
-                            <div class="col text-right align-self-center">
-                                <div :data-label="total.percentualIos + '%'"
-                                    :class="'css-bar m-b-0 css-bar-inverse css-bar-' + total.percentualIos"><i
-                                        class="mdi mdi-apple"></i></div>
-                            </div>
+            <DashboardColumn variant="lg">
+                <DashboardCard>
+                    <div class="flex-auto p-5">
+                        <div class="flex flex-wrap -mx-4 py-3">
+                            <DashboardColumn variant="base" class="pr-0 !bg-white">
+                                <h1 class="font-light">{{ total.percentualIOS }}</h1>
+                                <h6 class="text-gray-400 font-medium">Pedidos Através do App IOS</h6>
+                            </DashboardColumn>
+                            <DashboardColumn variant="base" class="text-right self-center !bg-white">
+                                <DashboardDonutChart :data="total.chartDataIos ? total.chartDataIos : []" />
+                            </DashboardColumn>
                         </div>
                     </div>
-                </div>
-            </div>
+                </DashboardCard>
+            </DashboardColumn>
             <!-- Column -->
         </div>
         <!-- Row -->
     </div>
 </template>
+
+<style lang="scss">
+// @import "../../assets/vendor/wrappixel/material-pro/4.1.0/material/scss/style.scss";
+// @import "../../assets/vendor/wrappixel/material-pro/4.1.0/material/scss/colors/blue.scss";
+// @import "../../assets/vendor/wrappixel/material-pro/4.1.0/material/scss/colors/blue-dark.scss";
+// @import "../../assets/vendor/wrappixel/material-pro/4.1.0/material/scss/colors/default.scss";
+// @import "../../assets/vendor/wrappixel/material-pro/4.1.0/material/scss/colors/default-dark.scss";
+// @import "../../assets/vendor/wrappixel/material-pro/4.1.0/material/scss/colors/green.scss";
+// @import "../../assets/vendor/wrappixel/material-pro/4.1.0/material/scss/colors/green-dark.scss";
+// @import "../../assets/vendor/wrappixel/material-pro/4.1.0/material/scss/colors/megna.scss";
+// @import "../../assets/vendor/wrappixel/material-pro/4.1.0/material/scss/colors/megna-dark.scss";
+// @import "../../assets/vendor/wrappixel/material-pro/4.1.0/material/scss/colors/purple.scss";
+// @import "../../assets/vendor/wrappixel/material-pro/4.1.0/material/scss/colors/purple-dark.scss";
+// @import "../../assets/vendor/wrappixel/material-pro/4.1.0/material/scss/colors/red.scss";
+// @import "../../assets/vendor/wrappixel/material-pro/4.1.0/material/scss/colors/red-dark.scss";
+</style>

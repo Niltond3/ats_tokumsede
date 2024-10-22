@@ -23,6 +23,12 @@ module.exports = {
         },
         extend: {
             colors: {
+                primary: '#7460ee',
+                success: '#26c6da',
+                info: '#1e88e5',
+                warning: '#ffb22b',
+                danger: '#fc4b6c',
+                inverse: '#2f3d4a',
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
                 ring: "hsl(var(--ring))",

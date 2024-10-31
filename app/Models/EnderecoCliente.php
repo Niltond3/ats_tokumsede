@@ -33,9 +33,9 @@ class EnderecoCliente extends Model
     const ATIVO = 1;
 	const INATIVO = 2;
 	const EXCLUIDO = 3;
-    public function cliente()
+    public function cliente(): BelongsTo
     {
-        return $this->BelongsTo(Cliente::class, 'idCliente');
+        return $this->belongsTo(Cliente::class, 'idCliente');
     }
 
 }

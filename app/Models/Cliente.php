@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\EnderecoCliente;
+use App\Models\Pedido;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\EnderecoCliente;
-
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Cliente extends Authenticatable
 {
@@ -78,15 +79,15 @@ class Cliente extends Authenticatable
     const EXCLUIDO = 3;
 
     //relacionamento UM para Muitos Inverso
-    public $appends = ['enderecos','pedidos'];
-    public function enderecos()
+    //public $appends = ['enderecos','pedidos'];
+    public function enderecos(): HasMany
     {
         return $this->hasMany(EnderecoCliente::class, 'idCliente')->where('status',1);
     }
 
-    public function pedidos()
+    public function pedidos(): HasManyThrough
     {
-        return $this->hasManyThrough('App\Models\Pedido', 'App\Models\EnderecoCliente', 'idCliente', 'idEndereco')->orderBy("pedido.id", "DESC")->limit(50)->with('distribuidor');
+        return $this->hasManyThrough(Pedido::class, EnderecoCliente::class, 'idCliente', 'idEndereco')->orderBy("pedido.id", "DESC")->limit(50)->with('distribuidor');
     }
     public function getEnderecosAttribute(){
         return $this->enderecos()->get();

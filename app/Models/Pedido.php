@@ -2,8 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Distribuidor;
+use App\Models\EnderecoCliente;
+use App\Models\Entregador;
+use App\Models\ItemPedido;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Pedido extends Model
 {
@@ -65,27 +71,27 @@ class Pedido extends Model
     const PLATAFORMA = 3;
 
     //RELACIONAMENTO
-    public function distribuidor()
+    public function distribuidor(): BelongsTo
     {
-        return $this->belongsTo('App\Models\Distribuidor', 'idDistribuidor');
+        return $this->belongsTo(Distribuidor::class, 'idDistribuidor');
     }
-    public function endereco()
+    public function endereco(): BelongsTo
     {
-        return $this->belongsTo('App\Models\EnderecoCliente', 'idEndereco')->with('cliente');
+        return $this->belongsTo(EnderecoCliente::class, 'idEndereco')->with('cliente');
     }
-    public function entregador()
+    public function entregador(): BelongsTo
     {
-        return $this->belongsTo('App\Models\Entregador', 'idEntregador');
+        return $this->belongsTo(Entregador::class, 'idEntregador');
     }
-    public function itens()
+    public function itens(): HasMany
     {
-        return $this->hasMany('App\Models\ItemPedido', 'idPedido');
+        return $this->hasMany(ItemPedido::class, 'idPedido');
     }
 
-    public function getClienteAttribute() {
+    public function getClienteAttribute(): mixed {
         return $this->endereco->cliente;
     }
-    // public function getRatingAttribute() {
-    //     return $this->endereco->rating;
-    // }
+    public function getRatingAttribute() {
+        return $this->endereco->rating;
+    }
 }

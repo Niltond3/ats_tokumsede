@@ -27,7 +27,7 @@ class RedirectIfAuthenticated
                 if($guard === 'cliente' && Route::is('cliente.*')) {
                     return Redirect::route('cliente.dashboard');
                 }else{
-                    return redirect()->route( 'dashboard');
+                    return redirect()->route( 'home');
                 }
             }
         }

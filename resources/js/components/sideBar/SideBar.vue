@@ -31,9 +31,10 @@ import {
             </SheetHeader>
             <div class="grid gap-4 py-4">
                 <SheetClose as-child>
-                    <Button href="home/listaclientes" class="" variant="link">
-                        clientes
-                    </Button>
+                    <RouterLink to="/">Dashboard</RouterLink>
+                </SheetClose>
+                <SheetClose as-child>
+                    <RouterLink to="/clientes">Clientes</RouterLink>
                 </SheetClose>
 
             </div>

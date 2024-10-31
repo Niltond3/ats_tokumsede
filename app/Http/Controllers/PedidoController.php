@@ -14,6 +14,9 @@ use App\Models\Preco;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use \Barryvdh\Debugbar\Facades\Debugbar;
+use Illuminate\database\query\JoinClause;
+
 
 
 class PedidoController extends Controller
@@ -1172,42 +1175,95 @@ class PedidoController extends Controller
     }
 
     function listaClientes(){
+        Debugbar::info('listaClientes');
         if (auth()->check()) {
-            $clientes = Cliente::select('id','nome','tipoPessoa','cpf','cnpj','precoAcertado','dddTelefone','telefone','outrosContatos','status','email','rating')
-                ->where('status',1)->with('enderecos');
-            return Datatables::of($clientes)
-                ->editColumn('nome', function(Cliente $cliente) {
-                    if($cliente->precoAcertado == 1){
-                        return '<i class="far fa-handshake"></i> '.$cliente->nome;
-                    }else{
-                        return $cliente->nome;
-                    }
-                })
-                ->editColumn('tipoPessoa', function(Cliente $cliente) {
-                    if($cliente->tipoPessoa == 1){
-                        return $cliente->cpf;
-                    }else{
-                        return $cliente->cnpj;
-                    }
-                })
-                ->editColumn('telefone', '({{$dddTelefone}}) {{$telefone}}')
-                ->addColumn('rating', function(Cliente $cliente) {
-                    if($cliente->rating > 0){
-                        return '<span class="badge badge-success">'.$cliente->rating.'</span>';
-                    }else if($cliente->rating == 0){
-                        return '<span class="badge badge-secondary">'.$cliente->rating.'</span>';
-                    }else if($cliente->rating < -2){
-                        return '<span class="badge badge-danger">'.$cliente->rating.'</span>';
-                    }else{
-                        return '<span class="badge badge-warning">'.$cliente->rating.'</span>';
-                    }
-                })
-                //->addColumn('endereco', '<button title="Endereços" id='.'{{$id}}'.' type="button" class="btn btn-circle btn-info"><i class="mdi mdi-map-marker-radius"></i></button>')
-                ->addColumn('endereco', function(Cliente $cliente) {
-                    return '<button title="Endereços" id="'.$cliente->id.'" name="'.$cliente->nome.'" value="'.$cliente->precoAcertado.'" type="button" class="btn btn-circle btn-info"><i class="mdi mdi-map-marker-radius"></i></button>';
-                })
-                ->rawColumns(['rating','endereco','nome'])
-                ->make(true);
+        Debugbar::info('auth()->check()');
+
+        // $enderecos = DB::table('enderecoCliente')
+        // ->select('id as idEndereco', 'logradouro', 'numero', 'bairro', 'complemento', 'cep', 'cidade', 'estado', 'referencia', 'apelido', 'atual', 'idCliente', 'latitude', 'longitude');
+
+// $users = DB::table('users')
+//         ->joinSub($latestPosts, 'latest_posts', function (JoinClause $join) {
+//             $join->on('users.id', '=', 'latest_posts.user_id');
+//         })->get();
+
+        // $enderecos = DB::table('enderecoCliente')
+        // ->select('id as idEndereco', 'logradouro', 'numero', 'bairro', 'complemento', 'cep', 'cidade', 'estado', 'referencia', 'apelido', 'atual', 'idCliente','idCliente', 'latitude', 'latitude')
+        // ->whereColumn('idCliente', 'cliente.id');
+
+        // ->select('id','nome','tipoPessoa','cpf','cnpj','precoAcertado','dddTelefone','telefone','outrosContatos','status','email','rating')
+
+        $clientes = Cliente::with('enderecos')
+               ->where('status',1)
+               ->select(['id','nome','tipoPessoa','cpf','cnpj','precoAcertado','dddTelefone','telefone','outrosContatos','status','email','rating'])
+               ->get();
+        return $clientes;
+
+       //$clientes = DB::table('cliente')
+       //->where('status',1)
+       //->get()->toArray();
+       //$enderecoCliente = DB::table('enderecoCliente')
+       //->where('status',1)
+       //->get()->toArray();
+       //foreach ($enderecoCliente as $endereco) {
+       //    foreach ($clientes as $cliente) {
+       //        if ($cliente->id == $endereco->idCliente ) {
+       //            if (!property_exists($cliente, 'enderecos')){
+       //                $cliente->enderecos = array();
+       //            }
+       //            array_push($cliente->enderecos, $endereco);
+       //            break;
+       //        }
+       //    }
+       //}
+       //return $clientes;
+
+        // ->join('enderecoCliente','cliente.id', '=', 'enderecoCliente.idCliente')
+        // ->select('cliente.*','enderecoCliente.id as idEndereco', 'logradouro', 'numero', 'bairro', 'complemento', 'cep', 'cidade', 'estado', 'referencia', 'apelido', 'atual', 'idCliente', 'latitude', 'longitude')
+        // ->get();
+
+        // ->joinSub($enderecos, 'enderecos',function (JoinClause $join) {
+        //     $join->on('cliente.id', '=', 'enderecos.idCliente')
+        //     ->where('cliente.status',1);
+        // })->get();
+
+        //->where('cliente.status',1);
+        //'cliente.id', '=', 'enderecoCliente.idCliente'
+
+            // return Datatables::of($clientes)
+            //     ->editColumn('nome', function(Cliente $cliente) {
+            //         if($cliente->precoAcertado == 1){
+            //             return '<i class="far fa-handshake"></i> '.$cliente->nome;
+            //         }else{
+            //             return $cliente->nome;
+            //         }
+            //     })
+            //     ->editColumn('tipoPessoa', function(Cliente $cliente) {
+            //         if($cliente->tipoPessoa == 1){
+            //             return $cliente->cpf;
+            //         }else{
+            //             return $cliente->cnpj;
+            //         }
+            //     })
+            //     ->editColumn('telefone', '({{$dddTelefone}}) {{$telefone}}')
+            //     ->addColumn('rating', function(Cliente $cliente) {
+            //         if($cliente->rating > 0){
+            //             return '<span class="badge badge-success">'.$cliente->rating.'</span>';
+            //         }else if($cliente->rating == 0){
+            //             return '<span class="badge badge-secondary">'.$cliente->rating.'</span>';
+            //         }else if($cliente->rating < -2){
+            //             return '<span class="badge badge-danger">'.$cliente->rating.'</span>';
+            //         }else{
+            //             return '<span class="badge badge-warning">'.$cliente->rating.'</span>';
+            //         }
+            //     })
+            //     //->addColumn('endereco', '<button title="Endereços" id='.'{{$id}}'.' type="button" class="btn btn-circle btn-info"><i class="mdi mdi-map-marker-radius"></i></button>')
+            //     ->addColumn('endereco', function(Cliente $cliente) {
+            //         return '<button title="Endereços" id="'.$cliente->id.'" name="'.$cliente->nome.'" value="'.$cliente->precoAcertado.'" type="button" class="btn btn-circle btn-info"><i class="mdi mdi-map-marker-radius"></i></button>';
+            //     })
+            //     ->rawColumns(['rating','endereco','nome'])
+            //     ->make(true);
+
         } else {
             return response('Sua sessão expirou. Por favor, refaça seu login.', 400);
         }

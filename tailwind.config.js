@@ -40,7 +40,7 @@ module.exports = {
                 },
                 secondary: {
                     DEFAULT: "hsl(var(--secondary))",
-                    foreground: "hsl(var(--secondary-foreground))",
+                    foreground: "#6c757d",
                 },
                 destructive: {
                     DEFAULT: "hsl(var(--destructive))",
@@ -101,7 +101,8 @@ module.exports = {
                 "clean-desktop": 'url("/images/bg-clean.png")',
             },
             transitionProperty: {
-                'width': 'width'
+                'width': 'width',
+                'max-height': 'max-height'
             },
         },
     },

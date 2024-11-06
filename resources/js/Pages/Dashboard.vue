@@ -4,9 +4,9 @@ import { DashboardCard, DashboardColumn, DashboardProgressBar, DashboardAvatar, 
 </script>
 
 <script>
-import { formatMoney } from './useFormatMoney';
+import { formatMoney } from '@/util';
 
-const [toCurrency] = formatMoney()
+const { toCurrency } = formatMoney()
 
 export default {
     data() {

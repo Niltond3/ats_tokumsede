@@ -57,7 +57,6 @@ Route::group(['prefix' => 'pedidos'], function(){
     Route::get('ultimoPedido', [PedidoController::class, 'ultimoPedido']);
     Route::get('listaClientes', [PedidoController::class, 'listaClientes']);
 });
-    //Route::get('/listaClientes', [PedidoController::class, 'listaClientes'])->name('pedido.listaClientes');
 });
 
 //PRODUTOS

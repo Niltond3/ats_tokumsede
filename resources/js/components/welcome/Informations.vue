@@ -77,7 +77,7 @@ const accordionItems = [
         <ul class="[&>li]:opacity-80 cursor-default [&_p]:text-blue-800 [&_p]:font-semibold flex flex-col gap-4 ">
             <li class="hover:opacity-100">
                 <p>Alcalinidade</p>
-                O seu pH de 8,5 facilita a condução dos nutrientes na circulação sanguínea, a eliminação de ácidos e o equilibrio dos radicais livres.
+                Com pH entre 8 e 10, facilita a condução dos nutrientes na circulação sanguínea, a eliminação de ácidos e o equilibrio dos radicais livres.
             </li>
             <li class="hover:opacity-100">
                 <p>Pureza</p>
@@ -104,13 +104,16 @@ const accordionItems = [
         subTitle: '+ Saúde + Leveza + Pureza',
         content: /*html*/`
         <p>
-            A água <span class="text-[#489BFB] font-bold">Alkalina Leve</span> é um hidratante alcalino onde na sua composição foi reduzido o teor de alguns sais, como sódio e potássio, para beneficiar aqueles consumidores que possam apresentar alguma restrição alimentar aos mesmos, bem como para favorecer aqueles que valorizam o prazer de beber e os adeptos das águas mais leves, mas que não abrem mão da qualidade do que consomem.
+            A água <span class="text-[#489BFB] font-bold">Alkalina Leve</span> é um hidratante alcalino onde na sua composição foi reduzido o teor de potássio, e zerado o sodio, para beneficiar aqueles consumidores que possam apresentar alguma restrição alimentar, bem como para favorecer aqueles que valorizam o prazer de beber e os adeptos das águas mais leves, mas que não abrem mão da qualidade do que consomem.
         </p>
         <p>
             Ao contrário das águas minerais, que em sua grande maioria só tem mineral no nome, o seu conteúdo de sais é superior a quase todas as marcas existentes no mercado, o que a classifica como sendo um dos melhores líquidos para aliviar a sua sede.
         </p>
         <p>
             Por ser muito leve e por ter o pH alcalino, a água <span class="text-[#489BFB] font-bold">Alkalina Leve</span> é simultâneamente uma excelente bebida e um verdadeiro isotônico que traz inúmeros benefícios ao seu corpo.
+        </p>
+        <p>
+            COMPOSIÇÃO
         </p>
         `
     },
@@ -149,13 +152,17 @@ const accordionItems = [
         value: 'alkalina-sport',
         title: 'Alkalina Sport',
         subTitle: '+ Eletrólitos + Antioxidantes + Energia',
-        content: `A Água Alcalina Tope, com pH 9.0 é um hidratante elaborado especialmente para o atleta, para o desportista, aquele que tem um trabalho extenuante e pra você que faz academia com regularidade. Sua formulação é composta por minerais de cálcio, magnésio e principalmente potássio que atua diretamente nos momentos de maior esforço físico, potencializando sua resistência ao desgaste natural dessa ação.
+        content: `A Água Alcalina Sport, com pH 10.0 é um hidratante elaborado especialmente para o atleta, para o desportista, aquele que tem um trabalho extenuante e pra você que faz academia com regularidade. Sua formulação é composta por minerais de cálcio, magnésio e principalmente potássio que atua diretamente nos momentos de maior esforço físico, potencializando sua resistência ao desgaste natural dessa ação.
         É no esporte, no trabalho pesado e na academia onde os músculos mais queimam energia. É no momento desse esforço que seu corpo mais precisa desses minerais para um melhor rendimento.
+
         1) O Cálcio O cálcio é quem te dá firmeza estrutural, na formação e renovação de toda sua massa óssea e articular.
 
         2) O Magnésio te dá precisão em todas as reações metabólicas que seu corpo exige para cada movimento.
 
-        3) O Potássio ativa a função cárdio-vascular, neuro-muscular, levando a energia necessária para cada reação.`
+        3) O Potássio ativa a função cárdio-vascular, neuro-muscular, levando a energia necessária para cada reação.
+
+
+        `
     },
 ]
 

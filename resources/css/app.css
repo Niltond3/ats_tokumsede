@@ -120,6 +120,10 @@
     }
 }
 
+.dtsp-titleRow {
+    opacity: 0;
+    pointer-events: none;
+}
 .icon>svg {
     fill: currentColor;
     align-self: center;
@@ -145,8 +149,6 @@
         --tw-ring-color: rgb(255 255 255 / var(--tw-ring-opacity));
         align-items: center;
         border-radius: 9999px;
-        box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
-        color: rgb(255 255 255 / var(--tw-text-opacity));
         -moz-column-gap: .5rem;
         column-gap: .5rem;
         display: inline-flex;

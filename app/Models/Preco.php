@@ -31,14 +31,14 @@ class Preco extends Model
     //RELACIONAMENTO
     public function distribuidor()
     {
-        return $this->belongsTo('App\Distribuidor', 'idDistribuidor');
+        return $this->belongsTo('App\Models\Distribuidor', 'idDistribuidor');
     }
     public function produto()
     {
-        return $this->belongsTo('App\Produto', 'idProduto');
+        return $this->belongsTo('App\Models\Produto', 'idProduto');
     }
     public function estoque()
     {
-        return $this->belongsTo('App\Estoque', 'idEstoque');
+        return $this->belongsTo('App\Models\Estoque', 'idEstoque');
     }
 }

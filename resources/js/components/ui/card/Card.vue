@@ -2,19 +2,16 @@
 import { cn } from "@/lib/utils";
 
 const props = defineProps({
-  class: { type: null, required: false },
+    class: { type: null, required: false },
 });
 </script>
 
 <template>
-  <div
-    :class="
-      cn(
-        'rounded-lg border bg-card text-card-foreground shadow-sm',
+    <div :class="cn(
+        'rounded-lg border border-slate-200 bg-card text-card-foreground shadow-sm',
         props.class,
-      )
-    "
-  >
-    <slot />
-  </div>
+    )
+        ">
+        <slot />
+    </div>
 </template>

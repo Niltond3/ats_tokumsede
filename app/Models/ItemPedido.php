@@ -21,11 +21,11 @@ class ItemPedido extends Model
     public $timestamps = false;
     public function produto()
     {
-        return $this->belongsTo('App\Produto', 'idProduto');
+        return $this->belongsTo('App\Models\Produto', 'idProduto');
     }
     public function pedido()
     {
-        return $this->belongsTo('App\Pedido', 'idPedido');
+        return $this->belongsTo('App\Models\Pedido', 'idPedido');
     }
 
 }

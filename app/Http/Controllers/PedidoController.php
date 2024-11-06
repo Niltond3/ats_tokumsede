@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 use \Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\database\query\JoinClause;
 
-
+date_default_timezone_set('America/Sao_Paulo');
 
 class PedidoController extends Controller
 {

@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-
+import { Toaster } from '@/components/ui/sonner'
 import ApplicationLogo from '@/components/ApplicationLogo.vue';
 import Dropdown from '@/components/Dropdown.vue';
 import DropdownLink from '@/components/DropdownLink.vue';
@@ -18,6 +18,7 @@ const showingNavigationDropdown = ref(false);
 </script>
 
 <template>
+    <Toaster richColors />
     <div>
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
             <div class="fixed w-full z-10 top-0">

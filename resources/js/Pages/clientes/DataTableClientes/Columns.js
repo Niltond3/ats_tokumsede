@@ -1,17 +1,16 @@
 import { h } from 'vue'
-import DataTableDropDown from './DataTableDropDown.vue'
-import DataTableHoverCard from './DataTableHoverCard.vue'
-import { ArrowUpDown, ChevronDown } from 'lucide-vue-next'
-import { removeEmptyValues, utf8Decode } from './DataTableUtil'
+import DropDownOrderActions from './DropDownOrderActions.vue'
+import { ArrowUpDown } from 'lucide-vue-next'
+import { utf8Decode } from '@/util'
 import { Button } from '@/components/ui/button'
 import {
     createColumnHelper,
 } from '@tanstack/vue-table'
 import DataTableNumberField from './DataTableNumberField.vue'
 import TableCell from './TableCell.vue'
-import { formatMoney } from '../useFormatMoney';
+import { formatMoney } from '@/util';
 
-const [toCurrency] = formatMoney()
+const { toCurrency } = formatMoney()
 /*
  {
     id: '728ed52f',
@@ -121,7 +120,7 @@ export const columns = [
         cell: ({ row }) => {
             const payment = row.original
 
-            return h('div', { class: 'relative' }, h(DataTableDropDown, {
+            return h('div', { class: 'relative' }, h(DropDownOrderActions, {
                 payment,
             }))
         },

@@ -23,13 +23,19 @@ function copy(id) {
             </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem @click="copy(payment.id)">
+            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+            <DropdownMenuItem class="gap-1" @click="copy(payment.id)">
+                <i class="ri-file-copy-fill"></i>
                 Copiar produto
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Editar Produto</DropdownMenuItem>
-            <DropdownMenuItem>Salvar Oferta</DropdownMenuItem>
+            <DropdownMenuItem class="gap-1">
+                <i class="ri-pencil-fill"></i>
+                Editar Produto
+            </DropdownMenuItem>
+            <DropdownMenuItem class="gap-1">
+                <i class="ri-save-3-fill"></i>
+                Salvar Oferta
+            </DropdownMenuItem>
             <DropdownMenuItem>Visualizar</DropdownMenuItem>
         </DropdownMenuContent>
     </DropdownMenu>

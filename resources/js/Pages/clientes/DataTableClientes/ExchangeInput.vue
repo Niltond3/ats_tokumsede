@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Input } from '@/components/ui/input'
-import { formatMoney } from '../useFormatMoney'
-const [_, config] = formatMoney()
+import { formatMoney } from '@/util'
+const { config } = formatMoney()
 
 const emits = defineEmits(['update:exchange']);
 

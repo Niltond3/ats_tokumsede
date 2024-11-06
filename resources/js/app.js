@@ -13,6 +13,7 @@ import VueTheMask from "vue-the-mask";
 import money from 'v-money3'
 import VueGoogleMaps from "@fawmi/vue-google-maps";
 import jQuery from "jquery";
+
 window.$ = window.jQuery = jQuery;
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";

@@ -14,6 +14,7 @@ import { dialogState } from '../useToggleDialog'
 import DialogEditOrder from './DialogEditOrder.vue'
 import DialogShowOrder from './DialogShowOrder.vue'
 import DialogConfirmAction from '../DialogConfirmAction.vue'
+import { utf8Decode } from '@/util'
 
 const [_, toggleDialogEditOrder] = dialogState();
 
@@ -69,9 +70,7 @@ const handleCancelar = (reson) => {
 }
 
 const handleToggleEditOrder = () => toggleDialogEditOrder()
-function handleCopyOrder() {
-    navigator.clipboard.writeText(props.payloadData)
-}
+
 </script>
 
 <template>
@@ -88,10 +87,6 @@ function handleCopyOrder() {
             <DropdownMenuItem class="cursor-pointer" @click="handleToggleEditOrder()">
                 <i class="ri-pencil-fill"></i>
                 <DialogEditOrder :payloadData="props.payloadData" />
-            </DropdownMenuItem>
-            <DropdownMenuItem class="cursor-pointer" @click="handleCopyOrder()">
-                <i class="ri-file-copy-2-fill"></i>
-                Copiar Pedido
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuSub>

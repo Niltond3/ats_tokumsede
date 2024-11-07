@@ -105,7 +105,8 @@ const handlePayForm = (value) => setPayload({ ...payload.value, formaPagamento: 
 
 const handleScheduling = (value) => {
     if (value) {
-        const dataAgendada = `${value.getDate()}-${value.getMonth(2) + 1}-${value.getFullYear()}`
+        console.log(value.toISOString().split('T')[0])
+        const dataAgendada = value.toISOString().split('T')[0]
         const horaInicio = `${value.getHours(2)}:${value.getMinutes(2)}:00`
         setPayload({ ...payload.value, agendado: 1, dataAgendada, horaInicio })
         return

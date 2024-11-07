@@ -35,8 +35,10 @@ onMounted(async () => {
     const phoneMatch = phone.replace(/\D/g, '').match(phoneRegex)
     const cepMatch = postalCode.replace(/\D/g, '').match(cepRegex) || []
 
-    const status = getStatusString(response.data.agendado, response.data.dataAgendada, response.data.status)
+    const status = getStatusString(response.data.agendado, response.data.dataAgendada, response.data.horaInicio, response.data.status)
     const reason = response.data.retorno
+
+    console.log(status)
 
     const details = [
         { classColor: '', classIcon: 'ri-calendar-fill', label: 'Horário Criação', data: response.data.horarioPedido, author: response.data.administrador },

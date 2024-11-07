@@ -1,10 +1,13 @@
+import { dateToISOFormat } from "@/util";
 
-export const getStatusString = (agendado, dataAgendada, status) => {
+export const getStatusString = (agendado, dataAgendada, horaInicio, status) => {
 
+    const dateIso = dateToISOFormat(`${dataAgendada} ${horaInicio}`)
     const currentDate = new Date();
-    const scheduleDate = new Date(dataAgendada);
+    const scheduleDate = new Date(dateIso);
 
-    const statusKey = ((agendado === 1) && (currentDate < scheduleDate)) ? 9 : status
+
+    const statusKey = ((agendado == 1) && (currentDate < scheduleDate)) ? 9 : status
 
     const statusString = {
         1: {
@@ -75,7 +78,7 @@ export const getStatusString = (agendado, dataAgendada, status) => {
             label: 'Agendado',
             classes: {
                 bg: 'bg-muted',
-                text: 'text-muted',
+                text: 'text-gray-400',
                 icon: 'ri-calendar-schedule-fill'
             }
         }

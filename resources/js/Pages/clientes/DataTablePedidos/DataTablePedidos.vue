@@ -12,6 +12,7 @@ import 'datatables.net-select-dt';
 import { utf8Decode } from '../../../util';
 import DropDownPedidos from './DropDownPedidos.vue';
 import { getStatusString } from './utils';
+import { dateToISOFormat } from "@/util";
 
 DataTable.use(DataTablesLib);
 
@@ -52,12 +53,22 @@ const loadTableData = async () => {
 
     entregadores.value = response.data[7];
 
-
     const concatArray = [...response.data[0], ...response.data[1], ...response.data[2], ...response.data[3], ...response.data[4]]
 
+    const scheduledOrders = response.data[5].filter((pedido, index, self) => {
+        const fid = concatArray.find(p => {
+            const dateIso = dateToISOFormat(`${p.dataAgendada} ${p.horaInicio}`)
+            const currentDate = new Date();
+            const scheduleDate = new Date(dateIso);
+            return p.id === pedido.id && currentDate >= scheduleDate
+        })
+        if (fid === undefined) return pedido
+    })
 
-    const newData = concatArray.map(pedido => {
-        const status = getStatusString(pedido.agendado, pedido.dataAgendada, pedido.status)
+    const orders = [...concatArray, ...scheduledOrders]
+
+    const newData = orders.map(pedido => {
+        const status = getStatusString(pedido.agendado, pedido.dataAgendada, pedido.horaInicio, pedido.status)
 
         const distribuidorNome = utf8Decode(pedido.distribuidor.nome)
         const clienteNome = utf8Decode(pedido.cliente.nome)
@@ -74,6 +85,7 @@ const loadTableData = async () => {
             }
         }
     })
+    console.log(newData)
     data.value = newData
 }
 

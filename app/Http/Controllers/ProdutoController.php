@@ -324,7 +324,7 @@ class ProdutoController extends Controller
                     ])
                     ->where(function ($query) {
                         $query->where('preco.inicioValidade', '=', NULL)
-                            ->orWhereRaw('preco.inicioValidade', '<=', DB::raw('curdate()'));
+                            ->orWhere('preco.inicioValidade', '<=', DB::raw('curdate()'));
                     })
                     ->where(function ($query) {
                         $query->where('preco.fimValidade', '=', NULL)

@@ -1,11 +1,18 @@
 <script setup>
+import { usePage } from '@inertiajs/vue3';
 import { getClientFormat } from '@/Pages/clientes/utils';
 import { RiEyeFill as EyeIcon, RiEyeCloseFill as EyeOffIcon } from 'vue-remix-icons';
 import { Checkbox } from '@/components/ui/checkbox'
 import { FormLabel, FormControl, FormMessage, FormItem, FormField, FormDescription } from '@/components/ui/form'
 import { Separator } from '@/components/ui/separator'
 import { Toggle } from '@/components/ui/toggle'
+import { toast } from 'vue-sonner';
+import { isEmptyObject } from 'jquery';
 
+const page = usePage()
+const { tipoAdministrador } = page.props.auth.user
+
+console.log(tipoAdministrador)
 
 const { values } = defineProps({ values: Object })
 
@@ -39,13 +46,40 @@ const newAddressValues = JSON.parse(JSON.stringify({
 
 const interatedValues = !values.tipoPessoa ? newDetailsValues : CNPJ ? { ...newDetailsValues, CNPJ: values.tipoPessoa } : { ...newDetailsValues, CPF: values.tipoPessoa }
 
-console.log(interatedValues)
-//[-webkit-text-security: disc !important;]
+function handleCopyClient() {
+    const payload = { ...newDetailsValues, ...newAddressValues }
+    const clipboard = `
+    ${!isEmptyObject(newDetailsValues) ? '------------- detalhes -------------' : ''}
+    ${payload.nome ? 'Nome: ' + payload.nome : ''}
+    ${payload.telefone ? 'Telefone: ' + payload.telefone : ''}
+    ${payload.senha ? 'Senha: ' + payload.senha : ''}
+    ${payload.sexo ? 'Sexo: ' + payload.sexo : ''}
+    ${payload.email ? 'Email: ' + payload.email : ''}
+    ------------- endereço -------------
+    ${payload.cep ? 'CEP: ' + payload.cep : ''}
+    Cidade: ${payload.cidade}
+    ${payload.estado !== null ? 'Estado: ' + payload.estado : ''}
+    ${payload.apelido ? 'Apelido: ' + payload.apelido : ''}
+    Logradouro: ${payload.logradouro}
+    Número: ${payload.numero}
+    Bairro: ${payload.bairro}
+    ${payload.complemento ? 'Complemento: ' + payload.complemento : ''}
+    ${payload.referencia ? 'Referência: ' + payload.referencia : ''}
+    ${payload.observacao ? 'Observação: ' + payload.observacao : ''}
+    `.replace(/(^[ \t]*\n)/gm, "")
+    console.log(clipboard)
+
+    navigator.clipboard.writeText(clipboard)
+    toast.info('Copiado para a área de transferência')
+}
+
 </script>
 
 <template>
     <section>
-        <div id="v-for-object" class="gap-3 flex flex-col p-4 text-sm capitalize  ">
+        <div id="v-for-object" class="relative gap-3 flex flex-col p-4 text-sm capitalize  ">
+            <button class="group absolute right-0 -top-1" @click="handleCopyClient"><i
+                    class="ri-file-copy-fill opacity-75 group-hover:opacity-100 transition-all text-xl text-info "></i></button>
             <div v-for="(value, key) in interatedValues"
                 class="flex items-center gap-4 cursor-pointer opacity-70 hover:opacity-100 ">
                 <span class="flex h-2 w-2 rounded-full bg-sky-500 " />
@@ -70,15 +104,17 @@ console.log(interatedValues)
             </div>
         </div>
         <FormField v-slot="{ value, handleChange }" type="checkbox" name="validateInformations">
-            <FormItem class="flex flex-row items-start gap-x-3 space-y-0 rounded-md border p-4">
+            <FormItem class="flex flex-row items-start gap-x-3 space-y-0 rounded-md border p-4  border-input">
                 <FormControl>
-                    <Checkbox :checked="value" @update:checked="handleChange" />
+                    <Checkbox :checked="value" @update:checked="handleChange"
+                        class="data-[state=checked]:bg-info border-info" />
                 </FormControl>
                 <div class="space-y-1 leading-none">
-                    <FormLabel>Todos os dados estão corretos!</FormLabel>
+                    <FormLabel class="font-semibold text-info">Todos os dados estão corretos!</FormLabel>
                     <FormDescription>
-                        Após confirmar você poderá alterar todos os seus dados no menú configurações ou entrando em
-                        contato com nossos atendentes pelo <a href="/examples/forms">whatsapp</a>.
+                        Após confirmar você poderá alterar todos os dados no menu configurações <span
+                            v-if="tipoAdministrador !== 'Administrador'"> ou entrando em contato com nossos atendentes
+                            pelo <a href="/examples/forms">whatsapp</a></span>.
                     </FormDescription>
                     <FormMessage />
                 </div>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -13,18 +13,27 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { dialogState } from '../useToggleDialog'
+import { dialogState } from '../../useToggleDialog'
 
 const [isOpen, toggleDialog] = dialogState()
 
-const orderNote = ref('');
 
 const emit = defineEmits(['callback:orderNote'])
 
+const props = defineProps(['orderNote'])
+
+const note = ref(props.orderNote);
+
+
 const handleClick = () => {
-    emit('callback:orderNote', orderNote.value)
+    emit('callback:orderNote', note.value)
     toggleDialog()
 }
+
+watch(() => props.orderNote, (newValue) => {
+    note.value = newValue
+})
+
 
 </script>
 
@@ -36,13 +45,16 @@ const handleClick = () => {
                 <i class="ri-sticky-note-add-fill text-white "></i>
             </button>
         </DialogTrigger>
-        <DialogContent class="sm:max-w-[425px]">
-            <DialogHeader class="flex flex-row text-info items-center gap-2">
-                <i class="ri-sticky-note-fill text-3xl"></i>
-                <DialogTitle>Observações do Pedido</DialogTitle>
+        <DialogContent class="sm:max-w-[440px]">
+            <DialogHeader class="text-info ">
+                <div class="flex flex-row items-center gap-2">
+                    <i class="ri-sticky-note-fill text-3xl" />
+                    <DialogTitle>Observações</DialogTitle>
+                </div>
+                <DialogDescription>Adicione uma observação para o pedido</DialogDescription>
             </DialogHeader>
             <Textarea class="border rounded-md border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
-                v-model:model-value="orderNote"></Textarea>
+                v-model:model-value="note"></Textarea>
             <DialogFooter>
                 <Button type="submit" @click="handleClick"
                     class="border-none rounded-xl px-4 py-2 text-base font-semibold bg-info/80 hover:bg-info/100 transition-all">

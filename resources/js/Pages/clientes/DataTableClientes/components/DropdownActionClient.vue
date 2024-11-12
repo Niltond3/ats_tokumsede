@@ -9,14 +9,14 @@ import {
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { MoreVertical } from 'lucide-vue-next'
-import DialogConfirmAction from '../DialogConfirmAction.vue'
+import DialogConfirmAction from '../../DialogConfirmAction.vue'
 
 const props = defineProps({
     payloadData: { type: null, required: true },
     dataTable: { type: null, required: true },
 })
 
-const { rowData: {id: idCliente}, } = props.payloadData
+const { rowData: { id: idCliente }, } = props.payloadData
 
 function copy() {
     navigator.clipboard.writeText(props.payloadData)
@@ -43,7 +43,7 @@ const renderToast = (promise, status) => {
     });
 }
 
-const handleStatusClientChange = ({id, status}) => {
+const handleStatusClientChange = ({ id, status }) => {
     var url = `clientes/${idCliente}`
     const response = axios.put(url, { status: id })
     renderToast(response, status)
@@ -62,7 +62,8 @@ const handleStatusClientChange = ({id, status}) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" class="border border-slate-200">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <DropdownMenuItem class="gap-2 text-muted-foreground cursor-pointer" @click="() => props.dataTable.ajax.reload()">
+            <DropdownMenuItem class="gap-2 text-muted-foreground cursor-pointer"
+                @click="() => props.dataTable.ajax.reload()">
                 <i class="ri-eye-fill text-info"></i>
                 Visualizar Cliente
             </DropdownMenuItem>
@@ -77,8 +78,13 @@ const handleStatusClientChange = ({id, status}) => {
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                     <DropdownMenuSubContent>
-                        <DialogConfirmAction @on:confirm="()=> handleStatusClientChange({id:2,status:'inativado'})" dialog-description="Deseja realmente inativar o cliente?" dialog-title="Inativar Cliente" trigger-icon="ri-pause-circle-fill" trigger-label="Inativar Cliente" variant="warning"/>
-                        <DialogConfirmAction @on:confirm="()=> handleStatusClientChange({id:3,status:'excluido'})" dialog-description="Deseja realmente Excluir o cliente?" dialog-title="Excluir Cliente" trigger-icon="ri-delete-bin-6-fill" trigger-label="Excluir Cliente" variant="danger"/>
+                        <DialogConfirmAction
+                            @on:confirm="() => handleStatusClientChange({ id: 2, status: 'inativado' })"
+                            dialog-description="Deseja realmente inativar o cliente?" dialog-title="Inativar Cliente"
+                            trigger-icon="ri-pause-circle-fill" trigger-label="Inativar Cliente" variant="warning" />
+                        <DialogConfirmAction @on:confirm="() => handleStatusClientChange({ id: 3, status: 'excluido' })"
+                            dialog-description="Deseja realmente Excluir o cliente?" dialog-title="Excluir Cliente"
+                            trigger-icon="ri-delete-bin-6-fill" trigger-label="Excluir Cliente" variant="danger" />
                     </DropdownMenuSubContent>
                 </DropdownMenuPortal>
             </DropdownMenuSub>

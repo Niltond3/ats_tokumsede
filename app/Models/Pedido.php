@@ -55,9 +55,9 @@ class Pedido extends Model
     const CANCELADO_NAO_LOCALIZADO = 3;
     const CANCELADO_TROTE = 4;
     const RECUSADO = 5;
-    const ACEITO = 8;
     const DESPACHADO = 6;
     const ENTREGUE = 7;
+    const ACEITO = 8;
     //FORMA_PAGAMENTO
     const OUTROS = 0;
     const DINHEIRO = 1;

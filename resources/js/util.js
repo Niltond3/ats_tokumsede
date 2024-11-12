@@ -1,12 +1,12 @@
 
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { ref } from 'vue';
-import { format } from 'v-money3';
+import { format, unformat } from 'v-money3';
 
 export function cn(...inputs) {
     return twMerge(clsx(inputs))
 }
+
 
 export function valueUpdater(updaterOrValue, ref) {
     ref.value = typeof updaterOrValue === 'function'
@@ -29,6 +29,24 @@ export function utf8Decode(utf8String) {
                 | c.charCodeAt(1) & 0x3f);
         });
     return unicodeString;
+}
+
+export function dateToDayMonthYearFormat(date) {
+    const YYYY = date.getFullYear();
+    const unformattedMonth = date.getMonth() + 1;
+    const unformattedDay = date.getDate();
+    const unformattedHour = date.getHours();
+    const unformattedMinutes = date.getMinutes();
+
+    const dd = unformattedDay < 10 ? `0${unformattedDay}` : unformattedDay
+    const MM = unformattedMonth < 10 ? `0${unformattedMonth}` : unformattedMonth
+    const hh = unformattedHour < 10 ? `0${unformattedHour}` : unformattedHour
+    const mm = unformattedMinutes < 10 ? `0${unformattedMinutes}` : unformattedMinutes
+
+    return {
+        date: `${dd}/${MM}/${YYYY}`,
+        time: `${hh}:${mm}:00`
+    }
 }
 
 // A data passada deve estar no padrão:
@@ -76,8 +94,53 @@ export const formatMoney = () => {
         shouldRound: true,
         focusOnRight: false,
     };
-
     const toCurrency = value => format(value, config);
 
-    return { toCurrency, config };
+    const toFloat = value => unformat(value, config);
+
+    return { toCurrency, toFloat, config };
 };
+
+function getRandomChar(str) {
+    return str.charAt(Math.floor(Math.random() * str.length));
+}
+
+const shuffle = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        let temp = array[i];
+        let temp2 = array[j];
+
+        [temp, temp2] = [temp2, temp];
+    }
+    return array;
+};
+
+export function generatePassword(options) {
+    const groups = options?.groups ?? [
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'abcdefghijklmnopqrstuvwxyz',
+        '1234567890',
+    ];
+    const length = options?.length ?? 8;
+    let pass = groups.map(getRandomChar).join('');
+
+    const str = groups.join('');
+
+    for (let i = pass.length; i <= length; i++) {
+        pass += getRandomChar(str)
+    }
+    return shuffle(pass);
+}
+
+export const isObjectEmpty = (objectName) => Object.keys(objectName).length === 0
+
+// // Tests
+// console.log('Running tests...');
+// for (let i = 0; i < 1e5; ++i) {
+//     const pass = generatePassword();
+//     if (!/[A-Z]/.test(pass) || !/[a-z]/.test(pass) || !/[0-9]/.test(pass) || !/[!@#$%^&()_+~`|}{[\]:;?><,./-=]/.test(pass)) {
+//         console.log('generatePassword() failed with: ' + pass);
+//     }
+// }
+// console.log('Tests finished');

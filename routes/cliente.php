@@ -70,7 +70,7 @@ Route::prefix('cliente')->name('cliente.')->group(function (){
                     ->name('logout');
 
                     //PRODUTOS
-Route::prefix('produtos')->name('produtos.')->group(function(){
+    Route::prefix('produtos')->name('produtos.')->group(function(){
     Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class, 'listarProdutos']);
     Route::get('{idEnderecoCliente}', [ProdutoController::class, 'show']);
 });

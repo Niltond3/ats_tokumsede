@@ -10,19 +10,17 @@ import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { MoreVertical } from 'lucide-vue-next'
 import DialogSelectDeliveryMan from './DialogSelectDeliveryMan.vue'
-import { dialogState } from '../useToggleDialog'
 import DialogEditOrder from './DialogEditOrder.vue'
 import DialogShowOrder from './DialogShowOrder.vue'
 import DialogConfirmAction from '../DialogConfirmAction.vue'
-import { utf8Decode } from '@/util'
-
-const [_, toggleDialogEditOrder] = dialogState();
 
 const props = defineProps({
     payloadData: { type: null, required: true },
     entregadores: { type: null, required: true },
     loadTable: { type: Function, required: true },
 })
+
+const emit = defineEmits(['callback:edited-order'])
 
 const { id: idPedido, } = props.payloadData
 
@@ -37,7 +35,6 @@ const renderToast = (promise, status) => {
         loading: 'Aguarde...',
 
         success: (data) => {
-            console.log(data)
             props.loadTable()
             return markRaw(CustomDiv('sucesso', `O pedido ${idPedido} foi ${status} com sucesso!`));
         },
@@ -69,12 +66,11 @@ const handleCancelar = (reson) => {
     renderToast(promise, 'Cancelado')
 }
 
-const handleToggleEditOrder = () => toggleDialogEditOrder()
-
+const handleEditOrder = () => emit('callback:edited-order')
 </script>
 
 <template>
-    <DropdownMenu :modal="false">
+    <DropdownMenu>
         <DropdownMenuTrigger as-child>
             <Button variant="ghost" class="transition-colors text-cyan-700 p-0">
                 <span class="sr-only">Abrir Menú</span>
@@ -84,10 +80,7 @@ const handleToggleEditOrder = () => toggleDialogEditOrder()
         <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
             <DialogShowOrder :order-id="idPedido" />
-            <DropdownMenuItem class="cursor-pointer" @click="handleToggleEditOrder()">
-                <i class="ri-pencil-fill"></i>
-                <DialogEditOrder :payloadData="props.payloadData" />
-            </DropdownMenuItem>
+            <DialogEditOrder :order-id="idPedido" @callback:edit-order="handleEditOrder" />
             <DropdownMenuSeparator />
             <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
@@ -99,7 +92,9 @@ const handleToggleEditOrder = () => toggleDialogEditOrder()
                         <DialogSelectDeliveryMan @on:delivery-man-selected="handleDespachar"
                             :entregadores="entregadores" />
                         <DropdownMenuItem class="cursor-pointer" @click="handleEntregar()">Entregar</DropdownMenuItem>
-                        <DialogConfirmAction @on:confirm="handleCancelar" dialog-title="Cancelar Pedido" trigger-icon="ri-close-circle-fill" trigger-label="Cancelar" variant="danger" :text-reson="true"/>
+                        <DialogConfirmAction @on:confirm="handleCancelar" dialog-title="Cancelar Pedido"
+                            trigger-icon="ri-close-circle-fill" trigger-label="Cancelar" variant="danger"
+                            :text-reson="true" />
                     </DropdownMenuSubContent>
                 </DropdownMenuPortal>
             </DropdownMenuSub>

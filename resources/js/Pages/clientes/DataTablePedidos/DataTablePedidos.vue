@@ -1,7 +1,6 @@
 <script setup>
 import axios from 'axios';
 import { ref, onMounted, defineProps } from 'vue';
-import Button from '@/components/Button.vue';
 import DataTable from 'datatables.net-vue3';
 import DataTablesLib from 'datatables.net';
 import languagePtBR from './dataTablePtBR.mjs';
@@ -11,7 +10,7 @@ import 'datatables.net-searchpanes-dt';
 import 'datatables.net-select-dt';
 import { utf8Decode } from '../../../util';
 import DropDownPedidos from './DropDownPedidos.vue';
-import { getStatusString } from './utils';
+import { getStatusString } from '../utils';
 import { dateToISOFormat } from "@/util";
 
 DataTable.use(DataTablesLib);
@@ -85,7 +84,7 @@ const loadTableData = async () => {
             }
         }
     })
-    console.log(newData)
+
     data.value = newData
 }
 
@@ -173,7 +172,8 @@ const badgeClasses = 'font-normal inline-block px-2 text-[75%] text-center white
     <DataTable class="display [&_thead]:bg-info [&_thead]:text-[#F3F9FD]" :columns="columns" :data="data"
         :options="options" ref="table" language="language">
         <template #action="data">
-            <DropDownPedidos :payloadData="data.rowData" :entregadores="entregadores" :loadTable="loadTableData" />
+            <DropDownPedidos :payloadData="data.rowData" :entregadores="entregadores" :loadTable="loadTableData"
+                @callback:edited-order="() => loadTableData()" />
         </template>
         <template #rating="data">
             <span v-if="data.rowData.cliente.rating > 0" :class="badgeClasses" class="bg-success">

@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Head } from '@inertiajs/vue3';
-import { useClientFormat } from "@/useClientFormat";
+import { getClientFormat } from "@/Pages/clientes/utils";
 import { RiLoginBoxLine as LoginIcon } from "vue-remix-icons";
 import { CheckIcon, CircleIcon, DotIcon } from '@radix-icons/vue'
 import { useForm } from 'vee-validate'
@@ -12,8 +12,8 @@ import * as z from 'zod'
 import { Form } from '@/components/ui/form'
 import { Stepper, StepperDescription, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from '@/components/ui/stepper'
 import Button from '@/components/Button.vue';
-import PersonalDetails from '../components/personalDetails.vue';
 import axios from 'axios';
+import PersonalDetails from '../components/personalDetails.vue';
 import AdressDetails from '../components/adressDetails.vue';
 import ConfirmClient from '../components/confirmClient.vue';
 
@@ -94,32 +94,8 @@ const steps = [
     },
 ]
 
-const { getTipoPessoaPayload } = useClientFormat();
+const { getTipoPessoaPayload } = getClientFormat();
 
-/*
-
-nome: $("#formCliente_Nome").val(),
-sexo: $("#formCliente_Sexo").val(),
-dataNascimento: $("#formCliente_DataNascimento").val(),
-tipoPessoa: $("#formCliente_TipoPessoa").val(),
-cnpj: $("#formCliente_Cnpj").val().replace(/\D+/g, ''),
-cpf: $("#formCliente_Cpf").val().replace(/\D+/g, ''),
-logradouro: $("#formCliente_Logradouro").val(),
-numero: $("#formCliente_Numero").val(),
-bairro: $("#formCliente_Bairro").val(),
-complemento: $("#formCliente_Complemento").val(),
-cep: $("#formCliente_Cep").val(),
-cidade: $("#formCliente_Cidade").val(),
-estado: $("#formCliente_Estado").val(),
-referencia: $("#formCliente_Referencia").val(),
-apelido: $("#formCliente_Apelido").val(),
-observacao: $("#formCliente_Observacao").val(),
-telefone: $("#formCliente_Telefone").val(),
-outrosContatos: $("#formCliente_Outros").val(),
-email: $("#formCliente_Email").val(),
-senha: $("#formCliente_Senha").val()
-
-*/
 
 const onSubmit = (values) => {
     const phoneRaw = values.telefone.replace(/\D/g, '')

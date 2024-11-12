@@ -58,6 +58,7 @@
         "radix-vue": "^1.9.6",
         "remixicon": "^4.5.0",
         "tailwind-merge": "^2.5.2",
+        "tailwind-scrollbar": "^3.1.0",
         "tailwindcss-animate": "^1.0.7",
         "v-mask": "^2.3.0",
         "v-money3": "^3.24.1",

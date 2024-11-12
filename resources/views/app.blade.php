@@ -13,6 +13,9 @@
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD3A65oIloNfr-TA3EK8vERo2nnWEi1fxg&loading=async&libraries=places">
+        </script>
+
         <!-- Styles -->
 
 	   <!--  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.min.css">

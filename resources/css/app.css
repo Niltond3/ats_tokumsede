@@ -91,11 +91,16 @@
   body {
     @apply bg-background text-foreground;
     --tw-text-opacity: 1;
-    color: rgb(55 65 81 / var(--tw-text-opacity));
     font-family: var(--ats-font-family), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     font-size: 1rem;
     line-height: 1.5rem;
   }
+
+  tr td {
+    color: rgb(107 114 128 / var(--tw-text-opacity));
+  }
+
+  
 
   h1,h2,h3,h4,h5,h6 {
     font-size: inherit;

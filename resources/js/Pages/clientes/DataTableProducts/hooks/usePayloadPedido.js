@@ -2,7 +2,7 @@ import { ref } from 'vue';
 
 export const payloadPedido = () => {
     const payload = ref({
-        formaPagamento: 0,
+        formaPagamento: '1',
         trocoPara: 0,
         agendado: 0,
         dataAgendada: '',

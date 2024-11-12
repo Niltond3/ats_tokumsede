@@ -5,16 +5,8 @@ import { useForwardPropsEmits } from "radix-vue";
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { columns } from './Columns'
-import DataTableProducts from './DataTableProducts.vue'
+import { DataTableProducts } from '../../DataTableProducts/'
 import { utf8Decode } from '@/util';
 import { toast } from 'vue-sonner'
 
@@ -24,6 +16,7 @@ const props = defineProps({
     idClienteAddress: { type: String, required: false },
     setTab: { type: Function, required: true },
 });
+
 const emits = defineEmits(["update:modelValue"]);
 
 const forwarded = useForwardPropsEmits(props, emits);
@@ -33,6 +26,7 @@ const CustomDiv = (title, description) => defineComponent({
         return () => h('div', { class: 'flex flex-col' }, title, h('span', { class: 'text-xs opacity-80' }, description))
     }
 })
+
 
 const renderToast = (promise) => {
     toast.promise(promise, {
@@ -48,15 +42,16 @@ const renderToast = (promise) => {
     });
 }
 
-const tableData = ref([])
 const createOrderData = ref()
 const whenDialogOpen = async () => {
     const url = `produtos/${props.idClienteAddress}`
-    const response = await axios.get(url)
-    console.log(response.data)
+    const responseOrder = await axios.get(url)
+    const { data: orderData } = responseOrder
 
-    const responseDistributor = response.data[1];
-    const responseAddress = response.data[2];
+    console.log(orderData)
+
+    const responseDistributor = orderData[1];
+    const responseAddress = orderData[2];
     const address = {
         ...responseAddress,
         "logradouro": utf8Decode(responseAddress.logradouro),
@@ -74,11 +69,11 @@ const whenDialogOpen = async () => {
     }
 
     createOrderData.value = {
-        products: response.data[0],
+        products: orderData[0],
         distributor,
         address,
-        distributorExpedient: response.data[6],
-        distributorTaxes: response.data[4],
+        distributorExpedient: orderData[6],
+        distributorTaxes: orderData[4],
     }
 }
 
@@ -90,15 +85,16 @@ const handleDialogOpen = () => {
 const handleRealizarPedido = (payload) => {
     var url = "pedidos";
     const response = axios.post(url, payload)
+    console.log(payload)
     renderToast(response)
 }
+
 </script>
 
 <template>
     <Dialog v-bind="forwarded" :open="handleDialogOpen()" @update:open="(op) => toggleDialog()">
         <DialogContent class="sm:max-w-3xl">
-            <DataTableProducts :columns="columns" :table-data="tableData" :create-order-data="createOrderData"
-                @callback:payload-pedido="handleRealizarPedido" />
+            <DataTableProducts :create-order-data="createOrderData" @callback:payload-pedido="handleRealizarPedido" />
         </DialogContent>
     </Dialog>
 </template>

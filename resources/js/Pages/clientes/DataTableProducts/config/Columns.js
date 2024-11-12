@@ -1,25 +1,13 @@
 import { h } from 'vue'
-import DropDownOrderActions from './DropDownOrderActions.vue'
 import { ArrowUpDown } from 'lucide-vue-next'
 import { utf8Decode } from '@/util'
 import { Button } from '@/components/ui/button'
-import {
-    createColumnHelper,
-} from '@tanstack/vue-table'
-import DataTableNumberField from './DataTableNumberField.vue'
-import TableCell from './TableCell.vue'
+import { createColumnHelper } from '@tanstack/vue-table'
+import { DropDownOrderActions, DataTableNumberField, TableCell } from '../components'
 import { formatMoney } from '@/util';
 
 const { toCurrency } = formatMoney()
-/*
- {
-    id: '728ed52f',
-    amount: 100,
-    status: 'pending',
-    email: 'm@example.com',
-  },
 
-*/
 const columnHelper = createColumnHelper()
 
 const fuzzySort = (rowA, rowB, columnId) => {
@@ -85,13 +73,21 @@ export const columns = [
         },
         cell: ({ row, getValue, column, table, cell }) => {
 
+            const price = row.original
+            const itens = table.options.meta.payload.itens
+
+            const payloadProduct = itens.filter(produto => produto.idProduto == price.id)
+
+            const cellvalue = payloadProduct.length > 0 ? payloadProduct[0].preco : `${getValue()[0].val}`
+
             return h(TableCell, {
-                cellvalue: getValue()[0].val,
+                cellvalue,
                 cellkey: cell.id,
+                row,
                 'onChanged': (val) => {
                     table.options.meta.updateData(row.index, column.id, val.value)
                 }
-            }, toCurrency(getValue()[0].val))
+            }, () => toCurrency(cellvalue))
         },
         meta: {
 
@@ -104,8 +100,15 @@ export const columns = [
         header: () => h('div', { class: 'font-bold text-white' }, 'quantidade'),
         cell: ({ row, getValue, column, table, cell }) => {
             const payment = row.original
+            const itens = table.options.meta.payload.itens
+
+            const payloadProduct = itens.filter(produto => produto.idProduto == payment.id)
+
+            const minQtd = itens.length > 0 && itens.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 2 ? 1 : 0
 
             return h(DataTableNumberField, {
+                min: minQtd,
+                value: payloadProduct.length > 0 ? payloadProduct[0].quantidade : 0,
                 payment,
                 onExpand: row.toggleExpanded,
                 'onUpdate:modelValue': (val) => {

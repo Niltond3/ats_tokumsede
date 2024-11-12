@@ -24,18 +24,18 @@ import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { editRow } from './useEditRow'
-import { dataTable } from './useDataTable'
-import { payloadPedido } from './usePayloadPedido'
-import { formatMoney } from '@/util'
-import SelectPayment from './SelectPayment.vue'
-import ExchangeInput from './ExchangeInput.vue'
-import DateTimePicker from './DateTimePicker.vue'
-import DialogCreateOrderNote from './DialogCreateOrderNote.vue'
+import { editRow } from './hooks/useEditRow'
+import { dataTable } from './hooks/useDataTable'
+import { payloadPedido } from './hooks/usePayloadPedido'
+import { columns } from './config/Columns'
+import { SelectPayment, ExchangeInput, DateTimePicker, SelectDistributor, DialogCreateOrderNote } from './components/'
+import { toast } from 'vue-sonner'
+import { dateToDayMonthYearFormat, dateToISOFormat, formatMoney } from '@/util'
+
 
 const props = defineProps({
-    columns: { type: null, required: false },
     createOrderData: { type: null, required: false },
+    distributors: { type: Array, required: false },
 })
 
 const [tableData, setTableData] = dataTable([])
@@ -44,19 +44,25 @@ const [editedRows, setEditedRows] = editRow()
 
 const [payload, setPayload] = payloadPedido()
 
-const { toCurrency } = formatMoney()
-
-const emit = defineEmits(['callback:payloadPedido'])
+const isUpdate = ref(false)
 
 const pageSizes = ref([50])
 
 const sorting = ref([])
+
+const status = ref(null)
 
 const globalFilter = ref('')
 
 const tableIdentifier = ref('')
 
 const addressNote = ref('')
+
+const disabledButton = ref(true)
+
+const { toCurrency, toFloat } = formatMoney()
+
+const emit = defineEmits(['callback:payloadPedido'])
 
 // Define a custom fuzzy filter function that will apply ranking info to rows (using match-sorter utils)
 const fuzzyFilter = (row, columnId, value, addMeta) => {
@@ -96,37 +102,123 @@ const fuzzyFilter = (row, columnId, value, addMeta) => {
 
 const handleCallbackPedido = () => {
     setPayload({ ...payload.value, observacao: addressNote.value })
+    disabledButton.value = true
     emit('callback:payloadPedido', payload.value)
 }
 
-const handleExchange = ({ value }) => setPayload({ ...payload.value, trocoPara: parseFloat(value) })
+const handleExchange = ({ value }) => {
+    setPayload({ ...payload.value, trocoPara: parseFloat(value.split(' ')[1]) })
+}
 
 const handlePayForm = (value) => setPayload({ ...payload.value, formaPagamento: value })
 
-const handleScheduling = (value) => {
-    if (value) {
-        console.log(value.toISOString().split('T')[0])
-        const dataAgendada = value.toISOString().split('T')[0]
-        const horaInicio = `${value.getHours(2)}:${value.getMinutes(2)}:00`
-        setPayload({ ...payload.value, agendado: 1, dataAgendada, horaInicio })
-        return
+const handleDistributor = (value) => setPayload({ ...payload.value, idDistribuidor: value })
+
+const handleScheduling = (date) => {
+    if (date) {
+        const { date: formattedDate, time } = dateToDayMonthYearFormat(date)
+
+        const dataAgendada = formattedDate
+
+        const horaInicio = time
+
+        return setPayload({ ...payload.value, agendado: 1, dataAgendada, horaInicio })
     }
-    setPayload({ ...payload.value, agendado: 0, dataAgendada: '', horaInicio: '' })
+    return setPayload({ ...payload.value, agendado: 0, dataAgendada: '', horaInicio: '' })
 }
 
 const handleOrderNote = (value) => setPayload({ ...payload.value, obs: value })
 
-watch(() => props.createOrderData, (newVal) => {
-    const { products, distributorTaxes: { taxaUnica: taxaEntrega }, distributor: { id: idDistribuidor, nome: distributorName }, address: { id: idEndereco, observacao } } = newVal
-    console.log(newVal)
-    setTableData(products)
+const handleStatusChange = () => {
+    if (status.value.label == 'Agendado') return toast.info('Pedido Agendado!')
+    if (status.value.label == 'Pendente' && !status.value.oldStatus) return toast.info('Pedido Pendente!')
+    if (status.value.label == 'Pendente' && status.value.oldStatus) {
+        status.value = status.value.oldStatus
+        setPayload({ ...payload.value, status: status.value.statusId })
+        return toast.info('Status Restaurado!')
+    }
+
+    const pendente = {
+        label: 'Pendente',
+        classes: {
+            bg: 'bg-warning',
+            text: 'text-warning',
+            icon: 'ri-error-warning-fill'
+        }
+
+    }
+
+    const oldStatus = {
+        ...status.value,
+        statusId: payload.value.status
+    }
+
+    status.value = { ...pendente, oldStatus }
+    setPayload({ ...payload.value, status: 1 })
+    return toast.info('Status Alterado!')
+}
+
+const dataToTable = (data) => {
+    const { products, distributorTaxes: { taxaUnica: taxaEntrega }, distributor: { id: idDistribuidor, nome: distributorName }, address: { id: idEndereco, observacao } } = data
 
     tableIdentifier.value = distributorName
 
     addressNote.value = observacao
 
+    const order = data.order
+
+    if (order) {
+        const { obs, itensPedido, total, formaPagamento: { id: formaPagamento }, trocoPara: orderTroco, agendado, dataAgendada, horaInicio, endereco: { observacao }, idEndereco, id: idPedido, status: orderStatus } = order
+        isUpdate.value = true
+
+        console.log(itensPedido)
+
+        const newProducts = products.map(product => {
+            const productToChange = itensPedido.filter(prod => prod.idProduto == product.id)[0]
+
+            if (productToChange) return { ...product, preco: [{ qtd: product.preco[0].qtd, val: toFloat(productToChange.preco) }] }
+            return product
+        })
+
+        setTableData(newProducts)
+
+        const itens = itensPedido.map(item => {
+            const { preco: itemPreco, qtd: quantidade, subtotal: itemSubtotal, id, precoAcertado: itemPrecoAcertado, idProduto } = item
+            const preco = toFloat(itemPreco)
+            const precoAcertado = itemPrecoAcertado ? toFloat(itemPrecoAcertado) : null
+            const subtotal = toFloat(itemSubtotal)
+
+            return {
+                idProduto,
+                preco,
+                precoAcertado,
+                quantidade,
+                subtotal
+            }
+        })
+
+        status.value = orderStatus
+        const trocoPara = toFloat(orderTroco)
+        const totalProdutos = itens.map(product => parseFloat(product.subtotal)).reduce((curr, prev) => curr + prev);
+
+        console.log(totalProdutos)
+
+        console.log(toFloat(total))
+
+        setPayload({ ...payload.value, formaPagamento, trocoPara, agendado, dataAgendada, horaInicio, obs, observacao, totalProdutos, total: toFloat(total), idEndereco, idDistribuidor, itens, idPedido, status: order.statusId })
+
+        return
+    }
+
+
+    setTableData(products)
+
     setPayload({ ...payload.value, taxaEntrega, idDistribuidor, idEndereco })
-})
+}
+
+watch(() => props.createOrderData, (newVal) => dataToTable(newVal))
+
+watch(() => payload.value.itens, (newVal) => disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false)
 
 const updateData = (rowIndex, columnId, value) => {
     const newData = columnId !== 'quantidade' ? [...tableData.value.map((row, index) => {
@@ -150,8 +242,7 @@ const updateData = (rowIndex, columnId, value) => {
     })]
 
     setTableData(newData)
-
-    const cartProducts = newData.map(product => {
+    const itens = newData.map(product => {
         if (product.quantidade > 0) {
             const { id, preco, quantidade } = product
             return {
@@ -165,23 +256,27 @@ const updateData = (rowIndex, columnId, value) => {
         return null
     }).filter(x => x)
 
-
-    const totalProdutos = cartProducts.map(product => product.subtotal).reduce((curr, prev) => curr + prev);
-
     const taxaEntrega = payload.value.taxaEntrega
+    try {
+        const totalProdutos = itens.map(product => product.subtotal).reduce((curr, prev) => curr + prev);
+        const total = totalProdutos + taxaEntrega
 
-    setPayload({ ...payload.value, totalProdutos, total: totalProdutos + taxaEntrega, itens: cartProducts })
+        setPayload({ ...payload.value, totalProdutos, total, itens })
+    } catch (error) {
+        disabledButton.value = true
+        toast.error('Adicione ao menos um produto')
+    }
 
-    console.log(payload.value)
 }
 
 onMounted(() => {
     table.setPageSize(pageSizes.value[0])
+    if (props.createOrderData) dataToTable(props.createOrderData)
 })
 
 const tableOptions = reactive({
     get data() { return tableData.value },
-    get columns() { return props.columns },
+    get columns() { return columns },
     filterFns: {
         fuzzy: fuzzyFilter, //define as a filter function that can be used in column definitions
     },
@@ -204,7 +299,8 @@ const tableOptions = reactive({
     meta: {
         updateData,
         editedRows,
-        setEditedRows
+        setEditedRows,
+        payload
     },
     globalFilterFn: 'fuzzy', //apply fuzzy filter to the global filter (most common use case for fuzzy filter)
     getCoreRowModel: getCoreRowModel(),
@@ -225,13 +321,27 @@ const table = useVueTable(tableOptions)
 
 <template>
     <div>
-        <div class="flex items-center py-4 justify-between">
+        <div class="flex items-center py-4 justify-between gap-3">
             <Input class="max-w-sm" placeholder="Pesquisar..." :modelValue="globalFilter ?? ''"
                 @update:modelValue="value => (globalFilter = String(value))" />
-            <span>{{ tableIdentifier }}</span>
+            <SelectDistributor v-if="props.distributors" :distributors="props.distributors"
+                @update:distributor="handleDistributor" :default="`${payload.idDistribuidor}`"></SelectDistributor>
+            <span v-else>{{ tableIdentifier }}</span>
+            <button v-if="status"
+                :class="[status.classes.bg, status.label == 'Agendado' ? 'text-slate-700' : 'text-white',]"
+                class="relative font-semibold px-2 py-1 rounded-lg opacity-80 hover:opacity-100"
+                @click="handleStatusChange">
+                <i v-if="status.label != 'Agendado' && status.label != 'Pendente'"
+                    class="ri-edit-2-fill absolute bg-white rounded-full w-5 h-5 flex justify-center items-center -top-3 -right-1"
+                    :class="status.classes.text"></i>
+                <i v-if="status.oldStatus"
+                    class="ri-arrow-go-back-fill absolute bg-white rounded-full w-5 h-5 flex justify-center items-center -top-3 -right-1"
+                    :class="status.classes.text"></i>
+                {{ status.label }}
+            </button>
         </div>
         <div class="border rounded-md border-gray-200 relative">
-            <DialogCreateOrderNote @callback:order-note="(callback) => handleOrderNote(callback)">
+            <DialogCreateOrderNote @callback:order-note="handleOrderNote" :order-note="payload.obs">
             </DialogCreateOrderNote>
             <Table
                 class="rounded-md [&_tbody]:h-[235px] [&_tbody]:table-fixed [&_tbody]:block [&_tbody]:overflow-y-auto [&_tbody]:overflow-x-hidden [&_tr]:table [&_tr]:w-full [&_tr]:table-fixed">
@@ -284,11 +394,12 @@ const table = useVueTable(tableOptions)
                 </div>
                 <Separator label="Detalhes" class="z-100" />
                 <div class="flex p-2 gap-4 h-14 justify-center">
-                    <SelectPayment @update:payment-form="handlePayForm" />
+                    <SelectPayment @update:payment-form="handlePayForm" :default="payload.formaPagamento" />
                     <Separator orientation="vertical" />
-                    <ExchangeInput @update:exchange="handleExchange" />
+                    <ExchangeInput @update:exchange="handleExchange" :value="payload.trocoPara" />
                     <Separator orientation="vertical" />
-                    <DateTimePicker @update:scheduling="handleScheduling" />
+                    <DateTimePicker @update:scheduling="handleScheduling"
+                        :default:scheduling="dateToISOFormat(`${payload.dataAgendada} ${payload.horaInicio}`)" />
                 </div>
             </div>
         </div>
@@ -300,9 +411,12 @@ const table = useVueTable(tableOptions)
                 <span class="absolute text-xs text-muted-foreground left-2 -top-2 bg-white">observação do
                     endereço</span>
             </div>
-            <Button type="submit"
-                class="border-none rounded-xl px-4 py-2 text-base font-semibold bg-info/80 hover:bg-info/100 transition-all"
-                @click="handleCallbackPedido"> Cadastrar Pedido </Button>
+            <Button :disabled="disabledButton" type="submit"
+                class="border-none rounded-xl px-4 py-2 text-base font-semibold bg-info/80 hover:bg-info/100 transition-all disabled:bg-info/60 disabled:hover:bg-info/60 disabled:cursor-not-allowed "
+                @click="handleCallbackPedido">
+                <span v-if="isUpdate"> Salvar </span>
+                <span v-else> Cadastrar </span>
+            </Button>
         </div>
     </div>
 </template>

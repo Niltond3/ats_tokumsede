@@ -1,11 +1,8 @@
 <script setup>
-import { cn } from '@/lib/utils';
-import { NumberFieldRoot, useForwardPropsEmits } from 'radix-vue';
-import { computed, onMounted, ref, watch } from 'vue';
-import EditCell from './EditCell.vue';
+import { onMounted, ref } from 'vue';
 import { formatMoney } from '@/util'
-//getValue, row, column, table
-import { } from '@/components/ui/tooltip'
+
+
 const props = defineProps({
     cellvalue: { type: String, required: false },
     cellkey: { type: String, required: false },
@@ -13,13 +10,9 @@ const props = defineProps({
 
 const { toCurrency, config } = formatMoney()
 const inputElement = ref()
-const initialValue = ref(toCurrency(props.cellvalue))
+const initialValue = ref(toCurrency(parseFloat(props.cellvalue).toFixed(2)))
 const showInput = ref(false)
 
-watch(() => props.cellValue, (newValue) => {
-    console.log(newValue)
-    initialValue.value = newValue
-})
 
 const emits = defineEmits(['changed']);
 
@@ -35,7 +28,6 @@ function handleBlur() {
     emits('changed', { key: props.cellkey, value: initialValue.value })
 }
 
-
 </script>
 
 <template>
@@ -44,9 +36,18 @@ function handleBlur() {
             <slot />
         </div>
 
-        <input v-else type="text" ref="inputElement" @blur="handleBlur" @keypress.enter="handleBlur"
-            v-model="initialValue"
-            class="focus:ring-transparent focus:outline-none w-20 border border-gray-200 rounded-md p-1"
-            v-money3="config">
+        <div v-else class="relative items-center flex">
+            <input type="text" ref="inputElement" @blur="handleBlur" @keypress.enter="handleBlur"
+                v-model.lazy="initialValue"
+                class="focus:ring-transparent focus:outline-none w-20 border border-gray-200 rounded-md p-1"
+                v-money3="config" />
+        </div>
     </div>
 </template>
+
+<script>
+import { Money3Directive } from 'v-money3'
+export default {
+    directives: { money3: Money3Directive }
+}
+</script>

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\EnderecoClienteController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\ProdutoController;
@@ -39,8 +40,11 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('clientes', ClienteController::class,['except' => 'create']);
 
+    //ENDERECOS CLIENTES
+    Route::resource('enderecos', EnderecoClienteController::class,['except' => 'create']);
+
     //PEDIDOS
-Route::group(['prefix' => 'pedidos'], function(){
+    Route::group(['prefix' => 'pedidos'], function(){
     Route::resource('/', PedidoController::class,['except' => 'create']);
     Route::get('visualizar/{id}', [PedidoController::class, 'visualizar']);
     Route::put('aceitar/{id}', [PedidoController::class, 'aceitar']);

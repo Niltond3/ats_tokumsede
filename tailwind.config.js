@@ -1,4 +1,5 @@
 const animate = require("tailwindcss-animate")
+const scrollbar = require('tailwind-scrollbar')({ nocompatible: true })
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -106,7 +107,8 @@ module.exports = {
                 'width': 'width',
                 'max-height': 'max-height'
             },
+
         },
     },
-    plugins: [animate],
+    plugins: [animate, scrollbar],
 }

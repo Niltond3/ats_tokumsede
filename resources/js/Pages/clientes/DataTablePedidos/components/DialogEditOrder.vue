@@ -10,10 +10,10 @@ import {
 } from '@/components/ui/dialog'
 import { utf8Decode, formatMoney } from '@/util';
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
-import { formatOrder, getStatusString } from '../utils';
+import { formatOrder, getStatusString } from '../../utils';
 import { toast } from 'vue-sonner'
-import { DataTableProducts } from '../DataTableProducts';
-import { dialogState } from '../useToggleDialog'
+import { DataTableProducts } from '../../DataTableProducts';
+import { dialogState } from '../../useToggleDialog'
 
 
 const props = defineProps({

@@ -8,10 +8,9 @@ import 'datatables.net-buttons-dt';
 import 'datatables.net-responsive-dt';
 import 'datatables.net-searchpanes-dt';
 import 'datatables.net-select-dt';
-import { utf8Decode } from '../../../util';
-import DropDownPedidos from './DropDownPedidos.vue';
+import { utf8Decode, dateToISOFormat } from '@/util';
 import { getStatusString } from '../utils';
-import { dateToISOFormat } from "@/util";
+import DropDownPedidos from './components/DropDownPedidos.vue';
 
 DataTable.use(DataTablesLib);
 

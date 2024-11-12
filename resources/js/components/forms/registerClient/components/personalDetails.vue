@@ -21,6 +21,8 @@ import Button from '@/components/Button.vue';
 import { generatePassword } from '@/util';
 
 const { values } = defineProps({ values: Object })
+
+console.log(values)
 const emit = defineEmits(['update:birthDatePicker', "update:generatePassword"])
 
 const { width } = useWindowSize()
@@ -74,16 +76,22 @@ const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-inf
                                 </span>
                                 <span v-if="values.sexo != undefined && width > 639">{{
                                     getSexo.desktop[values.sexo]
-                                    }}</span>
+                                }}</span>
                                 <span v-if="values.sexo != undefined && width < 640">{{
                                     getSexo.mobile[values.sexo]
-                                    }}</span>
+                                }}</span>
                             </Button>
                         </FormControl>
                     </PopoverTrigger>
                     <PopoverContent class="w-80">
                         <FormControl>
                             <RadioGroup v-bind="componentField">
+                                <FormItem class="flex items-center space-x-2">
+                                    <FormControl>
+                                        <RadioGroupItem />
+                                    </FormControl>
+                                    <FormLabel>Não informar</FormLabel>
+                                </FormItem>
                                 <FormItem class="flex items-center space-x-2">
                                     <FormControl>
                                         <RadioGroupItem value="1" />

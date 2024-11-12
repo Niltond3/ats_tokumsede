@@ -1,6 +1,5 @@
 <script setup>
-import { FormRegisterClient } from '@/components/forms/registerClient';
-import { Button } from '@/components/ui/button'
+import { ref } from 'vue'
 import {
     Dialog,
     DialogContent,
@@ -10,7 +9,15 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { RegisterDetails } from '@/components/forms/registerClient';
 import { dialogState } from '../../useToggleDialog'
+
+const props = defineProps({
+    clientDetails: { type: Object, required: false },
+})
+
+const details = ref()
 
 const emits = defineEmits(['update:dataTable'])
 
@@ -31,14 +38,36 @@ const handleSucess = () => {
     toggleDialog()
 }
 
+
+const whenDialogOpen = () => {
+    const { dataNascimento, email, nome, sexo, telefone, tipoPessoa, id } = props.clientDetails
+
+    details.value = {
+        id,
+        dataNascimento: dataNascimento ? `${dataNascimento}` : '',
+        email: email ? email : '',
+        nome,
+        sexo: sexo ? `${sexo}` : '',
+        telefone: telefone ? telefone : '',
+        tipoPessoa: tipoPessoa ? tipoPessoa : ''
+    }
+
+    console.log(details.value)
+}
+const handleDialogOpen = () => {
+    isOpen && whenDialogOpen()
+    return isOpen.value
+}
+
 </script>
 
 <template>
-    <Dialog :open="isOpen" @update:open="(op) => toggleDialog()">
+    <Dialog :open="handleDialogOpen()" @update:open="(op) => toggleDialog()">
         <DialogTrigger as-child>
-            <Button
-                class="rounded-md py-2 px-4 bg-info/70 hover:bg-info/100 transition-all text-base shadow-lg hover:shadow-sm">
-                <i class="ri-user-add-fill"></i>Novo Cliente </Button>
+            <DropdownMenuItem class="cursor-pointer gap-2" @select="(e) => e.preventDefault()">
+                <i class="ri-pencil-fill text-info" />
+                Editar Cliente
+            </DropdownMenuItem>
         </DialogTrigger>
         <DialogContent class="sm:max-w-[440px]" @interact-outside="handleDialogOutsideInteract">
             <DialogHeader>
@@ -50,7 +79,7 @@ const handleSucess = () => {
             </DialogHeader>
             <div
                 class="grid gap-4 py-4 px-1 max-h-96 overflow-y-scroll text-xs scrollbar !scrollbar-w-1.5 !scrollbar-h-1.5 !scrollbar-thumb-slate-200 !scrollbar-track-tr!scrollbar-thumb-rounded scrollbar-track-rounded dark:scrollbar-track:!bg-slate-500/[0.16] dark:scrollbar-thumb:!bg-slate-500/50 lg:supports-scrollbars:pr-2">
-                <FormRegisterClient @create:success="handleSucess"></FormRegisterClient>
+                <RegisterDetails @create:success="handleSucess" :client-details="details"></RegisterDetails>
             </div>
         </DialogContent>
     </Dialog>

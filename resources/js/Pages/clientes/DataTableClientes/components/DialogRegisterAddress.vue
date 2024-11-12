@@ -47,7 +47,7 @@ const handleSucess = () => {
             </DialogHeader>
             <div
                 class="grid gap-4 py-4 px-1 max-h-96 overflow-y-scroll text-xs scrollbar !scrollbar-w-1.5 !scrollbar-h-1.5 !scrollbar-thumb-slate-200 !scrollbar-track-tr!scrollbar-thumb-rounded scrollbar-track-rounded dark:scrollbar-track:!bg-slate-500/[0.16] dark:scrollbar-thumb:!bg-slate-500/50 lg:supports-scrollbars:pr-2">
-                <FormRegisterClientAddress @cresate:success="handleSucess" :id-client="idClient" />
+                <FormRegisterClientAddress @create:success="handleSucess" :id-client="idClient" />
             </div>
         </DialogContent>
     </Dialog>

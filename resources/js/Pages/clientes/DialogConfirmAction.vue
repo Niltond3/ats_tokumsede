@@ -20,7 +20,7 @@ const props = defineProps({
     triggerIcon: { type: String, required: true },
     dialogTitle: { type: String, required: false },
     dialogDescription: { type: String, required: false },
-    variant:{type: String, required:true}
+    variant: { type: String, required: true }
 })
 
 const [isOpen, toggleDialog] = dialogState()
@@ -37,14 +37,14 @@ const handleConfirm = () => {
 const getVariant = {
     danger: {
         textClasses: {
-            icon:'ri-close-circle-fill',
+            icon: 'ri-close-circle-fill',
             text: 'text-danger group-hover:text-danger'
         },
         bgClasses: 'bg-danger/70 hover:bg-danger'
     },
     warning: {
         textClasses: {
-            icon:'ri-error-warning-fill',
+            icon: 'ri-error-warning-fill',
             text: 'text-warning group-hover:text-warning'
         },
         bgClasses: 'bg-warning/70 hover:bg-warning'
@@ -59,8 +59,7 @@ const styleVariant = getVariant[props.variant]
     <Dialog :open="isOpen" @update:open="(op) => toggleDialog()">
         <DialogTrigger as-child>
             <DropdownMenuItem class="cursor-pointer group gap-1" @select="(e) => e.preventDefault()">
-                <i :class="[props.triggerIcon, styleVariant.textClasses.text]"
-                    class="transition-colors"></i>
+                <i :class="[props.triggerIcon, styleVariant.textClasses.text]" class="transition-colors"></i>
                 {{ props.triggerLabel }}
             </DropdownMenuItem>
         </DialogTrigger>
@@ -87,10 +86,8 @@ const styleVariant = getVariant[props.variant]
                 <Button variant="outline"
                     class="rounded-md py-1 px-4 bg-info/70 hover:bg-info transition-all !text-white"
                     @click="toggleDialog()">Desistir</Button>
-                <Button variant="outline"
-                    :class="[styleVariant.bgClasses]"
-                    class="rounded-md py-1 px-4 transition-all !text-white"
-                    @click="handleConfirm()">Confirmar</Button>
+                <Button variant="outline" :class="[styleVariant.bgClasses]"
+                    class="rounded-md py-1 px-4 transition-all !text-white" @click="handleConfirm()">Confirmar</Button>
             </div>
         </DialogContent>
     </Dialog>

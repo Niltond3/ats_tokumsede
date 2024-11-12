@@ -14,7 +14,7 @@ const props = defineProps({
     idClient: { type: String, required: false },
 });
 
-const emit = defineEmits(['cresate:success'])
+const emit = defineEmits(['create:success'])
 
 const disabledButton = ref(false)
 

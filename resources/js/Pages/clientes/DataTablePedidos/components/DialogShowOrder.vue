@@ -4,7 +4,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import DialogShowOrderContent from '../DialoShowOrderContent.vue'
+import DialogShowOrderContent from '../../DialoShowOrderContent.vue'
 
 const props = defineProps({
     orderId: { type: Number, required: true },
@@ -19,7 +19,7 @@ const props = defineProps({
                 <i class="ri-eye-fill"></i>
                 Visualizar Pedido
             </DropdownMenuItem>
-            <DialogShowOrderContent :order-id="orderId"></DialogShowOrderContent>
         </DialogTrigger>
+        <DialogShowOrderContent :order-id="orderId"></DialogShowOrderContent>
     </Dialog>
 </template>

@@ -9,9 +9,9 @@ import {
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-import { utf8Decode } from '../../../util';
+import { utf8Decode } from '@/util';
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
-import { dialogState } from '../useToggleDialog'
+import { dialogState } from '../../useToggleDialog'
 
 const props = defineProps({
     entregadores: { type: Array, required: true },

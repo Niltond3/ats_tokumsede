@@ -15,7 +15,12 @@ export default (d) => {
 
     const customLiAddress = (endereco) => /*html*/`
   <li class="${liClasses}">
-      <i class="ri-map-pin-fill group-hover:text-white transition-colors"></i>
+      <button
+              class="${btClasses} editarEndereco relative text-info transition-all group-hover:bg-white hover:shadow-lg"
+              id="${endereco.id}">
+              <i class="ri-pencil-fill text-sm pointer-events-none text-white absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 group-hover:text-info"></i>
+              <i class="ri-map-pin-fill group-hover:opacity-0 transition-colors absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 "></i>
+    </button>
       <div class="${separator}"></div>
       <span class="flex flex-col text-info group-hover:text-white">
           ${utf8Decode(endereco.logradouro)}, nº ${endereco.numero} - ${utf8Decode(endereco.bairro)}

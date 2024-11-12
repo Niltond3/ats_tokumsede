@@ -14,8 +14,9 @@ import { User, BookUser, Check } from 'lucide-vue-next'
 import { getClientFormat } from "@/Pages/clientes/utils";
 import { toast } from 'vue-sonner';
 
+const props = defineProps({})
 
-const emit = defineEmits(['cresate:success'])
+const emit = defineEmits(['create:success'])
 
 const page = usePage()
 
@@ -37,7 +38,7 @@ const formSchema = [
         ), {
             message: 'Senha fraca: precisa conter 5 caractéres, letra maiúscula e minúscula um número.'
         }),
-        sexo: z.enum(['1', '2']).nullable().optional(),
+        sexo: z.enum([undefined, '1', '2']).nullable().optional(),
         dataNascimento: z.string().nullable().optional(),
         tipoPessoa: z.string().nullable().optional(),
         email: z.string({ required_error: "e-mail obrigatório" }).refine(validator.isEmail, { message: 'e-mail inválido' }),
@@ -108,7 +109,7 @@ const renderToast = (promise) => {
         loading: 'Aguarde...',
 
         success: (data) => {
-            emit('cresate:success')
+            emit('create:success')
             return markRaw(CustomDiv('sucesso', `O Cliente foi cadastrado com sucesso!`));
         },
         error: (data) => markRaw(CustomDiv('Error', data.response)),

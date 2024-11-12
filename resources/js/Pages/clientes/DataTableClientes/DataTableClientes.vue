@@ -125,6 +125,10 @@ onMounted(() => {
         idClienteAddress.value = this.id
         toggleDialog()
     })
+    $('#datatable-clientes').on("click", '.editarEndereco', function () {
+        idClienteAddress.value = this.id
+        toggleEditAddress()
+    })
     $("#datatable-clientes").on("click", ".novoEndereco", function () {
         idClient.value = this.id
         toggleRegisterAddress()

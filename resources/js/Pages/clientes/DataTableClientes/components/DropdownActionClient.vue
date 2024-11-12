@@ -1,5 +1,5 @@
 <script setup>
-import { defineComponent, h, markRaw } from 'vue'
+import { defineComponent, h, markRaw, onMounted, ref } from 'vue'
 import axios from 'axios'
 import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub,
@@ -10,13 +10,15 @@ import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { MoreVertical } from 'lucide-vue-next'
 import DialogConfirmAction from '../../DialogConfirmAction.vue'
+import DialogEditClient from './DialogEditClient.vue'
 
 const props = defineProps({
     payloadData: { type: null, required: true },
     dataTable: { type: null, required: true },
 })
 
-const { rowData: { id: idCliente }, } = props.payloadData
+const { rowData } = props.payloadData
+const { id: idCliente } = rowData
 
 function copy() {
     navigator.clipboard.writeText(props.payloadData)
@@ -49,6 +51,7 @@ const handleStatusClientChange = ({ id, status }) => {
     renderToast(response, status)
 }
 
+const handleUpdateDataTable = () => props.dataTable.ajax.reload()
 
 </script>
 
@@ -67,10 +70,7 @@ const handleStatusClientChange = ({ id, status }) => {
                 <i class="ri-eye-fill text-info"></i>
                 Visualizar Cliente
             </DropdownMenuItem>
-            <DropdownMenuItem class="gap-2 text-muted-foreground cursor-pointer" @click="copy()">
-                <i class="ri-pencil-fill text-info"></i>
-                Editar Cliente
-            </DropdownMenuItem>
+            <DialogEditClient :client-details="rowData" @update:data-table="handleUpdateDataTable" />
             <DropdownMenuSeparator />
             <DropdownMenuSub>
                 <DropdownMenuSubTrigger>

@@ -92,7 +92,7 @@ export const formatMoney = () => {
             number: false,
         },
         shouldRound: true,
-        focusOnRight: false,
+        focusOnRight: true,
     };
     const toCurrency = value => format(value, config);
 

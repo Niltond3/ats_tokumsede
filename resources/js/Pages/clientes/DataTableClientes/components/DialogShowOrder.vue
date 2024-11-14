@@ -2,7 +2,7 @@
 import {
     Dialog,
 } from '@/components/ui/dialog'
-import DialogShowOrderContent from '../../DialoShowOrderContent.vue'
+import DialogShowOrderContent from '../../components/DialoShowOrderContent.vue'
 
 const props = defineProps({
     open: { type: Boolean, required: false },

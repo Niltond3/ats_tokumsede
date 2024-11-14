@@ -36,7 +36,7 @@ const handleSucess = () => {
 <template>
     <Dialog :open="isOpen" @update:open="(op) => toggleDialog()">
         <DialogTrigger as-child>
-            <Button
+            <Button data-long-press-delay="500"
                 class="rounded-md py-2 px-4 bg-info/70 hover:bg-info/100 transition-all text-base shadow-lg hover:shadow-sm">
                 <i class="ri-user-add-fill"></i>Novo Cliente </Button>
         </DialogTrigger>

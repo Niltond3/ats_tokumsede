@@ -9,7 +9,7 @@ import {
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { MoreVertical } from 'lucide-vue-next'
-import DialogConfirmAction from '../../DialogConfirmAction.vue'
+import DialogConfirmAction from './DialogConfirmAction.vue'
 import DialogEditClient from './DialogEditClient.vue'
 
 const props = defineProps({

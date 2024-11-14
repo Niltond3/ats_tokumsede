@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { utf8Decode, formatMoney } from '@/util';
-import { formatOrder, handleCopyOrder } from './utils';
+import { formatOrder, handleCopyOrder } from '../utils';
 
 const props = defineProps({
     orderId: { type: Number, required: true },

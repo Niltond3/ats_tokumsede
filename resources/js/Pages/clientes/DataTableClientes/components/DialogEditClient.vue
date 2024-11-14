@@ -51,8 +51,6 @@ const whenDialogOpen = () => {
         telefone: telefone ? telefone : '',
         tipoPessoa: tipoPessoa ? tipoPessoa : ''
     }
-
-    console.log(details.value)
 }
 const handleDialogOpen = () => {
     isOpen && whenDialogOpen()

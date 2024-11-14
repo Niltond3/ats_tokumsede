@@ -12,7 +12,7 @@ import { MoreVertical } from 'lucide-vue-next'
 import DialogSelectDeliveryMan from './DialogSelectDeliveryMan.vue'
 import DialogEditOrder from './DialogEditOrder.vue'
 import DialogShowOrder from './DialogShowOrder.vue'
-import DialogConfirmAction from '../../DialogConfirmAction.vue'
+import DialogConfirmAction from './DialogConfirmAction.vue'
 
 const props = defineProps({
     payloadData: { type: null, required: true },

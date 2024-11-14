@@ -147,7 +147,7 @@ const options = {
             searchPanes: {
                 show: true,
                 controls: false,
-                className: '[&_.dts_label]:hidden [&_tbody]:flex [&_tbody]:justify-center [&_tr]:cursor-pointer [&_tr_div]:flex [&_td]:!pb-[14px] [&_tr_div]:gap-2 [&_input]:opacity-0  [&_input]:pointer-events-none w-[72%] right-0 mr-[266px] max-h-[150px] absolute top-[-22px] !overflow-hidden bg-transparent [&_tr.selected>td]:!shadow-[inset_0_0_0_9999px_rgba(30,136,229,1)] [&_td]:rounded-t-md [&_tr.selected>td]:font-bold [&_tr.selected_.dtsp-nameCont]:translate-y-[5px] [&_tr_div]:transition-transform [&_.dt-scroll-body]:!overflow-hidden [&_.dt-scroll-head]:hidden [&_tr_div]:text-[#1e88e5]/80 [&_tr.selected_div]:!text-white [&_.dt-scroll-body]:!border-none [&_.dt-scroll-body]:!h-[46px]',
+                className: '[&_.dts_label]:hidden [&_tbody]:flex [&_tbody]:justify-center [&_tr]:cursor-pointer [&_tr_div]:flex [&_td]:!pb-[14px] [&_tr_div]:gap-2 [&_input]:opacity-0  [&_input]:pointer-events-none w-[72%] right-0 mr-[266px] max-h-[150px] absolute top-[-40px] !overflow-hidden bg-transparent [&_tr.selected>td]:!shadow-[inset_0_0_0_9999px_rgba(30,136,229,1)] [&_td]:rounded-t-md [&_tr.selected>td]:font-bold [&_tr.selected_.dtsp-nameCont]:translate-y-[5px] [&_tr_div]:transition-transform [&_.dt-scroll-body]:!overflow-hidden [&_.dt-scroll-head]:hidden [&_tr_div]:text-[#1e88e5]/80 [&_tr.selected_div]:!text-white [&_.dt-scroll-body]:!border-none [&_.dt-scroll-body]:!h-[46px]',
             },
             targets: [6]
         }

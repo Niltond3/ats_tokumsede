@@ -12,6 +12,7 @@ import { toast } from 'vue-sonner';
 
 const props = defineProps({
     idClient: { type: String, required: false },
+    addressDetails: { type: Object, required: false },
 });
 
 const emit = defineEmits(['create:success'])
@@ -70,7 +71,7 @@ const renderToast = (promise) => {
         loading: 'Aguarde...',
 
         success: (data) => {
-            emit('cresate:success')
+            emit('create:success')
             return markRaw(CustomDiv('sucesso', `O Endereço foi cadastrado com sucesso!`));
         },
         error: (data) => markRaw(CustomDiv('Error', data.response)),
@@ -91,8 +92,7 @@ const onSubmit = (values) => {
         apelido: values.apelido,
         observacao: values.observacao,
     }
-
-    const response = axios.post('enderecos', payload);
+    const response = props.addressDetails ? axios.put(`enderecos/${props.addressDetails.id}`, payload) : axios.post('enderecos', payload);
 
     renderToast(response)
 
@@ -113,7 +113,7 @@ const handleUpdateAddress = (addressValue, setValues) => setValues({
 
 <template>
     <Form v-slot="{ meta, validate, setFieldValue, values, setValues }" as="" keep-values
-        :validation-schema="toTypedSchema(formSchema[stepIndex - 1])">
+        :validation-schema="toTypedSchema(formSchema[stepIndex - 1])" :initial-values="addressDetails || {}">
 
         <Stepper v-slot="{ isNextDisabled, isPrevDisabled, nextStep, prevStep }" v-model="stepIndex"
             class="block w-full">
@@ -166,7 +166,7 @@ const handleUpdateAddress = (addressValue, setValues) => setValues({
                         </Button>
                         <Button v-if="stepIndex === 2" size="sm" type="submit" :disabled="disabledButton"
                             class="disabled:cursor-not-allowed">
-                            Cadastrar
+                            {{ addressDetails ? 'Atualiazar' : 'Cadastrar' }}
                         </Button>
                     </div>
                 </div>

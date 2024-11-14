@@ -20,11 +20,13 @@ import { dialogState } from '../useToggleDialog';
 import languagePtBR from './dataTablePtBR.mjs';
 import rowChildtable from './rowChildTable';
 import { formatOrder } from '../utils';
+import { toast } from 'vue-sonner';
 
 import DialogShowOrder from './components/DialogShowOrder.vue';
 import DropdownActionClient from './components/DropdownActionClient.vue';
 import DialogRegisterClient from './components/DialogRegisterClient.vue';
 import DialogRegisterAddress from './components/DialogRegisterAddress.vue';
+import DialogConfirmAddressDelete from './components/DialogConfirmAddressDelete.vue';
 
 DataTable.use(DataTablesCore);
 
@@ -35,30 +37,32 @@ const props = defineProps({
 const [isOpen, toggleDialog] = dialogState();
 const [openShowOrderDialog, toggleShowOrderDialog] = dialogState();
 const [openRegisterAddress, toggleRegisterAddress] = dialogState();
+const [openEditAddress, toggleEditAddress] = dialogState();
+const [openConfirmDialog, toggleConfirmDialog] = dialogState();
 
 const idClienteAddress = ref('')
 const idClient = ref('')
+const idAddress = ref('')
 const idOrder = ref('')
+const address = ref({})
+const addressTarget = ref({})
+
 let dt;
 const table = ref();
-
-
 onMounted(() => {
     dt = table.value.dt;
 
-    const format = (d) => {
-        // `d` is the original data object for the row
-        return (rowChildtable(d));
-    }
+    // `d` is the original data object for the row
+    const format = (d) => rowChildtable(d)
 
     const dragScrollList = (elementId) => {
-        console.log(`Drag scroll Element: ${elementId}`);
         const ele = document.getElementById(elementId);
-        ele.style.cursor = 'grab';
+        ele.style.cursor = 'pointer';
 
         let pos = { top: 0, left: 0, x: 0, y: 0 };
 
         const mouseDownHandler = function (e) {
+            e.preventDefault();
             ele.style.cursor = 'grabbing';
             ele.style.userSelect = 'none';
 
@@ -75,6 +79,7 @@ onMounted(() => {
         };
 
         const mouseMoveHandler = function (e) {
+            e.preventDefault();
             // How far the mouse has been moved
             const dx = e.clientX - pos.x;
             const dy = e.clientY - pos.y;
@@ -85,7 +90,7 @@ onMounted(() => {
         };
 
         const mouseUpHandler = function () {
-            ele.style.cursor = 'grab';
+            ele.style.cursor = 'pointer';
             ele.style.removeProperty('user-select');
 
             document.removeEventListener('mousemove', mouseMoveHandler);
@@ -94,7 +99,9 @@ onMounted(() => {
 
         // Attach the handler
         ele.addEventListener('mousedown', mouseDownHandler);
+        console.log(`Drag scroll Element: ${elementId}`);
     }
+
     $('#datatable-clientes tbody').on('click', 'td.dt-control', async function () {
         var tr = $(this).closest('tr');
         var row = dt.row(tr);
@@ -113,6 +120,7 @@ onMounted(() => {
         }
 
         if (row.child.isShown()) {
+            addressTarget.value == null && dt.ajax.reload()
             return row.child.hide(); // This row is already open - close it
         }
 
@@ -126,7 +134,14 @@ onMounted(() => {
         toggleDialog()
     })
     $('#datatable-clientes').on("click", '.editarEndereco', function () {
-        idClienteAddress.value = this.id
+
+        const idAddress = this.getAttribute('addr_id')
+        const idClient = this.getAttribute('cli_id')
+
+        const data = dt.data()
+
+        address.value = Object.values(data).filter(cli => cli.id == idClient)[0].enderecos.filter(addr => addr.id == idAddress)[0]
+
         toggleEditAddress()
     })
     $("#datatable-clientes").on("click", ".novoEndereco", function () {
@@ -136,6 +151,43 @@ onMounted(() => {
     $('#datatable-clientes').on("click", '.visualizarPedido', function () {
         idOrder.value = parseInt(this.id)
         toggleShowOrderDialog()
+    })
+    $('#datatable-clientes').on("click", '.copiarEndereco', function () {
+
+        const data = dt.data()
+
+        const payload = Object.values(data).filter(cli => cli.id == idClient.value)[0].enderecos.filter(addr => addr.id == idAddress.value)[0]
+        const clipboard = `
+------------- endereço -------------
+${payload.cep ? 'CEP: ' + payload.cep : ''}
+Cidade: ${payload.cidade}
+${payload.estado !== null ? 'Estado: ' + payload.estado : ''}
+${payload.apelido ? 'Apelido: ' + payload.apelido : ''}
+Logradouro: ${payload.logradouro}
+Número: ${payload.numero}
+Bairro: ${payload.bairro}
+${payload.complemento ? 'Complemento: ' + payload.complemento : ''}
+${payload.referencia ? 'Referência: ' + payload.referencia : ''}
+${payload.observacao ? 'Observação: ' + payload.observacao : ''}
+`.replace(/(^[ \t]*\n)/gm, "")
+
+        navigator.clipboard.writeText(clipboard)
+        toast.info('Copiado para a área de transferência')
+    })
+    $('#datatable-clientes').on("click", '.excluirEndereco', function () {
+        toggleConfirmDialog()
+    })
+    $('#datatable-clientes').on("long-press", '.deleteEndereco', function (e) {
+
+        idClient.value = e.target.id
+        idAddress.value = e.target.getAttribute('addr_id')
+
+        e.target.setAttribute('aria-selected', e.target.getAttribute('aria-selected') === 'true' ? 'false' : 'true');
+
+        addressTarget.value = e.target
+
+        e.target.parentNode.classList.toggle("[&>li[aria-selected='false']]:pointer-events-none");
+
     })
 });
 
@@ -201,18 +253,39 @@ const ajax = {
 
 const handleUpdateDataTable = () => dt.ajax.reload();
 
+const handleDeleteAddress = (confirm) => {
+    console.log('handleDeleteAddress' + confirm)
+
+    if (confirm === false) return toggleConfirmDialog()
+
+    let container = addressTarget.value;
+
+    container.classList.add('w-0');
+    container.classList.add('opacity-0');
+    container.classList.add('hidden');
+
+    container.parentNode.classList.toggle("[&>li[aria-selected='false']]:pointer-events-none");
+    addressTarget.value = null
+    toggleConfirmDialog()
+    container.ontransitionend = function () {
+    }
+}
+
 </script>
 
 <template>
     <div>
         <DialogCreateOrder :open="isOpen" :toggleDialog="toggleDialog" :id-cliente-address="idClienteAddress"
             :set-tab="props.setTab" />
-
         <DialogShowOrder :open="openShowOrderDialog" :toggleDialog="toggleShowOrderDialog" :order-id="idOrder" />
-
         <DialogRegisterClient @update:data-table="handleUpdateDataTable" />
         <DialogRegisterAddress :open="openRegisterAddress" :toggleDialog="toggleRegisterAddress" :id-client="idClient"
             @update:data-table="handleUpdateDataTable" />
+        <DialogRegisterAddress :open="openEditAddress" :toggleDialog="toggleEditAddress"
+            @update:data-table="handleUpdateDataTable" :address-details="address" />
+        <DialogConfirmAddressDelete dialog-title="Excluir Endereço" variant="danger" :id-address="idAddress"
+            @delete:confirm="handleDeleteAddress" dialog-description="Tem certeza que deseja excluir o endereço?"
+            :open="openConfirmDialog" />
         <DataTable id="datatable-clientes"
             class="display [&_thead]:bg-info [&_thead]:text-[#F3F9FD] [&_tbody>tr>td.dt-control]:before:hidden [&_tbody>tr.dt-hasChild_span.transition-all]:rotate-90 [&_tbody>tr.dt-hasChild_div.relative]:bg-danger"
             :columns="columns" :ajax="ajax" :options="options" ref="table" language="language">

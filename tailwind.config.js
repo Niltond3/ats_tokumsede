@@ -1,5 +1,14 @@
+const plugin = require("@tailwindcss/forms")
 const animate = require("tailwindcss-animate")
 const scrollbar = require('tailwind-scrollbar')({ nocompatible: true })
+
+const transitionDiscrete = plugin(function ({ addUtilities }) {
+    addUtilities({
+        ".transition-discrete": {
+            'transition-behavior': "allow-discrete",
+        }
+    })
+})
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -105,10 +114,15 @@ module.exports = {
             },
             transitionProperty: {
                 'width': 'width',
-                'max-height': 'max-height'
+                'max-height': 'max-height',
+                'max-width': 'max-width'
             },
 
         },
     },
-    plugins: [animate, scrollbar],
+    plugins: [
+        animate,
+        scrollbar,
+        transitionDiscrete
+    ],
 }

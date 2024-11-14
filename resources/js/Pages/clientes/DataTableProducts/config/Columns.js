@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { createColumnHelper } from '@tanstack/vue-table'
 import { DropDownOrderActions, DataTableNumberField, TableCell } from '../components'
 import { formatMoney } from '@/util';
+import { toFloat } from 'validator'
 
 const { toCurrency } = formatMoney()
 
@@ -78,16 +79,21 @@ export const columns = [
 
             const payloadProduct = itens.filter(produto => produto.idProduto == price.id)
 
-            const cellvalue = payloadProduct.length > 0 ? payloadProduct[0].preco : `${getValue()[0].val}`
+            const cellValue = payloadProduct.length > 0 ? payloadProduct[0].preco : toFloat(`${getValue()[0].val}`)
+
+            console.log('payloadProduct')
+            console.log(payloadProduct)
+            console.log('cellValue')
+            console.log(cellValue)
 
             return h(TableCell, {
-                cellvalue,
+                cellValue,
                 cellkey: cell.id,
                 row,
                 'onChanged': (val) => {
                     table.options.meta.updateData(row.index, column.id, val.value)
                 }
-            }, () => toCurrency(cellvalue))
+            }, () => toCurrency(cellValue))
         },
         meta: {
 

@@ -13,6 +13,7 @@ const props = defineProps({
     open: { type: Boolean, required: false },
     toggleDialog: { type: Function, required: false },
     idClient: { type: String, required: false },
+    addressDetails: { type: Object, required: false },
 });
 
 const emits = defineEmits(['update:dataTable'])
@@ -38,16 +39,18 @@ const handleSucess = () => {
     <Dialog :open="open" @update:open="(op) => toggleDialog()">
         <DialogContent class="sm:max-w-[440px]" @interact-outside="handleDialogOutsideInteract">
             <DialogHeader>
-                <DialogTitle class="text-info gap-1 flex items-center"><i class="ri-user-add-fill"></i>Cadastrar
-                    Endereço
+                <DialogTitle class="text-info gap-1 flex items-center"><i class="ri-user-add-fill"></i>
+                    {{ addressDetails ? 'Editar Endereço' : 'Cadastrar Endereço' }}
                 </DialogTitle>
                 <DialogDescription class="text-xs text-start">
-                    Após terminar todos os passos, clique em "Cadastrar" para concluir.
+                    Após terminar todos os passos, clique em {{ addressDetails ? '"Atualiazar"' : '"Cadastrar"' }} para
+                    concluir.
                 </DialogDescription>
             </DialogHeader>
             <div
                 class="grid gap-4 py-4 px-1 max-h-96 overflow-y-scroll text-xs scrollbar !scrollbar-w-1.5 !scrollbar-h-1.5 !scrollbar-thumb-slate-200 !scrollbar-track-tr!scrollbar-thumb-rounded scrollbar-track-rounded dark:scrollbar-track:!bg-slate-500/[0.16] dark:scrollbar-thumb:!bg-slate-500/50 lg:supports-scrollbars:pr-2">
-                <FormRegisterClientAddress @create:success="handleSucess" :id-client="idClient" />
+                <FormRegisterClientAddress @create:success="handleSucess" :id-client="idClient"
+                    :address-details="addressDetails" />
             </div>
         </DialogContent>
     </Dialog>

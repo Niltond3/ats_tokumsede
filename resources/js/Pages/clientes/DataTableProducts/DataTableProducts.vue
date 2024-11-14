@@ -183,9 +183,8 @@ const dataToTable = (data) => {
         setTableData(newProducts)
 
         const itens = itensPedido.map(item => {
-            const { preco: itemPreco, qtd: quantidade, subtotal: itemSubtotal, id, precoAcertado: itemPrecoAcertado, idProduto } = item
+            const { preco: itemPreco, qtd: quantidade, subtotal: itemSubtotal, id, precoAcertado, idProduto } = item
             const preco = toFloat(itemPreco)
-            const precoAcertado = itemPrecoAcertado ? toFloat(itemPrecoAcertado) : null
             const subtotal = toFloat(itemSubtotal)
 
             return {
@@ -222,15 +221,17 @@ watch(() => payload.value.itens, (newVal) => disabledButton.value = newVal.map(p
 
 const updateData = (rowIndex, columnId, value) => {
     const newData = columnId !== 'quantidade' ? [...tableData.value.map((row, index) => {
+        console.log(columnId)
         if (index == rowIndex) {
             const oldRow = tableData.value[rowIndex]
             return {
                 ...oldRow,
-                [columnId]: [{ qtd: oldRow[columnId][0].qtd, val: value }]
+                [columnId]: [{ qtd: oldRow[columnId][0].qtd, val: toFloat(value) }]
             }
         }
         return row;
     })] : [...tableData.value.map((row, index) => {
+        console.log(columnId)
         if (index == rowIndex) {
             const oldRow = tableData.value[rowIndex]
             return {
@@ -243,6 +244,7 @@ const updateData = (rowIndex, columnId, value) => {
 
     setTableData(newData)
     const itens = newData.map(product => {
+        // console.log(product)
         if (product.quantidade > 0) {
             const { id, preco, quantidade } = product
             return {

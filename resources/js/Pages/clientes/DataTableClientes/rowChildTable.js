@@ -81,7 +81,7 @@ export default (d) => {
             return/*html*/`
             <div class="flex gap-1 items-center">
                 <span class="min-w-[4.2rem] flex text-xs opacity-70 justify-start whitespace-nowrap">${detail.label.short}</span>
-                <i class="${iconClasses}"></i>
+                <i class="${iconClasses} group-hover/line:text-white"></i>
                 <span class="overflow-ellipsis whitespace-nowrap overflow-hidden w-[40%]">${detail.data}</span>
                 ${(() => {
                     if (detail.author !== "" && detail.author != undefined) return /*html*/`<span class="text-xs opacity-70 justify-start">responsável</span><span class="whitespace-nowrap overflow-ellipsis overflow-hidden w-[40%]">${detail.author}</span></span>`
@@ -96,11 +96,12 @@ export default (d) => {
         }).join('')
     }
     const customLiOrder = (order) => /*html*/`
-   <li class="${liClasses}">
+   <li class="${liClasses} hover:text-white">
     <i class="ri-e-bike-fill group-hover/line:text-white group-aria-selected/line:!text-white transition-colors"></i>
     <div class="${separator}"></div>
-    <div class="flex flex-col text-info group-hover/line:! group-aria-selected/line!:!text-white w-[82%]">
+    <div class="flex flex-col gap-2 text-info group-hover/line:! group-aria-selected/line!:!text-white w-[82%] group-hover/line:text-white">
         ${orderDetails(order.details)}
+        <div class="w-full h-px bg-slate-300"></div>
         <div
             class='overflow-hidden flex gap-2 mt-2 transition-max-height max-h-0 group-hover/line:max-h-40 group-aria-selected/line:!max-h-40 ease-in-out delay-150'>
             <div class="flex flex-col">

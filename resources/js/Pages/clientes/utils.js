@@ -128,7 +128,7 @@ export const formatOrder = (order) => {
         { classColor: 'text-dispatched', classIcon: 'ri-timer-fill', label: { short: 'Despachado', long: 'Horário Despachado' }, data: order.horarioDespache, author: order.despachadoPor },
         { classColor: 'text-info', classIcon: 'ri-timer-fill', label: { short: 'Entregue', long: 'Horário Entregue' }, data: order.horarioEntrega, author: order.entreguePor },
         { classColor: 'text-danger', classIcon: 'ri-timer-fill', label: { short: 'Cancelado', long: 'Horário Cancelado' }, data: order.horarioCancelado, author: order.canceladoPor },
-        { classColor: '', classIcon: 'ri-e-bike-fill', label: { short: 'entregador', long: 'entregador' }, data: order.entregador?.nome || null, author: '' },
+        { classColor: '', classIcon: 'ri-e-bike-fill', label: { short: 'entregador', long: 'entregador' }, data: utf8Decode(order.entregador?.nome || ''), author: '' },
         { classColor: '', classIcon: 'ri-sticky-note-fill', label: { short: 'Observação', long: 'Observação' }, data: utf8Decode(order.obs || ''), author: '' },
     ].filter(item => item.data)
 
@@ -178,8 +178,8 @@ export const formatOrder = (order) => {
     }
 }
 
-export function handleCopyOrder(order) {
-    const { id: orderId, total, formaPagamento, troco, status: { label: statusLabel }, horarioPedido, horarioAceito, horarioEntrega, horarioDespache, horarioCancelado, dataAgendada, horaInicio, cliente: { nome: cliente, telefone }, distribuidor: { nome: distribuidorNome }, endereco: { logradouro, numero, bairro, complemento, cidade, estado, referencia }, itensPedido } = order.value
+export function orderToClipboard(order) {
+    const { id: orderId, total, formaPagamento, troco, status: { label: statusLabel }, horarioPedido, horarioAceito, horarioEntrega, horarioDespache, horarioCancelado, dataAgendada, horaInicio, cliente: { nome: cliente, telefone }, distribuidor: { nome: distribuidorNome }, endereco: { logradouro, numero, bairro, complemento, cidade, estado, referencia }, itensPedido } = order
 
     const date = dateToISOFormat(horarioPedido)
 

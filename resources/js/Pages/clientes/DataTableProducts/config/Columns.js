@@ -41,15 +41,15 @@ export const columns = [
     //     enableGlobalFilter: true,
     // }),
     {
+        id: 'img',
         accessorKey: 'img',
+        size: 44,
         header: () => h('div', { class: 'text-white font-bold' }, 'img'),
-        cell: ({ row }) => {
-            // console.log(`(${row.original.dddTelefone}) ${row.getValue('telefone')}`)
-            return h('img', { class: 'font-medium', src: row.getValue('img') },)
-        },
+        cell: ({ row }) => h('img', { class: 'font-medium', src: row.getValue('img') },),
         enableGlobalFilter: false,
     },
     {
+        id: 'nome',
         accessorKey: 'nome',
         accessorFn: ({ nome }) => utf8Decode(nome),
         header: ({ column }) => {
@@ -63,7 +63,9 @@ export const columns = [
         enableGlobalFilter: false,
     },
     {
+        id: 'preco',
         accessorKey: 'preco',
+        size: 75,
         accessorFn: ({ preco }) => preco,
         header: ({ column }) => {
             return h(Button, {
@@ -81,11 +83,6 @@ export const columns = [
 
             const cellValue = payloadProduct.length > 0 ? payloadProduct[0].preco : toFloat(`${getValue()[0].val}`)
 
-            console.log('payloadProduct')
-            console.log(payloadProduct)
-            console.log('cellValue')
-            console.log(cellValue)
-
             return h(TableCell, {
                 cellValue,
                 cellkey: cell.id,
@@ -102,6 +99,7 @@ export const columns = [
     },
     {
         id: 'quantidade',
+        size: 90,
         enableHiding: false,
         header: () => h('div', { class: 'font-bold text-white' }, 'quantidade'),
         cell: ({ row, getValue, column, table, cell }) => {
@@ -125,6 +123,7 @@ export const columns = [
     },
     {
         id: 'actions',
+        size: 38,
         enableHiding: false,
         cell: ({ row }) => {
             const payment = row.original

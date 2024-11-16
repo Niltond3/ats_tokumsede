@@ -11,6 +11,7 @@ import 'datatables.net-select-dt';
 import { utf8Decode, dateToISOFormat } from '@/util';
 import { getStatusString } from '../utils';
 import DropDownPedidos from './components/DropDownPedidos.vue';
+import { twMerge } from 'tailwind-merge';
 
 DataTable.use(DataTablesLib);
 
@@ -24,17 +25,18 @@ const table = ref();
 const entregadores = ref([]);
 
 const columns = [
-    { data: 'id', title: '#' },
-    { data: 'distribuidor.nome', title: 'Distribuidor' },
-    { data: 'cliente.nome', title: 'Cliente' },
-    { data: 'cliente.rating', render: '#rating', title: 'Rating' },
+    { data: 'id', title: '#', responsivePriority: 7 },
+    { data: 'distribuidor.nome', title: 'Distribuidor', responsivePriority: 3 },
+    { data: 'cliente.nome', title: 'Cliente', responsivePriority: 2 },
+    { data: 'cliente.rating', render: '#rating', title: 'Rating', responsivePriority: 6 },
     { data: 'horarioPedido', title: 'Data do Pedido' },
-    { data: 'dataAgendada', title: 'Agendamento' },
-    { data: 'status.label', title: 'status' },
+    { data: 'dataAgendada', title: 'Agendamento', responsivePriority: 4 },
+    { data: 'status.label', title: 'status', responsivePriority: 5 },
     {
         data: 'cliente.nome',
         render: '#action',
-        title: 'ações'
+        title: 'ações',
+        responsivePriority: 1
     },
     { data: 'cliente.dddTelefone', title: 'cliente.dddTelefone', visible: false },
     { data: 'cliente.telefone', title: 'cliente.telefone', visible: false },
@@ -89,6 +91,16 @@ const loadTableData = async () => {
 
 onMounted(() => {
     dt = table.value.dt;
+    $('.dt-search').addClass('flex items-center py-2 px-1 gap-2 !text-info/80 !mb-[30px] min-[768px]:!mb-[10px]')
+
+    $('.dt-search > label').html(/*html*/`
+    <span class="hidden">pesquisar</span>
+    <i class="ri-search-2-fill"></i>
+    `)
+
+    const inputClasses = 'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded  bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary !border-input placeholder:text-info/50 !text-info/80'
+
+    $('.dt-search > input').addClass(inputClasses)
     /*
          //STATUS
     const PENDENTE = 1;
@@ -119,6 +131,20 @@ const options = {
     processing: true,
     deferRender: true,
     orderClasses: false,
+    responsive: {
+        details: false,
+        breakpoints: [
+            { name: 'bigdesktop', width: Infinity },
+            { name: 'meddesktop', width: 1480 },
+            { name: 'smalldesktop', width: 1280 },
+            { name: 'medium', width: 1188 },
+            { name: 'tabletl', width: 1024 },
+            { name: 'btwtabllandp', width: 848 },
+            { name: 'tabletp', width: 768 },
+            { name: 'mobilel', width: 480 },
+            { name: 'mobilep', width: 320 }
+        ]
+    },
     columnDefs: [
         {
             orderable: false,
@@ -128,7 +154,7 @@ const options = {
                     <div class="flex items-center gap-1">
                         <i class="${icon} text-lg"></i>
                         <span class="w-0 opacity-0 pointer-events-none">${peso}</span>
-                         ${data}
+                         <span class="hidden min-[768px]:block"> ${data} </span>
                     </div >
                  `
                 const getType = {
@@ -147,21 +173,47 @@ const options = {
             searchPanes: {
                 show: true,
                 controls: false,
-                className: '[&_.dts_label]:hidden [&_tbody]:flex [&_tbody]:justify-center [&_tr]:cursor-pointer [&_tr_div]:flex [&_td]:!pb-[14px] [&_tr_div]:gap-2 [&_input]:opacity-0  [&_input]:pointer-events-none w-[72%] right-0 mr-[266px] max-h-[150px] absolute top-[-40px] !overflow-hidden bg-transparent [&_tr.selected>td]:!shadow-[inset_0_0_0_9999px_rgba(30,136,229,1)] [&_td]:rounded-t-md [&_tr.selected>td]:font-bold [&_tr.selected_.dtsp-nameCont]:translate-y-[5px] [&_tr_div]:transition-transform [&_.dt-scroll-body]:!overflow-hidden [&_.dt-scroll-head]:hidden [&_tr_div]:text-[#1e88e5]/80 [&_tr.selected_div]:!text-white [&_.dt-scroll-body]:!border-none [&_.dt-scroll-body]:!h-[46px]',
+                className: twMerge(
+                    '[&>div.dtsp-topRow]:hidden',
+                    '[&_.dt-layout-row]:!m-0',
+                    '[&_.dt-scroll]:!m-0',
+                    '[&_.dts_label]:hidden',
+                    '[&_tr]:cursor-pointer',
+                    '[&_td]:!pb-[14px]  [&_td]:rounded-t-md',
+                    '[&_tbody]:flex [&_tbody]:justify-center',
+                    '[&_input]:opacity-0 [&_input]:pointer-events-none',
+                    '[&_tr_div]:flex [&_tr_div]:gap-2 [&_tr_div]:transition-transform [&_tr_div]:text-[#1e88e5]/80',
+                    '[&_tr.selected>td]:!shadow-[inset_0_0_0_9999px_rgba(30,136,229,1)] [&_tr.selected>td]:font-bold',
+                    '[&_.dt-scroll-body]:!overflow-hidden [&_.dt-scroll-body]:!border-none',
+                    '[&_tr>.dtsp-nameCont>span>div]:bg-success',
+                    '[&_tr.selected_.dtsp-nameCont]:translate-y-[5px]',
+                    '[&_.dt-scroll-head]:hidden',
+                    '[&_tr.selected_div]:!text-white',
+                    '[&_.dt-scroll-body]:!h-[46px]',
+                    '[&_table]:flex',
+                    '[&_table>colgroup]:hidden',
+                    '[&_table>thead]:hidden',
+                    'absolute top-[55px] right-0',
+                    'min-[768px]:top-[50px]',
+                    'w-full',
+                    '!overflow-hidden bg-transparent'),
             },
             targets: [6]
         }
     ],
     layout: {
-        top1: {
+        top: 'search',
+        topStart: {
             searchPanes: {
                 layout: 'columns-1',
                 cascadePanes: true,
             },
-        }
+        },
+        topEnd: null,
     },
 }
-
+//colgroup
+//thead
 const badgeClasses = 'font-normal inline-block px-2 text-[75%] text-center whitespace-nowrap align-baseline rounded text-white'
 
 </script>

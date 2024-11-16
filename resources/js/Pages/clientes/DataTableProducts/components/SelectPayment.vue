@@ -39,7 +39,7 @@ watch(() => props.default, (newValue) => defaultValue.value = newValue)
 
 <template>
     <Select @update:modelValue="handlePaymentForm" :modelValue="defaultValue">
-        <SelectTrigger class="w-[180px] focus:!ring-transparent text-slate-500">
+        <SelectTrigger class="min-w-32 max-w-32 focus:!ring-transparent text-slate-500">
             <SelectValue placeholder="Forma de pagamento" />
         </SelectTrigger>
         <SelectContent>

@@ -129,7 +129,7 @@ const accordionItems = [
                             <div id="docs-card-content" class="flex items-start gap-6 lg:flex-col">
                                 <div
                                     class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#0B1020]/20 sm:size-16">
-                                    <svg class="size-5 sm:size-6" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    <svg class="size-5 sm:size-6" xmlns="https://www.w3.org/2000/svg" fill="none"
                                         viewBox="0 0 24 24">
                                         <path fill="#fff"
                                             d="M23 4a1 1 0 0 0-1.447-.894L12.224 7.77a.5.5 0 0 1-.448 0L2.447 3.106A1 1 0 0 0 1 4v13.382a1.99 1.99 0 0 0 1.105 1.79l9.448 4.728c.14.065.293.1.447.1.154-.005.306-.04.447-.105l9.453-4.724a1.99 1.99 0 0 0 1.1-1.789V4ZM3 6.023a.25.25 0 0 1 .362-.223l7.5 3.75a.251.251 0 0 1 .138.223v11.2a.25.25 0 0 1-.362.224l-7.5-3.75a.25.25 0 0 1-.138-.22V6.023Zm18 11.2a.25.25 0 0 1-.138.224l-7.5 3.75a.249.249 0 0 1-.329-.099.249.249 0 0 1-.033-.12V9.772a.251.251 0 0 1 .138-.224l7.5-3.75a.25.25 0 0 1 .362.224v11.2Z" />
@@ -155,7 +155,7 @@ const accordionItems = [
                                         representam alcalinidade.
                                         Hoje no Brasil, quem determina todos os Padrões de Potabilidade é a <a
                                             class="link"
-                                            href="http://bvsms.saude.gov.br/bvs/saudelegis/gm/2011/prt2914_12_12_2011.html"
+                                            href="https://bvsms.saude.gov.br/bvs/saudelegis/gm/2011/prt2914_12_12_2011.html"
                                             target="_blank">Portaria 2.914</a> do Ministério da Saúde. Essa portaria
                                         determina que o
                                         valor do pH da água destinada ao consumo humano esteja na faixa entre 6,5 e
@@ -178,8 +178,8 @@ const accordionItems = [
                                 </div>
                             </div>
 
-                            <svg class="size-6 shrink-0 stroke-[#0B1020]" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                viewBox="0 0 24 24" stroke-width="1.5">
+                            <svg class="size-6 shrink-0 stroke-[#0B1020]" xmlns="https://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
                             </svg>
@@ -193,7 +193,7 @@ const accordionItems = [
                                 <button>
                                     <div
                                         class="absolute left-0 top-1/2 -translate-y-1/2 flex size-12 shrink-0 items-center justify-center rounded-full bg-[#0B1020]/20 sm:size-16">
-                                        <svg class="size-5 sm:size-6" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        <svg class="size-5 sm:size-6" xmlns="https://www.w3.org/2000/svg" fill="none"
                                             viewBox="0 0 24 24">
                                             <g fill="#fff">
                                                 <path
@@ -223,7 +223,7 @@ const accordionItems = [
                             class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#0B1020] lg:pb-10 dark:bg-[#1E293B] dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#0B1020]">
                             <div
                                 class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#0B1020]/20 sm:size-16">
-                                <svg class="size-5 sm:size-6" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                <svg class="size-5 sm:size-6" xmlns="https://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 24 24">
                                     <g fill="#fff">
                                         <path
@@ -255,7 +255,7 @@ const accordionItems = [
                                 </p>
                             </div>
 
-                            <svg class="size-6 shrink-0 self-center stroke-[#0B1020]" xmlns="http://www.w3.org/2000/svg"
+                            <svg class="size-6 shrink-0 self-center stroke-[#0B1020]" xmlns="https://www.w3.org/2000/svg"
                                 fill="none" viewBox="0 0 24 24" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
@@ -266,7 +266,7 @@ const accordionItems = [
                             class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#0B1020] lg:pb-10 dark:bg-[#1E293B] dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#0B1020]">
                             <div
                                 class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#0B1020]/20 sm:size-16">
-                                <svg class="size-5 sm:size-6" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                <svg class="size-5 sm:size-6" xmlns="https://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 24 24">
                                     <g fill="#fff">
                                         <path
@@ -311,7 +311,7 @@ const accordionItems = [
                                 </p>
                             </div>
 
-                            <svg class="size-6 shrink-0 self-center stroke-[#0B1020]" xmlns="http://www.w3.org/2000/svg"
+                            <svg class="size-6 shrink-0 self-center stroke-[#0B1020]" xmlns="https://www.w3.org/2000/svg"
                                 fill="none" viewBox="0 0 24 24" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
@@ -322,7 +322,7 @@ const accordionItems = [
                             class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] lg:pb-10 dark:bg-[#1E293B] dark:ring-zinc-800">
                             <div
                                 class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#0B1020]/20 sm:size-16">
-                                <svg class="size-5 sm:size-6" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                <svg class="size-5 sm:size-6" xmlns="https://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 24 24">
                                     <g fill="#fff">
                                         <path

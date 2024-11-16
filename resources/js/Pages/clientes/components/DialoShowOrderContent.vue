@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { utf8Decode, formatMoney } from '@/util';
-import { formatOrder, handleCopyOrder } from '../utils';
+import { formatOrder, orderToClipboard } from '../utils';
 
 const props = defineProps({
     orderId: { type: Number, required: true },
@@ -34,17 +34,21 @@ watch(() => props.isOpen, async (newValue) => fetchOrder())
 onMounted(async () => {
     if (props.orderId) fetchOrder()
 })
+const handleCopyOrder = (order) => {
+    console.log(order)
+    orderToClipboard(order)
+}
 
 </script>
 
 <template>
     <DialogContent
-        class="text-sm max-w-[22rem] sm:max-w-[30rem] md:max-w-[40rem] [&_div]:w-full [&_div]:flex [&_div]:flex-wrap gap-4 max-h-[560px] overflow-scroll scrollbar !scrollbar-w-1.5 !scrollbar-h-1.5 !scrollbar-thumb-slate-200 !scrollbar-track-tr!scrollbar-thumb-rounded scrollbar-track-rounded dark:scrollbar-track:!bg-slate-500/[0.16] dark:scrollbar-thumb:!bg-slate-500/50 lg:supports-scrollbars:pr-2">
+        class="flex flex-col text-sm max-w-[22rem] sm:max-w-[30rem] md:max-w-[40rem] [&_div]:w-full [&_div]:flex [&_div]:flex-wrap gap-4 max-h-[560px] overflow-scroll scrollbar !scrollbar-w-1.5 !scrollbar-h-1.5 !scrollbar-thumb-slate-200 !scrollbar-track-tr!scrollbar-thumb-rounded scrollbar-track-rounded dark:scrollbar-track:!bg-slate-500/[0.16] dark:scrollbar-thumb:!bg-slate-500/50 lg:supports-scrollbars:pr-2 text-slate-500">
         <DialogHeader>
             <DialogTitle class=" font-medium text-info leading-none flex gap-3 justify-between mr-4">
-                <button class="group" @click="handleCopyOrder">#{{ data.id }} <i
+                <button class="group" @click="handleCopyOrder(data)">#{{ data.id }} <i
                         class="ri-file-copy-fill opacity-75 group-hover:opacity-100 transition-all"></i></button>
-                <span>{{ data.distribuidor?.nome }}</span>
+                <span class="text-sm">{{ data.distribuidor?.nome }}</span>
             </DialogTitle>
             <DialogDescription>Detalhes do pedido</DialogDescription>
         </DialogHeader>
@@ -69,7 +73,7 @@ onMounted(async () => {
         <Separator label="outros detalhes" />
         <div class="flex-col relative gap-2 content-start">
             <span
-                class="relative bg-info text-white w-min flex-nowrap py-1 px-2 rounded-full font-semibold pointer-events-none">
+                class="relative bg-info text-white w-min flex-nowrap py-1 px-2 rounded-full font-semibold pointer-events-none whitespace-nowrap">
                 {{ data.origem }}
                 <span
                     class="absolute left-1/2 -translate-x-1/2 z-10 -top-3 text-xs rounded-md bg-white text-info px-1">origem</span>
@@ -90,8 +94,10 @@ onMounted(async () => {
                 </span>
                 <i :class="[detail.classIcon, detail.classColor]" />
                 {{ detail.data }}
-                <span v-if='detail.author !== ""'> <span class="text-xs opacity-70 justify-start">responsável</span>
-                    {{ detail.author }}</span>
+                <span v-if='detail.author !== ""' class="flex gap-1">
+                    <span class="text-xs opacity-70 justify-start w-[5.9rem] md:w-auto">responsável</span>
+                    <span class="text-sm text-slate-500 justify-start">{{ detail.author }}</span>
+                </span>
                 <span v-if="detail.reason"> <span class="text-xs opacity-70 justify-start">motivo</span> {{
                     detail.reason }}</span>
             </div>

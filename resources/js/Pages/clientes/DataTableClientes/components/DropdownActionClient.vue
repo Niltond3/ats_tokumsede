@@ -73,7 +73,7 @@ const handleUpdateDataTable = () => props.dataTable.ajax.reload()
             <DialogEditClient :client-details="rowData" @update:data-table="handleUpdateDataTable" />
             <DropdownMenuSeparator />
             <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
+                <DropdownMenuSubTrigger class="text-info/70">
                     <span>Outros</span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>

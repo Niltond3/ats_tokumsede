@@ -37,9 +37,12 @@ const handleSetActiveTab = (tab) => setActiveTab(tab)
             <TabsContent value="clientes">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Clientes</CardTitle>
+                        <CardTitle>
+                            <span class="hidden">Clientes</span>
+                        </CardTitle>
                         <CardDescription>
-                            Cadastre um novo cliente, edite um já existente ou realizar um pedido em nome de um cliente cadastrado
+                            Cadastre um novo cliente, edite um já existente ou realizar um pedido em nome de um cliente
+                            cadastrado
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="">

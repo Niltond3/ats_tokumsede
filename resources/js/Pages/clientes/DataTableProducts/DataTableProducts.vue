@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, reactive, watch } from 'vue'
+import { useWindowSize } from '@vueuse/core'
 import {
     Table,
     TableBody,
@@ -60,7 +61,12 @@ const addressNote = ref('')
 
 const disabledButton = ref(true)
 
+const resizebleColumns = ref(columns)
+
 const { toCurrency, toFloat } = formatMoney()
+
+const { width } = useWindowSize()
+
 
 const emit = defineEmits(['callback:payloadPedido'])
 
@@ -215,6 +221,18 @@ const dataToTable = (data) => {
     setPayload({ ...payload.value, taxaEntrega, idDistribuidor, idEndereco })
 }
 
+watch(() => width.value, (newVal) => {
+    console.log(newVal)
+    console.log(columns)
+    if (newVal <= 448) {
+        console.log('menor')
+        resizebleColumns.value = [...columns].filter(column => column.id !== "nome")
+        return
+    }
+    resizebleColumns.value = columns
+
+})
+
 watch(() => props.createOrderData, (newVal) => dataToTable(newVal))
 
 watch(() => payload.value.itens, (newVal) => disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false)
@@ -278,7 +296,7 @@ onMounted(() => {
 
 const tableOptions = reactive({
     get data() { return tableData.value },
-    get columns() { return columns },
+    get columns() { return resizebleColumns.value },
     filterFns: {
         fuzzy: fuzzyFilter, //define as a filter function that can be used in column definitions
     },
@@ -323,12 +341,14 @@ const table = useVueTable(tableOptions)
 
 <template>
     <div>
-        <div class="flex items-center py-4 justify-between gap-3">
+        <div class="relative flex flex-wrap items-center py-4 justify-between gap-1 group">
             <Input class="max-w-sm" placeholder="Pesquisar..." :modelValue="globalFilter ?? ''"
                 @update:modelValue="value => (globalFilter = String(value))" />
             <SelectDistributor v-if="props.distributors" :distributors="props.distributors"
                 @update:distributor="handleDistributor" :default="`${payload.idDistribuidor}`"></SelectDistributor>
-            <span v-else>{{ tableIdentifier }}</span>
+            <span v-else
+                class="text-xs font-semibold text-white absolute -bottom-1 bg-dispatched py-1 px-2 rounded-md">{{
+                    tableIdentifier }}</span>
             <button v-if="status"
                 :class="[status.classes.bg, status.label == 'Agendado' ? 'text-slate-700' : 'text-white',]"
                 class="relative font-semibold px-2 py-1 rounded-lg opacity-80 hover:opacity-100"
@@ -349,7 +369,8 @@ const table = useVueTable(tableOptions)
                 class="rounded-md [&_tbody]:h-[235px] [&_tbody]:table-fixed [&_tbody]:block [&_tbody]:overflow-y-auto [&_tbody]:overflow-x-hidden [&_tr]:table [&_tr]:w-full [&_tr]:table-fixed">
                 <TableHeader class="bg-info rounded-md">
                     <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-                        <TableHead v-for="header in headerGroup.headers" :key="header.id">
+                        <TableHead v-for="header in headerGroup.headers" :key="header.id"
+                            :style="{ width: header.getSize() + 'px' }">
                             <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header"
                                 :props="header.getContext()" />
                         </TableHead>
@@ -359,14 +380,15 @@ const table = useVueTable(tableOptions)
                     <template v-if="table.getRowModel().rows?.length">
                         <TableRow v-for="row in table.getRowModel().rows" :key="row.id"
                             :data-state="row.getIsSelected() ? 'selected' : undefined">
-                            <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+                            <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id"
+                                :style="{ width: cell.column.getSize() + 'px' }">
                                 <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                             </TableCell>
                         </TableRow>
                     </template>
                     <template v-else>
                         <TableRow>
-                            <TableCell :colspan="columns.length" class="h-24 text-center">
+                            <TableCell :colspan="resizebleColumns.length" class="h-24 text-center">
                                 No results.
                             </TableCell>
                         </TableRow>
@@ -395,11 +417,11 @@ const table = useVueTable(tableOptions)
                     </div>
                 </div>
                 <Separator label="Detalhes" class="z-100" />
-                <div class="flex p-2 gap-4 h-14 justify-center">
+                <div class="flex flex-wrap gap-2 p-2 sm:h-14 justify-center">
                     <SelectPayment @update:payment-form="handlePayForm" :default="payload.formaPagamento" />
-                    <Separator orientation="vertical" />
+                    <Separator orientation="vertical" class="" />
                     <ExchangeInput @update:exchange="handleExchange" :value="payload.trocoPara" />
-                    <Separator orientation="vertical" />
+                    <Separator orientation="vertical" class="hidden sm:block" />
                     <DateTimePicker @update:scheduling="handleScheduling"
                         :default:scheduling="dateToISOFormat(`${payload.dataAgendada} ${payload.horaInicio}`)" />
                 </div>

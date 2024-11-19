@@ -2,6 +2,7 @@ import "./bootstrap";
 import "../css/app.css";
 import 'remixicon/fonts/remixicon.css';
 import './long-press-event.min.js';
+import 'aos/dist/aos.css';
 
 import { createApp, h } from "vue";
 import router from './router';

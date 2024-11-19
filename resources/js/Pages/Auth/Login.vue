@@ -57,6 +57,7 @@ const onSubmit = handleSubmit((values, { resetField }) => {
         }).catch((error) => {
             console.error(error);
             resetField('senha')
+            location.reload();
         })
 
 })

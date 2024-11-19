@@ -1,5 +1,6 @@
 <?php
 
+include 'cors.php';
 use App\Http\Controllers\Cliente\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Cliente\ProfileController;
 use App\Http\Controllers\Cliente\Auth\ConfirmablePasswordController;

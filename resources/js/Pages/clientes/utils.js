@@ -179,7 +179,9 @@ export const formatOrder = (order) => {
 }
 
 export function orderToClipboard(order) {
-    const { id: orderId, total, formaPagamento, troco, status: { label: statusLabel }, horarioPedido, horarioAceito, horarioEntrega, horarioDespache, horarioCancelado, dataAgendada, horaInicio, cliente: { nome: cliente, telefone }, distribuidor: { nome: distribuidorNome }, endereco: { logradouro, numero, bairro, complemento, cidade, estado, referencia }, itensPedido } = order
+    const { id: orderId, total, formaPagamento, troco, status: { label: statusLabel }, horarioPedido, horarioAceito, horarioEntrega, horarioDespache, horarioCancelado, dataAgendada, horaInicio, cliente: { nome: cliente, telefone }, distribuidor: { nome: distribuidorNome }, endereco: { logradouro, numero, bairro, complemento, cidade, estado, referencia }, itensPedido, obs, trocoPara } = order
+
+    console.log(order)
 
     const date = dateToISOFormat(horarioPedido)
 
@@ -193,12 +195,17 @@ export function orderToClipboard(order) {
     const produtos = itensPedido.map((order) => `${order.qtd} ${order.produto.nome} un ${order.preco} subtotal ${order.subtotal}`).join('\n')
 
     navigator.clipboard.writeText(`
-    #: ${orderId} | cliente: ${cliente}, Telefone: ${telefone}
+    ---------- Pedido nº ${orderId} ----------
+    cliente: ${cliente}, Telefone: ${telefone}
     criado: ${formatDate}
-    status: ${statusLabel}
+    status: ${statusLabel} ${dataAgendada ? `- para ${dataAgendada} às ${horaInicio}` : ''}
     Endereço: ${logradouro}, nº ${numero} - ${complemento}, ${bairro} - ${cidade} ${estado} - ${referencia}
     distribuidor: ${distribuidorNome}
-    ${produtos}`)
+    forma de pagamento: ${formaPagamento} ${trocoPara !== "R$ 0,00" ? `- troco: ${troco}` : ''}
+    ${produtos}
+    total: ${total}
+    ${obs ? `obs: ${obs}` : ''}
+    ---------------------------------------`)
     toast.info('Copiado para a área de transferência', { position: 'top-center' })
 }
 

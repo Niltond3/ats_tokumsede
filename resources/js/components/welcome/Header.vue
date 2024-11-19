@@ -16,10 +16,11 @@ import { RiInformation2Line as InformationIcon } from "vue-remix-icons";
                 class="relative py-8 grid grid-cols-3 gap-x-3 gap-y-7 sm:grid-cols-2 sm:py-10 md:gap-10 md:auto-rows-auto lg:pt-[7.5rem] lg:pb-[8.75rem]">
                 <div class="col-span-2 relative z-20  sm:col-span-1">
                     <h1
-                        class="text-[1.75rem] leading-8 text-white m-0 [text-wrap:balance] md:text-[2rem] lg:text-5xl lg:leading-[3.5rem]">
+                        class="text-[1.75rem] leading-8 text-white m-0 [text-wrap:balance] md:text-[2rem] lg:text-5xl lg:leading-[3.5rem] intersect:animate-fade-right duration-1000 delay-300 animate-ease-in-out intersect-full">
                         Serviço de Captação, Envazamento e distribuição de águas Alcalinas</h1>
                     <div class="mt-5 md:mt-7 lg:text-lg lg:mt-8">
-                        <p class="p1">
+                        <p
+                            class="p1 intersect:animate-fade-right duration-500 delay-200 animate-ease-in-out intersect-full">
                             Presta o serviço de tratamento, envase e distribuição de águas alcalinas de qualidade
                             absoluta para distribuídores espalhados por todo o estado da Paraíba. Garantindo a
                             segurança, qualidade e o melhor custo-beneficio.</p>
@@ -28,7 +29,7 @@ import { RiInformation2Line as InformationIcon } from "vue-remix-icons";
                 <div class="relative sm:row-span-2">
                     <img fetchpriority="high" decoding="async" width="613" height="840"
                         src="https://www.advancedwaterinfrastructure.co.uk/wp-content/uploads/2023/08/reservoir-613x840.jpg"
-                        class="drop-mask absolute left-0 bottom-0 w-auto h-full max-w-none aspect-[613/840] z-20 sm:left-10 sm:h-[calc(100%+9.25rem)] md:h-[calc(100%+11.25rem)] lg:left-[3.75rem] lg:-bottom-[8.75rem] lg:h-[calc(100%+28.75rem)]"
+                        class="intersect:animate-fade-down intersect-full animate-ease-in-out drop-mask absolute left-0 bottom-0 w-auto h-full max-w-none aspect-[613/840] z-20 sm:left-10 sm:h-[calc(100%+9.25rem)] md:h-[calc(100%+11.25rem)] lg:left-[3.75rem] lg:-bottom-[8.75rem] lg:h-[calc(100%+28.75rem)]"
                         alt=""
                         srcset="https://www.advancedwaterinfrastructure.co.uk/wp-content/uploads/2023/08/reservoir-613x840.jpg 613w, https://www.advancedwaterinfrastructure.co.uk/wp-content/uploads/2023/08/reservoir-505x692.jpg 505w"
                         sizes="(max-width: 613px) 100vw, 613px">
@@ -36,7 +37,8 @@ import { RiInformation2Line as InformationIcon } from "vue-remix-icons";
                         class="bg-hero-backdrop bg-no-repeat bg-contain absolute left-0 bottom-0 w-auto h-[var(--ats-hero-backdrop-height)] aspect-[1024/1600] z-10 -translate-x-1/4 translate-y-[var(--ats-hero-backdrop-translate-y)] sm:left-10 sm:h-[calc(var(--ats-hero-backdrop-height)+18.5rem)] md:h-[calc(var(--ats-hero-backdrop-height)+22.5rem)] lg:left-[3.55rem] lg:-bottom-[9.5rem] lg:h-[calc(var(--ats-hero-backdrop-height)+67.75rem)]">
                     </div>
                 </div>
-                <div class="col-span-3 inline-flex items-start gap-x-3 relative z-20 sm:col-span-1">
+                <div
+                    class="col-span-3 inline-flex items-start gap-x-3 relative z-20 sm:col-span-1 opacity-0 intersect:animate-fade intersect-full duration-1000 delay-300 animate-ease-in-out">
                     <Button href="#quemsomos">
                         Quem Somos
                     </Button>

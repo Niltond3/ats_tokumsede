@@ -33,7 +33,7 @@
                         </h2>
                     </AccordionTrigger>
                     <AccordionContent>
-                        <div v-html=item.content
+                        <div v-html="item.content"
                             class="pb-4 px-5 dark:text-grey-700 lg:pb-5 lg:px-7 indent-3.5	flex flex-col gap-3 text-slate-900 [&_p]:text-slate-700">
                         </div>
                     </AccordionContent>

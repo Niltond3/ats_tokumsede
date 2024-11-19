@@ -1,7 +1,9 @@
 <?php
 
+include 'cors.php';
 use App\Http\Controllers\Cliente\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
+
 
 Route::middleware('guest:cliente')->group(function () {
 

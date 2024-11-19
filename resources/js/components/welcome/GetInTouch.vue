@@ -60,7 +60,7 @@ const onSubmit = handleSubmit((values) => {
 
 <template>
     <Dialog>
-        <DialogTrigger as-child class="fixed right-1 bottom-4 z-20">
+        <DialogTrigger as-child class="fixed  bottom-4 z-20">
             <Button>
                 <i class="icon text-xl">
                     <MailIcon></MailIcon>

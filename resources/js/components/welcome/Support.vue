@@ -10,37 +10,37 @@ import CertificatesCarousel from './CertificatesCarousel.vue';
 </script>
 
 <template>
-    <section class="container flex [&>*]:flex-1 gap-4 xl:px-64 mt-20 py-10" id="support">
+    <section class="flex [&>*]:flex-1 gap-4 mt-20 py-10" id="support">
         <div class="flex gap-7 flex-col items-center">
-            <img src="/images/saiba_mais.png" class="w-min" />
+            <img src="/images/saiba_mais.png" class="w-4/5" />
             <div
-                class="flex flex-col text-slate-300 [&>div]:flex [&>div]:items-center [&>div]:justify-between [&>div]:py-4 [&>div]:px-7 [&_h4]:text-xl [&_p]:text-sm [&_p]:max-w-[70%] [&_p]:text-slate-100 [&_i]:text-2xl [&>div]:relative [&>div]:after:absolute [&>div]:after:-bottom-[16px] [&>div]:after:z-10 [&>div]:after:left-1/2 [&>div]:after:-translate-x-1/2 [&>div]:after:h-0 [&>div]:after:w-0 [&>div]:after:border-x-[16px] [&>div]:after:border-b-[16px] [&>div]:after:border-x-transparent [&>div]:after:rotate-180">
-                <h2 class="my-8 text-slate-700">Como Comprar?</h2>
-                <div class="bg-stone-600 after:border-stone-600 gap-3">
+                class="flex flex-col text-slate-300 [&>div]:flex [&>div]:items-center [&>div]:justify-between [&>div]:py-4 [&>div]:px-3 px-6 [&_h4]:text-xl [&_p]:text-sm [&_p]:max-w-[70%] [&_p]:text-slate-100 [&_i]:text-2xl [&>div]:relative [&>div]:after:absolute [&>div]:after:-bottom-[16px] [&>div]:after:z-10 [&>div]:after:left-1/2 [&>div]:after:-translate-x-1/2 [&>div]:after:h-0 [&>div]:after:w-0 [&>div]:after:border-x-[16px] [&>div]:after:border-b-[16px] [&>div]:after:border-x-transparent [&>div]:after:rotate-180">
+                <h2 class="my-8 text-slate-700 ">Como Comprar?</h2>
+                <div class="bg-stone-600 after:border-stone-600 gap-0">
                     <div
                         class="absolute top-[-20px] left-[-20px] bg-slate-300 text-stone-600 text-3xl font-semibold border-solid border-[5px] border-stone-600 rounded-full w-10 h-10  flex items-center justify-center">
                         1
                     </div>
-                    <div>
+                    <div class="">
                         <h4>Passo 1</h4>
                         <p>Escolha a melhor forma de realizar o pedido</p>
                     </div>
-                    <Button class="max-md:h-14 max-md:w-14" href="/">
+                    <button class="w-7 h-7 " href="/">
                         <span class="hidden min-[768px]:block">whatspp</span>
                         <i class="icon icon--chevron-right text-xl">
                             <WhatsappIcon />
                         </i>
-                    </Button>
-                    <Button class="max-md:h-14 max-md:w-14" href="/">
+                    </button>
+                    <button class="w-7 h-7 " href="/">
                         <span class="hidden min-[768px]:block">Site</span>
                         <i class="icon icon--chevron-right text-xl">
                             <WebIcon />
                         </i>
-                    </Button>
-                    <Button class="max-md:h-14 max-md:w-14" href="/">
+                    </button>
+                    <button class="w-7 h-7 " href="/">
                         <span class="hidden min-[768px]:block">App</span>
                         <img src="/images/tokumsede-app.png" class="max-w-8"></img>
-                    </Button>
+                    </button>
 
                 </div>
                 <div class="bg-sky-600 after:border-sky-600">
@@ -97,11 +97,11 @@ import CertificatesCarousel from './CertificatesCarousel.vue';
 
             </div>
             <div class="gap-4 flex flex-col [&_*]:text-slate-700">
-                <h2 class="my-8">Licenças e Certificados</h2>
-                <p>
+                <h2 class="my-8 px-6">Licenças e Certificados</h2>
+                <p class="px-6">
                     Transparecemos as nossas Licenças e Certificações!
                 </p>
-                <p>
+                <p class="px-6">
                     Em respeito a <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2017/lei/l13425.htm"
                         target="_blank" class="hover:underline transition-all">Lei 13.425 de 30 de março de 2017</a>,
                     publicamos aqui as

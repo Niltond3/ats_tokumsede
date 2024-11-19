@@ -1,7 +1,7 @@
 <script setup>
-import { computed } from "vue";
-import { AccordionItem, useForwardProps } from "radix-vue";
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
+import { AccordionItem, useForwardProps } from 'radix-vue';
+import { computed } from 'vue';
 
 const props = defineProps({
   disabled: { type: Boolean, required: false },

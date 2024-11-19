@@ -24,6 +24,11 @@ export default defineConfig({
             },
         }),
     ],
+    server: {
+        proxy: {
+            '/api': 'http://localhost:8000',  // Se o backend Laravel estiver rodando na porta 8000
+        },
+    },
     optimizeDeps: {
         include: ["@fawmi/vue-google-maps", "fast-deep-equal"],
     },

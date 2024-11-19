@@ -84,7 +84,7 @@
                     </router-link>
                     <a class="nav-link active" data-toggle="tab" role="tab" id="audio">
                         <i class="mdi mdi-volume-off"></i>
-                    </a> 
+                    </a>
                 </li>
                 @endif
             </ul>
@@ -105,9 +105,10 @@
                 @includeWhen(true, 'templates.application.components.navbar-messages')
                 <!-- ============================================================== -->--}}
                 <!-- End Messages -->
-                <!-- ============================================================== -->     
+                <!-- ============================================================== -->
                 <form id="form-logout" action="{{ route('logout') }}" method="POST" style="display: none;">
                     {{ csrf_field() }}<input type="hidden" name="mobile" id="input-form-logout"/>
+                    
                 </form><!--diferencia 'Sair' mobile true ou mobile false para zerar token fcm-->
                 <li class="nav-item">
                 <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('form-logout').submit();" class="nav-link text-muted waves-effect waves-dark"><i class="mdi mdi-logout" aria-hidden="true"></i>Sair</a>

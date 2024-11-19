@@ -425,6 +425,11 @@ class PedidoController extends Controller
         // $idUsuario = auth()->user()->id; //$this->escape("user");
         // //Recuperando dados do usuário
         $u = auth()->user();//Administrador::find($idUsuario);
+
+        Debugbar::info(auth());
+        Debugbar::info($u);
+        Debugbar::info($u->tipoAdministrador);
+
         if (auth()->check()) {
             if (strcmp($u->tipoAdministrador, "Administrador") == 0 || strcmp($u->tipoAdministrador, "Atendente") == 0) {
                 $pedidosPendentes = Pedido::with('distribuidor', 'endereco', 'entregador')

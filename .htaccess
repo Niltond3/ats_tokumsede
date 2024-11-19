@@ -3,10 +3,10 @@
         Options -MultiViews -Indexes
     </IfModule>
 
-    RewriteEngine On
+     RewriteEngine On
 
-    RewriteCond %{HTTPS} off
-    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+     RewriteCond %{HTTPS} off
+     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
@@ -18,22 +18,11 @@
     RewriteRule ^ %1 [L,R=301]
 
     # Handle Front Controller...
-    RewriteBase /
-    RewriteRule ^index\.php$ - [L]
-    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule . /index.php [L]
-
-    #Redirecionar para HTTPS
-    RewriteCond %{HTTP:X-Forwarded-Proto} !https
-    RewriteCond %{HTTPS} off
-    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-    php_value upload_max_filesize 128M
-    php_value post_max_size 128M
-    php_value max_execution_time 300
-    php_value max_input_time 300
-    php_value memory_limit 256M
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+<FilesMatch "\.(php|html|htm)$">
     <IfModule mod_headers.c>
         Header set Access-Control-Allow-Origin "*"
         Header set Access-Control-Allow-Headers "X-CSRF-TOKEN"
@@ -41,4 +30,4 @@
         Header set Access-Control-Allow-Headers "Content-Type, Authorization"
         Header always set Content-Security-Policy "upgrade-insecure-requests;"
     </IfModule>
-</IfModule>
+</FilesMatch>

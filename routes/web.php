@@ -1,4 +1,5 @@
 <?php
+include 'cors.php';
 
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ContactController;

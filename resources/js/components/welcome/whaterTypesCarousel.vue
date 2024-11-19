@@ -54,7 +54,7 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
 
 <template>
     <div class="flex items-center flex-col">
-        <Carousel class="relative w-full max-w-xs px-3" @init-api="(val) => emblaMainApi = val">
+        <Carousel class="relative w-full max-w-xs" @init-api="(val) => emblaMainApi = val">
             <CarouselContent>
                 <CarouselItem v-for="{ index, url, title } in certificates" :key="index">
                     <div class="p-1">
@@ -80,9 +80,9 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
                 </CarouselItem>
             </CarouselContent>
             <CarouselPrevious
-                class="border-2 text-sky-200 hover:text-sky-600 transition-colors left-0 border-success/30" />
+                class="border-2 text-sky-200 hover:text-sky-600 transition-colors left-[-1rem] border-success/30" />
             <CarouselNext
-                class="border-2 text-sky-200 hover:text-sky-600 transition-colors right-0 border-success/30" />
+                class="border-2 text-sky-200 hover:text-sky-600 transition-colors right-[-1rem] border-success/30" />
         </Carousel>
 
         <Carousel class="relative w-full max-w-xs" @init-api="(val) => emblaThumbnailApi = val">

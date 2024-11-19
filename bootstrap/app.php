@@ -1,11 +1,21 @@
 <?php
 
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: x-csrf-token");
+header("Access-Control-Allow-Headers: x-xsrf-token");
+header("Access-Control-Allow-Headers: Origin, X-Requested-With, Accept");
+header("Access-Control-Allow-Headers: Acess-Control-Allow-Headers, Acess-Control-Allow-Methods");
+header('Access-Control-Allow-Headers: Content-Type, X-Auth-Token, Authorization,charset,boundary,Content-Length');
+header("Content-Type: application/json");
+header("Access-Control-Allow-Headers: PUT, POST, GET, DELETE, OPTIONS");
+
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\Authenticate;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -24,7 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->alias([
             'guest' => RedirectIfAuthenticated::class,
-            'auth' => Authenticate::class
+            'auth' => Authenticate::class,
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,

@@ -11,7 +11,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Favicon icon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="/vendor/wrappixel/material-pro/4.1.0/assets/images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/public/favicon.ico">
     {{--<link rel="icon" type="image/png" sizes="16x16" href="/vendor/wrappixel/material-pro/4.1.0/assets/images/favicon.ico">--}}
     <title>TôKumSede Delivery</title>
 

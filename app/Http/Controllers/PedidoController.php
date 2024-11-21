@@ -431,84 +431,117 @@ class PedidoController extends Controller
         Debugbar::info($u->tipoAdministrador);
 
         if (auth()->check()) {
-            if (strcmp($u->tipoAdministrador, "Administrador") == 0 || strcmp($u->tipoAdministrador, "Atendente") == 0) {
-                $pedidosPendentes = Pedido::with('distribuidor', 'endereco', 'entregador')
-                    ->selectRaw("pedido.*, CONCAT('R$', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                    ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and ((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
-                    ->orderBy('id', 'DESC')->get();
-                $pedidosAceitos = Pedido::with('distribuidor', 'endereco', 'entregador')
-                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                    ->whereRaw("pedido.status = " . Pedido::ACEITO)
-                    ->orderBy('id', 'DESC')->get();
-                $pedidosDespachados = Pedido::with('distribuidor', 'endereco', 'entregador')
-                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                    ->whereRaw("pedido.status = " . Pedido::DESPACHADO)
-                    ->orderBy('id', 'DESC')->get();
-                $pedidosEntregues = Pedido::with('distribuidor', 'endereco', 'entregador')
-                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioEntrega, '%d/%m/%Y %H:%i') as dataEntrega, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                    ->whereRaw("pedido.status = " . Pedido::ENTREGUE . " and DATE(pedido.horarioEntrega) = CURDATE()")
-                    ->orderBy('id', 'DESC')->get();
-                $pedidosCancelados = Pedido::with('distribuidor', 'endereco', 'entregador')
-                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                    ->whereRaw("(pedido.status = " . Pedido::CANCELADO_USUARIO . " OR "
-                            . "pedido.status = " . Pedido::CANCELADO_NAO_LOCALIZADO . " OR "
-                            . "pedido.status = " . Pedido::CANCELADO_TROTE . " OR "
-                            . "pedido.status = " . Pedido::RECUSADO . ") and DATE(pedido.horarioPedido) = CURDATE()")
-                    ->orderBy('id', 'DESC')->get();
-                $pedidosAgendados = Pedido::with('distribuidor', 'endereco', 'entregador')
-                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                    ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and pedido.agendado = 1")
-                    ->orderBy('id', 'DESC')->get();
-                $ultimoPedido = Pedido::orderBy("pedido.id", "DESC")
-                    ->limit(1)
-                    ->get();
-                $entregadores = Entregador::where("status", Entregador::ATIVO)->select('id','nome')->get();
+            if($u->tipoAdministrador == null){
+                Debugbar::info('aqui');
+                $pedidosPendentes = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id' )->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and ((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosAceitos = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id' )->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::ACEITO)
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosDespachados = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id' )->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::DESPACHADO)
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosEntregues = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id' )->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioEntrega, '%d/%m/%Y %H:%i') as dataEntrega, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::ENTREGUE . " and DATE(pedido.horarioEntrega) = CURDATE()")
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosCancelados = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id' )->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("(pedido.status = " . Pedido::CANCELADO_USUARIO . " OR "
+                                . "pedido.status = " . Pedido::CANCELADO_NAO_LOCALIZADO . " OR "
+                                . "pedido.status = " . Pedido::CANCELADO_TROTE . " OR "
+                                . "pedido.status = " . Pedido::RECUSADO . ") and DATE(pedido.horarioPedido) = CURDATE()")
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosAgendados = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id' )->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and pedido.agendado = 1")
+                        ->orderBy('id', 'DESC')->get();
+                    $ultimoPedido = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id' )->where('enderecoCliente.idCliente', $u->id)->orderBy("pedido.id", "DESC")
+                        ->limit(1)
+                        ->get();
+                    $entregadores = Entregador::where("status", Entregador::ATIVO)->select('id','nome')->get();
+            }else{
+                if (strcmp($u->tipoAdministrador, "Administrador") == 0 || strcmp($u->tipoAdministrador, "Atendente") == 0) {
+                    $pedidosPendentes = Pedido::with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and ((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosAceitos = Pedido::with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::ACEITO)
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosDespachados = Pedido::with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::DESPACHADO)
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosEntregues = Pedido::with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioEntrega, '%d/%m/%Y %H:%i') as dataEntrega, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::ENTREGUE . " and DATE(pedido.horarioEntrega) = CURDATE()")
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosCancelados = Pedido::with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("(pedido.status = " . Pedido::CANCELADO_USUARIO . " OR "
+                                . "pedido.status = " . Pedido::CANCELADO_NAO_LOCALIZADO . " OR "
+                                . "pedido.status = " . Pedido::CANCELADO_TROTE . " OR "
+                                . "pedido.status = " . Pedido::RECUSADO . ") and DATE(pedido.horarioPedido) = CURDATE()")
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosAgendados = Pedido::with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and pedido.agendado = 1")
+                        ->orderBy('id', 'DESC')->get();
+                    $ultimoPedido = Pedido::orderBy("pedido.id", "DESC")
+                        ->limit(1)
+                        ->get();
+                    $entregadores = Entregador::where("status", Entregador::ATIVO)->select('id','nome')->get();
 
-            } else {
-                if (strcmp($u->tipoAdministrador, "Entregador") == 0) {
-                    $entregadores = Entregador::where([
-                        ["status", Entregador::ATIVO],
-                        ['nome', $u->nome]
-                    ])->select('id','nome')->get();
-                }else{
-                    $entregadores = Entregador::where([
+                } else {
+                    if (strcmp($u->tipoAdministrador, "Entregador") == 0) {
+                        $entregadores = Entregador::where([
                             ["status", Entregador::ATIVO],
-                            ['idDistribuidor', $u->idDistribuidor]
+                            ['nome', $u->nome]
                         ])->select('id','nome')->get();
+                    }else{
+                        $entregadores = Entregador::where([
+                                ["status", Entregador::ATIVO],
+                                ['idDistribuidor', $u->idDistribuidor]
+                            ])->select('id','nome')->get();
+                    }
+                    $pedidosPendentes = Pedido::where('idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and ((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosAceitos = Pedido::where('idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::ACEITO)
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosDespachados = Pedido::where($u->tipoAdministrador=="Entregador"?[['idDistribuidor', $u->idDistribuidor],['idEntregador', $entregadores[0]->id]]:'idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::DESPACHADO)
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosEntregues = Pedido::where(strcmp($u->tipoAdministrador, "Entregador") == 0?[['idDistribuidor', $u->idDistribuidor],['idEntregador', $entregadores[0]->id]]:'idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioEntrega, '%d/%m/%Y %H:%i') as dataEntrega, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::ENTREGUE . " and DATE(pedido.horarioEntrega) = CURDATE()")
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosCancelados = Pedido::where('idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("(pedido.status = " . Pedido::CANCELADO_USUARIO . " OR "
+                                . "pedido.status = " . Pedido::CANCELADO_NAO_LOCALIZADO . " OR "
+                                . "pedido.status = " . Pedido::CANCELADO_TROTE . " OR "
+                                . "pedido.status = " . Pedido::RECUSADO . ") and DATE(pedido.horarioPedido) = CURDATE()")
+                        ->orderBy('id', 'DESC')->get();
+                    $pedidosAgendados = Pedido::where('idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
+                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                        ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and pedido.agendado = 1")
+                        ->orderBy('id', 'DESC')->get();
+                    $ultimoPedido = Pedido::where('idDistribuidor', $u->idDistribuidor)
+                        ->orderBy("pedido.id", "DESC")
+                        ->limit(1)
+                        ->get();
                 }
-                $pedidosPendentes = Pedido::where('idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
-                    ->selectRaw("pedido.*, CONCAT('R$', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                    ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and ((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
-                    ->orderBy('id', 'DESC')->get();
-                $pedidosAceitos = Pedido::where('idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
-                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                    ->whereRaw("pedido.status = " . Pedido::ACEITO)
-                    ->orderBy('id', 'DESC')->get();
-                $pedidosDespachados = Pedido::where($u->tipoAdministrador=="Entregador"?[['idDistribuidor', $u->idDistribuidor],['idEntregador', $entregadores[0]->id]]:'idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
-                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                    ->whereRaw("pedido.status = " . Pedido::DESPACHADO)
-                    ->orderBy('id', 'DESC')->get();
-                $pedidosEntregues = Pedido::where(strcmp($u->tipoAdministrador, "Entregador") == 0?[['idDistribuidor', $u->idDistribuidor],['idEntregador', $entregadores[0]->id]]:'idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
-                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioEntrega, '%d/%m/%Y %H:%i') as dataEntrega, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                    ->whereRaw("pedido.status = " . Pedido::ENTREGUE . " and DATE(pedido.horarioEntrega) = CURDATE()")
-                    ->orderBy('id', 'DESC')->get();
-                $pedidosCancelados = Pedido::where('idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
-                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                    ->whereRaw("(pedido.status = " . Pedido::CANCELADO_USUARIO . " OR "
-                            . "pedido.status = " . Pedido::CANCELADO_NAO_LOCALIZADO . " OR "
-                            . "pedido.status = " . Pedido::CANCELADO_TROTE . " OR "
-                            . "pedido.status = " . Pedido::RECUSADO . ") and DATE(pedido.horarioPedido) = CURDATE()")
-                    ->orderBy('id', 'DESC')->get();
-                $pedidosAgendados = Pedido::where('idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
-                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                    ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and pedido.agendado = 1")
-                    ->orderBy('id', 'DESC')->get();
-                $ultimoPedido = Pedido::where('idDistribuidor', $u->idDistribuidor)
-                    ->orderBy("pedido.id", "DESC")
-                    ->limit(1)
-                    ->get();
-
-
             }
             foreach ($pedidosPendentes as $pedidoPendente) {
                 $pedidoPendente["horaEsgotando"] = $this->maior30Minutos($pedidoPendente->dataAgendada . " " . $pedidoPendente->horaInicio);
@@ -517,7 +550,14 @@ class PedidoController extends Controller
                 $pedidoAceito["horaEsgotando"] = $this->maior30Minutos($pedidoAceito->dataAgendada . " " . $pedidoAceito->horaInicio);
             }
             // return [$pedidosPendentes, $pedidosAceitos, $pedidosEntregues, $pedidosCancelados, $pedidosAgendados, $ultimoPedido[0]->id, $entregadores];
-
+            Debugbar::info($pedidosPendentes);
+            Debugbar::info($pedidosAceitos);
+            Debugbar::info($pedidosDespachados);
+            Debugbar::info($pedidosEntregues);
+            Debugbar::info($pedidosCancelados);
+            Debugbar::info($pedidosAgendados);
+            Debugbar::info($ultimoPedido);
+            Debugbar::info($entregadores);
             return [$pedidosPendentes, $pedidosAceitos, $pedidosDespachados, $pedidosEntregues, $pedidosCancelados, $pedidosAgendados, $ultimoPedido[0]->id, $entregadores];
         } else {
             return response('Sua sessão expirou. Por favor, refaça seu login.', 400);
@@ -545,9 +585,9 @@ class PedidoController extends Controller
         $pedido->obs = $request->obs?$request->obs:"";
         $pedido->horarioPedido   = date('Y-m-d H:i:s');
         $pedido->status          = Pedido::PENDENTE;
-        $pedido->origem          = Pedido::PLATAFORMA;
+        $pedido->origem          = $request->origem?$request->origem:Pedido::PLATAFORMA;
         $pedido->dataAgendada    = $dataAgendada;
-        $pedido->idAdministrador = $idAdministrador;
+        $pedido->idAdministrador = $request->origem?null:$idAdministrador;
         $administradores = Administrador::where([['idDistribuidor', $request->idDistribuidor],['status','Ativo'],['id','!=',$idAdministrador]])->orwhere([['tipoAdministrador', 'Administrador'],['status', 'Ativo'],['id','!=',$idAdministrador]])->orwhere([['tipoAdministrador', 'Atendente'],['status', 'Ativo'],['id','!=',$idAdministrador]])->get();
         $endereco = EnderecoCliente::find($request->idEndereco);
         $endereco->update($request->all());
@@ -555,7 +595,7 @@ class PedidoController extends Controller
         $valorAgua=null;
 
         //$request->idDistribuidor==23?$pedido->idDistribuidor=14:'';//PASSAR PEDIDOS DA TKS PRAIA PARA O TREZE DE MAIO
-
+        Debugbar::info($pedido);
         if ($pedido->save()) {
             foreach ($request->itens as $item) {
                 //Cria novo objeto referente ao Item
@@ -656,7 +696,7 @@ class PedidoController extends Controller
             }
             return $pedido->id;//return response('Pedido '.$pedido.' cadastrado com sucesso.', 200);
         } else {
-            return response("Erro ao cadastrar o produto. Tente novamente ou contate o produto.");
+            return response("Erro ao cadastrar o produto. Tente novamente ou contate a central.");
         }
         return $itens;
         //CADASTRAR PEDIDO
@@ -1223,7 +1263,7 @@ class PedidoController extends Controller
        //}
        //return $clientes;
 
-        // ->join('enderecoCliente','cliente.id', '=', 'enderecoCliente.idCliente')
+        // ->join('enderecoCliente', 'pedido.idEndereco', '=','endereco.id''cliente.id', '=', 'enderecoCliente.idCliente')
         // ->select('cliente.*','enderecoCliente.id as idEndereco', 'logradouro', 'numero', 'bairro', 'complemento', 'cep', 'cidade', 'estado', 'referencia', 'apelido', 'atual', 'idCliente', 'latitude', 'longitude')
         // ->get();
 

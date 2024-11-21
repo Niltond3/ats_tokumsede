@@ -16,7 +16,8 @@ import { twMerge } from 'tailwind-merge';
 DataTable.use(DataTablesLib);
 
 const props = defineProps({
-    setTab: { type: Function, required: true },
+    setTab: { type: Function, required: false },
+    ajustClass: { type: String, required: false },
 })
 
 let dt;
@@ -174,6 +175,7 @@ const options = {
                 show: true,
                 controls: false,
                 className: twMerge(
+                    props.ajustClass,
                     '[&>div.dtsp-topRow]:hidden',
                     '[&_.dt-layout-row]:!m-0',
                     '[&_.dt-scroll]:!m-0',

@@ -38,7 +38,7 @@ function handleImageError() {
 
 <template>
 
-    <Head title="Ats - Águas Teera Santa"></Head>
+    <Head title="Ats - Águas Terra Santa"></Head>
     <div class="bg-gray-50 text-black/50 dark:bg-[#0B1020] dark:text-white/50 w-full overflow-x-hidden">
         <Header />
         <WhatInside />

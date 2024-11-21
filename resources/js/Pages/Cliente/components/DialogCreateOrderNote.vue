@@ -11,16 +11,15 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { dialogState } from '../../useToggleDialog'
+import { dialogState } from '@/hooks/useToggleDialog'
+import { twMerge } from 'tailwind-merge'
 
-const [isOpen, toggleDialog] = dialogState()
+const { isOpen, toggleDialog } = dialogState()
 
 
 const emit = defineEmits(['callback:orderNote'])
 
-const props = defineProps(['orderNote'])
+const props = defineProps(['orderNote', 'class'])
 
 const note = ref(props.orderNote);
 
@@ -41,7 +40,7 @@ watch(() => props.orderNote, (newValue) => {
     <Dialog :open="isOpen" @update:open="() => toggleDialog()">
         <DialogTrigger as-child>
             <button
-                class="absolute bg-dispatched p-0 rounded-md w-6 h-6 flex justify-center items-center shadow-lg transition-all hover:shadow-sm hover:rounded-full hover:w-8 hover:h-8 top-[-0.75rem] right-[-0.75rem] z-10">
+                :class="twMerge('absolute bg-dispatched p-0 rounded-md w-6 h-6 flex justify-center items-center shadow-lg transition-all hover:shadow-sm hover:rounded-full hover:w-8 hover:h-8 top-[-0.75rem] right-[-0.75rem] z-10', props.class)">
                 <i class="ri-sticky-note-add-fill text-white "></i>
             </button>
         </DialogTrigger>

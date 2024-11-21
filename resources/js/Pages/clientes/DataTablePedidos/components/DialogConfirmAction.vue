@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
-import { dialogState } from '../../useToggleDialog'
+import { dialogState } from '../../../../hooks/useToggleDialog'
 import DialogConfirmActionContent from '../../components/DialogConfirmActionContent.vue';
 
 const props = defineProps({
@@ -14,7 +14,7 @@ const props = defineProps({
     variant: { type: String, required: true }
 })
 
-const [isOpen, toggleDialog] = dialogState()
+const { isOpen, toggleDialog } = dialogState()
 
 const emits = defineEmits(["on:confirm"]);
 

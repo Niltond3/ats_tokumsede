@@ -16,6 +16,7 @@ export const payloadPedido = () => {
         idEndereco: 0,
         idDistribuidor: 0,
         itens: [{}],
+        origem: null
     });
 
     function setPayload(newPayload) {

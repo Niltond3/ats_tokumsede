@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { RegisterDetails } from '@/components/forms/registerClient';
-import { dialogState } from '../../useToggleDialog'
+import { dialogState } from '@/hooks/useToggleDialog'
 
 const props = defineProps({
     clientDetails: { type: Object, required: false },
@@ -21,7 +21,7 @@ const details = ref()
 
 const emits = defineEmits(['update:dataTable'])
 
-const [isOpen, toggleDialog] = dialogState()
+const { isOpen, toggleDialog } = dialogState()
 
 const handleDialogOutsideInteract = (event) => {
     const classes = [];

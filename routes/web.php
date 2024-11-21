@@ -44,32 +44,34 @@ Route::middleware('auth')->group(function () {
     //ENDERECOS CLIENTES
     Route::resource('enderecos', EnderecoClienteController::class,['except' => 'create']);
 
-    //PEDIDOS
-    Route::group(['prefix' => 'pedidos'], function(){
-    Route::resource('/', PedidoController::class,['except' => 'create']);
-    Route::get('visualizar/{id}', [PedidoController::class, 'visualizar']);
-    Route::put('aceitar/{id}', [PedidoController::class, 'aceitar']);
-    Route::put('despachar/{id}', [PedidoController::class, 'despachar']);
-    Route::put('recusar/{id}', [PedidoController::class, 'recusar']);
-    Route::put('entregar/{id}', [PedidoController::class, 'entregar']);
-    Route::put('cancelar/{id}', [PedidoController::class, 'cancelar']);
-    Route::get('editar/{id}', [PedidoController::class, 'editar']);
-    Route::put('atualizar/{id}', [PedidoController::class, 'atualizar']);
-    Route::get('escolherentregador/{id}', [PedidoController::class, 'escolherentregador']);
-    Route::get('ajustarCoordenadas/{id}', [PedidoController::class, 'ajustarCoordenadas']);
-    Route::post('ajustarCoordenadas/{id}', [PedidoController::class, 'ajustarCoordenadas']);
-    Route::get('buscarNovosPedidos/{id}', [PedidoController::class, 'buscarNovosPedidos']);
-    Route::get('ultimoPedido', [PedidoController::class, 'ultimoPedido']);
-    Route::get('listaClientes', [PedidoController::class, 'listaClientes']);
-});
+        //PEDIDOS
+        Route::group(['prefix' => 'pedidos'], function(){
+        Route::resource('/', PedidoController::class,['except' => 'create']);
+        Route::get('visualizar/{id}', [PedidoController::class, 'visualizar']);
+        Route::put('aceitar/{id}', [PedidoController::class, 'aceitar']);
+        Route::put('despachar/{id}', [PedidoController::class, 'despachar']);
+        Route::put('recusar/{id}', [PedidoController::class, 'recusar']);
+        Route::put('entregar/{id}', [PedidoController::class, 'entregar']);
+        Route::put('cancelar/{id}', [PedidoController::class, 'cancelar']);
+        Route::get('editar/{id}', [PedidoController::class, 'editar']);
+        Route::put('atualizar/{id}', [PedidoController::class, 'atualizar']);
+        Route::get('escolherentregador/{id}', [PedidoController::class, 'escolherentregador']);
+        Route::get('ajustarCoordenadas/{id}', [PedidoController::class, 'ajustarCoordenadas']);
+        Route::post('ajustarCoordenadas/{id}', [PedidoController::class, 'ajustarCoordenadas']);
+        Route::get('buscarNovosPedidos/{id}', [PedidoController::class, 'buscarNovosPedidos']);
+        Route::get('ultimoPedido', [PedidoController::class, 'ultimoPedido']);
+        Route::get('listaClientes', [PedidoController::class, 'listaClientes']);
+    });
+
+    //PRODUTOS
+    Route::group(['prefix' => 'produtos'], function(){
+        Route::resource('/', ProdutoController::class,['except' => 'create']);
+        Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class,'listarProdutos']);
+        Route::get('{idEnderecoCliente}', [ProdutoController::class,'show']);
+    });
 });
 
-//PRODUTOS
-Route::group(['prefix' => 'produtos'], function(){
-    Route::resource('/', ProdutoController::class,['except' => 'create']);
-    Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class,'listarProdutos']);
-    Route::get('{idEnderecoCliente}', [ProdutoController::class,'show']);
-});
+
 
 Route::get('/homepage', [HomeController::class, 'getHomepage'])->name('homepage');
 

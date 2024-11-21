@@ -8,5 +8,5 @@ export const dialogState = () => {
         return isOpen.value = true;
     }
 
-    return [isOpen, toggleDialog];
+    return { isOpen, toggleDialog };
 };

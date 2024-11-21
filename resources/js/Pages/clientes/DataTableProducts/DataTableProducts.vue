@@ -27,9 +27,12 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { editRow } from './hooks/useEditRow'
 import { dataTable } from './hooks/useDataTable'
-import { payloadPedido } from './hooks/usePayloadPedido'
+import { payloadPedido } from '@/hooks/usePayloadPedido'
 import { columns } from './config/Columns'
-import { SelectPayment, ExchangeInput, DateTimePicker, SelectDistributor, DialogCreateOrderNote } from './components/'
+import {  SelectDistributor, DialogCreateOrderNote } from './components/'
+import SelectPayment from '@/components/orderComponents/SelectPayment.vue'
+import ExchangeInput from '@/components/orderComponents/ExchangeInput.vue'
+import DateTimePicker from '@/components/orderComponents/DateTimePicker.vue'
 import { toast } from 'vue-sonner'
 import { dateToDayMonthYearFormat, dateToISOFormat, formatMoney } from '@/util'
 
@@ -112,13 +115,11 @@ const handleCallbackPedido = () => {
     emit('callback:payloadPedido', payload.value)
 }
 
+const handlePayForm = (value) => setPayload({ ...payload.value, formaPagamento: value })
+
 const handleExchange = ({ value }) => {
     setPayload({ ...payload.value, trocoPara: parseFloat(value.split(' ')[1]) })
 }
-
-const handlePayForm = (value) => setPayload({ ...payload.value, formaPagamento: value })
-
-const handleDistributor = (value) => setPayload({ ...payload.value, idDistribuidor: value })
 
 const handleScheduling = (date) => {
     if (date) {
@@ -132,6 +133,8 @@ const handleScheduling = (date) => {
     }
     return setPayload({ ...payload.value, agendado: 0, dataAgendada: '', horaInicio: '' })
 }
+
+const handleDistributor = (value) => setPayload({ ...payload.value, idDistribuidor: value })
 
 const handleOrderNote = (value) => setPayload({ ...payload.value, obs: value })
 
@@ -261,6 +264,7 @@ const updateData = (rowIndex, columnId, value) => {
     })]
 
     setTableData(newData)
+
     const itens = newData.map(product => {
         // console.log(product)
         if (product.quantidade > 0) {

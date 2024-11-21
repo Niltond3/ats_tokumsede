@@ -6,7 +6,7 @@ import Dropdown from '@/components/Dropdown.vue';
 import DropdownLink from '@/components/DropdownLink.vue';
 import NavLink from '@/components/NavLink.vue';
 import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
-import { Link, usePage,  } from '@inertiajs/vue3';
+import { Link, usePage, } from '@inertiajs/vue3';
 
 const page = usePage()
 // const isAuth = computed(() => page.props.auth.user)

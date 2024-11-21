@@ -1,23 +1,25 @@
 <script setup>
 import { ref } from 'vue';
+import { Toaster } from '@/components/ui/sonner'
 import ApplicationLogo from '@/components/ApplicationLogo.vue';
 import Dropdown from '@/components/Dropdown.vue';
 import DropdownLink from '@/components/DropdownLink.vue';
-import NavLink from '@/components/NavLink.vue';
 import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
 import { Link, usePage } from '@inertiajs/vue3';
+import { utf8Decode } from '@/util';
 
 const page = usePage()
-// const isAuth = computed(() => page.props.auth.user)
+
+const name = utf8Decode(page.props.auth.user.nome)
 
 const showingNavigationDropdown = ref(false);
-
 
 </script>
 
 <template>
+    <Toaster richColors />
     <div>
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div class="min-h-screen bg-white dark:bg-gray-900">
             <nav class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
                 <!-- Primary Navigation Menu -->
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,10 +35,10 @@ const showingNavigationDropdown = ref(false);
 
                             <!-- Navigation Links -->
                             <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink :href="route('cliente.dashboard')"
+                                <!-- <NavLink :href="route('cliente.dashboard')"
                                     :active="route().current('cliente.dashboard')">
                                     Cliente Dashboard
-                                </NavLink>
+                                </NavLink> -->
                             </div>
                         </div>
 
@@ -48,7 +50,7 @@ const showingNavigationDropdown = ref(false);
                                         <span class="inline-flex rounded-md">
                                             <button type="button"
                                                 class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                                                {{ $page.props.auth.user.nome }}
+                                                {{ name }}
 
                                                 <svg class="ms-2 -me-0.5 h-4 w-4" xmlns="https://www.w3.org/2000/svg"
                                                     viewBox="0 0 20 20" fill="currentColor">
@@ -95,10 +97,10 @@ const showingNavigationDropdown = ref(false);
                 <div :class="{ block: showingNavigationDropdown, hidden: !showingNavigationDropdown }"
                     class="sm:hidden">
                     <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('cliente.dashboard')"
+                        <!-- <ResponsiveNavLink :href="route('cliente.dashboard')"
                             :active="route().current('cliente.dashboard')">
                             Cliente Dashboard
-                        </ResponsiveNavLink>
+                        </ResponsiveNavLink> -->
                     </div>
 
                     <!-- Responsive Settings Options -->
@@ -121,8 +123,9 @@ const showingNavigationDropdown = ref(false);
             </nav>
 
             <!-- Page Heading -->
-            <header class="bg-white dark:bg-gray-800 shadow" v-if="$slots.header">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <header class="bg-white dark:bg-gray-800" v-if="$slots.header">
+                <div
+                    class="relative max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex flex-col items-center gap-2 bg-info text-white *:font-extralight before:bg-bg-cut before:absolute before:h-4 before:w-full before:z-10 before:bottom-0 ">
                     <slot name="header" />
                 </div>
             </header>

@@ -13,7 +13,7 @@ import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue
 import { formatOrder, getStatusString } from '../../utils';
 import { toast } from 'vue-sonner'
 import { DataTableProducts } from '../../DataTableProducts';
-import { dialogState } from '../../useToggleDialog'
+import { dialogState } from '../../../../hooks/useToggleDialog'
 
 
 const props = defineProps({
@@ -26,7 +26,7 @@ const data = ref({})
 const distributors = ref([])
 const createOrderData = ref()
 
-const [isOpen, toggleDialog] = dialogState()
+const { isOpen, toggleDialog } = dialogState()
 const { toCurrency } = formatMoney()
 
 const whenDialogOpen = async () => {

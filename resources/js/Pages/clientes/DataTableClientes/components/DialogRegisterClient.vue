@@ -10,11 +10,11 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { dialogState } from '../../useToggleDialog'
+import { dialogState } from '../../../../hooks/useToggleDialog'
 
 const emits = defineEmits(['update:dataTable'])
 
-const [isOpen, toggleDialog] = dialogState()
+const { isOpen, toggleDialog } = dialogState()
 
 const handleDialogOutsideInteract = (event) => {
     const classes = [];

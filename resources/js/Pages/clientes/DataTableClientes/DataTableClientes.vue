@@ -15,7 +15,7 @@ import 'datatables.net-searchpanes-dt';
 import 'datatables.net-select-dt';
 import 'datatables.net-staterestore-dt';
 import { utf8Decode } from '../../../util';
-import { dialogState } from '../useToggleDialog';
+import { dialogState } from '../../../hooks/useToggleDialog';
 import languagePtBR from './dataTablePtBR.mjs';
 import { formatOrder } from '../utils';
 import { toast } from 'vue-sonner';
@@ -34,11 +34,11 @@ const props = defineProps({
     setTab: { type: Function, required: true },
 })
 
-const [isOpen, toggleDialog] = dialogState();
-const [openShowOrderDialog, toggleShowOrderDialog] = dialogState();
-const [openRegisterAddress, toggleRegisterAddress] = dialogState();
-const [openEditAddress, toggleEditAddress] = dialogState();
-const [openConfirmDialog, toggleConfirmDialog] = dialogState();
+const { isOpen, toggleDialog } = dialogState();
+const { isOpen: openShowOrderDialog, toggleDialog: toggleShowOrderDialog } = dialogState();
+const { isOpen: openRegisterAddress, toggleDialog: toggleRegisterAddress } = dialogState();
+const { isOpen: openEditAddress, toggleDialog: toggleEditAddress } = dialogState();
+const { isOpen: openConfirmDialog, toggleDialog: toggleConfirmDialog } = dialogState();
 
 const idClienteAddress = ref('')
 const idClient = ref('')

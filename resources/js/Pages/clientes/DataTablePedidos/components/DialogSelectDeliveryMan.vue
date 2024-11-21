@@ -11,7 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { utf8Decode } from '@/util';
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
-import { dialogState } from '../../useToggleDialog'
+import { dialogState } from '../../../../hooks/useToggleDialog'
 
 const props = defineProps({
     entregadores: { type: Array, required: true },
@@ -19,7 +19,7 @@ const props = defineProps({
 
 const emits = defineEmits(["on:deliveryManSelected"]);
 
-const [isOpen, toggleDialog] = dialogState()
+const { isOpen, toggleDialog } = dialogState()
 
 const handleDeliveryManSelected = (deliveryMan) => {
     emits('on:deliveryManSelected', deliveryMan)

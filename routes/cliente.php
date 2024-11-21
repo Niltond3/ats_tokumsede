@@ -13,6 +13,9 @@ use App\Http\Controllers\Cliente\Auth\RegisteredUserController;
 use App\Http\Controllers\Cliente\Auth\VerifyEmailController;
 use App\Http\Controllers\ProdutoController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\EnderecoClienteController;
 use Inertia\Inertia;
 
 Route::prefix('cliente')->name('cliente.')->group(function (){
@@ -57,6 +60,15 @@ Route::prefix('cliente')->name('cliente.')->group(function (){
 
         // Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
+        //ENDERECOS CLIENTES
+        // Route::get('/enderecos', [EnderecoClienteController::class,'show'])->name('enderecos.show');
+
+        Route::resource('clientes', ClienteController::class,['except' => 'create']);
+
+        //ENDERECOS CLIENTES
+        Route::resource('enderecos', EnderecoClienteController::class,['except' => 'create']);
+
+
         Route::get('/dashboard', function () {
             return Inertia::render('Cliente/Dashboard');
         })->name('dashboard');
@@ -69,11 +81,29 @@ Route::prefix('cliente')->name('cliente.')->group(function (){
 
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
                     ->name('logout');
-
-                    //PRODUTOS
-    Route::prefix('produtos')->name('produtos.')->group(function(){
-    Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class, 'listarProdutos']);
-    Route::get('{idEnderecoCliente}', [ProdutoController::class, 'show']);
-});
+        //PEDIDOS
+        Route::group(['prefix' => 'pedidos'], function(){
+            Route::resource('/', PedidoController::class,['except' => 'create']);
+            Route::get('visualizar/{id}', [PedidoController::class, 'visualizar']);
+            Route::put('aceitar/{id}', [PedidoController::class, 'aceitar']);
+            Route::put('despachar/{id}', [PedidoController::class, 'despachar']);
+            Route::put('recusar/{id}', [PedidoController::class, 'recusar']);
+            Route::put('entregar/{id}', [PedidoController::class, 'entregar']);
+            Route::put('cancelar/{id}', [PedidoController::class, 'cancelar']);
+            Route::get('editar/{id}', [PedidoController::class, 'editar']);
+            Route::put('atualizar/{id}', [PedidoController::class, 'atualizar']);
+            Route::get('escolherentregador/{id}', [PedidoController::class, 'escolherentregador']);
+            Route::get('ajustarCoordenadas/{id}', [PedidoController::class, 'ajustarCoordenadas']);
+            Route::post('ajustarCoordenadas/{id}', [PedidoController::class, 'ajustarCoordenadas']);
+            Route::get('buscarNovosPedidos/{id}', [PedidoController::class, 'buscarNovosPedidos']);
+            Route::get('ultimoPedido', [PedidoController::class, 'ultimoPedido']);
+            Route::get('listaClientes', [PedidoController::class, 'listaClientes']);
+        });
+            //PRODUTOS
+        Route::group(['prefix' => 'produtos'], function(){
+            Route::resource('/', ProdutoController::class,['except' => 'create']);
+            Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class,'listarProdutos']);
+            Route::get('{idEnderecoCliente}', [ProdutoController::class,'show']);
+        });
     });
 });

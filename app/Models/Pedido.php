@@ -69,6 +69,7 @@ class Pedido extends Model
     const APP_ANDROID = 1;
     const APP_IOS = 2;
     const PLATAFORMA = 3;
+    const CLIENTE = 4;
 
     //RELACIONAMENTO
     public function distribuidor(): BelongsTo

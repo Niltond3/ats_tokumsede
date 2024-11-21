@@ -16,37 +16,61 @@ import {
     TabsTrigger,
 } from '@/components/ui/tabs'
 import { useToggleTabs } from './useTabs'
+import { Link, usePage, } from '@inertiajs/vue3';
 
-const { activeTab, setActiveTab } = useToggleTabs()
+const page = usePage()
+// const isAuth = computed(() => page.props.auth.user)
+console.log(page.props.auth.user.tipoAdministrador)
+
+
+const typeAdmin = page.props.auth.user.tipoAdministrador
+
+const getTypeAdmin = {
+    Distribuidor: {
+        tab: 'estatisticas',
+        tabName: 'Estatisticas',
+        description: 'Vistualize as estatisticas das vendas'
+    },
+    Administrador: {
+        tab: 'clientes',
+        tabName: 'Clientes',
+        description: 'Cadastre um novo cliente, edite um já existente ou realizar um pedido em nome de um cliente cadastrado'
+    }
+}
+
+const { tab, tabName, description } = getTypeAdmin[typeAdmin]
+
+const { activeTab, setActiveTab } = useToggleTabs(tab)
 const handleSetActiveTab = (tab) => setActiveTab(tab)
+
 </script>
 
 <template>
     <!-- MODAL REALIZAR PEDIDOS -->
     <div class="row">
         <!-- Column -->
-        <Tabs default-value="account" defaultValue="clientes" :model-value="activeTab">
+        <Tabs default-value="account" :default-value="tab" :model-value="activeTab">
             <TabsList class="grid w-full grid-cols-2">
-                <TabsTrigger value="clientes" @Click="handleSetActiveTab('clientes')">
-                    Clientes
+                <TabsTrigger :value="tab" @Click="handleSetActiveTab(tab)">
+                    {{ tabName }}
                 </TabsTrigger>
                 <TabsTrigger value="pedidos" @Click="handleSetActiveTab('pedidos')">
                     Pedidos
                 </TabsTrigger>
             </TabsList>
-            <TabsContent value="clientes">
+            <TabsContent :value="tab">
                 <Card>
                     <CardHeader>
                         <CardTitle>
                             <span class="hidden">Clientes</span>
                         </CardTitle>
                         <CardDescription>
-                            Cadastre um novo cliente, edite um já existente ou realizar um pedido em nome de um cliente
-                            cadastrado
+                            {{ description }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="">
-                        <TableClientes :set-tab="setActiveTab" />
+                        <TableClientes :set-tab="setActiveTab" v-if="typeAdmin === 'Administrador'" />
+                        <Dashboard v-else />
                     </CardContent>
                 </Card>
             </TabsContent>
@@ -70,6 +94,7 @@ const handleSetActiveTab = (tab) => setActiveTab(tab)
 
 <script>
 import axios from 'axios'
+import Dashboard from '../Dashboard.vue'
 export default {
     data() {
         return {

@@ -54,10 +54,10 @@ const whenDialogOpen = async () => {
     const responseAddress = orderData[2];
     const address = {
         ...responseAddress,
-        "logradouro": utf8Decode(responseAddress.logradouro),
-        "bairro": utf8Decode(responseAddress.bairro),
+        "logradouro": utf8Decode(responseAddress.logradouro || ''),
+        "bairro": utf8Decode(responseAddress.bairro || ''),
         "complemento": utf8Decode(responseAddress.complemento || ''),
-        "cidade": utf8Decode(responseAddress.cidade),
+        "cidade": utf8Decode(responseAddress.cidade || ''),
         "referencia": utf8Decode(responseAddress.referencia || ''),
         "apelido": utf8Decode(responseAddress.apelido || ''),
         "observacao": utf8Decode(responseAddress.observacao || ''),

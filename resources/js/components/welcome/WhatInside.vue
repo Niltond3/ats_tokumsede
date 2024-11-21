@@ -14,37 +14,37 @@ const whaterTypes = [
         mineralsLeft: [
             {
                 name: 'Carbonato',
-                formule: 'CO<sub>3</sub><sup>2-</sup>',
+                formule: '21,60 mg/l',
             },
             {
                 name: 'Bicarbonato',
-                formule: 'HCO<sub>3-</sub>',
+                formule: '14,00 mg/l',
             },
             {
                 name: 'Sulato',
-                formule: 'SO<sub>4</sub><sup>2-</sup>',
+                formule: '12,80 mg/l',
             },
             {
                 name: 'Magnésio',
-                formule: 'MG<sup>2</sup>',
+                formule: '12,50 mg/l',
             },
         ],
         mineralsRight: [
             {
                 name: 'Citrato',
-                formule: '[C<sub>6</sub>H<sub>5</sub>O<sub>7</sub><sup>]3</sup>',
+                formule: '8,80 mg/l',
             },
             {
                 name: 'Potássio',
-                formule: 'K',
+                formule: '4,40 mg/l',
             },
             {
                 name: 'Cálcio',
-                formule: 'CA',
+                formule: '3,60 mg/l',
             },
             {
                 name: 'Cloreto',
-                formule: 'NACl',
+                formule: '3,20 mg/l',
             },
         ]
     },
@@ -56,37 +56,37 @@ const whaterTypes = [
         mineralsLeft: [
             {
                 name: 'Carbonato',
-                formule: 'CO<sub>3</sub><sup>2-</sup>',
+                formule: '53,80 mg/l',
             },
             {
                 name: 'Bicarbonato',
-                formule: 'HCO<sub>3-</sub>',
+                formule: '35,20 mg/l',
             },
             {
                 name: 'Sulato',
-                formule: 'SO<sub>4</sub><sup>2-</sup>',
+                formule: '31,80 mg/l',
             },
             {
                 name: 'Magnésio',
-                formule: 'MG<sup>2</sup>',
+                formule: '30,20 mg/l',
             },
         ],
         mineralsRight: [
             {
                 name: 'Citrato',
-                formule: '[C<sub>6</sub>H<sub>5</sub>O<sub>7</sub><sup>]3</sup>',
+                formule: '21,80 mg/l',
             },
             {
                 name: 'Potássio',
-                formule: 'K',
+                formule: '10,50 mg/l',
             },
             {
                 name: 'Cálcio',
-                formule: 'CA',
+                formule: '8,90 mg/l',
             },
             {
                 name: 'Cloreto',
-                formule: 'NACl',
+                formule: '8,20 mg/l',
             },
         ]
     },
@@ -98,37 +98,37 @@ const whaterTypes = [
         mineralsLeft: [
             {
                 name: 'Carbonato',
-                formule: 'CO<sub>3</sub><sup>2-</sup>',
+                formule: '71,00 mg/l',
             },
             {
                 name: 'Bicarbonato',
-                formule: 'HCO<sub>3-</sub>',
+                formule: '50,00 mg/l',
             },
             {
                 name: 'Sulato',
-                formule: 'SO<sub>4</sub><sup>2-</sup>',
+                formule: '13,65 mg/l',
             },
             {
                 name: 'Magnésio',
-                formule: 'MG<sup>2</sup>',
+                formule: '40,12 mg/l',
             },
         ],
         mineralsRight: [
             {
                 name: 'Citrato',
-                formule: '[C<sub>6</sub>H<sub>5</sub>O<sub>7</sub><sup>]3</sup>',
+                formule: '30,05 mg/l',
             },
             {
                 name: 'Potássio',
-                formule: 'K',
+                formule: '20,01 mg/l',
             },
             {
                 name: 'Cálcio',
-                formule: 'CA',
+                formule: '10,07 mg/l',
             },
             {
                 name: 'Cloreto',
-                formule: 'NACl',
+                formule: '14,60 mg/l',
             },
         ]
     },

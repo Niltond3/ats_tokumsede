@@ -51,10 +51,6 @@ const CustomDiv = (title, description) => defineComponent({
     }
 })
 
-
-
-
-
 const onSubmit = handleSubmit((values, { resetField }) => {
     const phoneRaw = values.telefone.replace(/\D/g, '')
 

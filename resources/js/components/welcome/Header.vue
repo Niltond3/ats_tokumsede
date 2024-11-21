@@ -17,13 +17,11 @@ import { RiInformation2Line as InformationIcon } from "vue-remix-icons";
                 <div class="col-span-2 relative z-20  sm:col-span-1">
                     <h1
                         class="text-[1.75rem] leading-8 text-white m-0 [text-wrap:balance] md:text-[2rem] lg:text-5xl lg:leading-[3.5rem] intersect:animate-fade-right duration-1000 delay-300 animate-ease-in-out intersect-full">
-                        Serviço de Captação, Envazamento e distribuição de águas Alcalinas</h1>
+                        O seu delivery de águas alcalinas</h1>
                     <div class="mt-5 md:mt-7 lg:text-lg lg:mt-8">
                         <p
                             class="p1 intersect:animate-fade-right duration-500 delay-200 animate-ease-in-out intersect-full">
-                            Presta o serviço de tratamento, envase e distribuição de águas alcalinas de qualidade
-                            absoluta para distribuídores espalhados por todo o estado da Paraíba. Garantindo a
-                            segurança, qualidade e o melhor custo-beneficio.</p>
+                            Mais comodidade, e agilidade na entrega do seu hidratante</p>
                     </div>
                 </div>
                 <div class="relative sm:row-span-2">

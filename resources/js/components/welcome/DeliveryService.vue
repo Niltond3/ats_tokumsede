@@ -57,21 +57,22 @@ onMounted(() => {
                 </div>
                 <Separator orientation="vertical" class="hidden md:block h-9 bg-input"></Separator>
                 <div class="flex flex-col max-w-[34%] ">
-                    <div class="relative delay-500">
-                        <i class="ri-heart-2-line text-5xl" data-aos="fade-up"></i>
-                        <i class="ri-test-tube-line text-5xl absolute left-3 text-info/80 z-50" data-aos="fade-up"></i>
+                    <div class="relative delay-200">
+                        <i class="ri-heart-2-line text-5xl delay-200" data-aos="fade-up"></i>
+                        <i class="ri-test-tube-line text-5xl absolute left-3 text-info/80 z-50 delay-200"
+                            data-aos="fade-up"></i>
                     </div>
-                    <span class="delay-500" data-aos="zoom-in"> Composição saudável</span>
+                    <span class="delay-200" data-aos="zoom-in"> Composição saudável</span>
                 </div>
                 <Separator orientation="vertical" class="hidden md:block h-9 bg-input"></Separator>
                 <div class="flex flex-col max-w-[34%]">
-                    <i class="ri-filter-line text-5xl delay-700" data-aos="fade-up"></i>
-                    <span class="delay-700" data-aos="zoom-in"> Filtragem eficiente</span>
+                    <i class="ri-filter-line text-5xl delay-500" data-aos="fade-up"></i>
+                    <span class="delay-500" data-aos="zoom-in"> Filtragem eficiente</span>
                 </div>
                 <Separator orientation="vertical" class="hidden md:block h-9 bg-input"></Separator>
                 <div class="flex flex-col max-w-[34%]">
-                    <i class="ri-file-paper-2-line text-5xl delay-1000" data-aos="fade-up"></i>
-                    <span class="delay-1000" data-aos="zoom-in"> Qualidade certificada</span>
+                    <i class="ri-file-paper-2-line text-5xl delay-700" data-aos="fade-up"></i>
+                    <span class="delay-700" data-aos="zoom-in"> Qualidade certificada</span>
                 </div>
             </div>
         </div>

@@ -278,14 +278,14 @@ const ajax = {
         const obj = JSON.parse(data)
         const newData = obj.data.map((client) => {
 
-
             const nome = utf8Decode(client.nome)
             const enderecos = client.enderecos.map((address) => {
+                console.log(address.cidade)
                 return {
                     ...address,
-                    logradouro: utf8Decode(address.logradouro),
-                    bairro: utf8Decode(address.bairro),
-                    cidade: utf8Decode(address.cidade),
+                    logradouro: utf8Decode(address.logradouro || ''),
+                    bairro: utf8Decode(address.bairro || ''),
+                    cidade: utf8Decode(address.cidade || ''),
                     observacao: utf8Decode(address.observacao || ''),
                     referencia: utf8Decode(address.referencia || ''),
                     apelido: utf8Decode(address.apelido || ''),

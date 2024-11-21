@@ -12,7 +12,7 @@ import CertificatesCarousel from './CertificatesCarousel.vue';
 <template>
     <section class="flex [&>*]:flex-1 gap-4 mt-20 py-10" id="support">
         <div class="flex gap-7 flex-col items-center">
-            <img src="/images/saiba_mais.png" class="w-4/5" />
+            <img src="/images/saiba_mais.png" class="w-[20%]" />
             <div
                 class="flex flex-col text-slate-300 [&>div]:flex [&>div]:items-center [&>div]:justify-between [&>div]:py-4 [&>div]:px-3 px-6 [&_h4]:text-xl [&_p]:text-sm [&_p]:max-w-[70%] [&_p]:text-slate-100 [&_i]:text-2xl [&>div]:relative [&>div]:after:absolute [&>div]:after:-bottom-[16px] [&>div]:after:z-10 [&>div]:after:left-1/2 [&>div]:after:-translate-x-1/2 [&>div]:after:h-0 [&>div]:after:w-0 [&>div]:after:border-x-[16px] [&>div]:after:border-b-[16px] [&>div]:after:border-x-transparent [&>div]:after:rotate-180">
                 <h2 class="my-8 text-slate-700 ">Como Comprar?</h2>

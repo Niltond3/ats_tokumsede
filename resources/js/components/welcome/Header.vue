@@ -1,5 +1,6 @@
 <script setup>
 import AtsLogo from '@/../../public/images/ats-logo.svg?raw';
+import ApplicationLogo from '@/components/ApplicationLogo.vue';
 import Button from '@/components/Button.vue'
 import { RiArrowRightWideLine as ArrowRightIcon } from "vue-remix-icons";
 import { RiShoppingCartLine as ShoppingCart } from "vue-remix-icons";
@@ -11,7 +12,7 @@ import { RiInformation2Line as InformationIcon } from "vue-remix-icons";
     <div
         class="relative overflow-hidden pt-7 pb-10 bg-blue-900 text-blue-100 after:absolute after:w-full after:z-10 after:h-20 after:bottom-[-1px] after:bg-no-repeat after:bg-[length:100%_100%] after:bg-hero-mobile md:pt-10 md:pb-0 lg:pt-12 lg:after:h-[14.75rem] lg:after:bg-hero-desktop">
         <div class="container relative flex items-start flex-col">
-            <div v-html="AtsLogo"></div>
+            <ApplicationLogo class="w-36 h-36 z-10" />
             <div
                 class="relative py-8 grid grid-cols-3 gap-x-3 gap-y-7 sm:grid-cols-2 sm:py-10 md:gap-10 md:auto-rows-auto lg:pt-[7.5rem] lg:pb-[8.75rem]">
                 <div class="col-span-2 relative z-20  sm:col-span-1">
@@ -36,26 +37,33 @@ import { RiInformation2Line as InformationIcon } from "vue-remix-icons";
                     </div>
                 </div>
                 <div
-                    class="col-span-3 inline-flex items-start gap-x-3 relative z-20 sm:col-span-1 opacity-0 intersect:animate-fade intersect-full duration-1000 delay-300 animate-ease-in-out">
-                    <Button href="#quemsomos">
-                        Quem Somos
-                    </Button>
-                    <Button :href="route('cliente.dashboard')" class="btn--primary">
-                        <i class="icon icon--chevron-right text-xl">
-                            <ShoppingCart />
-                        </i>
-                        <span class="hidden min-[768px]:block">Peça já</span>
-                    </Button>
-                    <Button href="#informations" class="btn">
-                        <span class="hidden min-[768px]:block">Informações</span>
-                        <i class="icon icon--chevron-right text-xl hidden min-[425px]:block">
-                            <ArrowRightIcon />
-                        </i>
-                        <i class="icon block text-xl min-[425px]:hidden">
-                            <InformationIcon />
-                        </i>
-                    </Button>
+                    class="col-span-3 flex flex-col items-start gap-3 relative z-20 sm:col-span-1 opacity-0 intersect:animate-fade intersect-full duration-1000 delay-300 animate-ease-in-out">
+                    <div class="flex justify-between w-full">
+                        <Button href="#quemsomos">
+                            Quem Somos
+                        </Button>
+                        <Button :href="route('cliente.dashboard')" class="btn--primary">
+                            <i class="icon icon--chevron-right text-xl">
+                                <ShoppingCart />
+                            </i>
+                            <span class="hidden min-[768px]:block">Peça já</span>
+                        </Button>
+                        <Button href="#informations" class="btn">
+                            <span class="hidden min-[768px]:block">Informações</span>
+                            <i class="icon icon--chevron-right text-xl hidden min-[425px]:block">
+                                <ArrowRightIcon />
+                            </i>
+                            <i class="icon block text-xl min-[425px]:hidden">
+                                <InformationIcon />
+                            </i>
+                        </Button>
+                    </div>
+                    <a href="/home" class="flex gap-3 py-[0.875rem] px-[2rem] text-input/40 hover:text-input">
+                        Acessar como administrador
+                        <i class="ri-login-box-line"></i>
+                    </a>
                 </div>
+
             </div>
         </div>
     </div>

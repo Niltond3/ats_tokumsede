@@ -1,9 +1,13 @@
 <script setup>
 import ApplicationLogo from '@/components/ApplicationLogo.vue';
 import { Link } from '@inertiajs/vue3';
+import { Toaster } from '@/components/ui/sonner'
+
 </script>
 
 <template>
+    <Toaster richColors />
+
     <div class="bg-water-desktop bg-[center_top] w-full h-full fixed bottom-[-30rem]"></div>
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900 ">
 

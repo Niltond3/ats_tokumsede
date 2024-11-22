@@ -84,16 +84,16 @@ const renderToast = (promise) => {
 const onSubmit = (values) => {
     const payload = {
         idCliente: props.idClient,
-        logradouro: values.logradouro,
-        numero: values.numero,
-        bairro: values.bairro,
-        complemento: values.complemento,
-        cep: values.cep,
-        cidade: values.cidade,
-        estado: values.estado,
-        referencia: values.referencia,
-        apelido: values.apelido,
-        observacao: values.observacao,
+        logradouro: values.logradouro || '',
+        numero: values.numero || '',
+        bairro: values.bairro || '',
+        complemento: values.complemento || '',
+        cep: values.cep || '',
+        cidade: values.cidade || '',
+        estado: values.estado || '',
+        referencia: values.referencia || '',
+        apelido: values.apelido || '',
+        observacao: values.observacao || '',
     }
     const response = props.addressDetails ? axios.put(`enderecos/${props.addressDetails.id}`, payload) : axios.post('enderecos', payload);
 

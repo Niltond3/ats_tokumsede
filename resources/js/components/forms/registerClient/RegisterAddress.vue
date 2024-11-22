@@ -9,6 +9,7 @@ import * as z from 'zod'
 import { toTypedSchema } from '@vee-validate/zod'
 import { BookUser, Check } from 'lucide-vue-next'
 import { toast } from 'vue-sonner';
+import { errorUtils } from '@/util';
 
 const props = defineProps({
     idClient: { type: String, required: false },
@@ -76,6 +77,7 @@ const renderToast = (promise) => {
         },
         error: (data) => {
             console.log(data)
+            errorUtils(data)
             markRaw(CustomDiv('Error', data.response))
         },
     });

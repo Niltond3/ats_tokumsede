@@ -77,7 +77,7 @@ const renderToast = (promise) => {
         },
         error: (data) => {
             console.log(data)
-            console.log(errorUtils(data))
+            console.log(errorUtils.getError((data)))
             markRaw(CustomDiv('Error', data.response))
         },
     });

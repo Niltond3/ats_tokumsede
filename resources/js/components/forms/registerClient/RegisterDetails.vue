@@ -113,9 +113,11 @@ const onSubmit = (values) => {
         email: values.email,
         senha: values.senha,
     }
-    const response = tipoAdministrador === 'Administrador' ? axios.put(`clientes/${id}`, payload) : axios.put(route('cliente.register'), payload);
 
-    renderToast(response)
+    console.log(payload)
+    //const response = tipoAdministrador === 'Administrador' ? axios.put(`clientes/${id}`, payload) : axios.put(route('cliente.register'), payload);
+
+    //renderToast(response)
 
 }
 

@@ -9,7 +9,7 @@ export default (d) => {
     const plus = "&#xEA12;"
     console.log(rowChildData)
     //group-has-[li[aria-selected='true']]
-    const containerClasses = `p-2`;
+    const containerClasses = `p-2 md:flex-1`;
     //transition-all max-h-[11rem] overflow-y-scroll overflow-x-hidden
     const containerAddressClasses = twMerge(
         "md:!max-h-[11rem]",

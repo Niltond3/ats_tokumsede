@@ -69,10 +69,10 @@ const handleDialogOpen = () => {
         </DialogTrigger>
         <DialogContent class="sm:max-w-[440px]" @interact-outside="handleDialogOutsideInteract">
             <DialogHeader>
-                <DialogTitle class="text-info gap-1 flex items-center"><i class="ri-user-add-fill"></i>Cadastrar Cliente
+                <DialogTitle class="text-info gap-1 flex items-center"><i class="ri-user-add-fill"></i>Editar Cliente
                 </DialogTitle>
                 <DialogDescription class="text-xs text-start">
-                    Após terminar todos os passos, clique em "Cadastrar" para concluir.
+                    Após terminar todos os passos, clique em "Salvar" para concluir.
                 </DialogDescription>
             </DialogHeader>
             <div

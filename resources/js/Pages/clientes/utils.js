@@ -230,7 +230,8 @@ export function getClientFormat() {
 
             }
         }
-        if (documentValue.length <= 14) {
+        console.log(documentValue)
+        if (documentValue.length < 14) {
             return {
                 tipoPessoa: '1',
                 documento: {

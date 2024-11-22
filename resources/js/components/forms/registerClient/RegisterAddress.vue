@@ -74,7 +74,10 @@ const renderToast = (promise) => {
             emit('create:success')
             return markRaw(CustomDiv('sucesso', `O Endereço foi cadastrado com sucesso!`));
         },
-        error: (data) => markRaw(CustomDiv('Error', data.response)),
+        error: (data) => {
+            console.log(data)
+            markRaw(CustomDiv('Error', data.response))
+        },
     });
 }
 

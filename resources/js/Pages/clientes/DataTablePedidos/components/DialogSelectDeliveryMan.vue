@@ -15,6 +15,7 @@ import { dialogState } from '../../../../hooks/useToggleDialog'
 
 const props = defineProps({
     entregadores: { type: Array, required: true },
+    dropdown: { type: Boolean, required: false, default: true }
 });
 
 const emits = defineEmits(["on:deliveryManSelected"]);
@@ -31,10 +32,15 @@ const handleDeliveryManSelected = (deliveryMan) => {
 <template>
     <Dialog :open="isOpen" @update:open="(op) => toggleDialog()">
         <DialogTrigger as-child>
-            <DropdownMenuItem class="cursor-pointer group gap-1" @select="(e) => e.preventDefault()">
+            <DropdownMenuItem v-if="dropdown" class="cursor-pointer group gap-1" @select="(e) => e.preventDefault()">
                 <i class="ri-e-bike-2-fill group-hover:text-dispatched transition-colors"></i>
-                Despachar
+                <span class="hidden min-[426px]:block">Despachar</span>
             </DropdownMenuItem>
+            <button v-else
+                class="h-8 w-8 rounded-full bg-dispatched/80 focus:bg-dispatched text-white shadow-sm hover:shadow-md transition-all">
+                <i class="ri-e-bike-2-fill group-hover:text-dispatched transition-colors"></i>
+                <span class="hidden min-[426px]:block">Despachar</span>
+            </button>
         </DialogTrigger>
         <DialogContent class="gap-2 sm:max-w-min">
             <DialogHeader>

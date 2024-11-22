@@ -18,6 +18,7 @@ import { dialogState } from '../../../../hooks/useToggleDialog'
 
 const props = defineProps({
     orderId: { type: Number, required: true },
+    dropdown: { type: Boolean, required: false, default: true }
 });
 
 const emit = defineEmits(['callback:editOrder'])
@@ -123,7 +124,6 @@ const renderToast = (promise) => {
 }
 
 const handleUpdateOrder = (payload) => {
-
     const url = `pedidos/atualizar/${payload.idPedido}`
     const response = axios.put(url, payload)
     renderToast(response)
@@ -133,10 +133,15 @@ const handleUpdateOrder = (payload) => {
 <template>
     <Dialog :open="isOpen" @update:open="toggleDialog">
         <DialogTrigger as-child>
-            <DropdownMenuItem class="cursor-pointer" @select="(e) => e.preventDefault()">
+            <DropdownMenuItem v-if="dropdown" class="cursor-pointer" @select="(e) => e.preventDefault()">
                 <i class="ri-edit-2-fill"></i>
-                Editar Pedido
+                <span class="hidden min-[426px]:block">Editar Pedido</span>
             </DropdownMenuItem>
+            <button v-else
+                class="h-8 w-8 rounded-full bg-warning/80 focus:bg-warning text-white shadow-sm hover:shadow-md transition-all">
+                <i class="ri-edit-2-fill"></i>
+                <span class="hidden min-[426px]:block">Editar Pedido</span>
+            </button>
         </DialogTrigger>
         <DialogContent class="text-sm max-w-[22rem] sm:max-w-3xl md:max-w-[40rem]">
             <DialogHeader>
@@ -152,5 +157,6 @@ const handleUpdateOrder = (payload) => {
             <DataTableProducts @callback:payload-pedido="handleUpdateOrder" :create-order-data="createOrderData"
                 :distributors="distributors"></DataTableProducts>
         </DialogContent>
+
     </Dialog>
 </template>

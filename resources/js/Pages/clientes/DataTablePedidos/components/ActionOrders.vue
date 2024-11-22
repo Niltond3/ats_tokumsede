@@ -27,7 +27,6 @@ const orderStatus = ref(props.payloadData.status.label)
 
 const { tipoAdministrador } = page.props.auth.user
 
-
 const emit = defineEmits(['callback:edited-order'])
 
 const { id: idPedido, } = props.payloadData
@@ -75,46 +74,28 @@ const handleCancelar = (reson) => {
 }
 
 const handleEditOrder = () => emit('callback:edited-order')
+
+
 </script>
 
 <template>
-    <DropdownMenu class="">
-        <DropdownMenuTrigger as-child>
-            <Button variant="ghost" class="transition-colors text-cyan-700 p-0 hidden min-[426px]:block">
-                <span class="sr-only">Abrir Menú</span>
-                <MoreVertical class="w-6 h-6" />
-            </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <DialogShowOrder :order-id="idPedido" />
-            <DialogEditOrder v-if="tipoAdministrador === 'Administrador'" :order-id="idPedido"
-                @callback:edit-order="handleEditOrder" />
-            <DropdownMenuSeparator />
-            <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                    <span>Status</span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                    <DropdownMenuSubContent>
-                        <DropdownMenuItem v-if="orderStatus == 'Pendente'" class="cursor-pointer flex gap-1"
-                            @click="handleAceitar()">
-                            <i class="ri-check-fill"></i>
-                            Aceitar
-                        </DropdownMenuItem>
-                        <DialogSelectDeliveryMan v-if="orderStatus == 'Aceito'"
-                            @on:delivery-man-selected="handleDespachar" :entregadores="entregadores" />
-                        <DropdownMenuItem v-if="orderStatus == 'Despachado'" class="cursor-pointer flex gap-1"
-                            @click="handleEntregar()">
-                            <i class="ri-check-double-fill"></i>
-                            Entregar
-                        </DropdownMenuItem>
-                        <DialogConfirmAction @on:confirm="handleCancelar" dialog-title="Cancelar Pedido"
-                            trigger-icon="ri-close-circle-fill" trigger-label="Cancelar" variant="danger"
-                            :text-reson="true" />
-                    </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-            </DropdownMenuSub>
-        </DropdownMenuContent>
-    </DropdownMenu>
+    <div class="min-[426px]:hidden flex gap-3">
+        <DialogShowOrder :dropdown="false" :order-id="idPedido" />
+        <DialogEditOrder v-if="tipoAdministrador === 'Administrador'" :dropdown="false" :order-id="idPedido"
+            @callback:edit-order="handleEditOrder" />
+        <button v-if="orderStatus == 'Pendente'"
+            class="h-8 w-8 rounded-full bg-success/80 focus:bg-success text-white shadow-sm hover:shadow-md transition-all"
+            @click="handleAceitar()">
+            <i class="ri-check-fill"></i>
+        </button>
+        <DialogSelectDeliveryMan v-if="orderStatus == 'Aceito'" :dropdown="false"
+            @on:delivery-man-selected="handleDespachar" :entregadores="entregadores" />
+        <button v-if="orderStatus == 'Despachado'"
+            class="h-8 w-8 rounded-full bg-accepted/80 focus:bg-accepted text-white shadow-sm hover:shadow-md transition-all"
+            @click="handleEntregar()">
+            <i class="ri-check-double-fill"></i>
+        </button>
+        <DialogConfirmAction :dropdown="false" @on:confirm="handleCancelar" dialog-title="Cancelar Pedido"
+            trigger-icon="ri-close-circle-fill" trigger-label="Cancelar" variant="danger" :text-reson="true" />
+    </div>
 </template>

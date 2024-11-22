@@ -11,7 +11,8 @@ const props = defineProps({
     triggerIcon: { type: String, required: true },
     dialogTitle: { type: String, required: false },
     dialogDescription: { type: String, required: false },
-    variant: { type: String, required: true }
+    variant: { type: String, required: true },
+    dropdown: { type: Boolean, required: false, default: true }
 })
 
 const { isOpen, toggleDialog } = dialogState()
@@ -49,10 +50,14 @@ const styleVariant = getVariant[props.variant]
 <template>
     <Dialog :open="isOpen" @update:open="(op) => toggleDialog()">
         <DialogTrigger as-child>
-            <DropdownMenuItem class="cursor-pointer group gap-1" @select="(e) => e.preventDefault()">
+            <DropdownMenuItem v-if="dropdown" class="cursor-pointer group gap-1" @select="(e) => e.preventDefault()">
                 <i :class="[props.triggerIcon, styleVariant.textClasses.text]" class="transition-colors"></i>
-                {{ props.triggerLabel }}
+                <span class="hidden min-[426px]:block">{{ props.triggerLabel }}</span>
             </DropdownMenuItem>
+            <button v-else class="h-8 w-8 rounded-full text-white shadow-sm hover:shadow-md transition-all">
+                <i :class="[props.triggerIcon, styleVariant.textClasses.text]" class="transition-colors text-3xl"></i>
+                <span class="hidden min-[426px]:block">{{ props.triggerLabel }}</span>
+            </button>
         </DialogTrigger>
         <DialogConfirmActionContent v-bind="props" @on:confirm="handleConfirm" />
     </Dialog>

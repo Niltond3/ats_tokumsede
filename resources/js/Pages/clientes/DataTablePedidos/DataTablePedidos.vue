@@ -11,6 +11,7 @@ import 'datatables.net-select-dt';
 import { utf8Decode, dateToISOFormat } from '@/util';
 import { getStatusString } from '../utils';
 import DropDownPedidos from './components/DropDownPedidos.vue';
+import ActionOrders from './components/ActionOrders.vue';
 import { twMerge } from 'tailwind-merge';
 
 DataTable.use(DataTablesLib);
@@ -227,6 +228,7 @@ const badgeClasses = 'font-normal inline-block px-2 text-[75%] text-center white
         <template #action="data">
             <DropDownPedidos :payloadData="data.rowData" :entregadores="entregadores" :loadTable="loadTableData"
                 @callback:edited-order="() => loadTableData()" />
+            <ActionOrders :payloadData="data.rowData" :entregadores="entregadores" :loadTable="loadTableData" />
         </template>
         <template #rating="data">
             <span v-if="data.rowData.cliente.rating > 0" :class="badgeClasses" class="bg-success">

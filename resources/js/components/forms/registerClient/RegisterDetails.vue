@@ -100,6 +100,7 @@ const renderToast = (promise) => {
 }
 
 const onSubmit = (values) => {
+
     const { tipoPessoa, documento } = getTipoPessoaPayload(values.tipoPessoa);
     const { id } = props.clientDetails
     const payload = {
@@ -114,10 +115,9 @@ const onSubmit = (values) => {
         senha: values.senha,
     }
 
-    console.log(payload)
-    //const response = tipoAdministrador === 'Administrador' ? axios.put(`clientes/${id}`, payload) : axios.put(route('cliente.register'), payload);
+    const response = tipoAdministrador === 'Administrador' ? axios.put(`clientes/${id}`, payload) : axios.put(route('cliente.register'), payload);
 
-    //renderToast(response)
+    renderToast(response)
 
 }
 

@@ -134,11 +134,11 @@ class EnderecoClienteController extends Controller
         $key = "AIzaSyDIt2CSa_K8P64daT3v4Hv8Ml-8IJsFic8";
         $address = $logradouro . ", " . $numero . ", " . $cidade . ", " . $estado . ", " . $cep . "," . "Brasil";
         $request_url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $address . "&sensor=true&key=".$key; // A URL que vc manda pro google para pegar o XML
-        $context = stream_context_create(array('ssl'=>array(
-            'verify_peer' => true,
-            'cafile' => '/var/www/tokumsede/etc/certificados/ca-bundle.crt'
-        )));
-        libxml_set_streams_context($context);
+        // $context = stream_context_create(array('ssl'=>array(
+        //     'verify_peer' => true,
+        //     'cafile' => '/var/www/tokumsede/etc/certificados/ca-bundle.crt'
+        // )));
+        // libxml_set_streams_context($context);
         $xml = simplexml_load_file($request_url) or die("url not loading"); // request do XML
         $status = $xml->status; // pega o status do request, já qe a API da google pode retornar vários tipos de respostas
         if ($status == "OK") {

@@ -375,11 +375,11 @@ abstract class Controller extends BaseController
 		//https://fcm.googleapis.com/fcm/send
 		//https://android.googleapis.com/gcm/send
 
-        $context = stream_context_create(array('ssl'=>array(
-            'verify_peer' => true,
-            'cafile' => '/var/www/tokumsede/etc/certificados/ca-bundle.crt'
-        )));
-		libxml_set_streams_context($context);
+        // $context = stream_context_create(array('ssl'=>array(
+        //     'verify_peer' => true,
+        //     'cafile' => '/var/www/tokumsede/etc/certificados/ca-bundle.crt'
+        // )));
+		// libxml_set_streams_context($context);
 
 		$headers = array (
 			'Authorization:key='.GOOGLE_API_KEY,//'AIzaSyBJvOYNx0GwuUKv6GVo2WMo7mYP7vAwk18',

@@ -181,8 +181,6 @@ export const formatOrder = (order) => {
 export function orderToClipboard(order) {
     const { id: orderId, total, formaPagamento, troco, status: { label: statusLabel }, horarioPedido, horarioAceito, horarioEntrega, horarioDespache, horarioCancelado, dataAgendada, horaInicio, cliente: { nome: cliente, telefone }, distribuidor: { nome: distribuidorNome }, endereco: { logradouro, numero, bairro, complemento, cidade, estado, referencia }, itensPedido, obs, trocoPara } = order
 
-    console.log(order)
-
     const date = dateToISOFormat(horarioPedido)
 
     var minute = date.getMinutes().toString().padStart(2, '0');
@@ -230,7 +228,6 @@ export function getClientFormat() {
 
             }
         }
-        console.log(documentValue)
         if (documentValue.length < 14) {
             return {
                 tipoPessoa: '1',

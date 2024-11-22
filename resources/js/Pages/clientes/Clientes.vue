@@ -20,8 +20,6 @@ import { Link, usePage, } from '@inertiajs/vue3';
 
 const page = usePage()
 // const isAuth = computed(() => page.props.auth.user)
-console.log(page.props.auth.user.tipoAdministrador)
-
 
 const typeAdmin = page.props.auth.user.tipoAdministrador
 

@@ -55,11 +55,8 @@ export default {
                     { name: 'Pedidos Ios', total: this.total.pedidosIos, predicted: this.total.pedidosIos },
                 ];;
 
-                console.log(this.total);
             }).catch(error => {
-                console.log(error)
                 this.errors = error.response.data;
-                console.log(error)
                 Swal.fire({
                     title: "Aviso!",
                     text: this.errors,

@@ -14,7 +14,6 @@ const renderToast = (promise, callbackSuccess, message) => {
         loading: 'Aguarde...',
 
         success: (data) => {
-            console.log(data)
             callbackSuccess(data)
             return markRaw(CustomDiv('sucesso', message));
         },

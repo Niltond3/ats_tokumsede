@@ -148,7 +148,6 @@ const onSubmit = (values) => {
 
 
 const handleUpdateDatePicker = (dataValue, setFieldValue) => {
-    console.log(dataValue)
     if (!dataValue) return
     setFieldValue('dataNascimento', dataValue.toString())
 }

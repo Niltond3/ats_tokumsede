@@ -7,7 +7,6 @@ export default (d) => {
 
     const rowChildData = d
     const plus = "&#xEA12;"
-    console.log(rowChildData)
     //group-has-[li[aria-selected='true']]
     const containerClasses = `p-2 md:flex-1`;
     //transition-all max-h-[11rem] overflow-y-scroll overflow-x-hidden

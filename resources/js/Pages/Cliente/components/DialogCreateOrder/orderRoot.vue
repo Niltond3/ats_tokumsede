@@ -66,7 +66,6 @@ const renderToast = (promise) => {
         loading: 'Aguarde...',
 
         success: (data) => {
-            console.log(data)
             toggleDialog()
             return markRaw(CustomDiv('sucesso', `O pedido foi cadastrado com sucesso!`));
         },
@@ -111,7 +110,6 @@ const whenDialogOpen = async () => {
 
     setPayload({ ...payload.value, taxaEntrega, idDistribuidor, idEndereco, observacao })
 
-    console.log(createOrderData.value)
 }
 
 const handleDialogOpen = () => {
@@ -136,7 +134,6 @@ const updateData = (rowIndex, columnId, value) => {
         }
         return row;
     })] : [...createOrderData.value.products.map((row, index) => {
-        console.log(columnId)
         if (index == rowIndex) {
             const oldRow = createOrderData.value.products[rowIndex]
             return {
@@ -149,7 +146,6 @@ const updateData = (rowIndex, columnId, value) => {
     createOrderData.value = { ...createOrderData.value, products: newData }
 
     const itens = newData.map(product => {
-        // console.log(product)
         if (product.quantidade > 0) {
             const { id, preco, quantidade } = product
             return {
@@ -173,7 +169,6 @@ const updateData = (rowIndex, columnId, value) => {
         disabledButton.value = true
         toast.error('Adicione ao menos um produto')
     }
-    console.log(payload.value)
 }
 
 const handlePayForm = (value) => setPayload({ ...payload.value, formaPagamento: value })
@@ -197,7 +192,6 @@ const handleOrderNote = (value) => setPayload({ ...payload.value, obs: value })
 watch(() => payload.value.itens, (newVal) => disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false)
 
 const handleCallbackPedido = () => {
-    console.log(payload.value)
     disabledButton.value = true
     var url = "pedidos";
     const response = axios.post(url, payload.value)

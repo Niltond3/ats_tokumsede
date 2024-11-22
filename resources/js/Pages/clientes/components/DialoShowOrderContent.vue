@@ -35,7 +35,6 @@ onMounted(async () => {
     if (props.orderId) fetchOrder()
 })
 const handleCopyOrder = (order) => {
-    console.log(order)
     orderToClipboard(order)
 }
 

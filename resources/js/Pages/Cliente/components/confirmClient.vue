@@ -39,7 +39,6 @@ const newAddressValues = JSON.parse(JSON.stringify({
 
 const interatedValues = !values.tipoPessoa ? newDetailsValues : CNPJ ? { ...newDetailsValues, CNPJ: values.tipoPessoa } : { ...newDetailsValues, CPF: values.tipoPessoa }
 
-console.log(interatedValues)
 //[-webkit-text-security: disc !important;]
 </script>
 

@@ -200,7 +200,7 @@ const onSubmit = (values) => {
                         onSubmit(values)
                     }
                 }">
-                    
+
 
                     <div class="flex flex-col gap-4 mt-4">
                         <template v-if="stepIndex === 1">
@@ -332,8 +332,6 @@ const onSubmit = (values) => {
                                                 })" calendar-label="Data de Nascimento" initial-focus
                                                     :min-value="new CalendarDate(1900, 1, 1)"
                                                     :max-value="today(getLocalTimeZone())" @update:model-value="(v) => {
-                                                        console.log(v)
-                                                        console.log(values.dataNascimento)
                                                         if (v) setFieldValue('dataNascimento', v.toString())
                                                         else setFieldValue('dataNascimento', undefined)
                                                     }" /> -->

@@ -27,12 +27,10 @@ const renderToast = (promise) => {
         loading: 'Aguarde...',
 
         success: (data) => {
-            console.log(data)
             emits('delete:confirm', true)
             return markRaw(CustomDiv('sucesso', `O endereço foi deletado com sucesso!`));
         },
         error: (data) => {
-            console.log(data)
             return markRaw(CustomDiv('Error', data.response))
         },
     });

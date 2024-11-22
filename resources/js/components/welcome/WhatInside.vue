@@ -139,11 +139,9 @@ onMounted(() => {
 })
 const handlePrev = () => {
     selectedIndex.value < 2 ? selectedIndex.value++ : selectedIndex.value = 0
-    console.log(selectedIndex.value)
 }
 const handleNext = () => {
     selectedIndex.value > 0 ? selectedIndex.value-- : selectedIndex.value = 2
-    console.log(selectedIndex.value)
 }
 
 </script>

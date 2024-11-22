@@ -103,8 +103,6 @@ const fuzzyFilter = (row, columnId, value, addMeta) => {
     //set logic for does the filter pass
     const doesItemPass = rankedValue.rank >= 1.01;
 
-    if (doesItemPass) { console.log(metaItem) }
-
     // Return if the item should be filtered in/out
     return doesItemPass; //itemRank.passed;
 }
@@ -180,8 +178,6 @@ const dataToTable = (data) => {
         const { obs, itensPedido, total, formaPagamento: { id: formaPagamento }, trocoPara: orderTroco, agendado, dataAgendada, horaInicio, endereco: { observacao }, idEndereco, id: idPedido, status: orderStatus } = order
         isUpdate.value = true
 
-        console.log(itensPedido)
-
         const newProducts = products.map(product => {
             const productToChange = itensPedido.filter(prod => prod.idProduto == product.id)[0]
 
@@ -209,10 +205,6 @@ const dataToTable = (data) => {
         const trocoPara = toFloat(orderTroco)
         const totalProdutos = itens.map(product => parseFloat(product.subtotal)).reduce((curr, prev) => curr + prev);
 
-        console.log(totalProdutos)
-
-        console.log(toFloat(total))
-
         setPayload({ ...payload.value, formaPagamento, trocoPara, agendado, dataAgendada, horaInicio, obs, observacao, totalProdutos, total: toFloat(total), idEndereco, idDistribuidor, itens, idPedido, status: order.statusId })
 
         return
@@ -225,10 +217,7 @@ const dataToTable = (data) => {
 }
 
 watch(() => width.value, (newVal) => {
-    console.log(newVal)
-    console.log(columns)
     if (newVal <= 448) {
-        console.log('menor')
         resizebleColumns.value = [...columns].filter(column => column.id !== "nome")
         return
     }
@@ -242,7 +231,6 @@ watch(() => payload.value.itens, (newVal) => disabledButton.value = newVal.map(p
 
 const updateData = (rowIndex, columnId, value) => {
     const newData = columnId !== 'quantidade' ? [...tableData.value.map((row, index) => {
-        console.log(columnId)
         if (index == rowIndex) {
             const oldRow = tableData.value[rowIndex]
             return {
@@ -252,7 +240,6 @@ const updateData = (rowIndex, columnId, value) => {
         }
         return row;
     })] : [...tableData.value.map((row, index) => {
-        console.log(columnId)
         if (index == rowIndex) {
             const oldRow = tableData.value[rowIndex]
             return {

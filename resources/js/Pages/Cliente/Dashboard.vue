@@ -25,7 +25,6 @@ import { TablePedidos } from '../clientes/DataTablePedidos';
 const page = usePage()
 
 
-console.log(page.props.auth)
 const client = page.props.auth.user
 
 const welcome = ref(client.sexo == 1 ? 'Bem vindo senhor ' + utf8Decode(client.nome) : 'Bem vinda senhora ' + utf8Decode(client.nome))
@@ -50,7 +49,6 @@ onMounted(async () => {
         }
     })
     addresses.value = formatAddresses
-    console.log(request)
 })
 
 const open = ref(false)

@@ -12,7 +12,6 @@ import { isEmptyObject } from 'jquery';
 const page = usePage()
 const { tipoAdministrador } = page.props.auth.user
 
-console.log(tipoAdministrador)
 
 const { values } = defineProps({ values: Object })
 
@@ -67,7 +66,6 @@ function handleCopyClient() {
     ${payload.referencia ? 'Referência: ' + payload.referencia : ''}
     ${payload.observacao ? 'Observação: ' + payload.observacao : ''}
     `.replace(/(^[ \t]*\n)/gm, "")
-    console.log(clipboard)
 
     navigator.clipboard.writeText(clipboard)
     toast.info('Copiado para a área de transferência')

@@ -41,10 +41,8 @@ const { handleSubmit, resetForm } = useForm({
 
 
 const onSubmit = handleSubmit((values) => {
-    console.log(values)
     axios.post(route('contact'), { body: values.body, name: values.name, email: values.email, phone: values.phone })
         .then((response) => {
-            console.log(response)
             resetForm()
         }).catch((error) => {
             console.error(error.response.data);

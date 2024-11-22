@@ -5,7 +5,6 @@ import { usePage } from '@inertiajs/vue3';
 import { SideBar } from '@/components/sideBar';
 const page = usePage()
 // const isAuth = computed(() => page.props.auth.user)
-// console.log(page.props)
 
 </script>
 

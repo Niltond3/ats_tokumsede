@@ -33,7 +33,6 @@ const renderToast = (promise) => {
         loading: 'Aguarde...',
 
         success: (data) => {
-            console.log(data)
             props.toggleDialog()
             props.setTab('pedidos')
             return markRaw(CustomDiv('sucesso', `O pedido foi cadastrado com sucesso!`));
@@ -47,8 +46,6 @@ const whenDialogOpen = async () => {
     const url = `produtos/${props.idClienteAddress}`
     const responseOrder = await axios.get(url)
     const { data: orderData } = responseOrder
-
-    console.log(orderData)
 
     const responseDistributor = orderData[1];
     const responseAddress = orderData[2];
@@ -85,7 +82,6 @@ const handleDialogOpen = () => {
 const handleRealizarPedido = (payload) => {
     var url = "pedidos";
     const response = axios.post(url, payload)
-    console.log(payload)
     renderToast(response)
 }
 

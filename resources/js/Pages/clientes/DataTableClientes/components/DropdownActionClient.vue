@@ -34,12 +34,10 @@ const renderToast = (promise, status) => {
     toast.promise(promise, {
         loading: 'Aguarde...',
         success: (data) => {
-            console.log(data)
             props.dataTable.ajax.reload()
             return markRaw(CustomDiv('sucesso', `O cliente ${idCliente} foi ${status} com sucesso!`));
         },
         error: (data) => {
-            console.log(data)
             return markRaw(CustomDiv('Error', data.response.data));
         }
     });

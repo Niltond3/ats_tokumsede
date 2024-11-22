@@ -36,7 +36,6 @@ function onSelect() {
 }
 
 function onThumbClick(index) {
-    console.log(emblaMainApi.value)
     if (!emblaMainApi.value || !emblaThumbnailApi.value)
         return
     emblaMainApi.value.scrollTo(index)

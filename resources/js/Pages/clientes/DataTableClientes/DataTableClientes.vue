@@ -102,7 +102,6 @@ onMounted(() => {
 
         // Attach the handler
         ele.addEventListener('mousedown', mouseDownHandler);
-        console.log(`Drag scroll Element: ${elementId}`);
     }
 
     $('.dt-search').addClass('flex items-center py-2 px-4 gap-2 !text-info/80')
@@ -280,7 +279,6 @@ const ajax = {
 
             const nome = utf8Decode(client.nome)
             const enderecos = client.enderecos.map((address) => {
-                console.log(address.cidade)
                 return {
                     ...address,
                     logradouro: utf8Decode(address.logradouro || ''),
@@ -308,7 +306,6 @@ const ajax = {
 const handleUpdateDataTable = () => dt.ajax.reload();
 
 const handleDeleteAddress = (confirm) => {
-    console.log('handleDeleteAddress' + confirm)
 
     if (confirm === false) return toggleConfirmDialog()
 

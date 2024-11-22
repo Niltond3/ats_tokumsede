@@ -37,7 +37,6 @@ const handleChange = (value) => emit('update:addressValue', value)
 
 const setPlace = (place) => {
     const { address_components, formatted_address } = place
-    console.log(address_components)
 
     const addressComp = address_components.reduce((prev, addressItem) => {
         const { short_name, types } = addressItem
@@ -51,7 +50,6 @@ const setPlace = (place) => {
         return prev
 
     }, {});
-    console.log(addressComp)
     handleChange({ ...addressComp, search: formatted_address })
 }
 

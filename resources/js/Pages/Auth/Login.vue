@@ -50,8 +50,6 @@ const onSubmit = handleSubmit((values, { resetField }) => {
 
     axios.post(route('login'), values)
         .then((response) => {
-            console.log('response')
-            console.log(response)
             resetField('senha')
             location.reload();
         }).catch((error) => {

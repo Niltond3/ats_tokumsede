@@ -97,7 +97,8 @@ const onSubmit = (values) => {
         apelido: values.apelido || '',
         observacao: values.observacao || '',
     })
-    const response = props.addressDetails ? axios.put(`enderecos/${props.addressDetails.id}`, payload) : axios.post('enderecos', payload);
+
+    const response = props.addressDetails ? axios.put(`enderecos/${props.addressDetails.id}`, payload) : axios.post('enderecos', payload, { headers: { "Content-Type": "application/json" } });
 
     renderToast(response)
 

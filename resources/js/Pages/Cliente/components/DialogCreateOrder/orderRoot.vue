@@ -1,6 +1,5 @@
 <script setup>
 import { ref, markRaw, defineComponent, h, onMounted, watch, reactive } from 'vue';
-import _ from 'lodash';
 import axios from 'axios';
 import { useForwardPropsEmits } from "radix-vue";
 import { Button } from '@/components/ui/button'

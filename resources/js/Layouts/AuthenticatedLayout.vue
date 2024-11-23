@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Toaster } from '@/components/ui/sonner'
 import ApplicationLogo from '@/components/ApplicationLogo.vue';
 import Dropdown from '@/components/Dropdown.vue';
@@ -12,7 +12,44 @@ const page = usePage()
 // const isAuth = computed(() => page.props.auth.user)
 
 const showingNavigationDropdown = ref(false);
+async function observeNewOrders() {
+    var novosPedidos = 0;
 
+    var urlPedidos = 'pedidos/ultimoPedido';
+
+    const ultimoPedido = await axios.get(urlPedidos)
+
+    console.log('ultimoPedido');
+    console.log(ultimoPedido);
+
+    var urlPedidos = "/pedidos/buscarNovosPedidos/" + ultimoPedido.data;
+    const response = await axios.get(urlPedidos)
+
+    console.log('buscarNovosPedidos');
+    console.log(response);
+
+    // .then(response => {
+    //     if (novosPedidos > 0) {
+    //         if (window.location.href != 'https://adm.tokumsede.com/#/listapedidos') {
+    //             if (audio) { audio.play(); }
+    //             $("#alertaPedidoTop").addClass("notify");
+    //             response.data.length > 1 ? $("#alertaTopbar").html("<i class='fas fa-bell'></i> +" + response.data.length + " Pedidos") : $("#alertaTopbar").html("<i class='fas fa-bell'></i> +1 Pedido");
+    //             $("#audio").addClass("d-none");
+    //             $("#alertaTopbar").removeClass("d-none");
+    //         } else {
+    //             if (audio) { audio.play(); }
+    //             $("#alertaPedido").addClass("notify");
+    //             response.data.length > 1 ? $("#abaPedidosPendentes").html("<span class='hidden-md-up'><i class='fas fa-bell'></i></span><span class='hidden-sm-down'><i class='fas fa-bell'></i> +" + response.data.length + " Pendentes</span>") : $("#abaPedidosPendentes").html("<span class='hidden-md-up'><i class='fas fa-bell'></i></span><span class='hidden-sm-down'><i class='fas fa-bell'></i> +" + response.data.length + " Pendente</span>");
+    //             //window.navigator.vibrate([100,30,100,30,100,30,200,30,200,30,200,30,100,30,100,30,100]);
+    //         }
+    //     }
+    //     novosPedidos = response.data.length;
+    // });
+}
+
+onMounted(() => {
+    window.setInterval(buscarNovosPedidos, 10000);
+})
 
 </script>
 

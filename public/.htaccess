@@ -3,16 +3,14 @@
         Options -MultiViews -Indexes
     </IfModule>
 
-    RewriteEngine On
-
-    # Redirect www to non-www and enforce HTTPS
-    RewriteCond %{HTTP_HOST} ^www\. [NC,OR]
-    RewriteCond %{HTTPS} off
-    RewriteRule ^ https://tks.tokumsede.com.br%{REQUEST_URI} [L,R=301]
+    # RewriteEngine On
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
@@ -26,16 +24,14 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule . /index.php [L]
 
+    #Redirecionar para HTTPS
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
     php_value upload_max_filesize 128M
     php_value post_max_size 128M
     php_value max_execution_time 300
     php_value max_input_time 300
     php_value memory_limit 256M
-    <IfModule mod_headers.c>
-        Header set Access-Control-Allow-Origin "*"
-        Header set Access-Control-Allow-Headers "X-CSRF-TOKEN"
-        Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-        Header set Access-Control-Allow-Headers "Content-Type, Authorization"
-        Header always set Content-Security-Policy "upgrade-insecure-requests;"
-    </IfModule>
 </IfModule>

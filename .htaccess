@@ -3,10 +3,10 @@
         Options -MultiViews -Indexes
     </IfModule>
 
-     RewriteEngine On
+    # RewriteEngine On
 
-     RewriteCond %{HTTPS} off
-     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
@@ -23,11 +23,7 @@
     RewriteRule ^ index.php [L]
 </IfModule>
 <FilesMatch "\.(php|html|htm)$">
-    <IfModule mod_headers.c>
+    <IfModule mod_headers>
         Header set Access-Control-Allow-Origin "*"
-        Header set Access-Control-Allow-Headers "X-CSRF-TOKEN"
-        Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-        Header set Access-Control-Allow-Headers "Content-Type, Authorization"
-        Header always set Content-Security-Policy "upgrade-insecure-requests;"
     </IfModule>
 </FilesMatch>

@@ -26,8 +26,8 @@ const typeAdmin = page.props.auth.user.tipoAdministrador
 const getTypeAdmin = {
     Distribuidor: {
         tab: 'estatisticas',
-        tabName: 'Estatisticas',
-        description: 'Vistualize as estatisticas das vendas'
+        tabName: 'Estatísticas',
+        description: 'Vistualize as estatísticas das vendas'
     },
     Administrador: {
         tab: 'clientes',

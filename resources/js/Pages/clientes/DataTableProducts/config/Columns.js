@@ -45,7 +45,7 @@ export const columns = [
         accessorKey: 'img',
         size: 44,
         header: () => h('div', { class: 'text-white font-bold' }, 'img'),
-        cell: ({ row }) => h('img', { class: 'font-medium', src: row.getValue('img') },),
+        cell: ({ row }) => h('img', { class: 'font-medium h-[85px] m-auto', src: row.getValue('img') },),
         enableGlobalFilter: false,
     },
     {

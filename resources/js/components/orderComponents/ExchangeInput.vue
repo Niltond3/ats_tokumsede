@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { Input } from '@/components/ui/input'
+import {Label} from '@/components/ui/label'
 import { formatMoney } from '@/util'
 import { Money3Component } from 'v-money3'
 import { twMerge } from 'tailwind-merge'

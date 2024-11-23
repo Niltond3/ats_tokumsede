@@ -5,8 +5,10 @@
 
     RewriteEngine On
 
+    # Redirect www to non-www and enforce HTTPS
+    RewriteCond %{HTTP_HOST} ^www\. [NC,OR]
     RewriteCond %{HTTPS} off
-    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    RewriteRule ^ https://tks.tokumsede.com.br%{REQUEST_URI} [L,R=301]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
@@ -23,11 +25,6 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule . /index.php [L]
-
-    #Redirecionar para HTTPS
-    RewriteCond %{HTTP:X-Forwarded-Proto} !https
-    RewriteCond %{HTTPS} off
-    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     php_value upload_max_filesize 128M
     php_value post_max_size 128M

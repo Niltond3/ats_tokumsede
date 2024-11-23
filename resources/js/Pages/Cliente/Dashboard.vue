@@ -17,8 +17,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
-import { Check, ChevronsUpDown } from 'lucide-vue-next'
+import { ChevronsUpDown } from 'lucide-vue-next'
 import { DialogCreateOrder } from './components/DialogCreateOrder';
 import { TablePedidos } from '../clientes/DataTablePedidos';
 
@@ -80,10 +79,10 @@ const value = ref('')
                                 <CommandList>
                                     <CommandEmpty class="p-2">Nenhum endereço encontrado.</CommandEmpty>
                                     <CommandGroup>
-                                        <DialogCreateOrder v-for="address in addresses"
-                                            class="flex flex-col items-start" :address="address" :value="value"
-                                            @update:command-open="() => open = false">
-                                        </DialogCreateOrder>
+                                        <div>
+                                            <DialogCreateOrder v-for="address in addresses" :address="address"
+                                                :value="value" @update:command-open="() => open = false" />
+                                        </div>
                                     </CommandGroup>
                                 </CommandList>
                             </Command>

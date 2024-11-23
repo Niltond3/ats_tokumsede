@@ -19,14 +19,14 @@ async function observeNewOrders() {
 
     const ultimoPedido = await axios.get(urlPedidos)
 
-    console.log('ultimoPedido');
-    console.log(ultimoPedido);
+    // console.log('ultimoPedido');
+    // console.log(ultimoPedido);
 
     var urlPedidos = "/pedidos/buscarNovosPedidos/" + ultimoPedido.data;
     const response = await axios.get(urlPedidos)
 
-    console.log('buscarNovosPedidos');
-    console.log(response);
+    //console.log('buscarNovosPedidos');
+    //console.log(response.data);
 
     // .then(response => {
     //     if (novosPedidos > 0) {

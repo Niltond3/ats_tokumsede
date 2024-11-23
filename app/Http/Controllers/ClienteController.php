@@ -10,6 +10,7 @@ use App\Models\Distribuidor;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use Illuminate\Database\Eloquent\Builder;
+use \Barryvdh\Debugbar\Facades\Debugbar;
 
 class ClienteController extends Controller
 {
@@ -98,9 +99,10 @@ class ClienteController extends Controller
         $cliente->telefone = $telefone[1];
         $cliente->dataNascimento = $request->dataNascimento == "" ? null : implode("-", array_reverse(explode("/", $request->dataNascimento)));
 
-
-        $v = Cliente::get()->where('email', 'like ',$request->email);
-        if ($v->count() == 0 || strcmp($request->email, "") == 0) {
+        Debugbar::info($request);
+        Debugbar::info($cliente);
+        //$v = Cliente::get()->where('email', 'like ',$request->email);
+        //if ($v->count() == 0 || strcmp($request->email, "") == 0) {
             if ($cliente->save()) {
                 $enderecoCliente = new Enderecocliente($request->all());
                 $enderecoCliente->referencia = $request->referencia?$request->referencia:"";
@@ -120,9 +122,9 @@ class ClienteController extends Controller
             } else {
                 return response("Erro ao cadastrar o cliente. Tente novamente ou contate o cliente.", 400);
             }
-        } else {
-            return response('Email já cadastrado.', 200);
-        }
+       // } else {
+       //     return response('Email já cadastrado.', 200);
+       // }
         //CADASTRA CLIENTE
     }
 

@@ -109,6 +109,7 @@ const renderToast = (promise) => {
         loading: 'Aguarde...',
 
         success: (data) => {
+            console.log(data)
             emit('create:success')
             return markRaw(CustomDiv('sucesso', `O Cliente foi cadastrado com sucesso!`));
         },

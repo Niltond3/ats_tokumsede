@@ -43,9 +43,9 @@ async function observeNewOrders() {
     const responseBuscarNovosPedidos = await axios.get(urlNovosPedidos)
     novosPedidos.value = responseBuscarNovosPedidos.data;
     console.log('buscarNovosPedidos');
-    console.log(novosPedidos);
+    console.log(novosPedidos.value);
 
-    if (novosPedidos.length > 0) {
+    if (novosPedidos.value.length > 0) {
 
         console.log($('#radix-vue-tabs-v-1-trigger-pedidos'))
         console.log($('#radix-vue-tabs-v-1-trigger-estatisticas'))

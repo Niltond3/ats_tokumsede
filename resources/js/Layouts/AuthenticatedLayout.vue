@@ -48,7 +48,7 @@ async function observeNewOrders() {
 }
 
 onMounted(() => {
-    window.setInterval(buscarNovosPedidos, 10000);
+    window.setInterval(observeNewOrders, 10000);
 })
 
 </script>

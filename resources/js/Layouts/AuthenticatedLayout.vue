@@ -15,7 +15,17 @@ const page = usePage()
 const showingNavigationDropdown = ref(false);
 
 const ultimoPedido = ref(null)
+function playSound() {
+    if (audio) {
+        audio.autoplay = true;
+        audio.load();
+        audio.play();
+        //var mp3 = '<source src="http://commondatastorage.googleapis.com/codeskulptor-assets/jump.ogg" type="audio/mpeg">';
+        //document.getElementById("sound").innerHTML =
+        //    '<audio autoplay="autoplay">' + audio + "</audio>";
+    }
 
+}
 const newOrder = async () => {
     const urlUltimoPedido = 'pedidos/ultimoPedido';
     const responseUltimoPedido = await axios.get(urlUltimoPedido)
@@ -35,13 +45,11 @@ async function observeNewOrders() {
     console.log(novosPedidos);
 
     if (novosPedidos.length > 0) {
-        audio.load();
+
         console.log($('#radix-vue-tabs-v-1-trigger-pedidos'))
         console.log($('#radix-vue-tabs-v-1-trigger-estatisticas'))
-        if (audio) {
-            audio.play();
-            audio.pause();
-        }
+        console.log($('#header_bar'))
+        playSound();
     }
 
     // .then(response => {

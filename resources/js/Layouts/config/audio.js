@@ -6,7 +6,7 @@ var Sound = (function () {
         var snd = new Audio(src);
         df.appendChild(snd); // keep in fragment until finished playing
         snd.addEventListener('ended', function () { df.removeChild(snd); });
-        snd.play();
+        //snd.play();
         return snd;
     }
 }());

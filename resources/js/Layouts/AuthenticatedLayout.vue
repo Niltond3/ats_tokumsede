@@ -7,26 +7,38 @@ import DropdownLink from '@/components/DropdownLink.vue';
 import NavLink from '@/components/NavLink.vue';
 import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
 import { Link, usePage, } from '@inertiajs/vue3';
+import audio from './config/audio'
 
 const page = usePage()
 // const isAuth = computed(() => page.props.auth.user)
 
 const showingNavigationDropdown = ref(false);
+
+const ultimoPedido = ref(null)
+
+const newOrder = async () => {
+    const urlUltimoPedido = 'pedidos/ultimoPedido';
+    const responseUltimoPedido = await axios.get(urlUltimoPedido)
+    ultimoPedido.value = responseUltimoPedido.data;
+    console.log('ultimoPedido');
+    console.log(ultimoPedido.value);
+}
 async function observeNewOrders() {
-    var novosPedidos = 0;
 
-    var urlPedidos = 'pedidos/ultimoPedido';
 
-    const ultimoPedido = await axios.get(urlPedidos)
+    !ultimoPedido.value && await newOrder()
 
-    // console.log('ultimoPedido');
-    // console.log(ultimoPedido);
+    var urlNovosPedidos = "/pedidos/buscarNovosPedidos/" + ultimoPedido.value;
+    const responseBuscarNovosPedidos = await axios.get(urlNovosPedidos)
+    const novosPedidos = responseBuscarNovosPedidos.data;
+    console.log('buscarNovosPedidos');
+    console.log(novosPedidos);
 
-    var urlPedidos = "/pedidos/buscarNovosPedidos/" + ultimoPedido.data;
-    const response = await axios.get(urlPedidos)
-
-    //console.log('buscarNovosPedidos');
-    //console.log(response.data);
+    if (novosPedidos > 0) {
+        console.log($('#radix-vue-tabs-v-1-trigger-pedidos'))
+        console.log($('#radix-vue-tabs-v-1-trigger-estatisticas'))
+        if (audio) { audio.play(); }
+    }
 
     // .then(response => {
     //     if (novosPedidos > 0) {

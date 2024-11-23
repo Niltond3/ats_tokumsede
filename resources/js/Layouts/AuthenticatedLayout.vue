@@ -34,10 +34,14 @@ async function observeNewOrders() {
     console.log('buscarNovosPedidos');
     console.log(novosPedidos);
 
-    if (novosPedidos > 0) {
+    if (novosPedidos.length > 0) {
+        audio.load();
         console.log($('#radix-vue-tabs-v-1-trigger-pedidos'))
         console.log($('#radix-vue-tabs-v-1-trigger-estatisticas'))
-        if (audio) { audio.play(); }
+        if (audio) {
+            audio.play();
+            audio.pause();
+        }
     }
 
     // .then(response => {

@@ -15,6 +15,7 @@ const page = usePage()
 const showingNavigationDropdown = ref(false);
 
 const ultimoPedido = ref(null)
+const novosPedidos = ref([])
 function playSound() {
     if (audio) {
         audio.autoplay = true;
@@ -40,7 +41,7 @@ async function observeNewOrders() {
 
     var urlNovosPedidos = "/pedidos/buscarNovosPedidos/" + ultimoPedido.value;
     const responseBuscarNovosPedidos = await axios.get(urlNovosPedidos)
-    const novosPedidos = responseBuscarNovosPedidos.data;
+    novosPedidos.value = responseBuscarNovosPedidos.data;
     console.log('buscarNovosPedidos');
     console.log(novosPedidos);
 
@@ -50,6 +51,8 @@ async function observeNewOrders() {
         console.log($('#radix-vue-tabs-v-1-trigger-estatisticas'))
         console.log($('#header_bar'))
         playSound();
+
+        await newOrder()
     }
 
     // .then(response => {

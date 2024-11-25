@@ -59,6 +59,7 @@
         "long-press-event": "^2.5.0",
         "lucide-vue-next": "^0.441.0",
         "querystring": "^0.2.1",
+        "qz-tray": "^2.2.4",
         "radix-vue": "^1.9.6",
         "remixicon": "^4.5.0",
         "tailwind-merge": "^2.5.2",

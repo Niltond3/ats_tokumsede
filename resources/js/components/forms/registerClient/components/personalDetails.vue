@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input'
 import DatePicker from './datePicker.vue';
 import Button from '@/components/Button.vue';
 import { generatePassword } from '@/util';
+import DialogOthersContacts from './DialogOthersContacts.vue';
 
 const { values } = defineProps({ values: Object })
 
@@ -50,7 +51,7 @@ const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-inf
 </script>
 
 <template>
-    <section class="flex flex-col gap-4 mt-4 space-y-6 sm:grid sm:grid-cols-6 sm:gap-4 sm:space-y-0">
+    <section class="flex flex-col gap-4 mt-4 space-y-6 sm:grid sm:grid-cols-6 sm:gap-4 sm:space-y-0 relative">
         <FormField v-slot="{ componentField }" name="nome">
             <FormItem v-auto-animate class="relative sm:col-span-5">
                 <FormControl>
@@ -114,18 +115,22 @@ const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-inf
                 <FormMessage />
             </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField }" name="telefone">
-            <FormItem v-auto-animate class="relative sm:col-span-3">
-                <FormControl>
-                    <Input v-bind="componentField" autocomplete="username" type="text" placeholder="Número de telefone"
-                        :class="cn(inputClass)" v-mask="['(##) ####-####', '(##) #####-####']" />
-                </FormControl>
-                <FormLabel :class="cn(labelClass)">
-                    Telefone
-                </FormLabel>
-                <FormMessage />
-            </FormItem>
-        </FormField>
+        <div class="relative sm:col-span-3">
+            <DialogOthersContacts class="right-0 sm:-right-3"></DialogOthersContacts>
+            <FormField v-slot="{ componentField }" name="telefone">
+                <FormItem v-auto-animate class="relative ">
+                    <FormControl>
+                        <Input v-bind="componentField" autocomplete="username" type="text"
+                            placeholder="Número de telefone" :class="cn(inputClass)"
+                            v-mask="['(##) ####-####', '(##) #####-####']" />
+                    </FormControl>
+                    <FormLabel :class="cn(labelClass)">
+                        Telefone
+                    </FormLabel>
+                    <FormMessage />
+                </FormItem>
+            </FormField>
+        </div>
         <FormField v-slot="{ componentField }" name="tipoPessoa">
             <FormItem v-auto-animate class="relative sm:col-span-3">
                 <FormControl>

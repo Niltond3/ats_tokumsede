@@ -40,7 +40,7 @@ const handleSucess = () => {
 
 
 const whenDialogOpen = () => {
-    const { dataNascimento, email, nome, sexo, telefone, tipoPessoa, id } = props.clientDetails
+    const { dataNascimento, email, nome, sexo, telefone, tipoPessoa, id, outrosContatos } = props.clientDetails
 
     details.value = {
         id,
@@ -49,7 +49,8 @@ const whenDialogOpen = () => {
         nome,
         sexo: sexo ? `${sexo}` : '',
         telefone: telefone ? telefone : '',
-        tipoPessoa: tipoPessoa ? tipoPessoa : ''
+        tipoPessoa: tipoPessoa ? tipoPessoa : '',
+        outrosContatos: outrosContatos ? outrosContatos : ''
     }
 }
 const handleDialogOpen = () => {

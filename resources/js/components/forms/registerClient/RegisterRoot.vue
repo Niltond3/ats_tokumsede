@@ -124,6 +124,7 @@ const onSubmit = (values) => {
         sexo: values.sexo,
         dataNascimento: values.dataNascimento,
         tipoPessoa,
+        outrosContatos: values.outrosContatos,
         cpf: documento['CPF'],
         cnpj: documento['CNPJ'],
         logradouro: values.logradouro,

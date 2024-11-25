@@ -24,7 +24,9 @@ const page = usePage()
 const { tipoAdministrador } = page.props.auth.user
 
 const disabledButton = ref(false)
-
+onMounted(() => {
+    console.log(props.clientDetails)
+})
 const formSchema = [
     z.object({
         nome: z.string({ required_error: 'Informar seu nome é obrigatório' }).min(4, { message: 'Nome muito curto' }),
@@ -43,6 +45,7 @@ const formSchema = [
         dataNascimento: z.string().nullable().optional(),
         tipoPessoa: z.string().nullable().optional(),
         email: z.string({ required_error: "e-mail obrigatório" }).refine(validator.isEmail, { message: 'e-mail inválido' }),
+        outrosContatos: z.string().nullable().optional(),
     }).superRefine(({ confirmSenha, senha }, ctx) => {
         if (confirmSenha !== senha) {
             ctx.addIssue({
@@ -108,6 +111,7 @@ const onSubmit = (values) => {
         sexo: values.sexo,
         dataNascimento: values.dataNascimento,
         tipoPessoa,
+        outrosContatos: values.outrosContatos,
         cpf: documento['CPF'],
         cnpj: documento['CNPJ'],
         telefone: values.telefone,

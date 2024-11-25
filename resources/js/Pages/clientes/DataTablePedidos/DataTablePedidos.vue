@@ -1,6 +1,6 @@
 <script setup>
 import axios from 'axios';
-import { ref, onMounted, defineProps } from 'vue';
+import { ref, onMounted } from 'vue';
 import DataTable from 'datatables.net-vue3';
 import DataTablesLib from 'datatables.net';
 import languagePtBR from './dataTablePtBR.mjs';
@@ -13,6 +13,7 @@ import { getStatusString } from '../utils';
 import DropDownPedidos from './components/DropDownPedidos.vue';
 import ActionOrders from './components/ActionOrders.vue';
 import { twMerge } from 'tailwind-merge';
+import observeNewOrders from './components/observeNewOrders';
 
 DataTable.use(DataTablesLib);
 
@@ -22,32 +23,10 @@ const props = defineProps({
 })
 
 let dt;
-const data = ref([]);
 const table = ref();
+const data = ref([]);
 const entregadores = ref([]);
 
-const columns = [
-    { data: 'id', title: '#', responsivePriority: 7 },
-    { data: 'distribuidor.nome', title: 'Distribuidor', responsivePriority: 3 },
-    { data: 'cliente.nome', title: 'Cliente', responsivePriority: 2 },
-    { data: 'cliente.rating', render: '#rating', title: 'Rating', responsivePriority: 6 },
-    { data: 'horarioPedido', title: 'Data do Pedido' },
-    { data: 'dataAgendada', title: 'Agendamento', responsivePriority: 4 },
-    { data: 'status.label', title: 'status', responsivePriority: 5 },
-    {
-        data: 'cliente.nome',
-        render: '#action',
-        title: 'ações',
-        responsivePriority: 1
-    },
-    { data: 'cliente.dddTelefone', title: 'cliente.dddTelefone', visible: false },
-    { data: 'cliente.telefone', title: 'cliente.telefone', visible: false },
-    { data: 'endereco.logradouro', title: 'endereco.logradouro', visible: false },
-    { data: 'endereco.bairro', title: 'endereco.bairro', visible: false },
-    { data: 'endereco.numero', title: 'endereco.numero', visible: false },
-    { data: 'endereco.estado', title: 'endereco.estado', visible: false },
-    { data: 'endereco.cidade', title: 'endereco.cidade', visible: false },
-];
 
 const loadTableData = async () => {
     var urlPedidos = 'pedidos';
@@ -126,7 +105,31 @@ onMounted(() => {
     const PLATAFORMA = 3;
     */
     loadTableData();
+    window.setInterval(observeNewOrders(loadTableData), 10000);
 })
+
+const columns = [
+    { data: 'id', title: '#', responsivePriority: 7 },
+    { data: 'distribuidor.nome', title: 'Distribuidor', responsivePriority: 3 },
+    { data: 'cliente.nome', title: 'Cliente', responsivePriority: 2 },
+    { data: 'cliente.rating', render: '#rating', title: 'Rating', responsivePriority: 6 },
+    { data: 'horarioPedido', title: 'Data do Pedido' },
+    { data: 'dataAgendada', title: 'Agendamento', responsivePriority: 4 },
+    { data: 'status.label', title: 'status', responsivePriority: 5 },
+    {
+        data: 'cliente.nome',
+        render: '#action',
+        title: 'ações',
+        responsivePriority: 1
+    },
+    { data: 'cliente.dddTelefone', title: 'cliente.dddTelefone', visible: false },
+    { data: 'cliente.telefone', title: 'cliente.telefone', visible: false },
+    { data: 'endereco.logradouro', title: 'endereco.logradouro', visible: false },
+    { data: 'endereco.bairro', title: 'endereco.bairro', visible: false },
+    { data: 'endereco.numero', title: 'endereco.numero', visible: false },
+    { data: 'endereco.estado', title: 'endereco.estado', visible: false },
+    { data: 'endereco.cidade', title: 'endereco.cidade', visible: false },
+];
 
 const options = {
     language: languagePtBR,

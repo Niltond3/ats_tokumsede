@@ -52,8 +52,15 @@ const handleSetActiveTab = (tab) => setActiveTab(tab)
                 <TabsTrigger :value="tab" @Click="handleSetActiveTab(tab)">
                     {{ tabName }}
                 </TabsTrigger>
-                <TabsTrigger value="pedidos" @Click="handleSetActiveTab('pedidos')">
-                    Pedidos
+                <TabsTrigger value="pedidos" @Click="handleSetActiveTab('pedidos')" class="*:overflow-visible">
+                    <span class="relative ">
+                        <div
+                            class="absolute hidden items-center justify-center w-6 h-6 text-xs font-bold text-white bg-danger border-2 border-white rounded-full -top-3 -right-6 -end-2 dark:border-gray-900 animate-pulse m-auto transition-all [transition-behavior:allow-discrete]">
+                            !
+                        </div>
+                        Pedidos
+                    </span>
+
                 </TabsTrigger>
             </TabsList>
             <TabsContent :value="tab">

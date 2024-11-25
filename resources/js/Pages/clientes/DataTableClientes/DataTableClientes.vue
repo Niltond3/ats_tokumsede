@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, defineComponent, h, markRaw, defineProps, onBeforeMount, getCurrentInstance } from 'vue';
+import { ref, onMounted} from 'vue';
 import axios from 'axios'
 import DataTable from 'datatables.net-vue3';
 import DataTablesCore from 'datatables.net';

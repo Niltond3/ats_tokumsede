@@ -7,72 +7,12 @@ import DropdownLink from '@/components/DropdownLink.vue';
 import NavLink from '@/components/NavLink.vue';
 import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
 import { Link, usePage, } from '@inertiajs/vue3';
-import audio from './config/audio'
+import observeNewOrders from '@/Pages/clientes/DataTablePedidos/components/observeNewOrders';
 
 const page = usePage()
 // const isAuth = computed(() => page.props.auth.user)
 
 const showingNavigationDropdown = ref(false);
-
-const ultimoPedido = ref(null)
-const novosPedidos = ref([])
-function playSound() {
-    if (audio) {
-        audio.autoplay = true;
-        audio.load();
-        audio.play();
-        //var mp3 = '<source src="http://commondatastorage.googleapis.com/codeskulptor-assets/jump.ogg" type="audio/mpeg">';
-        //document.getElementById("sound").innerHTML =
-        //    '<audio autoplay="autoplay">' + audio + "</audio>";
-    }
-
-}
-const newOrder = async () => {
-    const urlUltimoPedido = 'pedidos/ultimoPedido';
-    const responseUltimoPedido = await axios.get(urlUltimoPedido)
-    ultimoPedido.value = responseUltimoPedido.data;
-    console.log('ultimoPedido');
-    console.log(ultimoPedido.value);
-}
-async function observeNewOrders() {
-
-
-    !ultimoPedido.value && await newOrder()
-
-    var urlNovosPedidos = "/pedidos/buscarNovosPedidos/" + ultimoPedido.value;
-    const responseBuscarNovosPedidos = await axios.get(urlNovosPedidos)
-    novosPedidos.value = responseBuscarNovosPedidos.data;
-    console.log('buscarNovosPedidos');
-    console.log(novosPedidos.value);
-
-    if (novosPedidos.value.length > 0) {
-
-        console.log($('#radix-vue-tabs-v-1-trigger-pedidos'))
-        console.log($('#radix-vue-tabs-v-1-trigger-estatisticas'))
-        console.log($('#header_bar'))
-        playSound();
-
-        await newOrder()
-    }
-
-    // .then(response => {
-    //     if (novosPedidos > 0) {
-    //         if (window.location.href != 'https://adm.tokumsede.com/#/listapedidos') {
-    //             if (audio) { audio.play(); }
-    //             $("#alertaPedidoTop").addClass("notify");
-    //             response.data.length > 1 ? $("#alertaTopbar").html("<i class='fas fa-bell'></i> +" + response.data.length + " Pedidos") : $("#alertaTopbar").html("<i class='fas fa-bell'></i> +1 Pedido");
-    //             $("#audio").addClass("d-none");
-    //             $("#alertaTopbar").removeClass("d-none");
-    //         } else {
-    //             if (audio) { audio.play(); }
-    //             $("#alertaPedido").addClass("notify");
-    //             response.data.length > 1 ? $("#abaPedidosPendentes").html("<span class='hidden-md-up'><i class='fas fa-bell'></i></span><span class='hidden-sm-down'><i class='fas fa-bell'></i> +" + response.data.length + " Pendentes</span>") : $("#abaPedidosPendentes").html("<span class='hidden-md-up'><i class='fas fa-bell'></i></span><span class='hidden-sm-down'><i class='fas fa-bell'></i> +" + response.data.length + " Pendente</span>");
-    //             //window.navigator.vibrate([100,30,100,30,100,30,200,30,200,30,200,30,100,30,100,30,100]);
-    //         }
-    //     }
-    //     novosPedidos = response.data.length;
-    // });
-}
 
 onMounted(() => {
     window.setInterval(observeNewOrders, 10000);

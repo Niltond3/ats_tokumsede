@@ -253,7 +253,6 @@ const updateData = (rowIndex, columnId, value) => {
     setTableData(newData)
 
     const itens = newData.map(product => {
-        // console.log(product)
         if (product.quantidade > 0) {
             const { id, preco, quantidade } = product
             return {

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted} from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios'
 import DataTable from 'datatables.net-vue3';
 import DataTablesCore from 'datatables.net';
@@ -14,7 +14,7 @@ import 'datatables.net-searchbuilder-dt';
 import 'datatables.net-searchpanes-dt';
 import 'datatables.net-select-dt';
 import 'datatables.net-staterestore-dt';
-import { utf8Decode } from '../../../util';
+import { errorUtils, utf8Decode } from '../../../util';
 import { dialogState } from '../../../hooks/useToggleDialog';
 import languagePtBR from './dataTablePtBR.mjs';
 import { formatOrder } from '../utils';
@@ -299,7 +299,8 @@ const ajax = {
         return JSON.stringify(newObj);
     },
     error: function (err) {
-        console.log(err)
+        console.log(errorUtils.getError(err))
+        toast.error('Ocorreu um erro ao carregar os clientes!' + errorUtils.getError(err))
     }
 }
 

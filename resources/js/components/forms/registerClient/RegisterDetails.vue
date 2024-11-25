@@ -24,9 +24,7 @@ const page = usePage()
 const { tipoAdministrador } = page.props.auth.user
 
 const disabledButton = ref(false)
-onMounted(() => {
-    console.log(props.clientDetails)
-})
+
 const formSchema = [
     z.object({
         nome: z.string({ required_error: 'Informar seu nome é obrigatório' }).min(4, { message: 'Nome muito curto' }),

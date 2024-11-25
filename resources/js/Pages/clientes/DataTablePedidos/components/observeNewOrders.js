@@ -47,7 +47,6 @@ const getNewOrders = async (successCallback) => {
 
         if (novosPedidos.length > 0) {
             successCallback(novosPedidos.length);
-
         }
     } catch (error) {
         console.log(errorUtils.getError(error))
@@ -66,6 +65,7 @@ const isActive = async () => {
     const getSucessCallback = async () => {
         await newOrder()
         callback.value()
+        playSound();
     }
     getNewOrders(getSucessCallback)
 }

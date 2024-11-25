@@ -22,10 +22,12 @@ const page = usePage()
                     <i class="ri-home-2-fill"></i>
                 </h2>
 
-                <Toggle aria-label="Toggle sound" id='toggleSound'
+                <Toggle aria-label="Toggle sound" id='toggleSound' default-value="true"
                     class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 group">
-                    <i class="ri-volume-mute-fill group-aria-pressed:hidden text-info/50 "></i>
-                    <i class="ri-volume-up-fill hidden group-aria-pressed:block text-info/50 "></i>
+                    <i
+                        class="ri-volume-mute-fill group-aria-pressed:hidden text-info/50 pointer-events-none select-none"></i>
+                    <i
+                        class="ri-volume-up-fill hidden group-aria-pressed:block text-info/50 pointer-events-none select-none"></i>
                 </Toggle>
 
             </div>

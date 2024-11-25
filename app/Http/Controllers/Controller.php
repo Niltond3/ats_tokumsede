@@ -146,7 +146,22 @@ abstract class Controller extends BaseController
 		}
 	}
 
+    function escape($variavel) {
 
+		if (!isset($_SESSION))
+			session_start();
+
+		if (isset($_GET[$variavel])) {
+			return stripslashes($_GET[$variavel]);
+		} elseif (isset($_POST[$variavel])) {
+			return stripslashes($_POST[$variavel]);
+		} elseif (isset($_SESSION[$variavel])) {
+			return @stripslashes($_SESSION[$variavel]);
+		} else {
+			return null;
+		}
+
+	}
 	function gcmSend($registrationIds, $idCliente, $idPedido, $status, $resposta, $origem, $alert){
 
 		switch($status){

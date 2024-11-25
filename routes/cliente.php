@@ -12,6 +12,7 @@ use App\Http\Controllers\Cliente\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Cliente\Auth\RegisteredUserController;
 use App\Http\Controllers\Cliente\Auth\VerifyEmailController;
 use App\Http\Controllers\ProdutoController;
+use App\Http\Controllers\api\IndexController as Api;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\ClienteController;
@@ -106,4 +107,8 @@ Route::prefix('cliente')->name('cliente.')->group(function (){
             Route::get('{idEnderecoCliente}', [ProdutoController::class,'show']);
         });
     });
+});
+
+Route::middleware('auth:cliente')->group(function () {
+    Route::resource('Api', Api::class,['except' => 'create']);
 });

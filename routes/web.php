@@ -1,7 +1,7 @@
 <?php
 include 'cors.php';
 
-use App\Http\Controllers\api\IndexController as Api;
+use App\Http\Controllers\Api\IndexController as Api;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\EnderecoClienteController;
@@ -77,31 +77,30 @@ Route::middleware('auth')->group(function () {
 Route::get('/homepage', [HomeController::class, 'getHomepage'])->name('homepage');
 
 
-Route::resource('Api', Api::class,['except' => 'create']);
  //PEDIDOS
  Route::group(['prefix' => 'Api'], function(){
     Route::resource('/', Api::class,['except' => 'create']);
-    Route::get('verificaPedidoAlterado', [PedidoController::class, 'visualizar']);
-    Route::put('verificaEmail', [PedidoController::class, 'aceitar']);
-    Route::put('consultaInicial/{id}', [PedidoController::class, 'despachar']);
-    Route::put('solicitaContato', [PedidoController::class, 'recusar']);
-    Route::put('enviaEmail', [PedidoController::class, 'entregar']);
-    Route::put('removerEndereco', [PedidoController::class, 'cancelar']);
-    Route::get('listImages', [PedidoController::class, 'editar']);
-    Route::put('consultaInicialSemCadastro', [PedidoController::class, 'atualizar']);
-    Route::get('clientePotencial', [PedidoController::class, 'escolherentregador']);
-    Route::get('login', [PedidoController::class, 'ajustarCoordenadas']);
-    Route::post('refreshRegId', [PedidoController::class, 'ajustarCoordenadas']);
-    Route::get('notificacaoRecebida', [PedidoController::class, 'buscarNovosPedidos']);
-    Route::get('senhaModoTeste', [PedidoController::class, 'ultimoPedido']);
-    Route::get('alteraEnderecoAtual', [PedidoController::class, 'listaClientes']);
-    Route::get('cadastrarNovoEndereco', [PedidoController::class, 'listaClientes']);
-    Route::get('cancelarPedido', [PedidoController::class, 'listaClientes']);
-    Route::get('pedidoRecebido', [PedidoController::class, 'listaClientes']);
-    Route::get('alteraDadosCliente', [PedidoController::class, 'listaClientes']);
-    Route::get('verifyRecover', [PedidoController::class, 'listaClientes']);
-    Route::get('alteraSenha', [PedidoController::class, 'listaClientes']);
-    Route::get('novoPedido', [PedidoController::class, 'listaClientes']);
+    Route::get('verificaPedidoAlterado', [Api::class, 'verificaPedidoAlterado']);
+    Route::put('verificaEmail', [Api::class, 'verificaEmail']);
+    Route::put('consultaInicial/{id}', [Api::class, 'consultaInicial']);
+    Route::put('solicitaContato', [Api::class, 'solicitaContato']);
+    Route::put('enviaEmail', [Api::class, 'enviaEmail']);
+    Route::put('removerEndereco', [Api::class, 'removerEndereco']);
+    Route::get('listImages', [Api::class, 'listImages']);
+    Route::put('consultaInicialSemCadastro', [Api::class, 'consultaInicialSemCadastro']);
+    Route::get('clientePotencial', [Api::class, 'clientePotencial']);
+    Route::get('login', [Api::class, 'login']);
+    Route::post('refreshRegId', [Api::class, 'refreshRegId']);
+    Route::get('notificacaoRecebida', [Api::class, 'notificacaoRecebida']);
+    Route::get('senhaModoTeste', [Api::class, 'senhaModoTeste']);
+    Route::get('alteraEnderecoAtual', [Api::class, 'alteraEnderecoAtual']);
+    Route::get('cadastrarNovoEndereco', [Api::class, 'cadastrarNovoEndereco']);
+    Route::get('cancelarPedido', [Api::class, 'cancelarPedido']);
+    Route::get('pedidoRecebido', [Api::class, 'pedidoRecebido']);
+    Route::get('alteraDadosCliente', [Api::class, 'alteraDadosCliente']);
+    Route::get('verifyRecover', [Api::class, 'verifyRecover']);
+    Route::get('alteraSenha', [Api::class, 'alteraSenha']);
+    Route::get('novoPedido', [Api::class, 'novoPedido']);
 });
 
 

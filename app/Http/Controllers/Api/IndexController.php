@@ -101,9 +101,12 @@ class IndexController extends Controller
 
 		$appVersion	= $request->appVersion?$request->appVersion:$cliente->appVersion;
 
-		$distrib = Distribuidor::where('status',Distribuidor::ATIVO)
-			->with('novoHorarioFuncionamento','enderecoDistribuidor:id,cidade,logradouro,estado,bairro,complemento,numero')
-			->get();
+		$distrib = Distribuidor::with([
+            'enderecoDistribuidor:id,cidade,logradouro,estado,bairro,complemento,numero',
+            'novoHorarioFuncionamento:id,segunda,inicioSegunda,fimSegunda,terca,inicioTerca,fimTerca,quarta,inicioQuarta,fimQuarta,quinta,inicioQuinta,fimQuinta,sexta,inicioSexta,fimSexta,sabado,inicioSabado,fimSabado,domingo,inicioDomingo,fimDomingo,pausaAlmoco,inicioAlmoco,fimAlmoco'
+        ])
+        ->where('status', Distribuidor::ATIVO)
+        ->get();
 
 		foreach($distrib as $pos => $d){
 			$out["distrib"][$pos]["nome"] 			= $d["nome"];
@@ -173,12 +176,13 @@ class IndexController extends Controller
 
 				$joinHorario = $appVersion==null?"horarioFuncionamento":'novoHorarioFuncionamento';
 
-				$distribuidores = Distribuidor::selectRaw("distribuidor.*, enderecoDistribuidor.cidade as cidade, enderecoDistribuidor.latitude as latitude, enderecoDistribuidor.longitude as longitude, enderecoDistribuidor.cep as cep, enderecoDistribuidor.distanciaMaxima as distanciaMaxima")
+				$distribuidores = Distribuidor::select("distribuidor.*, enderecoDistribuidor.cidade as cidade, enderecoDistribuidor.latitude as latitude, enderecoDistribuidor.longitude as longitude, enderecoDistribuidor.cep as cep, enderecoDistribuidor.distanciaMaxima as distanciaMaxima")
 					->Join("enderecoDistribuidor", 'enderecoDistribuidor.id', '=','distribuidor.idEnderecoDistribuidor')
 					->Join("taxaEntrega", 'taxaEntrega.id', '=','distribuidor.idTaxaEntrega')
 					->Join($joinHorario, $joinHorario.'.id', '=','distribuidor.id'.$joinHorario)
-					->whereRaw("distribuidor.status = ".Distribuidor::ATIVO." AND enderecoDistribuidor.latitude + $fator >= ".$endereco["latitude"]." AND enderecoDistribuidor.latitude - $fator <= ".$endereco["latitude"]." AND enderecoDistribuidor.longitude + $fator >= ".$endereco["longitude"]." AND enderecoDistribuidor.longitude - $fator <= ".$endereco["longitude"])
-					->get();
+					->where("distribuidor.status = ".Distribuidor::ATIVO." AND enderecoDistribuidor.latitude + $fator >= ".$endereco["latitude"]." AND enderecoDistribuidor.latitude - $fator <= ".$endereco["latitude"]." AND enderecoDistribuidor.longitude + $fator >= ".$endereco["longitude"]." AND enderecoDistribuidor.longitude - $fator <= ".$endereco["longitude"])
+					->get()
+                    ->toArray();
 
 				if(count($distribuidores) == 0){
 					$out["distribuidores"][$pos]["idDistribuidor"] = null;
@@ -196,15 +200,16 @@ class IndexController extends Controller
 
 						$idDistribuidor = $distribuidores[$indexDistribuidor]["tipoDistribuidor"]=="revendedor"?$distribuidores[$indexDistribuidor]["idDistribuidor"]:$distribuidores[$indexDistribuidor]["id"];
 
-						$produtos = Preco::selectRaw("preco.*, produto.id as idProd, produto.nome as nome, produto.descricao as descricao, produto.img as img, categoria.nome as categoria, estoque.id as idEstoque")
+						$produtos = Preco::select("preco.*, produto.id as idProd, produto.nome as nome, produto.descricao as descricao, produto.img as img, categoria.nome as categoria, estoque.id as idEstoque")
 							->Join("produto", 'produto.id', '=', 'preco.idProduto')
 							->Join('categoria', 'categoria.id', '=', 'produto.idCategoria')
 							->Join('estoque', 'estoque.id', '=', 'preco.idEstoque')
-							->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$idDistribuidor. " AND estoque.quantidade >= 1 ".
+							->where("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$idDistribuidor. " AND estoque.quantidade >= 1 ".
 							" AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
 							" AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
-							->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
-							->get();
+							->orderBy("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
+							->get()
+                            ->toArray();;
 
 						if(count($produtos)){
 							//MONTA JSON DE PRODUTOS
@@ -256,7 +261,7 @@ class IndexController extends Controller
 							$out["distribuidores"][$pos]["distanciaMaxima"] = $distribuidores[$indexDistribuidor]['taxaEntrega']["distanciaMaxima"];
 							$out["distribuidores"][$pos]["valorKmAdicional"] = $distribuidores[$indexDistribuidor]['taxaEntrega']["valorKmAdicional"];
 
-							$feriados = Feriado::where('idDistribuidor', $distribuidores[$indexDistribuidor]["id"])->get();
+							$feriados = Feriado::where('idDistribuidor', $distribuidores[$indexDistribuidor]["id"])->get()->toArray();;
 
 							if(count($feriados)){
 								foreach($feriados as $fPos => $f){

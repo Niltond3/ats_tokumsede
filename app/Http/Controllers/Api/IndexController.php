@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\api\UtilController;
@@ -64,21 +65,17 @@ class IndexController extends Controller
         //
     }
     // ---------------------------------- Refatorados ------------------------------------------------//
-	function verificaPedidoAlterado(){
+    function verificaPedidoAlterado(Request $request){
 
-		$idCliente = $this->escape("idCliente");
-
-        $cliente = Cliente::find($idCliente);
+		$idCliente = $request->idCliente;
+		$cliente = Cliente::find($idCliente);
 
 		if($cliente){
-            $pedidos = Pedido::where('statusChange', 1)
-            ->whereHas('enderecoCliente.cliente', function($query) use ($cliente) {
-                $query->where('id', $cliente->id);
-            })
-            ->with(['enderecoCliente', 'enderecoCliente.cliente']) // Se você precisar carregar os relacionamentos
-            ->get();
-
-
+			$pedidos = Pedido::select("pedido.*")
+						->leftJoin('enderecoCliente', 'enderecoCliente.id', '=', 'pedido.idEndereco')
+						->leftJoin('cliente', 'cliente.id', '=', 'enderecoCliente.idCliente')
+						->where([["statusChange","1"],['cliente.id',$idCliente]])
+						->get();
 			if(count($pedidos)){
 				foreach($pedidos as $p){
 					$this->gcmSend($cliente->regId, $idCliente, $p["id"], $p["status"], $p["retorno"], $p["origem"], false);
@@ -88,87 +85,75 @@ class IndexController extends Controller
 
 	}
 
-    function verificaEmail() {
+    function verificaEmail(Request $request) {
 
-        $email = $this->escape("email");
-
-        $users = Cliente::where('email', $email)
-        ->where('status', Cliente::ATIVO)
-        ->get();
+        $users = Cliente::where([['email',$request->email],['status',Cliente::ATIVO]])->get();
 
 		$out["qtd"] = count($users);
 		echo json_encode($out);
 
     }
 
-    function consultaInicial($clie = null){
+    function consultaInicial(Request $request){//$clie == null
+		$idCliente  = $request->idCliente;
+		$system 	= $request->system;
+		$cliente 	= Cliente::find($idCliente);
 
-		$idCliente 	= ($clie == null) ? $this->escape("idCliente") : $clie;
-		$system 	= $this->escape("system");
-		$cliente = Cliente::find($idCliente);
+		$appVersion	= $request->appVersion?$request->appVersion:$cliente->appVersion;
 
-		$appVersion	= $this->escape("appVersion")?$this->escape("appVersion"):$cliente->appVersion;
-
-		$distrib = Distribuidor::with([
-            'enderecoDistribuidor:id,cidade,logradouro,estado,bairro,complemento,numero',
-            'novoHorarioFuncionamento:id,segunda,inicioSegunda,fimSegunda,terca,inicioTerca,fimTerca,quarta,inicioQuarta,fimQuarta,quinta,inicioQuinta,fimQuinta,sexta,inicioSexta,fimSexta,sabado,inicioSabado,fimSabado,domingo,inicioDomingo,fimDomingo,pausaAlmoco,inicioAlmoco,fimAlmoco'
-        ])
-        ->where('status', Distribuidor::ATIVO)
-        ->get();
+		$distrib = Distribuidor::where('status',Distribuidor::ATIVO)
+			->with('novoHorarioFuncionamento','enderecoDistribuidor:id,cidade,logradouro,estado,bairro,complemento,numero')
+			->get();
 
 		foreach($distrib as $pos => $d){
 			$out["distrib"][$pos]["nome"] 			= $d["nome"];
 			$out["distrib"][$pos]["contato"] 		= "(".$d["dddTelefone"].") ".$d["telefonePrincipal"];
 			$out["distrib"][$pos]["email"] 			= $d["email"];
-			$out["distrib"][$pos]["logradouro"] 	= $d["logradouro"];
-			$out["distrib"][$pos]["numero"] 		= $d["numero"];
-			$out["distrib"][$pos]["complemento"]	= $d["complemento"];
-			$out["distrib"][$pos]["bairro"] 		= $d["bairro"];
-			$out["distrib"][$pos]["cidade"] 		= $d["cidade"];
-			$out["distrib"][$pos]["estado"] 		= $d["estado"];
+			$out["distrib"][$pos]["logradouro"] 	= $d['enderecoDistribuidor']["logradouro"];
+			$out["distrib"][$pos]["numero"] 		= $d['enderecoDistribuidor']["numero"];
+			$out["distrib"][$pos]["complemento"]	= $d['enderecoDistribuidor']["complemento"];
+			$out["distrib"][$pos]["bairro"] 		= $d['enderecoDistribuidor']["bairro"];
+			$out["distrib"][$pos]["cidade"] 		= $d['enderecoDistribuidor']["cidade"];
+			$out["distrib"][$pos]["estado"] 		= $d['enderecoDistribuidor']["estado"];
 
-			$out["distrib"][$pos]["horario"][0]["funciona"] = $d["domingo"];
-			$out["distrib"][$pos]["horario"][0]["inicio"] 	= $d["inicioDomingo"];
-			$out["distrib"][$pos]["horario"][0]["fim"] 		= $d["fimDomingo"];
-			$out["distrib"][$pos]["horario"][1]["funciona"] = $d["segunda"];
-			$out["distrib"][$pos]["horario"][1]["inicio"] 	= $d["inicioSegunda"];
-			$out["distrib"][$pos]["horario"][1]["fim"] 		= $d["fimSegunda"];
-			$out["distrib"][$pos]["horario"][2]["funciona"] = $d["terca"];
-			$out["distrib"][$pos]["horario"][2]["inicio"] 	= $d["inicioTerca"];
-			$out["distrib"][$pos]["horario"][2]["fim"] 		= $d["fimTerca"];
-			$out["distrib"][$pos]["horario"][3]["funciona"] = $d["quarta"];
-			$out["distrib"][$pos]["horario"][3]["inicio"] 	= $d["inicioQuarta"];
-			$out["distrib"][$pos]["horario"][3]["fim"] 		= $d["fimQuarta"];
-			$out["distrib"][$pos]["horario"][4]["funciona"] = $d["quinta"];
-			$out["distrib"][$pos]["horario"][4]["inicio"] 	= $d["inicioQuinta"];
-			$out["distrib"][$pos]["horario"][4]["fim"] 		= $d["fimQuinta"];
-			$out["distrib"][$pos]["horario"][5]["funciona"] = $d["sexta"];
-			$out["distrib"][$pos]["horario"][5]["inicio"] 	= $d["inicioSexta"];
-			$out["distrib"][$pos]["horario"][5]["fim"] 		= $d["fimSexta"];
-			$out["distrib"][$pos]["horario"][6]["funciona"] = $d["sabado"];
-			$out["distrib"][$pos]["horario"][6]["inicio"] 	= $d["inicioSabado"];
-			$out["distrib"][$pos]["horario"][6]["fim"] 		= $d["fimSabado"];
-			$out["distrib"][$pos]["pausaAlmoco"] 			= $d["pausaAlmoco"];
-			$out["distrib"][$pos]["inicioAlmoco"] 			= $d["inicioAlmoco"];
-			$out["distrib"][$pos]["fimAlmoco"]		 		= $d["fimAlmoco"];
+			$out["distrib"][$pos]["horario"][0]["funciona"] = (string)$d['novoHorarioFuncionamento']["domingo"];
+			$out["distrib"][$pos]["horario"][0]["inicio"] 	= $d['novoHorarioFuncionamento']["inicioDomingo"];
+			$out["distrib"][$pos]["horario"][0]["fim"] 		= $d['novoHorarioFuncionamento']["fimDomingo"];
+			$out["distrib"][$pos]["horario"][1]["funciona"] = (string)$d['novoHorarioFuncionamento']["segunda"];
+			$out["distrib"][$pos]["horario"][1]["inicio"] 	= $d['novoHorarioFuncionamento']["inicioSegunda"];
+			$out["distrib"][$pos]["horario"][1]["fim"] 		= $d['novoHorarioFuncionamento']["fimSegunda"];
+			$out["distrib"][$pos]["horario"][2]["funciona"] = (string)$d['novoHorarioFuncionamento']["terca"];
+			$out["distrib"][$pos]["horario"][2]["inicio"] 	= $d['novoHorarioFuncionamento']["inicioTerca"];
+			$out["distrib"][$pos]["horario"][2]["fim"] 		= $d['novoHorarioFuncionamento']["fimTerca"];
+			$out["distrib"][$pos]["horario"][3]["funciona"] = (string)$d['novoHorarioFuncionamento']["quarta"];
+			$out["distrib"][$pos]["horario"][3]["inicio"] 	= $d['novoHorarioFuncionamento']["inicioQuarta"];
+			$out["distrib"][$pos]["horario"][3]["fim"] 		= $d['novoHorarioFuncionamento']["fimQuarta"];
+			$out["distrib"][$pos]["horario"][4]["funciona"] = (string)$d['novoHorarioFuncionamento']["quinta"];
+			$out["distrib"][$pos]["horario"][4]["inicio"] 	= $d['novoHorarioFuncionamento']["inicioQuinta"];
+			$out["distrib"][$pos]["horario"][4]["fim"] 		= $d['novoHorarioFuncionamento']["fimQuinta"];
+			$out["distrib"][$pos]["horario"][5]["funciona"] = (string)$d['novoHorarioFuncionamento']["sexta"];
+			$out["distrib"][$pos]["horario"][5]["inicio"] 	= $d['novoHorarioFuncionamento']["inicioSexta"];
+			$out["distrib"][$pos]["horario"][5]["fim"] 		= $d['novoHorarioFuncionamento']["fimSexta"];
+			$out["distrib"][$pos]["horario"][6]["funciona"] = (string)$d['novoHorarioFuncionamento']["sabado"];
+			$out["distrib"][$pos]["horario"][6]["inicio"] 	= $d['novoHorarioFuncionamento']["inicioSabado"];
+			$out["distrib"][$pos]["horario"][6]["fim"] 		= $d['novoHorarioFuncionamento']["fimSabado"];
+			$out["distrib"][$pos]["pausaAlmoco"] 			= (string)$d['novoHorarioFuncionamento']["pausaAlmoco"];
+			$out["distrib"][$pos]["inicioAlmoco"] 			= $d['novoHorarioFuncionamento']["inicioAlmoco"];
+			$out["distrib"][$pos]["fimAlmoco"]		 		= $d['novoHorarioFuncionamento']["fimAlmoco"];
 		}
-
 
 		if($cliente && $cliente->status == Cliente::ATIVO){
 
 			if($system != null){
 				$cliente->appVersion = $system." => ".$appVersion;
 			}
-			$cliente->ultimoLogin = date('Y-m-d H:i:s');
+			$cliente->ultimoLogin = now();
 			$cliente->save();
 
 			$out["msg"] = "ok";
-			$enderecos = EnderecoCliente::where('idCliente', $idCliente)
-    ->where('status', EnderecoCliente::ATIVO)
-    ->get()
-    ->toArray();
+			$enderecos = EnderecoCliente::where([['idCliente',$idCliente],['status',Enderecocliente::ATIVO]])->get();
 
-			$out["freeTax"] = array(1, 4, 5, 6); //ID dos produtos que geram liberação de Taxa de Entrega
+			$out["freeTax"] = array(1, 4, 5, 6, 332, 333, 335); //ID dos produtos que geram liberação de Taxa de Entrega
 			$fator = 0.2; //Raio de aproximadamente 30km
 
 			foreach($enderecos as $pos => $endereco){
@@ -186,60 +171,14 @@ class IndexController extends Controller
 				$out["enderecos"][$pos]["latitude"] 	= $endereco["latitude"];
 				$out["enderecos"][$pos]["longitude"] 	= $endereco["longitude"];
 
-				if($appVersion == null){
-					$select = [
-                        'h.inicioSemana as inicioSemana',
-                        'h.fimSemana as fimSemana',
-                        'h.inicioSabado as inicioSabado',
-                        'h.fimSabado as fimSabado',
-                        'h.domingo as domingo',
-                        'h.inicioDomingo as inicioDomingo',
-                        'h.fimDomingo as fimDomingo'
-                    ];
-                    $joinHorario = 'd.Horariofuncionamento h';
-				}else{
-					$select = [
-                        'h.domingo as domingo',
-                        'h.inicioDomingo as inicioDomingo',
-                        'h.fimDomingo as fimDomingo',
-                        'h.segunda as segunda',
-                        'h.inicioSegunda as inicioSegunda',
-                        'h.fimSegunda as fimSegunda',
-                        'h.terca as terca',
-                        'h.inicioTerca as inicioTerca',
-                        'h.fimTerca as fimTerca',
-                        'h.quarta as quarta',
-                        'h.inicioQuarta as inicioQuarta',
-                        'h.fimQuarta as fimQuarta',
-                        'h.quinta as quinta',
-                        'h.inicioQuinta as inicioQuinta',
-                        'h.fimQuinta as fimQuinta',
-                        'h.sexta as sexta',
-                        'h.inicioSexta as inicioSexta',
-                        'h.fimSexta as fimSexta',
-                        'h.sabado as sabado',
-                        'h.inicioSabado as inicioSabado',
-                        'h.fimSabado as fimSabado',
-                        'h.pausaAlmoco as pausaAlmoco',
-                        'h.inicioAlmoco as inicioAlmoco',
-                        'h.fimAlmoco as fimAlmoco'
-                    ];
-                    $joinHorario = 'd.Novohorariofuncionamento h';
-				}
+				$joinHorario = $appVersion==null?"horarioFuncionamento":'novoHorarioFuncionamento';
 
-				// Recuperando os distribuidores com Eloquent
-                $distribuidores = Distribuidor::with([
-                    'enderecoDistribuidor:id,cidade,latitude,longitude,cep,distanciaMaxima',
-                    'taxaEntrega:id,taxaUnica,valorTaxaUnica,taxaDomingo,valorTaxaDomingo,taxaCompraMinima,valorCompraMinima,taxaEntregaDistante,distanciaMaxima,valorKmAdicional',
-                    'horarioFuncionamento' => function($query) use ($select) {
-                        $query->select($select); // Condicionalmente inclui os campos de horário
-                    }
-                ])
-                ->where('d.status', Distribuidor::ATIVO)
-                ->whereRaw('ed.latitude + ? >= ? AND ed.latitude - ? <= ?', [$fator, $endereco["latitude"], $fator, $endereco["latitude"]])
-                ->whereRaw('ed.longitude + ? >= ? AND ed.longitude - ? <= ?', [$fator, $endereco["longitude"], $fator, $endereco["longitude"]])
-                ->get()
-                ->toArray();
+				$distribuidores = Distribuidor::selectRaw("distribuidor.*, enderecoDistribuidor.cidade as cidade, enderecoDistribuidor.latitude as latitude, enderecoDistribuidor.longitude as longitude, enderecoDistribuidor.cep as cep, enderecoDistribuidor.distanciaMaxima as distanciaMaxima")
+					->Join("enderecoDistribuidor", 'enderecoDistribuidor.id', '=','distribuidor.idEnderecoDistribuidor')
+					->Join("taxaEntrega", 'taxaEntrega.id', '=','distribuidor.idTaxaEntrega')
+					->Join($joinHorario, $joinHorario.'.id', '=','distribuidor.id'.$joinHorario)
+					->whereRaw("distribuidor.status = ".Distribuidor::ATIVO." AND enderecoDistribuidor.latitude + $fator >= ".$endereco["latitude"]." AND enderecoDistribuidor.latitude - $fator <= ".$endereco["latitude"]." AND enderecoDistribuidor.longitude + $fator >= ".$endereco["longitude"]." AND enderecoDistribuidor.longitude - $fator <= ".$endereco["longitude"])
+					->get();
 
 				if(count($distribuidores) == 0){
 					$out["distribuidores"][$pos]["idDistribuidor"] = null;
@@ -250,125 +189,74 @@ class IndexController extends Controller
 						$dist = calcDistancia($d["latitude"], $d["longitude"], $endereco["latitude"], $endereco["longitude"]);
 						$dists[$pos2] = array("max" => $d["distanciaMaxima"], "atual" => $dist, "pos" => $pos2);
 					}
+
 					$indexDistribuidor = $this->selectDist($dists);
 
 					if($indexDistribuidor != -1){ //CASO O RAIO DE ATENDIMENTO DO DISTRIBUIDOR ALCANCE A LOCALIZACAO DO CLIENTE
 
-						if($distribuidores[$indexDistribuidor]["tipoDistribuidor"]=="revendedor"){
-							$produtos = Preco::with([
-                                'produto:id,nome,descricao,img',
-                                'produto.categoria:id,nome',
-                                'estoque:id,quantidade'
-                            ])
-                            ->where('pre.status', Preco::ATIVO)
-                            ->where('pre.idDistribuidor', $distribuidores[$indexDistribuidor]["idDistribuidor"])
-                            ->where('e.quantidade', '>=', 1)
-                            ->where(function($query) {
-                                $query->whereNull('pre.inicioValidade')
-                                      ->orWhere('pre.inicioValidade', '<=', now());
-                            })
-                            ->where(function($query) {
-                                $query->whereNull('pre.fimValidade')
-                                      ->orWhere('pre.fimValidade', '>=', now());
-                            })
-                            ->where(function($query) {
-                                $query->whereNull('pre.inicioHora')
-                                      ->orWhere('pre.inicioHora', '<=', now()->format('H:i:s'));
-                            })
-                            ->where(function($query) {
-                                $query->whereNull('pre.fimHora')
-                                      ->orWhere('pre.fimHora', '>', now()->format('H:i:s'));
-                            })
-                            ->whereNull('pre.idCliente')
-                            ->orderBy('cat.nome', 'ASC')
-                            ->orderBy('pro.nome')
-                            ->orderBy('pre.qtdMin', 'ASC')
-                            ->get()
-							->toArray();
-						}else{
-							    $produtos = Preco::with([
-                                    'produto:id,nome,descricao,img',
-                                    'produto.categoria:id,nome',
-                                    'estoque:id,quantidade'
-                                ])
-                                ->where('pre.status', Preco::ATIVO)
-                                ->where('pre.idDistribuidor', $distribuidores[$indexDistribuidor]["id"])
-                                ->where('e.quantidade', '>=', 1)
-                                ->where(function($query) {
-                                    // Filtro para validade de data
-                                    $query->whereNull('pre.inicioValidade')
-                                          ->orWhere('pre.inicioValidade', '<=', now());
-                                })
-                                ->where(function($query) {
-                                    $query->whereNull('pre.fimValidade')
-                                          ->orWhere('pre.fimValidade', '>=', now());
-                                })
-                                ->where(function($query) {
-                                    $query->whereNull('pre.inicioHora')
-                                          ->orWhere('pre.inicioHora', '<=', now()->format('H:i:s'));
-                                })
-                                ->where(function($query) {
-                                    $query->whereNull('pre.fimHora')
-                                          ->orWhere('pre.fimHora', '>', now()->format('H:i:s'));
-                                })
-                                ->whereNull('pre.idCliente')
-                                ->orderBy('cat.nome', 'ASC')
-                                ->orderBy('pro.nome', 'ASC')
-                                ->orderBy('pre.qtdMin', 'ASC')
-                                ->get()
-								->toArray();
-						}
+						$idDistribuidor = $distribuidores[$indexDistribuidor]["tipoDistribuidor"]=="revendedor"?$distribuidores[$indexDistribuidor]["idDistribuidor"]:$distribuidores[$indexDistribuidor]["id"];
+
+						$produtos = Preco::selectRaw("preco.*, produto.id as idProd, produto.nome as nome, produto.descricao as descricao, produto.img as img, categoria.nome as categoria, estoque.id as idEstoque")
+							->Join("produto", 'produto.id', '=', 'preco.idProduto')
+							->Join('categoria', 'categoria.id', '=', 'produto.idCategoria')
+							->Join('estoque', 'estoque.id', '=', 'preco.idEstoque')
+							->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$idDistribuidor. " AND estoque.quantidade >= 1 ".
+							" AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
+							" AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
+							->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
+							->get();
+
 						if(count($produtos)){
 							//MONTA JSON DE PRODUTOS
 							$out["distribuidores"][$pos]["idDistribuidor"] = $distribuidores[$indexDistribuidor]["id"];
 							$out["distribuidores"][$pos]["contato"] = "(".$distribuidores[$indexDistribuidor]["dddTelefone"].") ".$distribuidores[$indexDistribuidor]["telefonePrincipal"];
 							if($appVersion == null){
-								$out["distribuidores"][$pos]["inicioSemana"] 	= $distribuidores[$indexDistribuidor]["inicioSemana"];
-								$out["distribuidores"][$pos]["fimSemana"] 		= $distribuidores[$indexDistribuidor]["fimSemana"];
-								$out["distribuidores"][$pos]["inicioSabado"] 	= $distribuidores[$indexDistribuidor]["inicioSabado"];
-								$out["distribuidores"][$pos]["fimSabado"] 		= $distribuidores[$indexDistribuidor]["fimSabado"];
-								$out["distribuidores"][$pos]["domingo"] 		= (bool)$distribuidores[$indexDistribuidor]["domingo"];
-								$out["distribuidores"][$pos]["inicioDomingo"] 	= $distribuidores[$indexDistribuidor]["inicioDomingo"];
-								$out["distribuidores"][$pos]["fimDomingo"] 		= $distribuidores[$indexDistribuidor]["fimDomingo"];
+								$out["distribuidores"][$pos]["inicioSemana"] 	= $distribuidores[$indexDistribuidor]['horarioFuncionamento']["inicioSemana"];
+								$out["distribuidores"][$pos]["fimSemana"] 		= $distribuidores[$indexDistribuidor]['horarioFuncionamento']["fimSemana"];
+								$out["distribuidores"][$pos]["inicioSabado"] 	= $distribuidores[$indexDistribuidor]['horarioFuncionamento']["inicioSabado"];
+								$out["distribuidores"][$pos]["fimSabado"] 		= $distribuidores[$indexDistribuidor]['horarioFuncionamento']["fimSabado"];
+								$out["distribuidores"][$pos]["domingo"] 		= (bool)$distribuidores[$indexDistribuidor]['horarioFuncionamento']["domingo"];
+								$out["distribuidores"][$pos]["inicioDomingo"] 	= $distribuidores[$indexDistribuidor]['horarioFuncionamento']["inicioDomingo"];
+								$out["distribuidores"][$pos]["fimDomingo"] 		= $distribuidores[$indexDistribuidor]['horarioFuncionamento']["fimDomingo"];
 							}else{
-								$out["distribuidores"][$pos]["horario"][0]["funciona"] 	= $distribuidores[$indexDistribuidor]["domingo"];
-								$out["distribuidores"][$pos]["horario"][0]["inicio"] 	= $distribuidores[$indexDistribuidor]["inicioDomingo"];
-								$out["distribuidores"][$pos]["horario"][0]["fim"] 		= $distribuidores[$indexDistribuidor]["fimDomingo"];
-								$out["distribuidores"][$pos]["horario"][1]["funciona"] 	= $distribuidores[$indexDistribuidor]["segunda"];
-								$out["distribuidores"][$pos]["horario"][1]["inicio"] 	= $distribuidores[$indexDistribuidor]["inicioSegunda"];
-								$out["distribuidores"][$pos]["horario"][1]["fim"] 		= $distribuidores[$indexDistribuidor]["fimSegunda"];
-								$out["distribuidores"][$pos]["horario"][2]["funciona"] 	= $distribuidores[$indexDistribuidor]["terca"];
-								$out["distribuidores"][$pos]["horario"][2]["inicio"] 	= $distribuidores[$indexDistribuidor]["inicioTerca"];
-								$out["distribuidores"][$pos]["horario"][2]["fim"] 		= $distribuidores[$indexDistribuidor]["fimTerca"];
-								$out["distribuidores"][$pos]["horario"][3]["funciona"] 	= $distribuidores[$indexDistribuidor]["quarta"];
-								$out["distribuidores"][$pos]["horario"][3]["inicio"] 	= $distribuidores[$indexDistribuidor]["inicioQuarta"];
-								$out["distribuidores"][$pos]["horario"][3]["fim"] 		= $distribuidores[$indexDistribuidor]["fimQuarta"];
-								$out["distribuidores"][$pos]["horario"][4]["funciona"] 	= $distribuidores[$indexDistribuidor]["quinta"];
-								$out["distribuidores"][$pos]["horario"][4]["inicio"] 	= $distribuidores[$indexDistribuidor]["inicioQuinta"];
-								$out["distribuidores"][$pos]["horario"][4]["fim"] 		= $distribuidores[$indexDistribuidor]["fimQuinta"];
-								$out["distribuidores"][$pos]["horario"][5]["funciona"] 	= $distribuidores[$indexDistribuidor]["sexta"];
-								$out["distribuidores"][$pos]["horario"][5]["inicio"] 	= $distribuidores[$indexDistribuidor]["inicioSexta"];
-								$out["distribuidores"][$pos]["horario"][5]["fim"] 		= $distribuidores[$indexDistribuidor]["fimSexta"];
-								$out["distribuidores"][$pos]["horario"][6]["funciona"] 	= $distribuidores[$indexDistribuidor]["sabado"];
-								$out["distribuidores"][$pos]["horario"][6]["inicio"] 	= $distribuidores[$indexDistribuidor]["inicioSabado"];
-								$out["distribuidores"][$pos]["horario"][6]["fim"] 		= $distribuidores[$indexDistribuidor]["fimSabado"];
-								$out["distribuidores"][$pos]["pausaAlmoco"] 			= $distribuidores[$indexDistribuidor]["pausaAlmoco"];
-								$out["distribuidores"][$pos]["inicioAlmoco"] 			= $distribuidores[$indexDistribuidor]["inicioAlmoco"];
-								$out["distribuidores"][$pos]["fimAlmoco"]		 		= $distribuidores[$indexDistribuidor]["fimAlmoco"];
+								$out["distribuidores"][$pos]["horario"][0]["funciona"] 	= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["domingo"];
+								$out["distribuidores"][$pos]["horario"][0]["inicio"] 	= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["inicioDomingo"];
+								$out["distribuidores"][$pos]["horario"][0]["fim"] 		= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["fimDomingo"];
+								$out["distribuidores"][$pos]["horario"][1]["funciona"] 	= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["segunda"];
+								$out["distribuidores"][$pos]["horario"][1]["inicio"] 	= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["inicioSegunda"];
+								$out["distribuidores"][$pos]["horario"][1]["fim"] 		= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["fimSegunda"];
+								$out["distribuidores"][$pos]["horario"][2]["funciona"] 	= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["terca"];
+								$out["distribuidores"][$pos]["horario"][2]["inicio"] 	= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["inicioTerca"];
+								$out["distribuidores"][$pos]["horario"][2]["fim"] 		= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["fimTerca"];
+								$out["distribuidores"][$pos]["horario"][3]["funciona"] 	= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["quarta"];
+								$out["distribuidores"][$pos]["horario"][3]["inicio"] 	= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["inicioQuarta"];
+								$out["distribuidores"][$pos]["horario"][3]["fim"] 		= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["fimQuarta"];
+								$out["distribuidores"][$pos]["horario"][4]["funciona"] 	= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["quinta"];
+								$out["distribuidores"][$pos]["horario"][4]["inicio"] 	= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["inicioQuinta"];
+								$out["distribuidores"][$pos]["horario"][4]["fim"] 		= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["fimQuinta"];
+								$out["distribuidores"][$pos]["horario"][5]["funciona"] 	= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["sexta"];
+								$out["distribuidores"][$pos]["horario"][5]["inicio"] 	= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["inicioSexta"];
+								$out["distribuidores"][$pos]["horario"][5]["fim"] 		= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["fimSexta"];
+								$out["distribuidores"][$pos]["horario"][6]["funciona"] 	= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["sabado"];
+								$out["distribuidores"][$pos]["horario"][6]["inicio"] 	= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["inicioSabado"];
+								$out["distribuidores"][$pos]["horario"][6]["fim"] 		= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["fimSabado"];
+								$out["distribuidores"][$pos]["pausaAlmoco"] 			= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["pausaAlmoco"];
+								$out["distribuidores"][$pos]["inicioAlmoco"] 			= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["inicioAlmoco"];
+								$out["distribuidores"][$pos]["fimAlmoco"]		 		= $distribuidores[$indexDistribuidor]['novoHorarioFuncionamento']["fimAlmoco"];
 							}
 
-							$out["distribuidores"][$pos]["distancia"] = calcDistancia($distribuidores[$indexDistribuidor]["latitude"], $distribuidores[$indexDistribuidor]["longitude"], $endereco["latitude"], $endereco["longitude"]);;
-							$out["distribuidores"][$pos]["taxaUnica"] = $distribuidores[$indexDistribuidor]["taxaUnica"];
-							$out["distribuidores"][$pos]["valorTaxaUnica"] = $distribuidores[$indexDistribuidor]["valorTaxaUnica"];
-							$out["distribuidores"][$pos]["taxaDomingo"] = $distribuidores[$indexDistribuidor]["taxaDomingo"];
-							$out["distribuidores"][$pos]["valorTaxaDomingo"] = $distribuidores[$indexDistribuidor]["valorTaxaDomingo"];
-							$out["distribuidores"][$pos]["taxaCompraMinima"] = $distribuidores[$indexDistribuidor]["taxaCompraMinima"];
-							$out["distribuidores"][$pos]["valorCompraMinima"] = $distribuidores[$indexDistribuidor]["valorCompraMinima"];
-							$out["distribuidores"][$pos]["taxaEntregaDistante"] = $distribuidores[$indexDistribuidor]["taxaEntregaDistante"];
-							$out["distribuidores"][$pos]["distanciaMaxima"] = $distribuidores[$indexDistribuidor]["distanciaMaxima"];
-							$out["distribuidores"][$pos]["valorKmAdicional"] = $distribuidores[$indexDistribuidor]["valorKmAdicional"];
+							$out["distribuidores"][$pos]["distancia"] = calcDistancia($distribuidores[$indexDistribuidor]['taxaEntrega']["latitude"], $distribuidores[$indexDistribuidor]["longitude"], $endereco["latitude"], $endereco["longitude"]);;
+							$out["distribuidores"][$pos]["taxaUnica"] = $distribuidores[$indexDistribuidor]['taxaEntrega']["taxaUnica"];
+							$out["distribuidores"][$pos]["valorTaxaUnica"] = $distribuidores[$indexDistribuidor]['taxaEntrega']["valorTaxaUnica"];
+							$out["distribuidores"][$pos]["taxaDomingo"] = $distribuidores[$indexDistribuidor]['taxaEntrega']["taxaDomingo"];
+							$out["distribuidores"][$pos]["valorTaxaDomingo"] = $distribuidores[$indexDistribuidor]['taxaEntrega']["valorTaxaDomingo"];
+							$out["distribuidores"][$pos]["taxaCompraMinima"] = $distribuidores[$indexDistribuidor]['taxaEntrega']["taxaCompraMinima"];
+							$out["distribuidores"][$pos]["valorCompraMinima"] = $distribuidores[$indexDistribuidor]['taxaEntrega']["valorCompraMinima"];
+							$out["distribuidores"][$pos]["taxaEntregaDistante"] = $distribuidores[$indexDistribuidor]['taxaEntrega']["taxaEntregaDistante"];
+							$out["distribuidores"][$pos]["distanciaMaxima"] = $distribuidores[$indexDistribuidor]['taxaEntrega']["distanciaMaxima"];
+							$out["distribuidores"][$pos]["valorKmAdicional"] = $distribuidores[$indexDistribuidor]['taxaEntrega']["valorKmAdicional"];
 
-							$feriados = Feriado::where('idDistribuidor', $distribuidores[$indexDistribuidor]['id'])->get()->toArray();
+							$feriados = Feriado::where('idDistribuidor', $distribuidores[$indexDistribuidor]["id"])->get();
 
 							if(count($feriados)){
 								foreach($feriados as $fPos => $f){
@@ -429,39 +317,33 @@ class IndexController extends Controller
 					}else{ //SENAO NAO HA DISTRIBUIDOR DISPONIVEL PARA O ENDERECO
 						$out["distribuidores"][$pos]["idDistribuidor"] = null;
 					}
+
 				}
+
+
 			}
 
 			header('Content-Type: application/json');
 			echo json_encode($out, JSON_PRETTY_PRINT);
+
 		}else{
 			$out["msg"] = "not found";
 			echo json_encode($out);
 		}
+
 	}
 
-    function solicitaContato(){
-
-		$idClientePotencial = $this->escape("id");
-		if($idClientePotencial == ""){
-			$clientePotencial = new ClientePotencial();
+    function solicitaContato(Request $request){
+		if($request->id==""){
+			$clientePotencial = new Clientepotencial($request->all());
 			$date = new DateTime();
-			$clientePotencial->dataAcesso	=	$date->format('Y-m-d H:i:s');
-			$clientePotencial->latitude		=	$this->escape("latitude");
-			$clientePotencial->longitude	=	$this->escape("longitude");
+			$clientePotencial->dataAcesso=$date->format('Y-m-d H:i:s');
 		}else{
-			$clientePotencial = ClientePotencial::find($idClientePotencial);
+			$clientePotencial = ClientePotencial::find($request->id);
+			$clientePotencial->fill($request->all());
 		}
 
-		$clientePotencial->nome		    =	$this->escape("nome");
-		$clientePotencial->email		=	$this->escape("email");
-		$clientePotencial->telefone 	=	$this->escape("telefone");
-		$clientePotencial->endereco		=	$this->escape("endereco");
-		$clientePotencial->numero		=	$this->escape("numero");
-		$clientePotencial->bairro 		=	$this->escape("bairro");
-		$clientePotencial->cidade		=	$this->escape("cidade");
-		$clientePotencial->estado		=	$this->escape("estado");
-		$clientePotencial->status 		=   ClientePotencial::SOLICITA_CONTATO;
+		$clientePotencial->status=ClientePotencial::SOLICITA_CONTATO;
 
 		if($clientePotencial->save()){
 			$out["msg"] =  "ok";
@@ -471,55 +353,34 @@ class IndexController extends Controller
 		echo json_encode($out);
 	}
 
-    function enviaEmail(){
-        $apiKey = 'key-027dbb9405dc7e439709cf45d01ceda1';
-        $domain = "mg.aguasterrasanta.com.br";
+    function enviaEmail(Request $request){
+		$dados = $request->all();
+		Mail::send('mail', $dados, function($m) use ($dados){
+			$m->from('mailgun@mg.aguasterrasanta.com.br', $dados['nome']);
+			$m->to('contato@tokumsede.com.br', 'Contato TôKumSede');
+			$m->subject($dados['assunto']);
+		});
 
-        $mgClient = Mailgun::create($apiKey);
-
-		$contato = $this->escape("contato");
-		$endereco = $this->escape("endereco");
-		$email = $this->escape("email");
-		$nome = $this->escape("nome");
-		$idUsuario = $this->escape("idUsuario");
-		$assunto = $this->escape("assunto");
-		$mensagem = $this->escape("mensagem");
-
-		$msg = "O usuário '$nome' ( ID: $idUsuario ) enviou através do seu app TôKumSede a seguinte mensagem:\r\n\r\n$mensagem\r\n\r\n----------------------------------------------\r\nEmail: $email\r\nTelefone: $contato\r\n\r\nEndereço: $endereco";
-
-		$options = array(
-		    'from'    => "$nome <mailgun@mg.aguasterrasanta.com.br>",
-		    'to'      => 'Contato TôKumSede <contato@tokumsede.com.br>',
-		    'subject' => $assunto,
-		    'text'    => $msg,
-		    'html'	  => ""
-		);
-
-		$result = $mgClient->messages()->send($domain, $options);
 		$out["msg"] = "ok";
 		echo json_encode($out);
 	}
 
-    function removerEndereco(){
+    function removerEndereco(Request $request){
 
-		$idEndereco = $this->escape("id");
-		$out["curPos"] = $this->escape("curPos");
-        $endereco = EnderecoCliente::find($idEndereco);
+		$idEndereco = $request->id;
+		$out["curPos"] = $request->curPos;
+		$endereco = EnderecoCliente::find($idEndereco);
 
 		if($endereco){
+
 			if($endereco->atual){
 
-				$novoAtual = EnderecoCliente::where('idCliente', $endereco->idCliente)
-                ->where('atual', 0)
-                ->where('status', EnderecoCliente::ATIVO)
-                ->first();
+				$novoAtual = EnderecoCliente::where([['idCliente',$endereco->idCliente],['atual', 0],['status',EnderecoCliente::ATIVO]])->first();
 
 				if($novoAtual->count()){
 
-					$nEnd = $novoAtual->fetchOne();
-					$nEnd->atual = true;
-					$nEnd->save();
-					$out["novoAtual"] = $nEnd->id;
+					$novoAtual->update(['atual'=>true]);
+					$out["novoAtual"] = $novoAtual->id;
 
 				}else{
 					$out["novoAtual"] = "nok";
@@ -528,10 +389,7 @@ class IndexController extends Controller
 			}else{
 				$out["novoAtual"] = "nok";
 			}
-
-			$endereco->status = Enderecocliente::EXCLUIDO;
-			$endereco->atual = false;
-			$endereco->save();
+			$endereco->update(['status'=>EnderecoCliente::EXCLUIDO, 'atual'=>false]);
 
 			$out["msg"] = "ok";
 
@@ -561,124 +419,60 @@ class IndexController extends Controller
 
 	}
 
-    function consultaInicialSemCadastro(){
+    function consultaInicialSemCadastro(Request $request){
 
-		$endereco["cidade"] = $this->escape("cidade");
-		$endereco["latitude"] = $this->escape("latitude");
-		$endereco["longitude"] = $this->escape("longitude");
+		$endereco["cidade"] = $request->cidade;
+		$endereco["latitude"] = $request->latitude;
+		$endereco["longitude"] = $request->longitude;
 
-        $distrib = Distribuidor::with(['enderecoDistribuidor', 'novoHorarioFuncionamento'])
-        ->select('distribuidores.*',
-            'endereco_distribuidor.cidade as cidade',
-            'endereco_distribuidor.logradouro as logradouro',
-            'endereco_distribuidor.estado as estado',
-            'endereco_distribuidor.bairro as bairro',
-            'endereco_distribuidor.complemento as complemento',
-            'endereco_distribuidor.numero as numero',
-            'novo_horario_funcionamento.segunda as segunda',
-            'novo_horario_funcionamento.inicioSegunda as inicioSegunda',
-            'novo_horario_funcionamento.fimSegunda as fimSegunda',
-            'novo_horario_funcionamento.terca as terca',
-            'novo_horario_funcionamento.inicioTerca as inicioTerca',
-            'novo_horario_funcionamento.fimTerca as fimTerca',
-            'novo_horario_funcionamento.quarta as quarta',
-            'novo_horario_funcionamento.inicioQuarta as inicioQuarta',
-            'novo_horario_funcionamento.fimQuarta as fimQuarta',
-            'novo_horario_funcionamento.quinta as quinta',
-            'novo_horario_funcionamento.inicioQuinta as inicioQuinta',
-            'novo_horario_funcionamento.fimQuinta as fimQuinta',
-            'novo_horario_funcionamento.sexta as sexta',
-            'novo_horario_funcionamento.inicioSexta as inicioSexta',
-            'novo_horario_funcionamento.fimSexta as fimSexta',
-            'novo_horario_funcionamento.sabado as sabado',
-            'novo_horario_funcionamento.inicioSabado as inicioSabado',
-            'novo_horario_funcionamento.fimSabado as fimSabado',
-            'novo_horario_funcionamento.domingo as domingo',
-            'novo_horario_funcionamento.inicioDomingo as inicioDomingo',
-            'novo_horario_funcionamento.fimDomingo as fimDomingo',
-            'novo_horario_funcionamento.pausaAlmoco as pausaAlmoco',
-            'novo_horario_funcionamento.inicioAlmoco as inicioAlmoco',
-            'novo_horario_funcionamento.fimAlmoco as fimAlmoco'
-        )
-        ->where('status', Distribuidor::ATIVO)
-        ->get()
-        ->toArray();
-
+	$distrib = Distribuidor::with('enderecoDistribuidor:id,cidade,logradouro,estado,bairro,complemento,numero', 'novoHorarioFuncionamento')
+		->where('status',Distribuidor::ATIVO)->get();
 
 	foreach($distrib as $pos => $d){
 		$out["distrib"][$pos]["nome"] 			= $d["nome"];
 		$out["distrib"][$pos]["contato"] 		= "(".$d["dddTelefone"].") ".$d["telefonePrincipal"];
 		$out["distrib"][$pos]["email"] 			= $d["email"];
-		$out["distrib"][$pos]["logradouro"] 	= $d["logradouro"];
-		$out["distrib"][$pos]["numero"] 		= $d["numero"];
-		$out["distrib"][$pos]["complemento"]	= $d["complemento"];
-		$out["distrib"][$pos]["bairro"] 		= $d["bairro"];
-		$out["distrib"][$pos]["cidade"] 		= $d["cidade"];
-		$out["distrib"][$pos]["estado"] 		= $d["estado"];
+		$out["distrib"][$pos]["logradouro"] 	= $d['enderecoDistribuidor']["logradouro"];
+		$out["distrib"][$pos]["numero"] 		= $d['enderecoDistribuidor']["numero"];
+		$out["distrib"][$pos]["complemento"]	= $d['enderecoDistribuidor']["complemento"];
+		$out["distrib"][$pos]["bairro"] 		= $d['enderecoDistribuidor']["bairro"];
+		$out["distrib"][$pos]["cidade"] 		= $d['enderecoDistribuidor']["cidade"];
+		$out["distrib"][$pos]["estado"] 		= $d['enderecoDistribuidor']["estado"];
 
-		$out["distrib"][$pos]["horario"][0]["funciona"] = $d["domingo"];
-		$out["distrib"][$pos]["horario"][0]["inicio"] 	= $d["inicioDomingo"];
-		$out["distrib"][$pos]["horario"][0]["fim"] 		= $d["fimDomingo"];
-		$out["distrib"][$pos]["horario"][1]["funciona"] = $d["segunda"];
-		$out["distrib"][$pos]["horario"][1]["inicio"] 	= $d["inicioSegunda"];
-		$out["distrib"][$pos]["horario"][1]["fim"] 		= $d["fimSegunda"];
-		$out["distrib"][$pos]["horario"][2]["funciona"] = $d["terca"];
-		$out["distrib"][$pos]["horario"][2]["inicio"] 	= $d["inicioTerca"];
-		$out["distrib"][$pos]["horario"][2]["fim"] 		= $d["fimTerca"];
-		$out["distrib"][$pos]["horario"][3]["funciona"] = $d["quarta"];
-		$out["distrib"][$pos]["horario"][3]["inicio"] 	= $d["inicioQuarta"];
-		$out["distrib"][$pos]["horario"][3]["fim"] 		= $d["fimQuarta"];
-		$out["distrib"][$pos]["horario"][4]["funciona"] = $d["quinta"];
-		$out["distrib"][$pos]["horario"][4]["inicio"] 	= $d["inicioQuinta"];
-		$out["distrib"][$pos]["horario"][4]["fim"] 		= $d["fimQuinta"];
-		$out["distrib"][$pos]["horario"][5]["funciona"] = $d["sexta"];
-		$out["distrib"][$pos]["horario"][5]["inicio"] 	= $d["inicioSexta"];
-		$out["distrib"][$pos]["horario"][5]["fim"] 		= $d["fimSexta"];
-		$out["distrib"][$pos]["horario"][6]["funciona"] = $d["sabado"];
-		$out["distrib"][$pos]["horario"][6]["inicio"] 	= $d["inicioSabado"];
-		$out["distrib"][$pos]["horario"][6]["fim"] 		= $d["fimSabado"];
-		$out["distrib"][$pos]["pausaAlmoco"] 			= $d["pausaAlmoco"];
-		$out["distrib"][$pos]["inicioAlmoco"] 			= $d["inicioAlmoco"];
-		$out["distrib"][$pos]["fimAlmoco"]		 		= $d["fimAlmoco"];
+		$out["distrib"][$pos]["horario"][0]["funciona"] = (string)$d['novoHorarioFuncionamento']["domingo"];
+		$out["distrib"][$pos]["horario"][0]["inicio"] 	= $d['novoHorarioFuncionamento']["inicioDomingo"];
+		$out["distrib"][$pos]["horario"][0]["fim"] 		= $d['novoHorarioFuncionamento']["fimDomingo"];
+		$out["distrib"][$pos]["horario"][1]["funciona"] = (string)$d['novoHorarioFuncionamento']["segunda"];
+		$out["distrib"][$pos]["horario"][1]["inicio"] 	= $d['novoHorarioFuncionamento']["inicioSegunda"];
+		$out["distrib"][$pos]["horario"][1]["fim"] 		= $d['novoHorarioFuncionamento']["fimSegunda"];
+		$out["distrib"][$pos]["horario"][2]["funciona"] = (string)$d['novoHorarioFuncionamento']["terca"];
+		$out["distrib"][$pos]["horario"][2]["inicio"] 	= $d['novoHorarioFuncionamento']["inicioTerca"];
+		$out["distrib"][$pos]["horario"][2]["fim"] 		= $d['novoHorarioFuncionamento']["fimTerca"];
+		$out["distrib"][$pos]["horario"][3]["funciona"] = (string)$d['novoHorarioFuncionamento']["quarta"];
+		$out["distrib"][$pos]["horario"][3]["inicio"] 	= $d['novoHorarioFuncionamento']["inicioQuarta"];
+		$out["distrib"][$pos]["horario"][3]["fim"] 		= $d['novoHorarioFuncionamento']["fimQuarta"];
+		$out["distrib"][$pos]["horario"][4]["funciona"] = (string)$d['novoHorarioFuncionamento']["quinta"];
+		$out["distrib"][$pos]["horario"][4]["inicio"] 	= $d['novoHorarioFuncionamento']["inicioQuinta"];
+		$out["distrib"][$pos]["horario"][4]["fim"] 		= $d['novoHorarioFuncionamento']["fimQuinta"];
+		$out["distrib"][$pos]["horario"][5]["funciona"] = (string)$d['novoHorarioFuncionamento']["sexta"];
+		$out["distrib"][$pos]["horario"][5]["inicio"] 	= $d['novoHorarioFuncionamento']["inicioSexta"];
+		$out["distrib"][$pos]["horario"][5]["fim"] 		= $d['novoHorarioFuncionamento']["fimSexta"];
+		$out["distrib"][$pos]["horario"][6]["funciona"] = (string)$d['novoHorarioFuncionamento']["sabado"];
+		$out["distrib"][$pos]["horario"][6]["inicio"] 	= $d['novoHorarioFuncionamento']["inicioSabado"];
+		$out["distrib"][$pos]["horario"][6]["fim"] 		= $d['novoHorarioFuncionamento']["fimSabado"];
+		$out["distrib"][$pos]["pausaAlmoco"] 			= (string)$d['novoHorarioFuncionamento']["pausaAlmoco"];
+		$out["distrib"][$pos]["inicioAlmoco"] 			= $d['novoHorarioFuncionamento']["inicioAlmoco"];
+		$out["distrib"][$pos]["fimAlmoco"]		 		= $d['novoHorarioFuncionamento']["fimAlmoco"];
 	}
-
 
 		$fator = 0.1; //Raio de aproximadamente 15,66 km
 
-		$distribuidores = Distribuidor::select(
-            'distribuidores.*',
-            'endereco_distribuidor.cidade as cidade',
-            'endereco_distribuidor.latitude as latitude',
-            'endereco_distribuidor.longitude as longitude',
-            'endereco_distribuidor.cep as cep',
-            'endereco_distribuidor.distanciaMaxima as distanciaMaxima',
-            'horario_funcionamento.inicioSemana as inicioSemana',
-            'horario_funcionamento.fimSemana as fimSemana',
-            'horario_funcionamento.inicioSabado as inicioSabado',
-            'horario_funcionamento.fimSabado as fimSabado',
-            'horario_funcionamento.domingo as domingo',
-            'horario_funcionamento.inicioDomingo as inicioDomingo',
-            'horario_funcionamento.fimDomingo as fimDomingo',
-            'taxa_entrega.taxaUnica as taxaUnica',
-            'taxa_entrega.valorTaxaUnica as valorTaxaUnica',
-            'taxa_entrega.taxaDomingo as taxaDomingo',
-            'taxa_entrega.valorTaxaDomingo as valorTaxaDomingo',
-            'taxa_entrega.taxaCompraMinima as taxaCompraMinima',
-            'taxa_entrega.valorCompraMinima as valorCompraMinima',
-            'taxa_entrega.taxaEntregaDistante as taxaEntregaDistante',
-            'taxa_entrega.distanciaMaxima as distanciaMaxima',
-            'taxa_entrega.valorKmAdicional as valorKmAdicional'
-        )
-        ->join('endereco_distribuidor', 'endereco_distribuidor.id_distribuidor', '=', 'distribuidores.id')
-        ->join('horario_funcionamento', 'horario_funcionamento.id_distribuidor', '=', 'distribuidores.id')
-        ->join('taxa_entrega', 'taxa_entrega.id_distribuidor', '=', 'distribuidores.id')
-        ->where('distribuidores.status', Distribuidor::ATIVO)
-        ->whereRaw("endereco_distribuidor.latitude + ? >= ?", [$fator, $endereco['latitude']])
-        ->whereRaw("endereco_distribuidor.latitude - ? <= ?", [$fator, $endereco['latitude']])
-        ->whereRaw("endereco_distribuidor.longitude + ? >= ?", [$fator, $endereco['longitude']])
-        ->whereRaw("endereco_distribuidor.longitude - ? <= ?", [$fator, $endereco['longitude']])
-        ->get()
-        ->toArray();
+		$distribuidores = Distribuidor::selectRaw("distribuidor.*, enderecoDistribuidor.cidade as cidade, enderecoDistribuidor.latitude as latitude, enderecoDistribuidor.longitude as longitude, enderecoDistribuidor.cep as cep, enderecoDistribuidor.distanciaMaxima as distanciaMaxima")
+			->Join("enderecoDistribuidor", 'enderecoDistribuidor.id', '=','distribuidor.idEnderecoDistribuidor')
+			->Join("taxaEntrega", 'taxaEntrega.id', '=','distribuidor.idTaxaEntrega')
+			->Join("horarioFuncionamento", 'horarioFuncionamento.id', '=','distribuidor.idHorarioFuncionamento')
+			->whereRaw("distribuidor.status = ".Distribuidor::ATIVO." AND enderecoDistribuidor.latitude + $fator >= ".$endereco["latitude"]." AND enderecoDistribuidor.latitude - $fator <= ".$endereco["latitude"]." AND enderecoDistribuidor.longitude + $fator >= ".$endereco["longitude"]." AND enderecoDistribuidor.longitude - $fator <= ".$endereco["longitude"])
+			->get();
 
 		if(count($distribuidores) == 0){
 			$out["msg"] = "nok";
@@ -693,67 +487,18 @@ class IndexController extends Controller
 			$indexDistribuidor = $this->selectDist($dists);
 
 			if($indexDistribuidor != -1){ //CASO O RAIO DE ATENDIMENTO DO DISTRIBUIDOR ALCANCE A LOCALIZACAO DO CLIENTE
-				if($distribuidores[$indexDistribuidor]["tipoDistribuidor"]=="revendedor"){
-					$produtos = Preco::select(
-                        'precos.*',
-                        'produtos.id as idProd',
-                        'produtos.nome as nome',
-                        'produtos.descricao as descricao',
-                        'produtos.img as img',
-                        'categorias.nome as categoria'
-                    )
-                    ->leftJoin('produtos', 'precos.id_produto', '=', 'produtos.id')
-                    ->leftJoin('categorias', 'produtos.id_categoria', '=', 'categorias.id')
-                    ->leftJoin('estoques', 'precos.id_estoque', '=', 'estoques.id')
-                    ->where('precos.status', Preco::ATIVO)
-                    ->where('precos.id_distribuidor', $distribuidores[$indexDistribuidor]['idDistribuidor'])
-                    ->where('estoques.quantidade', '>=', 1)
-                    ->where(function($query) {
-                        $query->whereNull('precos.inicio_validade')
-                            ->orWhere('precos.inicio_validade', '<=', now());
-                    })
-                    ->where(function($query) {
-                        $query->whereNull('precos.fim_validade')
-                            ->orWhere('precos.fim_validade', '>', now());
-                    })
-                    ->whereNull('precos.id_cliente')
-                    ->orderBy('categorias.nome', 'asc')
-                    ->orderBy('produtos.id')
-                    ->orderBy('precos.qtd_min', 'asc')
-                    ->get()
-                    ->toArray();
 
-				}else{
-					$produtos = Preco::select(
-                        'precos.*',
-                        'produtos.id as idProd',
-                        'produtos.nome as nome',
-                        'produtos.descricao as descricao',
-                        'produtos.img as img',
-                        'categorias.nome as categoria'
-                    )
-                    ->leftJoin('produtos', 'precos.id_produto', '=', 'produtos.id')
-                    ->leftJoin('categorias', 'produtos.id_categoria', '=', 'categorias.id')
-                    ->leftJoin('estoques', 'precos.id_estoque', '=', 'estoques.id')
-                    ->where('precos.status', Preco::ATIVO)
-                    ->where('precos.id_distribuidor', $distribuidores[$indexDistribuidor]['id'])
-                    ->where('estoques.quantidade', '>=', 1)
-                    ->where(function($query) {
-                        $query->whereNull('precos.inicio_validade')
-                            ->orWhere('precos.inicio_validade', '<=', now());
-                    })
-                    ->where(function($query) {
-                        $query->whereNull('precos.fim_validade')
-                            ->orWhere('precos.fim_validade', '>', now());
-                    })
-                    ->whereNull('precos.id_cliente')
-                    ->orderBy('categorias.nome', 'asc')
-                    ->orderBy('produtos.id')
-                    ->orderBy('precos.qtd_min', 'asc')
-                    ->get()
-                    ->toArray();
+				$idDistribuidor = $distribuidores[$indexDistribuidor]["tipoDistribuidor"]=="revendedor"?$distribuidores[$indexDistribuidor]["idDistribuidor"]:$distribuidores[$indexDistribuidor]["id"];
 
-				}
+				$produtos = Preco::selectRaw("preco.*, produto.id as idProd, produto.nome as nome, produto.descricao as descricao, produto.img as img, categoria.nome as categoria, estoque.id as idEstoque")
+					->Join("produto", 'produto.id', '=', 'preco.idProduto')
+					->Join('categoria', 'categoria.id', '=', 'produto.idCategoria')
+					->Join('estoque', 'estoque.id', '=', 'preco.idEstoque')
+					->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$idDistribuidor. " AND estoque.quantidade >= 1 ".
+					" AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
+					" AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
+					->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
+					->get();
 
 				if(count($produtos)){
 					//MONTA JSON DE PRODUTOS
@@ -799,19 +544,11 @@ class IndexController extends Controller
 
 	}
 
-	function clientePotencial(){
+	function clientePotencial(Request $request){
 
-		$clientePotencial = new Clientepotencial();
+		$clientePotencial = new ClientePotencial($request->all());
 		$date = new DateTime();
-
-		$clientePotencial->latitude		=	$this->escape("latitude");
-		$clientePotencial->longitude	=	$this->escape("longitude");
 		$clientePotencial->dataAcesso	=	$date->format('Y-m-d H:i:s');
-		$clientePotencial->endereco		=	$this->escape("endereco");
-		$clientePotencial->numero		=	$this->escape("numero");
-		$clientePotencial->bairro 		=	$this->escape("bairro");
-		$clientePotencial->cidade		=	$this->escape("cidade");
-		$clientePotencial->estado		=	$this->escape("estado");
 		$clientePotencial->status 		=   ClientePotencial::ACESSO_COMUM;
 
 		if($clientePotencial->save()){
@@ -852,17 +589,13 @@ class IndexController extends Controller
 
 	}
 
-    function refreshRegId(){
+	function refreshRegId(Request $request){
 
-		$idCliente = $this->escape("idCliente");
-		$regId = $this->escape("regId");
-
-        $cliente = Cliente::find($idCliente);
+		$cliente = Cliente::find($request->idCliente);
 
 		if($cliente){
 
-			$cliente->regId = $regId;
-
+			$cliente->regId = $request->regId;
 			if($cliente->save()){
 				$out["msg"] = "ok";
 			}else{
@@ -877,20 +610,16 @@ class IndexController extends Controller
 
 	}
 
-    function notificacaoRecebida(){
-		$idPedido = $this->escape("idPedido");
-        $pedido = Pedido::find($idPedido);
+    function notificacaoRecebida(Request $request){
+		$pedido = Pedido::find($request->idPedido);
 		if($pedido){
-			$pedido->statusChange = 0;
-			$pedido->save();
+			$pedido->update(['statusChange'=>0]);
 		}
 	}
 
-    function senhaModoTeste(){
+    function senhaModoTeste(Request $request){
 
-		$senha = $this->escape("senha");
-
-		if($senha == "tokumsedes3cr3t"){
+		if($request->senha=="tokumsedes3cr3t"){
 			$out["msg"] = "ok";
 		}else{
 			$out["msg"] = "nok";
@@ -899,69 +628,48 @@ class IndexController extends Controller
 		echo json_encode($out);
 	}
 
-    function alteraEnderecoAtual(){
+    function alteraEnderecoAtual(Request $request){
 
-		$idCliente  = $this->escape("idCliente");
-		$idEndereco = $this->escape("idEndereco");
+		EnderecoCliente::where('idCliente',$request->idCliente)->update(['atual'=>'0']);
 
-        // Atualiza todos os registros de Enderecocliente com o idCliente para "atual" = 0
-        Enderecocliente::where('idCliente', $idCliente)
-            ->update(['atual' => 0]);
-
-        // Atualiza o registro específico de Enderecocliente com o id = $idEndereco para "atual" = 1
-        Enderecocliente::where('id', $idEndereco)
-            ->update(['atual' => 1]);
+		EnderecoCliente::where('id',$request->idEndereco)->update(['atual'=>'1']);
 
 		$out["msg"]	= "ok";
 		echo json_encode($out);
 
 	}
 
-    function cadastrarNovoEndereco(){
+    function cadastrarNovoEndereco(Request $request){
 
-		$enderecoCliente = new Enderecocliente();
-
-		$enderecoCliente->logradouro	=	$this->escape("endereco");
-		$enderecoCliente->numero		=	$this->escape("numero");
-		$enderecoCliente->bairro		=	$this->escape("bairro");
-		$enderecoCliente->complemento	=	$this->escape("complemento");
-		$enderecoCliente->cep			=	$this->escape("cep");
-		$enderecoCliente->cidade 		=	$this->escape("cidade");
-		$enderecoCliente->estado		=	$this->escape("estado");
-		$enderecoCliente->referencia 	=	$this->escape("referencia");
-		$enderecoCliente->apelido		=	$this->escape("apelido");
+		$enderecoCliente = new Enderecocliente($request->all());
+		$enderecoCliente->logradouro	=   $request->endereco;
 		$enderecoCliente->atual			=   true;
-		$enderecoCliente->idCliente		=   $this->escape("idCliente");
-		$enderecoCliente->latitude		=	$this->escape("latitude");
-		$enderecoCliente->longitude		=	$this->escape("longitude");
 		$enderecoCliente->status		=	Enderecocliente::ATIVO;
 
 		if($enderecoCliente->save()){
 
-			Enderecocliente::where('idCliente', $enderecoCliente->idCliente)
-            ->where('id', '!=', $enderecoCliente->id)
-            ->update(['atual' => 0]);
+			EnderecoCliente::where([['idCliente',$enderecoCliente->idCliente],['id','!=',$enderecoCliente->id]])->update(['atual'=>'0']);
 
+			// $request->replace([
+			//  'idCliente' => $enderecoCliente->idCliente,//Enviar vários parâmetros
+			// ]);
+			$requestIdCliente = new Request(['idCliente' => $enderecoCliente->idCliente]);
 
-			$this->consultaInicial($enderecoCliente->idCliente);
+			$this->consultaInicial($requestIdCliente);
 
 		}else{
 			$out["msg"] = "nok";
 			echo json_encode($out);
 		}
-
 	}
 
-    function cancelarPedido(){
+    function cancelarPedido(Request $request){
 
-		$idPedido = $this->escape("idPedido");
-        $pedido = Pedido::find($idPedido);
+		$pedido = Pedido::find($request->idPedido);
 
 		if($pedido){
 
-			$pedido->status = Pedido::CANCELADO_USUARIO;
-
-			if($pedido->save()){
+			if($pedido->update(['status'=>Pedido::CANCELADO_USUARIO])){
 				$out["msg"] = "ok";
 			}else{
 				$out["msg"] = "nok";
@@ -975,30 +683,26 @@ class IndexController extends Controller
 
 	}
 
-    function pedidoRecebido(){
+    function pedidoRecebido(Request $request){
 
-		$idPedido = $this->escape("idPedido");
-        $pedido = Pedido::find($idPedido);
+		$idPedido = $request->idPedido;
+		$pedido = Pedido::find($idPedido);
 		$date = new DateTime();
 		// //Buscar distribuidor e cliente ***PREMIAÇÕES
 		// if($premiacoes){
-		// 	$distribuidor = Doctrine::getTable("Distribuidor")->findOneById($pedido->idDistribuidor);
-		// 	$enderecoCliente = Doctrine::getTable("Enderecocliente")->findOneById($pedido->idEndereco);
-		// 	$cliente = Doctrine::getTable("Cliente")->findOneById($enderecoCliente->idCliente);
+		// 	$distribuidor = Distribuidor::find($pedido->idDistribuidor);
+		// 	$enderecoCliente = EnderecoCliente::find($pedido->idEndereco);
+		// 	$cliente = Cliente::find($enderecoCliente->idCliente);
 		// }
 		if($pedido){
 
 			//ALTERA OS ESTOQUES
 	        if($pedido->status == Pedido::ACEITO){
-				$itensPedido = ItemPedido::where('idPedido', $idPedido)->get()->toArray();
-
+				$itensPedido = ItemPedido::where('idPedido', $idPedido)->get();
 
 	            for ($i = 0; $i < sizeof($itensPedido); $i++) {
-	                $estoques = Estoque::where('idDistribuidor', $pedido->idDistribuidor == 23 ? 14 : $pedido->idDistribuidor)
-                    ->where('idProduto', $itensPedido[$i]['idProduto'])
-                    ->get()
-                    ->toArray();
-                    $estoque = Estoque::find($estoques[0]['id']);
+	                $estoques = Estoque::where([['idDistribuidor',$pedido->idDistribuidor],['idProduto',$itensPedido[$i]["idProduto"]]])->get();
+	                $estoque = Estoque::find($estoques[0]["id"]);
 	                $estoque->quantidade -= $itensPedido[$i]["qtd"];
 					$estoque->save();
 
@@ -1040,26 +744,13 @@ class IndexController extends Controller
 
 	}
 
-    function alteraDadosCliente(){
-
-		$idCliente = $this->escape("id");
-        $cliente = Cliente::find($idCliente);
+    function alteraDadosCliente(Request $request){
+		$cliente = Cliente::find($request->id);
 
 		if($cliente){
+			$request['senha'] = $request->senha == '' ? $cliente->senha : $request->senha;
 
-			$senha = $this->escape("senha");
-
-			$cliente->nome 			=	$this->escape("nome");
-			$cliente->dddTelefone	=	$this->escape("ddd");
-			$cliente->telefone		=	$this->escape("telefone");
-			$cliente->sexo			=	$this->escape("sexo");
-			$cliente->dataNascimento=	$this->escape("dataNascimento");
-			$cliente->senha			=	$senha == "" ? $cliente->senha : $senha;
-			$cliente->tipoPessoa 	=	$this->escape("tipoPessoa");
-			$cliente->cpf			=	$this->escape("cpf");
-			$cliente->cnpj			=	$this->escape("cnpj");
-
-			if($cliente->save()){
+			if($cliente->update($request->all())){
 				$out["msg"] = "ok";
 			}else{
 				$out["msg"] = "nok";
@@ -1073,21 +764,9 @@ class IndexController extends Controller
 
 	}
 
-    function verifyRecover(){
+    function verifyRecover(Request $request){
 
-		$email 		= $this->escape("email");
-		$ddd 		= $this->escape("ddd");
-		$telefone 	= $this->escape("telefone");
-
-		$cliente = Cliente::select('clientes.*')
-        ->where('clientes.email', $email)
-        ->where('clientes.dddTelefone', $ddd)
-        ->where('clientes.telefone', $telefone)
-        ->where('clientes.status', Cliente::ATIVO)
-        ->get()
-        ->toArray();
-
-
+		$cliente = Cliente::where([['email',$request->email],['dddTelefone',$request->ddd],['telefone',$request->telefone],['status',Cliente::ATIVO]])->get();
         if (count($cliente)) {
         	$out["msg"] = "ok";
 			$out["idCliente"] = $cliente[0]["id"];
@@ -1111,18 +790,13 @@ class IndexController extends Controller
 
 	}
 
-    function alteraSenha(){
+    function alteraSenha(Request $request){
 
-		$idCliente = $this->escape("idCliente");
-		$senha = $this->escape("senha");
-
-        $cliente = Cliente::find($idCliente);
+		$cliente = Cliente::find($request->idCliente);
 
 		if($cliente){
 
-			$cliente->senha = $senha;
-
-			if($cliente->save()){
+			if($cliente->update(['senha'=>$request->senha])){
 
 				$out["msg"] = "ok";
 				echo json_encode($out);
@@ -1139,52 +813,29 @@ class IndexController extends Controller
 
 	}
 
-    function novoPedido(){
+    function novoPedido(Request $request){
 
-		$pedido = new Pedido();
-        $timezone = new DateTimeZone('America/Recife');
-
-		$date = new DateTime('now', $timezone);
-
-		$pedido->idDistribuidor = $this->escape("idDistribuidor");
-		$pedido->total 			= $this->escape("totalPedido");
-		$pedido->taxaEntrega	= $this->escape("taxaEntrega");
-		$pedido->formaPagamento = $this->escape("formaPagamento");
-		$pedido->trocoPara 		= $this->escape("trocoPara");
-		$pedido->horarioPedido 	= $date->format('Y-m-d H:i:s');
+		$pedido = new Pedido($request->all());
+		$pedido->horarioPedido 	= now()->format('Y-m-d H:i:s');
 		$pedido->status 		= Pedido::PENDENTE;
 		$pedido->statusChange	= 0;
-		$pedido->idEndereco 	= $this->escape("idEndereco");
-		$pedido->agendado 		= (int)$this->escape("agendado");
-		if($pedido->agendado){
-			$pedido->dataAgendada 	= $this->escape("dataAgendada");
-			$pedido->horaInicio 	= $this->escape("horaInicio");
-			$pedido->horaFim 		= $this->escape("horaFim");
-		}
-		$pedido->origem 		= $this->escape("origem");
-		$pedido->obs 			= $this->escape("obs");
+		$pedido->trocoPara      = $pedido->trocoPara!=""?str_replace(",",".",$request->trocoPara):0;
+		$pedido->total      	= str_replace(",",".",$request->totalPedido);
+		$pedido->obs 			= $request->testePh?'FAZER TESTE DE PH. '.$request->obs:$request->obs;
 
-		$produtos = rawurldecode($this->escape("produtos"));
+		$produtos = rawurldecode($request->produtos);
 		$produtos = json_decode($produtos);
-        // Buscar o distribuidor pelo id
-        $distribuidor = Distribuidor::find($pedido->idDistribuidor);
-
-        // Buscar o endereço do cliente pelo id
-        $endereco = EnderecoCliente::find($pedido->idEndereco);
-
-        // Buscar o cliente associado ao endereço
-        $cliente = Cliente::find($endereco->idCliente);
+		$distribuidor = Distribuidor::find($pedido->idDistribuidor);
+		$endereco = EnderecoCliente::find($pedido->idEndereco);
+		$cliente = Cliente::find($endereco->idCliente);
 		if($distribuidor->tipoDistribuidor=="revendedor"){
-			//$prodRevendedor = array(1, 4, 5, 6); //ID dos produtos do revendedor
+			//$prodRevendedor = array(1, 4, 5, 6, 332, 333, 335); //ID dos produtos do revendedor
 			foreach ($produtos as $produto) {
-				if ($produto->produto->id != 1 && $produto->produto->id != 4 && $produto->produto->id != 5 && $produto->produto->id != 6) {//prodRevendedor.indexOf(parseInt($produto->produto->id)) == -1
+				if ($produto->produto->id != 1 && $produto->produto->id != 4 && $produto->produto->id != 5 && $produto->produto->id != 6 && $produto->produto->id != 332 && $produto->produto->id != 333 && $produto->produto->id != 335) {//prodRevendedor.indexOf(parseInt($produto->produto->id)) == -1
 					$pedido->idDistribuidor = $distribuidor->idDistribuidor;
 				}
 			}
 		}
-		// if($pedido->idDistribuidor==23){
-		// 	$pedido->idDistribuidor=14;
-		// }
 		if($pedido->save()){
 			// //PREMIAÇÕES
 			// $aguaPl=false;
@@ -1239,14 +890,9 @@ class IndexController extends Controller
 
 			$out["msg"] = "ok";
 			$out["idPedido"] = $pedido->id;
-			$administradores = Administrador::where('status', 'Ativo')
-            ->where(function($query) use ($pedido) {
-                $query->where('tipoAdministrador', 'Administrador')
-                      ->orWhere('tipoAdministrador', 'Atendente')
-                      ->orWhere('idDistribuidor', $pedido->idDistribuidor);
-            })
-            ->get()
-            ->toArray();
+			$administradores = Administrador::where('status','Ativo')
+				->whereRaw("tipoAdministrador = 'Administrador' or tipoAdministrador = 'Atendente' or idDistribuidor =".$pedido->idDistribuidor)
+				->get();
 
             // API access key from Google API's Console
             $texto = $endereco->logradouro.' '.$endereco->numero.', '.$endereco->bairro.' - '.$endereco->cidade.'/'.$endereco->estado;
@@ -1256,12 +902,11 @@ class IndexController extends Controller
                 'body' => $texto,
                 'tag' => $pedido->id,
                 'icon' => '/images/logo-icon.png',
-                'click_action' => 'https://tks.tokumsede.com.br'
+                'click_action' => 'https://adm.tokumsede.com'
             );
             $headers = array(
                 'Authorization: key=AAAA92nZhZY:APA91bFbwC0HrbjmBGjQIrXtPrPZcH5gmCFK9y1jlQucH03VlNOHlO45Ru5Dk69iplWGYcnsVUbhG2hMH5AgoZzU9GCK0DmFplBjLz-QAmlFM5YOpmFFOr5ak--7l-yLahiaJKPPIUct',
-                'Content-Type: application/json',
-								"Access-Control-Allow-Origin: *"
+                'Content-Type: application/json'
 			);
             foreach($administradores as $p => $administrador) {
                 // set only for one for safety

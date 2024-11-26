@@ -179,6 +179,7 @@ const dataToTable = (data) => {
         isUpdate.value = true
 
         const newProducts = products.map(product => {
+            console.log(product)
             const productToChange = itensPedido.filter(prod => prod.idProduto == product.id)[0]
 
             if (productToChange) return { ...product, preco: [{ qtd: product.preco[0].qtd, val: toFloat(productToChange.preco) }] }

@@ -46,7 +46,7 @@ const whenDialogOpen = async () => {
     const url = `produtos/${props.idClienteAddress}`
     const responseOrder = await axios.get(url)
     const { data: orderData } = responseOrder
-
+    console.log(orderData)
     const responseDistributor = orderData[1];
     const responseAddress = orderData[2];
     const address = {

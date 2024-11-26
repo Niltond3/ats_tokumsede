@@ -82,7 +82,7 @@ Route::get('/homepage', [HomeController::class, 'getHomepage'])->name('homepage'
     Route::resource('/', Api::class,['except' => 'create']);
     Route::get('verificaPedidoAlterado', [Api::class, 'verificaPedidoAlterado']);
     Route::get('verificaEmail', [Api::class, 'verificaEmail']);
-    Route::get('consultaInicial/{id}', [Api::class, 'consultaInicial']);
+    Route::get('consultaInicial', [Api::class, 'consultaInicial']);
     Route::get('solicitaContato', [Api::class, 'solicitaContato']);
     Route::get('enviaEmail', [Api::class, 'enviaEmail']);
     Route::get('removerEndereco', [Api::class, 'removerEndereco']);

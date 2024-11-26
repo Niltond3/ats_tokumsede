@@ -1,6 +1,7 @@
 <?php
 include 'cors.php';
 
+use App\Http\Controllers\api\IndexController as Api;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\EnderecoClienteController;
@@ -76,6 +77,32 @@ Route::middleware('auth')->group(function () {
 Route::get('/homepage', [HomeController::class, 'getHomepage'])->name('homepage');
 
 
+Route::resource('Api', Api::class,['except' => 'create']);
+ //PEDIDOS
+ Route::group(['prefix' => 'Api'], function(){
+    Route::resource('/', Api::class,['except' => 'create']);
+    Route::get('verificaPedidoAlterado', [PedidoController::class, 'visualizar']);
+    Route::put('verificaEmail', [PedidoController::class, 'aceitar']);
+    Route::put('consultaInicial/{id}', [PedidoController::class, 'despachar']);
+    Route::put('solicitaContato', [PedidoController::class, 'recusar']);
+    Route::put('enviaEmail', [PedidoController::class, 'entregar']);
+    Route::put('removerEndereco', [PedidoController::class, 'cancelar']);
+    Route::get('listImages', [PedidoController::class, 'editar']);
+    Route::put('consultaInicialSemCadastro', [PedidoController::class, 'atualizar']);
+    Route::get('clientePotencial', [PedidoController::class, 'escolherentregador']);
+    Route::get('login', [PedidoController::class, 'ajustarCoordenadas']);
+    Route::post('refreshRegId', [PedidoController::class, 'ajustarCoordenadas']);
+    Route::get('notificacaoRecebida', [PedidoController::class, 'buscarNovosPedidos']);
+    Route::get('senhaModoTeste', [PedidoController::class, 'ultimoPedido']);
+    Route::get('alteraEnderecoAtual', [PedidoController::class, 'listaClientes']);
+    Route::get('cadastrarNovoEndereco', [PedidoController::class, 'listaClientes']);
+    Route::get('cancelarPedido', [PedidoController::class, 'listaClientes']);
+    Route::get('pedidoRecebido', [PedidoController::class, 'listaClientes']);
+    Route::get('alteraDadosCliente', [PedidoController::class, 'listaClientes']);
+    Route::get('verifyRecover', [PedidoController::class, 'listaClientes']);
+    Route::get('alteraSenha', [PedidoController::class, 'listaClientes']);
+    Route::get('novoPedido', [PedidoController::class, 'listaClientes']);
+});
 
 
 require __DIR__.'/auth.php';

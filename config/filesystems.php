@@ -29,6 +29,12 @@ return [
     */
 
     'disks' => [
+        'public_images' => [
+            'driver' => 'local',
+            'root' => public_path('images'), // Acessa public/images
+            'url' => env('APP_URL').'/images', // URL pública para acessar as imagens
+            'visibility' => 'public', // Torna os arquivos visíveis publicamente
+        ],
 
         'local' => [
             'driver' => 'local',
@@ -72,6 +78,7 @@ return [
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
+        public_path('images') => storage_path('images'),
     ],
 
 ];

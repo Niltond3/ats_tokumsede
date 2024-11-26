@@ -81,16 +81,16 @@ Route::get('/homepage', [HomeController::class, 'getHomepage'])->name('homepage'
  Route::group(['prefix' => 'Api'], function(){
     Route::resource('/', Api::class,['except' => 'create']);
     Route::get('verificaPedidoAlterado', [Api::class, 'verificaPedidoAlterado']);
-    Route::put('verificaEmail', [Api::class, 'verificaEmail']);
-    Route::put('consultaInicial/{id}', [Api::class, 'consultaInicial']);
-    Route::put('solicitaContato', [Api::class, 'solicitaContato']);
-    Route::put('enviaEmail', [Api::class, 'enviaEmail']);
-    Route::put('removerEndereco', [Api::class, 'removerEndereco']);
+    Route::get('verificaEmail', [Api::class, 'verificaEmail']);
+    Route::get('consultaInicial/{id}', [Api::class, 'consultaInicial']);
+    Route::get('solicitaContato', [Api::class, 'solicitaContato']);
+    Route::get('enviaEmail', [Api::class, 'enviaEmail']);
+    Route::get('removerEndereco', [Api::class, 'removerEndereco']);
     Route::get('listImages', [Api::class, 'listImages']);
-    Route::put('consultaInicialSemCadastro', [Api::class, 'consultaInicialSemCadastro']);
+    Route::get('consultaInicialSemCadastro', [Api::class, 'consultaInicialSemCadastro']);
     Route::get('clientePotencial', [Api::class, 'clientePotencial']);
     Route::get('login', [Api::class, 'login']);
-    Route::post('refreshRegId', [Api::class, 'refreshRegId']);
+    Route::get('refreshRegId', [Api::class, 'refreshRegId']);
     Route::get('notificacaoRecebida', [Api::class, 'notificacaoRecebida']);
     Route::get('senhaModoTeste', [Api::class, 'senhaModoTeste']);
     Route::get('alteraEnderecoAtual', [Api::class, 'alteraEnderecoAtual']);

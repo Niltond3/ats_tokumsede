@@ -824,20 +824,9 @@ class IndexController extends Controller
 		}
 	}
 
-	function login(){
+	function login(Request $request){
 
-		$email = $this->escape("email");
-		$senha = $this->escape("senha");
-
-		$cliente = Cliente::select('clientes.*')
-        ->where('clientes.email', $email)
-        ->where(function($query) use ($senha) {
-            $query->where('clientes.senha', $senha)
-                  ->orWhere('clientes.senha', md5($senha));
-        })
-        ->where('clientes.status', Cliente::ATIVO)
-        ->get()
-        ->toArray();
+		$cliente = Cliente::whereRaw("cliente.email = '$request->email' AND ( cliente.senha = '$request->senha' OR cliente.senha = '".md5($request->senha)."' OR cliente.senha = '".bcrypt($request->senha)."' ) AND cliente.status = ".Cliente::ATIVO)->get();
 
         if (count($cliente)) {
             $out["msg"] = "ok";

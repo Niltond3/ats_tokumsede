@@ -83,7 +83,7 @@ const renderToast = (promise) => {
 }
 
 const onSubmit = (values) => {
-    const payload = JSON.stringify({
+    const payload = {
         idCliente: props.idClient,
         logradouro: values.logradouro || '',
         numero: values.numero || '',
@@ -95,8 +95,7 @@ const onSubmit = (values) => {
         referencia: values.referencia || '',
         apelido: values.apelido || '',
         observacao: values.observacao || '',
-    })
-
+    }
     const response = props.addressDetails ? axios.put(`enderecos/${props.addressDetails.id}`, payload) : axios.post('enderecos', payload, { headers: { "Content-Type": "application/json" } });
 
     renderToast(response)

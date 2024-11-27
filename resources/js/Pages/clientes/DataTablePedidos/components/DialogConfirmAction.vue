@@ -21,9 +21,14 @@ const emits = defineEmits(["on:confirm"]);
 
 const reson = ref('');
 
+
 const handleConfirm = (confirm) => {
     if (confirm === false) return toggleDialog()
-    emits('on:confirm', reson.value == '' ? true : reson.value)
+    const reason = reson.value == '' ? true : reson.value
+    emits('on:confirm', {
+        reason,
+        toggleDialog
+    })
 }
 
 const getVariant = {

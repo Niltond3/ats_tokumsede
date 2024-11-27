@@ -14,6 +14,7 @@ import DropDownPedidos from './components/DropDownPedidos.vue';
 import ActionOrders from './components/ActionOrders.vue';
 import { twMerge } from 'tailwind-merge';
 import observeNewOrders from './components/observeNewOrders';
+import renderToast from '@/components/renderPromiseToast'
 
 DataTable.use(DataTablesLib);
 
@@ -28,46 +29,54 @@ const data = ref([]);
 const entregadores = ref([]);
 
 
-const loadTableData = async () => {
+
+const loadTableData = () => {
     var urlPedidos = 'pedidos';
-    const response = await axios.get(urlPedidos);
 
-    entregadores.value = response.data[7];
+    const pedidos = axios.get(urlPedidos);
 
-    const concatArray = [...response.data[0], ...response.data[1], ...response.data[2], ...response.data[3], ...response.data[4]]
+    renderToast(pedidos, 'Atualizando Tabela, aguarde...', 'tabela de pedidos atualizada', (response) => {
+        entregadores.value = response.data[7];
 
-    const scheduledOrders = response.data[5].filter((pedido, index, self) => {
-        const fid = concatArray.find(p => {
-            const dateIso = dateToISOFormat(`${p.dataAgendada} ${p.horaInicio}`)
-            const currentDate = new Date();
-            const scheduleDate = new Date(dateIso);
-            return p.id === pedido.id && currentDate >= scheduleDate
+        const concatArray = [...response.data[0], ...response.data[1], ...response.data[2], ...response.data[3], ...response.data[4]]
+
+        const scheduledOrders = response.data[5].filter((pedido, index, self) => {
+            const fid = concatArray.find(p => {
+                const dateIso = dateToISOFormat(`${p.dataAgendada} ${p.horaInicio}`)
+                const currentDate = new Date();
+                const scheduleDate = new Date(dateIso);
+                return p.id === pedido.id && currentDate >= scheduleDate
+            })
+            if (fid === undefined) return pedido
         })
-        if (fid === undefined) return pedido
-    })
 
-    const orders = [...concatArray, ...scheduledOrders]
+        const orders = [...concatArray, ...scheduledOrders]
 
-    const newData = orders.map(pedido => {
-        const status = getStatusString(pedido.agendado, pedido.dataAgendada, pedido.horaInicio, pedido.status)
+        const newData = orders.map(pedido => {
+            const status = getStatusString(pedido.agendado, pedido.dataAgendada, pedido.horaInicio, pedido.status)
 
-        const distribuidorNome = utf8Decode(pedido.distribuidor.nome)
-        const clienteNome = utf8Decode(pedido.cliente.nome)
+            const distribuidorNome = utf8Decode(pedido.distribuidor.nome)
+            const clienteNome = utf8Decode(pedido.cliente.nome)
 
-        return {
-            ...pedido, status,
-            distribuidor: {
-                ...pedido.distribuidor,
-                nome: distribuidorNome.substr(distribuidorNome.indexOf(" ") + 1)
-            },
-            cliente: {
-                ...pedido.cliente,
-                nome: clienteNome
+            return {
+                ...pedido, status,
+                distribuidor: {
+                    ...pedido.distribuidor,
+                    nome: distribuidorNome.substr(distribuidorNome.indexOf(" ") + 1)
+                },
+                cliente: {
+                    ...pedido.cliente,
+                    nome: clienteNome
+                }
             }
-        }
+        })
+        data.value = newData
     })
+}
 
-    data.value = newData
+const handleLoadTableData = () => {
+    console.log('handleLoadTableData')
+    loadTableData()
 }
 
 onMounted(() => {
@@ -82,28 +91,7 @@ onMounted(() => {
     const inputClasses = 'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded  bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary !border-input placeholder:text-info/50 !text-info/80'
 
     $('.dt-search > input').addClass(inputClasses)
-    /*
-         //STATUS
-    const PENDENTE = 1;
-    const CANCELADO_USUARIO = 2;
-    const CANCELADO_NAO_LOCALIZADO = 3;
-    const CANCELADO_TROTE = 4;
-    const RECUSADO = 5;
-    const ACEITO = 8;
-    const DESPACHADO = 6;
-    const ENTREGUE = 7;
-    //FORMA_PAGAMENTO
-    const OUTROS = 0;
-    const DINHEIRO = 1;
-    const CARTAO = 2;
-    const PIX = 3;
-    const TRANSFERENCIA = 4;
-    const IFOOD = 5;
-    //ORIGEM
-    const APP_ANDROID = 1;
-    const APP_IOS = 2;
-    const PLATAFORMA = 3;
-    */
+
     loadTableData();
     window.setInterval(observeNewOrders(loadTableData), 10000);
 })
@@ -218,8 +206,7 @@ const options = {
         topEnd: null,
     },
 }
-//colgroup
-//thead
+
 const badgeClasses = 'font-normal inline-block px-2 text-[75%] text-center whitespace-nowrap align-baseline rounded text-white'
 
 </script>
@@ -229,8 +216,8 @@ const badgeClasses = 'font-normal inline-block px-2 text-[75%] text-center white
     <DataTable class="display [&_thead]:bg-info [&_thead]:text-[#F3F9FD]" :columns="columns" :data="data"
         :options="options" ref="table" language="language">
         <template #action="data">
-            <DropDownPedidos :payloadData="data.rowData" :entregadores="entregadores" :loadTable="loadTableData"
-                @callback:edited-order="() => loadTableData()" />
+            <DropDownPedidos :payloadData="data.rowData" :entregadores="entregadores"
+                @callback:edited-order="handleLoadTableData" />
             <ActionOrders :payloadData="data.rowData" :entregadores="entregadores" :loadTable="loadTableData" />
         </template>
         <template #rating="data">

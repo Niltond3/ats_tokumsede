@@ -13,14 +13,13 @@ import DialogSelectDeliveryMan from './DialogSelectDeliveryMan.vue'
 import DialogEditOrder from './DialogEditOrder.vue'
 import DialogShowOrder from './DialogShowOrder.vue'
 import DialogConfirmAction from './DialogConfirmAction.vue'
-import { Link, usePage, } from '@inertiajs/vue3';
+import { usePage, } from '@inertiajs/vue3';
 
 const page = usePage()
 
 const props = defineProps({
     payloadData: { type: null, required: true },
     entregadores: { type: null, required: true },
-    loadTable: { type: Function, required: true },
 })
 
 const orderStatus = ref(props.payloadData.status.label)
@@ -32,18 +31,21 @@ const emit = defineEmits(['callback:edited-order'])
 
 const { id: idPedido, } = props.payloadData
 
+const handleEditOrder = () => emit('callback:edited-order')
+
 const CustomDiv = (title, description) => defineComponent({
     setup() {
         return () => h('div', { class: 'flex flex-col' }, title, h('span', { class: 'text-xs opacity-80' }, description))
     }
 })
 
-const renderToast = (promise, status) => {
+const renderToast = (promise, status, callbackSucess) => {
     toast.promise(promise, {
         loading: 'Aguarde...',
 
         success: (data) => {
-            props.loadTable()
+            handleEditOrder()
+            callbackSucess && callbackSucess(data)
             return markRaw(CustomDiv('sucesso', `O pedido ${idPedido} foi ${status} com sucesso!`));
         },
         error: (data) => markRaw(CustomDiv('Error', data.response.data)),
@@ -68,13 +70,14 @@ const handleEntregar = (id) => {
     renderToast(promise, 'entregue')
 }
 
-const handleCancelar = (reson) => {
+const handleCancelar = (confirmCancellCalback) => {
+    const { reson, toggleDialog } = confirmCancellCalback
+
     var url = `pedidos/recusar/${idPedido}`
     const promise = axios.put(url, { retorno: reson })
-    renderToast(promise, 'Cancelado')
+    renderToast(promise, 'Cancelado', toggleDialog)
 }
 
-const handleEditOrder = () => emit('callback:edited-order')
 </script>
 
 <template>

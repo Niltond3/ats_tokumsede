@@ -21,7 +21,7 @@ const props = defineProps({
     dropdown: { type: Boolean, required: false, default: true }
 });
 
-const emit = defineEmits(['callback:editOrder'])
+const emits = defineEmits(['callback:editOrder', 'update:dialogOpen'])
 
 const data = ref({})
 const distributors = ref([])
@@ -79,7 +79,6 @@ const whenDialogOpen = async () => {
 
 onMounted(() => whenDialogOpen())
 
-
 function handleCopyOrder() {
     const { id: orderId, total, formaPagamento, troco, status: { label: statusLabel }, horarioPedido, horarioAceito, horarioEntrega, horarioDespache, horarioCancelado, dataAgendada, horaInicio, cliente: { nome: cliente, telefone }, distribuidor: { nome: distribuidorNome }, endereco: { logradouro, numero, bairro, complemento, cidade, estado, referencia }, itensPedido } = data.value
 
@@ -128,10 +127,15 @@ const handleUpdateOrder = (payload) => {
     const response = axios.put(url, payload)
     renderToast(response)
 }
+
+const handleDialogOpen = (op) => {
+    !op && emits('update:dialogOpen', false)
+    toggleDialog()
+}
 </script>
 
 <template>
-    <Dialog :open="isOpen" @update:open="toggleDialog">
+    <Dialog :open="isOpen" @update:open="handleDialogOpen">
         <DialogTrigger as-child>
             <DropdownMenuItem v-if="dropdown" class="cursor-pointer" @select="(e) => e.preventDefault()">
                 <i class="ri-edit-2-fill"></i>

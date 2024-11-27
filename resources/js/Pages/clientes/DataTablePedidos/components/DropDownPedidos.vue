@@ -23,6 +23,7 @@ const props = defineProps({
 })
 
 const orderStatus = ref(props.payloadData.status.label)
+const dropdownOpen = ref(false)
 
 const { tipoAdministrador } = page.props.auth.user
 
@@ -30,6 +31,8 @@ const { tipoAdministrador } = page.props.auth.user
 const emit = defineEmits(['callback:edited-order'])
 
 const { id: idPedido, } = props.payloadData
+
+
 
 const handleEditOrder = () => emit('callback:edited-order')
 
@@ -71,28 +74,35 @@ const handleEntregar = (id) => {
 }
 
 const handleCancelar = (confirmCancellCalback) => {
-    const { reson, toggleDialog } = confirmCancellCalback
+    const { reason, toggleDialog } = confirmCancellCalback
+
+    if (!reason) return toggleDialog()
 
     var url = `pedidos/recusar/${idPedido}`
-    const promise = axios.put(url, { retorno: reson })
+    const promise = axios.put(url, { retorno: reason })
     renderToast(promise, 'Cancelado', toggleDialog)
+}
+const handleToggleDropdown = (op) => {
+    console.log(op)
+    if (op || op == false) dropdownOpen.value = !dropdownOpen.value
 }
 
 </script>
 
 <template>
-    <DropdownMenu class="">
+    <DropdownMenu class="" :open="dropdownOpen" @update:open="handleToggleDropdown">
         <DropdownMenuTrigger as-child>
-            <Button variant="ghost" class="transition-colors text-cyan-700 p-0 hidden min-[426px]:block">
+            <Button variant="ghost" class="transition-colors text-cyan-700 p-0 hidden min-[426px]:block"
+                @click="handleToggleDropdown()">
                 <span class="sr-only">Abrir Menú</span>
                 <MoreVertical class="w-6 h-6" />
             </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <DialogShowOrder :order-id="idPedido" />
+            <DialogShowOrder :order-id="idPedido" @update:dialog-open="handleToggleDropdown" />
             <DialogEditOrder v-if="tipoAdministrador === 'Administrador'" :order-id="idPedido"
-                @callback:edit-order="handleEditOrder" />
+                @callback:edit-order="handleEditOrder" @update:dialog-open="handleToggleDropdown" />
             <DropdownMenuSeparator />
             <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
@@ -106,15 +116,16 @@ const handleCancelar = (confirmCancellCalback) => {
                             Aceitar
                         </DropdownMenuItem>
                         <DialogSelectDeliveryMan v-if="orderStatus == 'Aceito'"
-                            @on:delivery-man-selected="handleDespachar" :entregadores="entregadores" />
+                            @on:delivery-man-selected="handleDespachar" :entregadores="entregadores"
+                            @update:dialog-open="handleToggleDropdown" />
                         <DropdownMenuItem v-if="orderStatus == 'Despachado'" class="cursor-pointer flex gap-1"
                             @click="handleEntregar()">
                             <i class="ri-check-double-fill"></i>
                             Entregar
                         </DropdownMenuItem>
-                        <DialogConfirmAction @on:confirm="handleCancelar" dialog-title="Cancelar Pedido"
-                            trigger-icon="ri-close-circle-fill" trigger-label="Cancelar" variant="danger"
-                            :text-reson="true" />
+                        <DialogConfirmAction dialog-title="Cancelar Pedido" trigger-icon="ri-close-circle-fill"
+                            trigger-label="Cancelar" variant="danger" :text-reson="true"
+                            @update:dialog-open="handleToggleDropdown" @on:confirm="handleCancelar" />
                     </DropdownMenuSubContent>
                 </DropdownMenuPortal>
             </DropdownMenuSub>

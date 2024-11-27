@@ -10,11 +10,15 @@ const props = defineProps({
     orderId: { type: Number, required: true },
     dropdown: { type: Boolean, required: false, default: true }
 });
+const emits = defineEmits(['update:dialogOpen'])
 
+const handleDialogOpen = (op) => {
+    !op && emits('update:dialogOpen', false)
+}
 </script>
 
 <template>
-    <Dialog>
+    <Dialog @update:open="handleDialogOpen">
         <DialogTrigger as-child>
             <DropdownMenuItem v-if="dropdown" class="cursor-pointer" @select="(e) => e.preventDefault()">
                 <i class="ri-eye-fill"></i>

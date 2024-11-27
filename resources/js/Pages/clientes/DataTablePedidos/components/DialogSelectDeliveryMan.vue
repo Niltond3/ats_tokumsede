@@ -18,7 +18,7 @@ const props = defineProps({
     dropdown: { type: Boolean, required: false, default: true }
 });
 
-const emits = defineEmits(["on:deliveryManSelected"]);
+const emits = defineEmits(["on:deliveryManSelected", 'update:dialogOpen']);
 
 const { isOpen, toggleDialog } = dialogState()
 
@@ -27,10 +27,14 @@ const handleDeliveryManSelected = (deliveryMan) => {
     toggleDialog()
 }
 
+const handleDialogOpen = (op) => {
+    !op && emits('update:dialogOpen', false)
+    toggleDialog()
+}
 </script>
 
 <template>
-    <Dialog :open="isOpen" @update:open="(op) => toggleDialog()">
+    <Dialog :open="isOpen" @update:open="handleDialogOpen">
         <DialogTrigger as-child>
             <DropdownMenuItem v-if="dropdown" class="cursor-pointer group gap-1" @select="(e) => e.preventDefault()">
                 <i class="ri-e-bike-2-fill group-hover:text-dispatched transition-colors"></i>

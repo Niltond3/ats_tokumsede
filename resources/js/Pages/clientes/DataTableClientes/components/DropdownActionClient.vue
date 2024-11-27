@@ -19,6 +19,8 @@ const props = defineProps({
 
 const { rowData } = props.payloadData
 const { id: idCliente } = rowData
+const dropdownOpen = ref(false)
+
 
 function copy() {
     navigator.clipboard.writeText(props.payloadData)
@@ -50,11 +52,13 @@ const handleStatusClientChange = ({ id, status }) => {
 }
 
 const handleUpdateDataTable = () => props.dataTable.ajax.reload()
-
+const handleToggleDropdown = (op) => {
+    if (op || op == false) dropdownOpen.value = !dropdownOpen.value
+}
 </script>
 
 <template>
-    <DropdownMenu>
+    <DropdownMenu :open="dropdownOpen" @update:open="handleToggleDropdown">
         <DropdownMenuTrigger as-child>
             <Button variant="ghost" class="transition-colors text-cyan-700 p-0">
                 <span class="sr-only">Abrir Menú</span>
@@ -76,11 +80,12 @@ const handleUpdateDataTable = () => props.dataTable.ajax.reload()
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                     <DropdownMenuSubContent>
-                        <DialogConfirmAction
+                        <DialogConfirmAction @update:dialog-open="handleToggleDropdown"
                             @on:confirm="() => handleStatusClientChange({ id: 2, status: 'inativado' })"
                             dialog-description="Deseja realmente inativar o cliente?" dialog-title="Inativar Cliente"
                             trigger-icon="ri-pause-circle-fill" trigger-label="Inativar Cliente" variant="warning" />
-                        <DialogConfirmAction @on:confirm="() => handleStatusClientChange({ id: 3, status: 'excluido' })"
+                        <DialogConfirmAction @update:dialog-open="handleToggleDropdown"
+                            @on:confirm="() => handleStatusClientChange({ id: 3, status: 'excluido' })"
                             dialog-description="Deseja realmente Excluir o cliente?" dialog-title="Excluir Cliente"
                             trigger-icon="ri-delete-bin-6-fill" trigger-label="Excluir Cliente" variant="danger" />
                     </DropdownMenuSubContent>

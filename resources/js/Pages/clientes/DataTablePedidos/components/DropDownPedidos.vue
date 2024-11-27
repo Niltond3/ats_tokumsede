@@ -83,7 +83,6 @@ const handleCancelar = (confirmCancellCalback) => {
     renderToast(promise, 'Cancelado', toggleDialog)
 }
 const handleToggleDropdown = (op) => {
-    console.log(op)
     if (op || op == false) dropdownOpen.value = !dropdownOpen.value
 }
 

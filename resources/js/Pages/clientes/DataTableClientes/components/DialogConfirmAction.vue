@@ -16,12 +16,15 @@ const props = defineProps({
 
 const { isOpen, toggleDialog } = dialogState()
 
-const emits = defineEmits(["on:confirm"]);
+const emits = defineEmits(["on:confirm", 'update:dialogOpen']);
 
 const reson = ref('');
 
 const handleConfirm = (confirm) => {
-    if (confirm === false) return toggleDialog()
+    if (confirm === false) {
+        emits('update:dialogOpen', false)
+        return toggleDialog()
+    }
     emits('on:confirm', reson.value == '' ? true : reson.value)
 }
 
@@ -44,10 +47,14 @@ const getVariant = {
 
 const styleVariant = getVariant[props.variant]
 
+const handleDialogOpen = (op) => {
+    !op && emits('update:dialogOpen', false)
+    toggleDialog()
+}
 </script>
 
 <template>
-    <Dialog :open="isOpen" @update:open="(op) => toggleDialog()">
+    <Dialog :open="isOpen" @update:open="handleDialogOpen">
         <DialogTrigger as-child>
             <DropdownMenuItem class="cursor-pointer group gap-1" @select="(e) => e.preventDefault()">
                 <i :class="[props.triggerIcon, styleVariant.textClasses.text]" class="transition-colors"></i>

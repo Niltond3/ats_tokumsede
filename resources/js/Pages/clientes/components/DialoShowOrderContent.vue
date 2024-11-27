@@ -34,9 +34,7 @@ watch(() => props.isOpen, async (newValue) => fetchOrder())
 onMounted(async () => {
     if (props.orderId) fetchOrder()
 })
-const handleCopyOrder = (order) => {
-    orderToClipboard(order)
-}
+const handleCopyOrder = (order) => orderToClipboard(order)
 
 </script>
 

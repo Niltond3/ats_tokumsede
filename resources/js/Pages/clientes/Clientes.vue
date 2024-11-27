@@ -82,7 +82,9 @@ const handleSetActiveTab = (tab) => setActiveTab(tab)
             <TabsContent value="pedidos">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Pedidos</CardTitle>
+                        <CardTitle>
+                            <span class="hidden">Pedidos</span>
+                        </CardTitle>
                         <CardDescription>
                             Visualize e gerencie todos os pedios feitos hoje
                         </CardDescription>

@@ -66,7 +66,7 @@ const handleToggleDropdown = (op) => {
             </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" class="border border-slate-200">
-            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+            <DropdownMenuLabel class="text-info">Ações</DropdownMenuLabel>
             <DropdownMenuItem class="gap-2 text-muted-foreground cursor-pointer"
                 @click="() => props.dataTable.ajax.reload()">
                 <i class="ri-eye-fill text-info"></i>
@@ -75,11 +75,11 @@ const handleToggleDropdown = (op) => {
             <DialogEditClient :client-details="rowData" @update:data-table="handleUpdateDataTable" />
             <DropdownMenuSeparator />
             <DropdownMenuSub>
-                <DropdownMenuSubTrigger class="text-info/70">
-                    <span>Outros</span>
+                <DropdownMenuSubTrigger class="text-info">
+                    Outros
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                    <DropdownMenuSubContent>
+                    <DropdownMenuSubContent class="border border-slate-200">
                         <DialogConfirmAction @update:dialog-open="handleToggleDropdown"
                             @on:confirm="() => handleStatusClientChange({ id: 2, status: 'inativado' })"
                             dialog-description="Deseja realmente inativar o cliente?" dialog-title="Inativar Cliente"

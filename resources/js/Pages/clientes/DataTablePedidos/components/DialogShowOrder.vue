@@ -20,8 +20,8 @@ const handleDialogOpen = (op) => {
 <template>
     <Dialog @update:open="handleDialogOpen">
         <DialogTrigger as-child>
-            <DropdownMenuItem v-if="dropdown" class="cursor-pointer" @select="(e) => e.preventDefault()">
-                <i class="ri-eye-fill"></i>
+            <DropdownMenuItem v-if="dropdown" class="cursor-pointer flex gap-2" @select="(e) => e.preventDefault()">
+                <i class="ri-eye-fill text-info"></i>
                 <span class="hidden min-[426px]:block">Visualizar Pedido</span>
             </DropdownMenuItem>
             <button v-else class="">

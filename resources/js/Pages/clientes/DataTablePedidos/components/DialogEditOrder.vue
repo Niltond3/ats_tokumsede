@@ -137,8 +137,8 @@ const handleDialogOpen = (op) => {
 <template>
     <Dialog :open="isOpen" @update:open="handleDialogOpen">
         <DialogTrigger as-child>
-            <DropdownMenuItem v-if="dropdown" class="cursor-pointer" @select="(e) => e.preventDefault()">
-                <i class="ri-edit-2-fill"></i>
+            <DropdownMenuItem v-if="dropdown" class="cursor-pointer flex gap-2" @select="(e) => e.preventDefault()">
+                <i class="ri-edit-2-fill text-info"></i>
                 <span class="hidden min-[426px]:block">Editar Pedido</span>
             </DropdownMenuItem>
             <button v-else

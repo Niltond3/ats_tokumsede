@@ -97,18 +97,18 @@ const handleToggleDropdown = (op) => {
                 <MoreVertical class="w-6 h-6" />
             </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+        <DropdownMenuContent align="end" class="border border-slate-200">
+            <DropdownMenuLabel class="text-info">Ações</DropdownMenuLabel>
             <DialogShowOrder :order-id="idPedido" @update:dialog-open="handleToggleDropdown" />
             <DialogEditOrder v-if="tipoAdministrador === 'Administrador'" :order-id="idPedido"
                 @callback:edit-order="handleEditOrder" @update:dialog-open="handleToggleDropdown" />
             <DropdownMenuSeparator />
             <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                    <span>Status</span>
+                <DropdownMenuSubTrigger class="text-info">
+                    Status
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                    <DropdownMenuSubContent>
+                    <DropdownMenuSubContent class="border border-slate-200">
                         <DropdownMenuItem v-if="orderStatus == 'Pendente'" class="cursor-pointer flex gap-1"
                             @click="handleAceitar()">
                             <i class="ri-check-fill"></i>
@@ -119,7 +119,7 @@ const handleToggleDropdown = (op) => {
                             @update:dialog-open="handleToggleDropdown" />
                         <DropdownMenuItem v-if="orderStatus == 'Despachado'" class="cursor-pointer flex gap-1"
                             @click="handleEntregar()">
-                            <i class="ri-check-double-fill"></i>
+                            <i class="ri-check-double-fill text-info"></i>
                             Entregar
                         </DropdownMenuItem>
                         <DialogConfirmAction dialog-title="Cancelar Pedido" trigger-icon="ri-close-circle-fill"

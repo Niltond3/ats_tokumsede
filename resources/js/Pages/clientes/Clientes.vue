@@ -67,7 +67,7 @@ const handleSetActiveTab = (tab) => setActiveTab(tab)
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            <span class="hidden">Clientes</span>
+                            <span class="sr-only">Clientes</span>
                         </CardTitle>
                         <CardDescription>
                             {{ description }}
@@ -83,7 +83,7 @@ const handleSetActiveTab = (tab) => setActiveTab(tab)
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            <span class="hidden">Pedidos</span>
+                            <span class="sr-only">Pedidos</span>
                         </CardTitle>
                         <CardDescription>
                             Visualize e gerencie todos os pedios feitos hoje

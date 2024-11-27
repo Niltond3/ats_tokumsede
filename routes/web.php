@@ -78,8 +78,10 @@ Route::get('/homepage', [HomeController::class, 'getHomepage'])->name('homepage'
 
 
  //PEDIDOS
- Route::group(['prefix' => 'Api'], function(){
-    Route::resource('/', Api::class,['except' => 'create']);
+ Route::group(['prefix' => 'api'], function () {
+    Route::resource('/', Api::class, ['except' => 'create']);
+
+    // Demais rotas configuradas
     Route::get('verificaPedidoAlterado', [Api::class, 'verificaPedidoAlterado']);
     Route::get('verificaEmail', [Api::class, 'verificaEmail']);
     Route::get('consultaInicial', [Api::class, 'consultaInicial']);

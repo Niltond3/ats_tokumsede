@@ -1141,7 +1141,7 @@ function calcDistancia($lat1, $long1, $lat2, $long2){
 
 function buscarLatitudeLongitude($logradouro, $numero, $cidade, $estado, $cep) {
     //$address = {nm_bairro}.", ".{nm_cidade}.", ".{nm_estado}.", ".{nm_brasil};
-    $key = "AIzaSyDIt2CSa_K8P64daT3v4Hv8Ml-8IJsFic8";
+    $key = "AIzaSyD3A65oIloNfr-TA3EK8vERo2nnWEi1fxg";
     $address = $logradouro . ", " . $numero . ", " . $cidade . ", " . $estado . ", " . $cep . "," . "Brasil";
     $request_url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $address . "&sensor=true&key=".$key; // A URL que vc manda pro google para pegar o XML
     $xml = simplexml_load_file($request_url) or die("url not loading"); // request do XML

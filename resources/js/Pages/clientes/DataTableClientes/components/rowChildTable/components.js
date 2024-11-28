@@ -74,7 +74,7 @@ export default () => {
     }
 
     return {
-        customLiAddress: (endereco) => {
+        customLiAddress: (endereco, clientName) => {
             return /*html*/`<li
         class="${liStyles} deleteEndereco aria-selected:bg-dispatched aria-selected:my-2 transition-all duration-300 [transition-behavior:allow-discrete]"
         aria-selected="false" data-long-press-delay="500" id="${endereco.idCliente}" addr_id="${endereco.id}">
@@ -91,7 +91,7 @@ export default () => {
         <div class="ml-auto border-l border-slate-300 pl-3">
             <button
                 class="${buttonStyles} iniciarPedido hover:text-info/100 text-info/60 group-aria-selected/line:text-dispatched/60 group-aria-selected/line:hover:text-dispatched/100"
-                id="${endereco.id}"><i class="ri-shopping-cart-fill ${iconStyles}"></i></button></div>
+                id="${endereco.id}" data-client="${clientName}"><i class="ri-shopping-cart-fill ${iconStyles}"></i></button></div>
     </li>`;
         },
         customLiOrder: (order) => {

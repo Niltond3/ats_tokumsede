@@ -126,10 +126,7 @@ watch(() => readbleOrderData.value.products, (newValue) => {
     console.log(newValue)
     interableProducts.value = newValue
 })
-// onMounted(() => {
-//     console.log('opp')
-//     whenDialogOpen()
-// })
+
 
 const handleToggleOpenDialog = (op) => {
     !op && emits('update:commandOpen', false)

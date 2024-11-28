@@ -42,9 +42,10 @@ const fetchOrder = () => {
 
     renderToast(promise, `carregando pedido #${props.orderId}`, 'sucesso ao carregar pedido', (responseOrder) => {
         const { data: orderEditData } = responseOrder
-
+        console.log(orderEditData)
         const orderData = orderEditData[0]
         const distributorsData = orderEditData[1]
+        const clientName = utf8Decode(orderEditData[0].cliente.nome)
 
         distributors.value = distributorsData.filter(distributor => distributor.status == 1)
 
@@ -78,6 +79,7 @@ const fetchOrder = () => {
             }
 
             createOrderData.value = {
+                clientName,
                 order,
                 products: products.value,
                 distributor: order.distribuidor,
@@ -141,7 +143,6 @@ const handleUpdateOrder = (payload) => {
                             #{{ createOrderData.order.id }}
                             <i class="ri-file-copy-fill opacity-75 group-hover:opacity-100 transition-all" />
                         </button>
-                        <span>{{ createOrderData.distributor.nome }}</span>
                     </div>
                 </DialogTitle>
                 <DialogDescription>

@@ -14,6 +14,7 @@ const props = defineProps({
     open: { type: Boolean, required: false },
     toggleDialog: { type: Function, required: false },
     idClienteAddress: { type: String, required: false },
+    clientName: { type: String, required: false },
     setTab: { type: Function, required: true },
 });
 
@@ -43,11 +44,9 @@ const renderToast = (promise) => {
 
 const createOrderData = ref()
 const whenDialogOpen = async () => {
-    console.log('whenDialogOpen')
     const url = `produtos/${props.idClienteAddress}`
     const responseOrder = await axios.get(url)
     const { data: orderData } = responseOrder
-    console.log(orderData)
     const responseDistributor = orderData[1];
     const responseAddress = orderData[2];
     const address = {
@@ -66,9 +65,8 @@ const whenDialogOpen = async () => {
         nome: utf8Decode(responseDistributor.nome),
     }
 
-    console.log(orderData)
-
     createOrderData.value = {
+        clientName: props.clientName,
         products: orderData[0],
         distributor,
         address,
@@ -78,7 +76,6 @@ const whenDialogOpen = async () => {
 }
 
 const handleDialogOpen = () => {
-    console.log(props.open)
     props.open && whenDialogOpen()
     return props.open
 }

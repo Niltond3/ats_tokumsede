@@ -79,9 +79,9 @@ const value = ref('')
                                 <CommandList>
                                     <CommandEmpty class="p-2">Nenhum endereço encontrado.</CommandEmpty>
                                     <CommandGroup>
-                                        <div>
-                                            <DialogCreateOrder v-for="address in addresses" :address="address"
-                                                :value="value" @update:command-open="() => open = false" />
+                                        <div v-for="address in addresses">
+                                            <DialogCreateOrder :address="address" :value="value"
+                                                @update:command-open="() => open = false" />
                                         </div>
                                     </CommandGroup>
                                 </CommandList>

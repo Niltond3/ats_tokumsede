@@ -6,10 +6,9 @@ export default (d) => {
     const { customLiAddress, customLiOrder } = components()
 
     const rowChildData = d
-    const plus = "&#xEA12;"
-    //group-has-[li[aria-selected='true']]
+    const clientName = utf8Decode(rowChildData.nome)
+
     const containerClasses = `p-2 md:flex-1`;
-    //transition-all max-h-[11rem] overflow-y-scroll overflow-x-hidden
     const containerAddressClasses = twMerge(
         "md:!max-h-[11rem]",
         "hover:bg-info/5  flex flex-col px-3 py-2bg-slate-100 ",
@@ -62,7 +61,7 @@ export default (d) => {
         </div>
         <dl>
             <ul class="${containerAddressClasses}" id="enderecos">
-                ${rowChildData.enderecos.map(endereco => customLiAddress(endereco)).join('')}
+                ${rowChildData.enderecos.map(endereco => customLiAddress(endereco, clientName)).join('')}
             </ul>
         </dl>
     </div>

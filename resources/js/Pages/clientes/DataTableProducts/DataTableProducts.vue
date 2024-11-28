@@ -206,7 +206,6 @@ const dataToTable = (data) => {
         const totalProdutos = itens.map(product => parseFloat(product.subtotal)).reduce((curr, prev) => curr + prev);
 
         setPayload({ ...payload.value, formaPagamento, trocoPara, agendado, dataAgendada, horaInicio, obs, observacao, totalProdutos, total: toFloat(total), idEndereco, idDistribuidor, itens, idPedido, status: order.statusId })
-
         return
     }
 
@@ -333,26 +332,36 @@ const table = useVueTable(tableOptions)
 
 <template>
     <div>
-        <div class="relative flex flex-wrap items-center py-4 justify-between gap-1 group">
-            <Input class="max-w-sm" placeholder="Pesquisar..." :modelValue="globalFilter ?? ''"
-                @update:modelValue="value => (globalFilter = String(value))" />
-            <SelectDistributor v-if="props.distributors" :distributors="props.distributors"
-                @update:distributor="handleDistributor" :default="`${payload.idDistribuidor}`"></SelectDistributor>
-            <span v-else
-                class="text-xs font-semibold text-white absolute -bottom-1 bg-dispatched py-1 px-2 rounded-md">{{
-                    tableIdentifier }}</span>
-            <button v-if="status"
-                :class="[status.classes.bg, status.label == 'Agendado' ? 'text-slate-700' : 'text-white',]"
-                class="relative font-semibold px-2 py-1 rounded-lg opacity-80 hover:opacity-100"
-                @click="handleStatusChange">
-                <i v-if="status.label != 'Agendado' && status.label != 'Pendente'"
-                    class="ri-edit-2-fill absolute bg-white rounded-full w-5 h-5 flex justify-center items-center -top-3 -right-1"
-                    :class="status.classes.text"></i>
-                <i v-if="status.oldStatus"
-                    class="ri-arrow-go-back-fill absolute bg-white rounded-full w-5 h-5 flex justify-center items-center -top-3 -right-1"
-                    :class="status.classes.text"></i>
-                {{ status.label }}
-            </button>
+        <div class="relative flex flex-wrap items-center pt-4 pb-1 justify-between gap-3 group">
+            <div class="flex flex-col gap-1 w-full md:flex-row">
+                <Input class="w-full" placeholder="Pesquisar..." :modelValue="globalFilter ?? ''"
+                    @update:modelValue="value => (globalFilter = String(value))" />
+                <SelectDistributor v-if="props.distributors" :distributors="props.distributors"
+                    @update:distributor="handleDistributor" :default="`${payload.idDistribuidor}`"></SelectDistributor>
+                <span v-else class="font-medium flex items-center justify-center text-info py-1 px-2 w-full">
+                    {{ tableIdentifier }}
+                </span>
+            </div>
+            <div class="flex flex-col gap-1 w-full md:flex-row pb-2">
+                <button v-if="status"
+                    :class="[status.classes.bg, status.label == 'Agendado' ? 'text-slate-700' : 'text-white',]"
+                    class="relative font-semibold px-2 py-1 rounded-lg opacity-80 hover:opacity-100 "
+                    @click="handleStatusChange">
+                    <i v-if="status.label != 'Agendado' && status.label != 'Pendente'"
+                        class="ri-edit-2-fill absolute bg-white rounded-full w-5 h-5 flex justify-center items-center -top-3 -right-1"
+                        :class="status.classes.text"></i>
+                    <i v-if="status.oldStatus"
+                        class="ri-arrow-go-back-fill absolute bg-white rounded-full w-5 h-5 flex justify-center items-center -top-3 -right-1"
+                        :class="status.classes.text"></i>
+                    {{ status.label }}
+                </button>
+                <p class="text-sm font-semibold px-2 py-1 rounded-lg text-info ">
+                    Cliente:
+                    <span class="font-medium">
+                        {{ props.createOrderData?.clientName ?? '' }}
+                    </span>
+                </p>
+            </div>
         </div>
         <div class="border rounded-md border-gray-200 relative">
             <DialogCreateOrderNote @callback:order-note="handleOrderNote" :order-note="payload.obs">

@@ -40,11 +40,11 @@ watch(() => props.orderNote, (newValue) => {
     <Dialog :open="isOpen" @update:open="() => toggleDialog()">
         <DialogTrigger as-child>
             <button
-                :class="twMerge('absolute bg-dispatched p-0 rounded-md w-6 h-6 flex justify-center items-center shadow-lg transition-all hover:shadow-sm hover:rounded-full hover:w-8 hover:h-8 top-[-0.75rem] right-[-0.75rem] z-10', props.class)">
+                :class="twMerge('absolute bg-dispatched p-0 rounded-md w-6 h-6 flex justify-center items-center shadow-lg transition-all hover:shadow-sm hover:rounded-full hover:w-8 hover:h-8 top-[-0.75rem] right-[-0.75rem] z-10 border-2 border-white', props.class)">
                 <i class="ri-sticky-note-add-fill text-white "></i>
             </button>
         </DialogTrigger>
-        <DialogContent class="sm:max-w-[440px]">
+        <DialogContent class="sm:max-w-[440px] flex flex-col gap-2">
             <DialogHeader class="text-info ">
                 <div class="flex flex-row items-center gap-2">
                     <i class="ri-sticky-note-fill text-3xl" />
@@ -53,7 +53,8 @@ watch(() => props.orderNote, (newValue) => {
                 <DialogDescription>Adicione uma observação para o pedido</DialogDescription>
             </DialogHeader>
             <Textarea class="border rounded-md border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
-                v-model:model-value="note"></Textarea>
+                v-model:model-value="note">
+            </Textarea>
             <DialogFooter>
                 <Button type="submit" @click="handleClick"
                     class="border-none rounded-xl px-4 py-2 text-base font-semibold bg-info/80 hover:bg-info/100 transition-all">

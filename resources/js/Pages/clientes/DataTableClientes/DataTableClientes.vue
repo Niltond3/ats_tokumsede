@@ -42,6 +42,7 @@ const { isOpen: openConfirmDialog, toggleDialog: toggleConfirmDialog } = dialogS
 
 const idClienteAddress = ref('')
 const idClient = ref('')
+const clientName = ref('')
 const idAddress = ref('')
 const idOrder = ref('')
 const address = ref({})
@@ -56,7 +57,6 @@ onMounted(() => {
 
 
     const format = (d) => rowChildtable(d)
-    //
 
     const dragScrollList = (elementId) => {
         const ele = document.getElementById(elementId);
@@ -142,6 +142,7 @@ onMounted(() => {
         dragScrollList('pedidos')
     });
     $('#datatable-clientes').on("click", '.iniciarPedido', function () {
+        clientName.value = this.getAttribute('data-client')
         idClienteAddress.value = this.id
         toggleDialog()
     })
@@ -180,7 +181,6 @@ Número: ${payload.numero}
 Bairro: ${payload.bairro}
 ${payload.complemento ? 'Complemento: ' + payload.complemento : ''}
 ${payload.referencia ? 'Referência: ' + payload.referencia : ''}
-${payload.observacao ? 'Observação: ' + payload.observacao : ''}
 `.replace(/(^[ \t]*\n)/gm, "")
 
         navigator.clipboard.writeText(clipboard)
@@ -206,19 +206,6 @@ ${payload.observacao ? 'Observação: ' + payload.observacao : ''}
         const panel = e.target.parentNode.nextElementSibling
         panel.firstChild.nextElementSibling.classList.toggle('!max-h-[11rem]')
     })
-    // accordionController
-    // var acc = document.getElementsByClassName("accordionController");
-    // var i;
-
-    // for (i = 0; i < acc.length; i++) {
-    //     acc[i].addEventListener("click", function () {
-    //         this.classList.toggle("active");
-    //         var panel = this.nextElementSibling;
-    //         if (panel.style.maxHeight) {
-    //             panel.style.maxHeight = null;
-    //         } else {
-    //             panel.style.maxHeight = panel.scrollHeight + "px";
-    //         }
 
 });
 
@@ -329,7 +316,7 @@ const handleDeleteAddress = (confirm) => {
     <div class="[&_.dt-search]:relative [&_.dt-search>label]:ri-search-2-fill">
 
         <DialogCreateOrder :open="isOpen" :toggleDialog="toggleDialog" :id-cliente-address="idClienteAddress"
-            :set-tab="props.setTab" />
+            :client-name="clientName" :set-tab="props.setTab" />
         <DialogShowOrder :open="openShowOrderDialog" :toggleDialog="toggleShowOrderDialog" :order-id="idOrder" />
         <DialogRegisterClient @update:data-table="handleUpdateDataTable" />
         <DialogRegisterAddress :open="openRegisterAddress" :toggleDialog="toggleRegisterAddress" :id-client="idClient"

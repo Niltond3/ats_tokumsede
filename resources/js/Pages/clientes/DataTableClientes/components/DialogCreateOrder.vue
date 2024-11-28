@@ -43,6 +43,7 @@ const renderToast = (promise) => {
 
 const createOrderData = ref()
 const whenDialogOpen = async () => {
+    console.log('whenDialogOpen')
     const url = `produtos/${props.idClienteAddress}`
     const responseOrder = await axios.get(url)
     const { data: orderData } = responseOrder
@@ -65,6 +66,8 @@ const whenDialogOpen = async () => {
         nome: utf8Decode(responseDistributor.nome),
     }
 
+    console.log(orderData)
+
     createOrderData.value = {
         products: orderData[0],
         distributor,
@@ -75,6 +78,7 @@ const whenDialogOpen = async () => {
 }
 
 const handleDialogOpen = () => {
+    console.log(props.open)
     props.open && whenDialogOpen()
     return props.open
 }

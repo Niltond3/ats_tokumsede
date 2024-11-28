@@ -90,44 +90,46 @@ const handleToggleDropdown = (op) => {
 
 <template>
     <DropdownMenu class="" :open="dropdownOpen" @update:open="handleToggleDropdown">
-        <DropdownMenuTrigger as-child>
-            <Button variant="ghost" class="transition-colors text-cyan-700 p-0 hidden min-[426px]:block"
-                @click="handleToggleDropdown()">
-                <span class="sr-only">Abrir Menú</span>
-                <MoreVertical class="w-6 h-6" />
-            </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" class="border border-slate-200">
-            <DropdownMenuLabel class="text-info">Ações</DropdownMenuLabel>
-            <DialogShowOrder :order-id="idPedido" @update:dialog-open="handleToggleDropdown" />
-            <DialogEditOrder v-if="tipoAdministrador === 'Administrador'" :order-id="idPedido"
-                @callback:edit-order="handleEditOrder" @update:dialog-open="handleToggleDropdown" />
-            <DropdownMenuSeparator />
-            <DropdownMenuSub>
-                <DropdownMenuSubTrigger class="text-info">
-                    Status
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                    <DropdownMenuSubContent class="border border-slate-200">
-                        <DropdownMenuItem v-if="orderStatus == 'Pendente'" class="cursor-pointer flex gap-1"
-                            @click="handleAceitar()">
-                            <i class="ri-check-fill"></i>
-                            Aceitar
-                        </DropdownMenuItem>
-                        <DialogSelectDeliveryMan v-if="orderStatus == 'Aceito'"
-                            @on:delivery-man-selected="handleDespachar" :entregadores="entregadores"
-                            @update:dialog-open="handleToggleDropdown" />
-                        <DropdownMenuItem v-if="orderStatus == 'Despachado'" class="cursor-pointer flex gap-1"
-                            @click="handleEntregar()">
-                            <i class="ri-check-double-fill text-info"></i>
-                            Entregar
-                        </DropdownMenuItem>
-                        <DialogConfirmAction dialog-title="Cancelar Pedido" trigger-icon="ri-close-circle-fill"
-                            trigger-label="Cancelar" variant="danger" :text-reson="true"
-                            @update:dialog-open="handleToggleDropdown" @on:confirm="handleCancelar" />
-                    </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-            </DropdownMenuSub>
-        </DropdownMenuContent>
+        <div>
+            <DropdownMenuTrigger as-child>
+                <Button variant="ghost" class="transition-colors text-cyan-700 p-0 hidden min-[426px]:block"
+                    @click="handleToggleDropdown()">
+                    <span class="sr-only">Abrir Menú</span>
+                    <MoreVertical class="w-6 h-6" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" class="border border-slate-200">
+                <DropdownMenuLabel class="text-info">Ações</DropdownMenuLabel>
+                <DialogShowOrder :order-id="idPedido" @update:dialog-open="handleToggleDropdown" />
+                <DialogEditOrder v-if="tipoAdministrador === 'Administrador'" :order-id="idPedido"
+                    @callback:edit-order="handleEditOrder" @update:dialog-open="handleToggleDropdown" />
+                <DropdownMenuSeparator />
+                <DropdownMenuSub>
+                    <DropdownMenuSubTrigger class="text-info">
+                        Status
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                        <DropdownMenuSubContent class="border border-slate-200">
+                            <DropdownMenuItem v-if="orderStatus == 'Pendente'" class="cursor-pointer flex gap-1"
+                                @click="handleAceitar()">
+                                <i class="ri-check-fill"></i>
+                                Aceitar
+                            </DropdownMenuItem>
+                            <DialogSelectDeliveryMan v-if="orderStatus == 'Aceito'"
+                                @on:delivery-man-selected="handleDespachar" :entregadores="entregadores"
+                                @update:dialog-open="handleToggleDropdown" />
+                            <DropdownMenuItem v-if="orderStatus == 'Despachado'" class="cursor-pointer flex gap-1"
+                                @click="handleEntregar()">
+                                <i class="ri-check-double-fill text-info"></i>
+                                Entregar
+                            </DropdownMenuItem>
+                            <DialogConfirmAction dialog-title="Cancelar Pedido" trigger-icon="ri-close-circle-fill"
+                                trigger-label="Cancelar" variant="danger" :text-reson="true"
+                                @update:dialog-open="handleToggleDropdown" @on:confirm="handleCancelar" />
+                        </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                </DropdownMenuSub>
+            </DropdownMenuContent>
+        </div>
     </DropdownMenu>
 </template>

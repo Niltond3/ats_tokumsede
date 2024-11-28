@@ -70,6 +70,7 @@ const loadTableData = () => {
                 }
             }
         })
+        
         data.value = newData
     })
 }
@@ -216,23 +217,27 @@ const badgeClasses = 'font-normal inline-block px-2 text-[75%] text-center white
     <DataTable class="display [&_thead]:bg-info [&_thead]:text-[#F3F9FD]" :columns="columns" :data="data"
         :options="options" ref="table" language="language">
         <template #action="data">
-            <DropDownPedidos :payloadData="data.rowData" :entregadores="entregadores"
-                @callback:edited-order="handleLoadTableData" />
-            <ActionOrders :payloadData="data.rowData" :entregadores="entregadores" :loadTable="loadTableData" />
+            <div>
+                <DropDownPedidos :payloadData="data.rowData" :entregadores="entregadores"
+                    @callback:edited-order="handleLoadTableData" />
+                <ActionOrders :payloadData="data.rowData" :entregadores="entregadores" :loadTable="loadTableData" />
+            </div>
         </template>
         <template #rating="data">
-            <span v-if="data.rowData.cliente.rating > 0" :class="badgeClasses" class="bg-success">
-                {{ data.rowData.cliente.rating }}
-            </span>
-            <span v-else-if="data.rowData.cliente.rating == 0" :class="badgeClasses" class="bg-inverse">
-                {{ data.rowData.cliente.rating }}
-            </span>
-            <span v-else-if="data.rowData.cliente.rating < -2" :class="badgeClasses" class="bg-danger">
-                {{ data.rowData.cliente.rating }}
-            </span>
-            <span v-else :class="badgeClasses" class="bg-warning">
-                {{ data.rowData.cliente.rating }}
-            </span>
+            <div>
+                <span v-if="data.rowData.cliente.rating > 0" :class="badgeClasses" class="bg-success">
+                    {{ data.rowData.cliente.rating }}
+                </span>
+                <span v-else-if="data.rowData.cliente.rating == 0" :class="badgeClasses" class="bg-inverse">
+                    {{ data.rowData.cliente.rating }}
+                </span>
+                <span v-else-if="data.rowData.cliente.rating < -2" :class="badgeClasses" class="bg-danger">
+                    {{ data.rowData.cliente.rating }}
+                </span>
+                <span v-else :class="badgeClasses" class="bg-warning">
+                    {{ data.rowData.cliente.rating }}
+                </span>
+            </div>
         </template>
     </DataTable>
 </template>

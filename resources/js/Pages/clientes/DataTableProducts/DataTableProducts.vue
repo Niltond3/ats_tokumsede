@@ -179,7 +179,6 @@ const dataToTable = (data) => {
         isUpdate.value = true
 
         const newProducts = products.map(product => {
-            console.log(product)
             const productToChange = itensPedido.filter(prod => prod.idProduto == product.id)[0]
 
             if (productToChange) return { ...product, preco: [{ qtd: product.preco[0].qtd, val: toFloat(productToChange.preco) }] }
@@ -226,7 +225,9 @@ watch(() => width.value, (newVal) => {
 
 })
 
-watch(() => props.createOrderData, (newVal) => dataToTable(newVal))
+watch(() => props.createOrderData, (newVal) => {
+    dataToTable(newVal)
+})
 
 watch(() => payload.value.itens, (newVal) => disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false)
 

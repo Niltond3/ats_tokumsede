@@ -14,7 +14,8 @@ import { formatOrder, orderToClipboard } from '../../utils';
 import { toast } from 'vue-sonner'
 import { DataTableProducts } from '../../DataTableProducts';
 import { dialogState } from '../../../../hooks/useToggleDialog'
-
+import renderToast from '@/components/renderPromiseToast';
+import { Skeleton } from '@/components/ui/skeleton'
 
 const props = defineProps({
     orderId: { type: Number, required: true },
@@ -23,98 +24,90 @@ const props = defineProps({
 
 const emits = defineEmits(['callback:editOrder', 'update:dialogOpen'])
 
+const isLoading = ref(true); // Estado de carregamento
 const data = ref({})
 const distributors = ref([])
 const createOrderData = ref()
+const distributorExpedient = ref()
+const distributorTaxes = ref()
+const products = ref()
 
 const { isOpen, toggleDialog } = dialogState()
 const { toCurrency } = formatMoney()
 
-const fetchOrder = async () => {
+
+const fetchOrder = () => {
     const urlOrder = `pedidos/editar/${props.orderId}`
-    const responseOrder = await axios.get(urlOrder)
-    const { data: orderEditData } = responseOrder
+    const promise = axios.get(urlOrder)
 
-    const orderData = orderEditData[0]
-    const distributorsData = orderEditData[1]
+    renderToast(promise, `carregando pedido #${props.orderId}`, 'sucesso ao carregar pedido', (responseOrder) => {
+        const { data: orderEditData } = responseOrder
 
-    distributors.value = distributorsData.filter(distributor => distributor.status == 1)
+        const orderData = orderEditData[0]
+        const distributorsData = orderEditData[1]
 
-    const idDistribuidor = orderData.distribuidor.id
-    const idCliente = orderData.cliente.id
-    const urlProducts = `produtos/listarProdutos/${idDistribuidor}/${idCliente}`
+        distributors.value = distributorsData.filter(distributor => distributor.status == 1)
 
-    const responseProducts = await axios.get(urlProducts)
-    const { data: productsData } = responseProducts
+        const idDistribuidor = orderData.distribuidor.id
+        const idCliente = orderData.cliente.id
+        const urlProducts = `produtos/listarProdutos/${idDistribuidor}/${idCliente}`
 
-    const distributorExpedient = productsData[2];
-    const distributorTaxes = productsData[3];
+        const productsPromise = axios.get(urlProducts)
 
-    const itensPedido = orderData.itensPedido.map((order) => { return { ...order, preco: toCurrency(order.preco), subtotal: toCurrency(order.subtotal), produto: { ...order.produto, nome: utf8Decode(order.produto.nome) } } })
+        renderToast(productsPromise, 'carregando produtos', 'produtos carregados com sucesso', (responseProducts) => {
+            const { data: productsData } = responseProducts
+            distributorExpedient.value = productsData[2];
+            distributorTaxes.value = productsData[3];
 
-    const products = productsData[0].map(product => {
-        const orderItem = itensPedido.find(item => item.produto.id == product.id)
-        const quantidade = orderItem ? orderItem.qtd : 0
+            const itensPedido = orderData.itensPedido.map((order) => { return { ...order, preco: toCurrency(order.preco), subtotal: toCurrency(order.subtotal), produto: { ...order.produto, nome: utf8Decode(order.produto.nome) } } })
 
-        return {
-            ...product,
-            quantidade
-        }
+            products.value = productsData[0].map(product => {
+                const orderItem = itensPedido.find(item => item.produto.id == product.id)
+                const quantidade = orderItem ? orderItem.qtd : 0
+
+                return {
+                    ...product,
+                    quantidade
+                }
+            })
+
+            const formatedOrder = formatOrder(orderData)
+
+            const order = {
+                ...formatedOrder, itensPedido
+            }
+
+            createOrderData.value = {
+                order,
+                products: products.value,
+                distributor: order.distribuidor,
+                address: order.endereco,
+                distributorExpedient: distributorExpedient.value,
+                distributorTaxes: distributorTaxes.value,
+            }
+            data.value = order
+
+            isLoading.value = false
+        })
     })
-    const formatedOrder = formatOrder(orderData)
-
-    const order = {
-        ...formatedOrder, itensPedido
-    }
-
-    createOrderData.value = {
-        order,
-        products,
-        distributor: order.distribuidor,
-        address: order.endereco,
-        distributorExpedient,
-        distributorTaxes,
-    }
-    data.value = order
 }
 
 watch(() => isOpen.value, () => fetchOrder())
 
-onMounted(async () => {
-    if (props.orderId) fetchOrder()
-})
-
 const handleCopyOrder = (order) => orderToClipboard(order)
 
-const CustomDiv = (title, description) => defineComponent({
-    setup() {
-        return () => h('div', { class: 'flex flex-col' }, title, h('span', { class: 'text-xs opacity-80' }, description))
-    }
-})
-
-const renderToast = (promise) => {
-    toast.promise(promise, {
-        loading: 'Aguarde...',
-
-        success: (data) => {
-            emit('callback:editOrder', true)
-            toggleDialog()
-            return markRaw(CustomDiv('sucesso', `O pedido foi atualizado com sucesso!`));
-        },
-        error: (data) => markRaw(CustomDiv('Error', JSON.stringify(data.response))),
-    });
-}
-
-const handleUpdateOrder = (payload) => {
-    const url = `pedidos/atualizar/${payload.idPedido}`
-    const response = axios.put(url, payload)
-    renderToast(response)
-}
 
 const handleDialogOpen = (op) => {
     !op && emits('update:dialogOpen', false)
     toggleDialog()
 }
+
+const handleUpdateOrder = (payload) => {
+    const url = `pedidos/atualizar/${payload.idPedido}`
+    const response = axios.put(url, payload)
+    renderToast(response, 'atualizando pedido', 'pedido atualizado', () => handleDialogOpen(false))
+}
+
 </script>
 
 <template>
@@ -132,18 +125,74 @@ const handleDialogOpen = (op) => {
         </DialogTrigger>
         <DialogContent class="text-sm max-w-[22rem] sm:max-w-3xl md:max-w-[40rem]">
             <DialogHeader>
-                <DialogTitle class=" font-medium text-info leading-none flex gap-3 justify-between mr-4">
-                    <button class="group" @click="handleCopyOrder(data)">#{{ createOrderData.order.id }} <i
-                            class="ri-file-copy-fill opacity-75 group-hover:opacity-100 transition-all"></i></button>
-                    <span>{{ createOrderData.distributor.nome }}</span>
+                <DialogTitle class=" font-medium text-info leading-none">
+                    <div v-if="isLoading" class="flex gap-3 justify-between mr-4">
+                        <div class="flex gap-1">
+                            #
+                            <Skeleton class="h-5 w-20" />
+                        </div>
+                        <Skeleton class="h-5 w-40" />
+                    </div>
+                    <div v-else class="flex gap-3 justify-between mr-4">
+                        <button class="group" @click="handleCopyOrder(data)">
+                            #{{ createOrderData.order.id }}
+                            <i class="ri-file-copy-fill opacity-75 group-hover:opacity-100 transition-all" />
+                        </button>
+                        <span>{{ createOrderData.distributor.nome }}</span>
+                    </div>
                 </DialogTitle>
                 <DialogDescription>
                     Clique no botão "Salvar" para salvar as alterações
                 </DialogDescription>
             </DialogHeader>
-            <DataTableProducts @callback:payload-pedido="handleUpdateOrder" :create-order-data="createOrderData"
-                :distributors="distributors"></DataTableProducts>
+            <div v-if="isLoading">
+                <div class="border rounded-md border-gray-200 relative">
+                    <div class="flex flex-col gap-1">
+                        <Skeleton class="h-12 w-full rounded-md" />
+                        <Skeleton class="h-[235px] w-full" />
+                    </div>
+                    <div class="flex flex-col gap-1 p-2">
+                        <Separator />
+                        <div class="flex items-center h-11 justify-around ">
+                            <div class="flex gap-8">
+                                <span class="text-sm font-medium relative text-info">
+                                    <span
+                                        class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">
+                                        Produtos
+                                    </span>
+                                    <Skeleton class="w-14 h-5" />
+                                </span>
+                                <span class="text-sm font-medium relative text-info">
+                                    <span
+                                        class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">
+                                        Entrega
+                                    </span>
+                                    <Skeleton class="w-14 h-5" />
+                                </span>
+                                <span class="text-sm font-medium relative text-info">
+                                    <span
+                                        class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">
+                                        Total
+                                    </span>
+                                    <Skeleton class="w-14 h-5" />
+                                </span>
+                            </div>
+                        </div>
+                        <Separator label="Detalhes" class="z-100" />
+                        <div class="flex flex-wrap gap-2 p-2 sm:h-14 justify-center">
+                            <Skeleton class="w-1/4 h-10" />
+                            <Separator orientation="vertical" class="" />
+                            <Skeleton class="w-1/4 h-10" />
+                            <Separator orientation="vertical" class="hidden sm:block" />
+                            <Skeleton class="w-1/4 h-10" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-else>
+                <DataTableProducts @callback:payload-pedido="handleUpdateOrder" :create-order-data="createOrderData"
+                    :distributors="distributors"></DataTableProducts>
+            </div>
         </DialogContent>
-
     </Dialog>
 </template>

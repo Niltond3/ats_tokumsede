@@ -6,7 +6,7 @@ import { dialogState } from '../../../../hooks/useToggleDialog'
 import DialogConfirmActionContent from '../../components/DialogConfirmActionContent.vue';
 
 const props = defineProps({
-    textReson: { type: Boolean, required: true },
+    textReson: { type: Boolean, required: false },
     triggerLabel: { type: String, required: false },
     triggerIcon: { type: String, required: true },
     dialogTitle: { type: String, required: false },

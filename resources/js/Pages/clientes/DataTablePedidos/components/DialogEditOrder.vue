@@ -105,7 +105,10 @@ const handleDialogOpen = (op) => {
 const handleUpdateOrder = (payload) => {
     const url = `pedidos/atualizar/${payload.idPedido}`
     const response = axios.put(url, payload)
-    renderToast(response, 'atualizando pedido', 'pedido atualizado', () => handleDialogOpen(false))
+    renderToast(response, 'atualizando pedido', 'pedido atualizado', () => {
+        handleDialogOpen(false)
+        emits('callback:editOrder')
+    })
 }
 
 </script>

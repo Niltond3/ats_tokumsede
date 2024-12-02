@@ -1,5 +1,5 @@
 <script setup>
-import { getClientFormat } from '@/Pages/clientes/utils';
+import { getClientFormat } from '@/Pages/Management/utils';
 import { RiEyeFill as EyeIcon, RiEyeCloseFill as EyeOffIcon } from 'vue-remix-icons';
 import { Checkbox } from '@/components/ui/checkbox'
 import { FormLabel, FormControl, FormMessage, FormItem, FormField, FormDescription } from '@/components/ui/form'

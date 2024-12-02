@@ -9,31 +9,35 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { utf8Decode, formatMoney } from '@/util';
 import { formatOrder, orderToClipboard } from '../utils';
+import renderToast from '@/components/renderPromiseToast';
+import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 
 const props = defineProps({
     orderId: { type: Number, required: true },
     isOpen: { type: Boolean, required: false },
 });
 
+const isLoading = ref(true); // Estado de carregamento
 const data = ref({})
 
 const { toCurrency } = formatMoney()
 
-const fetchOrder = async () => {
+const fetchOrder = () => {
     var url = `pedidos/visualizar/${props.orderId}`
-    const response = await axios.get(url)
-    const formatedOrder = formatOrder(response.data)
+    const promise = axios.get(url)
+    renderToast(promise, `carregando pedido ${props.orderId}`, 'Pedido carregado', (response) => {
+        const formatedOrder = formatOrder(response.data)
 
-    const itensPedido = response.data.itensPedido.map((order) => { return { ...order, preco: toCurrency(order.preco), subtotal: toCurrency(order.subtotal), produto: { ...order.produto, nome: utf8Decode(order.produto.nome) } } })
+        const itensPedido = response.data.itensPedido.map((order) => { return { ...order, preco: toCurrency(order.preco), subtotal: toCurrency(order.subtotal), produto: { ...order.produto, nome: utf8Decode(order.produto.nome) } } })
 
-    data.value = { ...formatedOrder, itensPedido }
+        data.value = { ...formatedOrder, itensPedido }
+
+        isLoading.value = false
+    })
 }
 
-watch(() => props.isOpen, async (newValue) => fetchOrder())
+watch(() => props.isOpen, async () => fetchOrder())
 
-onMounted(async () => {
-    if (props.orderId) fetchOrder()
-})
 const handleCopyOrder = (order) => orderToClipboard(order)
 
 </script>
@@ -42,20 +46,40 @@ const handleCopyOrder = (order) => orderToClipboard(order)
     <DialogContent
         class="flex flex-col text-sm max-w-[22rem] sm:max-w-[30rem] md:max-w-[40rem] [&_div]:w-full [&_div]:flex [&_div]:flex-wrap gap-4 max-h-[560px] overflow-scroll scrollbar !scrollbar-w-1.5 !scrollbar-h-1.5 !scrollbar-thumb-slate-200 !scrollbar-track-tr!scrollbar-thumb-rounded scrollbar-track-rounded dark:scrollbar-track:!bg-slate-500/[0.16] dark:scrollbar-thumb:!bg-slate-500/50 lg:supports-scrollbars:pr-2 text-slate-500">
         <DialogHeader>
-            <DialogTitle class=" font-medium text-info leading-none flex gap-3 justify-between mr-4">
-                <button class="group" @click="handleCopyOrder(data)">#{{ data.id }} <i
-                        class="ri-file-copy-fill opacity-75 group-hover:opacity-100 transition-all"></i></button>
-                <span class="text-sm">{{ data.distribuidor?.nome }}</span>
+            <DialogTitle class=" font-medium text-info mr-4">
+                <div class="leading-none flex gap-3 justify-between" v-if="isLoading">
+                    <Skeleton class="w-24 h-5" />
+                    <Skeleton class="w-48 h-5" />
+                </div>
+                <div class="leading-none flex gap-3 justify-between" v-else>
+                    <button class="group" @click="handleCopyOrder(data)">
+                        #{{ data.id }} <i class="ri-file-copy-fill opacity-75 group-hover:opacity-100 transition-all" />
+                    </button>
+                    <span class="text-sm">{{ data.distribuidor?.nome }}</span>
+                </div>
             </DialogTitle>
             <DialogDescription>Detalhes do pedido</DialogDescription>
         </DialogHeader>
         <Separator label="cliente" />
-        <div class="justify-between">
+        <div class="flex justify-between" v-if="isLoading">
+            <span class="flex gap-1 w-1/3">
+                <i class="ri-contacts-fill" />
+                <Skeleton class="w-48 h-5" />
+            </span>
+            <span class="flex gap-1 w-1/3">
+                <i class="ri-phone-fill" />
+                <Skeleton class="w-48 h-5" />
+            </span>
+        </div>
+        <div class="justify-between" v-else>
             <span><i class="ri-contacts-fill" /> {{ data.cliente?.nome }}</span>
             <span><i class="ri-phone-fill" /> {{ data.cliente?.telefone }}</span>
         </div>
         <Separator label="endereço de entrega" />
-        <div class="flex-col">
+        <div class="flex-col" v-if="isLoading">
+            <Skeleton class="w-96 h-5" v-for="(_, index) in 3" :id="`address-skeleton-${index}`" />
+        </div>
+        <div class="flex-col" v-else>
             <span>{{ data.endereco?.logradouro }}, {{ `nº ${data.endereco?.numero}` || 'SN' }} - {{
                 data.endereco?.bairro }}</span>
             <span v-if="data.endereco?.complemento">Complemento: {{ data.endereco.complemento }}</span>
@@ -68,7 +92,12 @@ const handleCopyOrder = (order) => orderToClipboard(order)
                 }}</span>
         </div>
         <Separator label="outros detalhes" />
-        <div class="flex-col relative gap-2 content-start">
+        <div class="flex-col relative gap-2 content-start" v-if="isLoading">
+            <div class=" flex gap-1 items-center" v-for="(_, index) in 3" :id="`detail-skeleton-${index}`">
+                <Skeleton class="w-96 h-5" />
+            </div>
+        </div>
+        <div class="flex-col relative gap-2 content-start" v-else>
             <span
                 class="relative bg-info text-white w-min flex-nowrap py-1 px-2 rounded-full font-semibold pointer-events-none whitespace-nowrap">
                 {{ data.origem }}
@@ -100,16 +129,27 @@ const handleCopyOrder = (order) => orderToClipboard(order)
             </div>
         </div>
         <Separator label="produtos " />
-        <div v-for="order in data.itensPedido">
-            <p>
-                {{ order.qtd }} {{ utf8Decode(order.produto.nome) }}
-                <span class="text-xs opacity-70 justify-start">un</span>
-                {{ toCurrency(order.preco) }}
-                <span class="text-xs opacity-70 justify-start">subtotal</span>
-                {{ toCurrency(order.subtotal) }}
-            </p>
+        <div v-if="isLoading">
+            <div v-for="(_, index) in 3" :id="`products-skeleton-${index}`">
+                <Skeleton class="w-72 h-5" />
+            </div>
         </div>
-        <p class="">
+        <div v-else>
+            <div v-for="order in data.itensPedido">
+                <p>
+                    {{ order.qtd }} {{ utf8Decode(order.produto.nome) }}
+                    <span class="text-xs opacity-70 justify-start">un</span>
+                    {{ toCurrency(order.preco) }}
+                    <span class="text-xs opacity-70 justify-start">subtotal</span>
+                    {{ toCurrency(order.subtotal) }}
+                </p>
+            </div>
+        </div>
+        <p class="flex" v-if="isLoading">
+            <span class="text-xs opacity-70 justify-start">total</span>
+            <Skeleton class="w-44 h-5" />
+        </p>
+        <p class="" v-else>
             <span class="text-xs opacity-70 justify-start">total</span>
             <span
                 class="relative bg-success text-white w-min flex-nowrap py-1 px-2 rounded-lg font-semibold pointer-events-none mx-2">

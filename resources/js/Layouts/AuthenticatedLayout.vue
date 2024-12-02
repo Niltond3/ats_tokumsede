@@ -7,7 +7,9 @@ import DropdownLink from '@/components/DropdownLink.vue';
 import NavLink from '@/components/NavLink.vue';
 import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
 import { Link, usePage, } from '@inertiajs/vue3';
-import observeNewOrders from '@/Pages/clientes/DataTablePedidos/components/observeNewOrders';
+import observeNewOrders from '@/Pages/Management/DataTablePedidos/components/observeNewOrders';
+import { Toggle } from '@/components/ui/toggle'
+import NavigationMenu from '@/components/NavigationMenu.vue';
 
 const page = usePage()
 // const isAuth = computed(() => page.props.auth.user)
@@ -129,14 +131,31 @@ onMounted(() => {
                 <!-- Page Heading -->
                 <header class="bg-white dark:bg-gray-800 shadow" v-if="$slots.header">
                     <div class="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8">
-                        <slot name="header" />
+                        <div class="flex items-center gap-4 relative h-7" id="header_bar">
+                            <NavigationMenu />
+                            <Toggle aria-label="Toggle sound" id='toggleSound' :default-value="true"
+                                class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 group">
+                                <i
+                                    class="ri-volume-mute-fill group-aria-pressed:hidden text-info/50 pointer-events-none select-none"></i>
+                                <i
+                                    class="ri-volume-up-fill hidden group-aria-pressed:block text-info/50 pointer-events-none select-none"></i>
+                            </Toggle>
+                            <slot name="header" />
+                        </div>
                     </div>
                 </header>
             </div>
 
             <!-- Page Content -->
             <main class="mt-16">
-                <slot />
+                <div class="py-12 ">
+                    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                        <div class="bg-white dark:bg-gray-800 overflow-hidden sm:rounded-lg">
+                            <slot />
+                        </div>
+                    </div>
+                </div>
+
             </main>
         </div>
     </div>

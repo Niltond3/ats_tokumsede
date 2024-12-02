@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Distribuidor;
+use App\Models\Produto;
+use App\Models\Estoque;
 
 class Preco extends Model
 {
@@ -31,14 +34,14 @@ class Preco extends Model
     //RELACIONAMENTO
     public function distribuidor()
     {
-        return $this->belongsTo('App\Models\Distribuidor', 'idDistribuidor');
+        return $this->belongsTo(Distribuidor::class, 'idDistribuidor');
     }
     public function produto()
     {
-        return $this->belongsTo('App\Models\Produto', 'idProduto');
+        return $this->belongsTo(Produto::class, 'idProduto');
     }
     public function estoque()
     {
-        return $this->belongsTo('App\Models\Estoque', 'idEstoque');
+        return $this->belongsTo(Estoque::class, 'idEstoque');
     }
 }

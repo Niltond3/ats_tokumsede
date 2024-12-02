@@ -14,7 +14,9 @@ const { error, formItemId } = useFormField();
 </script>
 
 <template>
-    <Label :class="cn(error && 'text-danger/65', props.class)" :for="formItemId">
+    <Label
+        :class="cn(error && 'text-danger/65', 'absolute -top-4 text-info/50 peer-placeholder-shown:text-info text-[13px] px-1 left-px bg-white', props.class)"
+        :for="formItemId">
         <slot />
     </Label>
 </template>

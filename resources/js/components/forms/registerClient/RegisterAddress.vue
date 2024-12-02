@@ -8,8 +8,7 @@ import ConfirmClient from './components/confirmClient.vue';
 import * as z from 'zod'
 import { toTypedSchema } from '@vee-validate/zod'
 import { BookUser, Check } from 'lucide-vue-next'
-import { toast } from 'vue-sonner';
-import { errorUtils } from '@/util';
+import renderToast from '@/components/renderPromiseToast';
 
 const props = defineProps({
     idClient: { type: String, required: false },
@@ -59,29 +58,6 @@ const steps = [
     },
 ]
 
-const CustomDiv = (title, description) => defineComponent({
-    setup() {
-        return () => h('div', { class: 'flex flex-col' }, title, h('span', { class: 'text-xs opacity-80' }, description))
-    }
-})
-
-
-const renderToast = (promise) => {
-    disabledButton.value = true
-    toast.promise(promise, {
-        loading: 'Aguarde...',
-
-        success: (data) => {
-            emit('create:success')
-            return markRaw(CustomDiv('sucesso', `O Endereço foi cadastrado com sucesso!`));
-        },
-        error: (data) => {
-            console.log(errorUtils.getError(data))
-            markRaw(CustomDiv('Error', errorUtils.getError(data)))
-        },
-    });
-}
-
 const onSubmit = (values) => {
     const payload = {
         idCliente: props.idClient,
@@ -98,7 +74,7 @@ const onSubmit = (values) => {
     }
     const response = props.addressDetails ? axios.put(`enderecos/${props.addressDetails.id}`, payload) : axios.post('enderecos', payload, { headers: { "Content-Type": "application/json" } });
 
-    renderToast(response)
+    renderToast(response, 'Salvando Endereço...', 'Endereço salvo com sucesso!', () => emit('create:success'))
 
 }
 

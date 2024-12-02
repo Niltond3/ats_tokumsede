@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/popover'
 import { ChevronsUpDown } from 'lucide-vue-next'
 import { DialogCreateOrder } from './components/DialogCreateOrder';
-import { TablePedidos } from '../clientes/DataTablePedidos';
+import { TablePedidos } from '../Management/DataTablePedidos';
 
 const page = usePage()
 

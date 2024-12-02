@@ -39,6 +39,7 @@ const getTypeAdmin = {
 const { tab, tabName, description } = getTypeAdmin[typeAdmin]
 
 const { activeTab, setActiveTab } = useToggleTabs(tab)
+
 const handleSetActiveTab = (tab) => setActiveTab(tab)
 
 </script>

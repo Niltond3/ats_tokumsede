@@ -2,13 +2,14 @@
 include 'cors.php';
 
 use App\Http\Controllers\Api\IndexController as Api;
+use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ClienteController;
-use App\Http\Controllers\ContactController;
 use App\Http\Controllers\EnderecoClienteController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FileUploadController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -30,6 +31,13 @@ Route::get('/home', function () {
     return Inertia::render('Home');
 })->middleware(['auth', 'verified'])->name('home');
 
+Route::get('/home/dashboard', function () {
+    return Inertia::render('Dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/home/register/produto', function () {
+    return Inertia::render('Home');
+})->middleware(['auth', 'verified'])->name('novo-produto');
 
 // Route::get('/dashboard', function () {
 //     return view('home-one');
@@ -42,11 +50,13 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('clientes', ClienteController::class,['except' => 'create']);
 
+    Route::post('/upload', [FileUploadController::class, 'upload']);
+
     //ENDERECOS CLIENTES
     Route::resource('enderecos', EnderecoClienteController::class,['except' => 'create']);
 
-        //PEDIDOS
-        Route::group(['prefix' => 'pedidos'], function(){
+    //PEDIDOS
+    Route::group(['prefix' => 'pedidos'], function(){
         Route::resource('/', PedidoController::class,['except' => 'create']);
         Route::get('visualizar/{id}', [PedidoController::class, 'visualizar']);
         Route::put('aceitar/{id}', [PedidoController::class, 'aceitar']);
@@ -70,6 +80,9 @@ Route::middleware('auth')->group(function () {
         Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class,'listarProdutos']);
         Route::get('{idEnderecoCliente}', [ProdutoController::class,'show']);
     });
+
+    //CATEGORIAS
+    Route::resource('categorias', CategoriaController::class,['except' => 'create']);
 });
 
 

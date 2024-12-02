@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Produto;
+use App\Models\Distribuidor;
 
 class Estoque extends Model
 {
@@ -17,11 +19,11 @@ class Estoque extends Model
     public $timestamps = false;
     public function produto()
     {
-        return $this->belongsTo('App\Models\Produto', 'idProduto');
+        return $this->belongsTo(Produto::class, 'idProduto');
     }
     public function distribuidor()
     {
-        return $this->belongsTo('App\Models\Distribuidor', 'idDistribuidor');
+        return $this->belongsTo(Distribuidor::class, 'idDistribuidor');
     }
     //
 }

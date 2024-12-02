@@ -11,7 +11,7 @@ import * as z from 'zod'
 import validator from 'validator'
 import { toTypedSchema } from '@vee-validate/zod'
 import { User, BookUser, Check } from 'lucide-vue-next'
-import { getClientFormat } from "@/Pages/clientes/utils";
+import { getClientFormat } from "@/Pages/Management/utils";
 import { toast } from 'vue-sonner';
 
 const props = defineProps({})

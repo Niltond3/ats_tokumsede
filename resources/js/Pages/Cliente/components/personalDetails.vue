@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { CalendarDate, getLocalTimeZone, parseDate, today } from '@internationalized/date'
 import { useWindowSize } from '@vueuse/core';
-import { getClientFormat } from "@/Pages/clientes/utils";
+import { getClientFormat } from "@/Pages/Management/utils";
 import {
     RiLoginBoxLine as LoginIcon,
     RiGenderlessLine as GenderlessIcon,
@@ -65,10 +65,10 @@ const handleBirthDateChange = (value) => emit('update:birthDatePicker', value)
                                 </span>
                                 <span v-if="values.sexo != undefined && width > 639">{{
                                     getSexo.desktop[values.sexo]
-                                }}</span>
+                                    }}</span>
                                 <span v-if="values.sexo != undefined && width < 640">{{
                                     getSexo.mobile[values.sexo]
-                                }}</span>
+                                    }}</span>
                             </Button>
                         </FormControl>
                     </PopoverTrigger>

@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Preco;
+use App\Models\Estoque;
+use App\Models\Categoria;
 
 class Produto extends Model
 {
@@ -24,19 +27,19 @@ class Produto extends Model
     const EXCLUIDO = 3;
     public function categoria()
     {
-        return $this->belongsTo('App\Categoria', 'idCategoria');
+        return $this->belongsTo(Categoria::class, 'idCategoria');
     }
     public function preco()
     {
-        return $this->hasMany('App\Preco', 'idProduto')->where('idDistribuidor', auth()->user()->idDistribuidor)->where('status', '!=', Produto::EXCLUIDO);
+        return $this->hasMany(Preco::class, 'idProduto')->where('idDistribuidor', auth()->user()->idDistribuidor)->where('status', '!=', Produto::EXCLUIDO);
     }
     public function precos()
     {
-        return $this->hasManyThrough('App\Preco', 'App\Estoque', 'idProduto', 'idEstoque');
+        return $this->hasManyThrough(Preco::class, Estoque::class, 'idProduto', 'idEstoque');
     }
     public function estoque()
     {
-        return $this->hasMany('App\Estoque', 'idProduto')->where('idDistribuidor', auth()->user()->idDistribuidor);
+        return $this->hasMany(Estoque::class, 'idProduto')->where('idDistribuidor', auth()->user()->idDistribuidor);
     }
     //
 }

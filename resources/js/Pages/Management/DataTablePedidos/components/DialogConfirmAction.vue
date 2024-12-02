@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
-import { dialogState } from '../../../../hooks/useToggleDialog'
+import { dialogState } from '@/hooks/useToggleDialog'
 import DialogConfirmActionContent from '../../components/DialogConfirmActionContent.vue';
 
 const props = defineProps({

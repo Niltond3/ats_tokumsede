@@ -5,6 +5,9 @@ import {
 } from '@/components/ui/dialog'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import DialogShowOrderContent from '../../components/DialoShowOrderContent.vue'
+import { dialogState } from '@/hooks/useToggleDialog';
+
+const { isOpen, toggleDialog } = dialogState()
 
 const props = defineProps({
     orderId: { type: Number, required: true },
@@ -14,11 +17,13 @@ const emits = defineEmits(['update:dialogOpen'])
 
 const handleDialogOpen = (op) => {
     !op && emits('update:dialogOpen', false)
+    toggleDialog()
 }
+
 </script>
 
 <template>
-    <Dialog @update:open="handleDialogOpen">
+    <Dialog :open="isOpen" @update:open="handleDialogOpen">
         <DialogTrigger as-child>
             <DropdownMenuItem v-if="dropdown" class="cursor-pointer flex gap-2" @select="(e) => e.preventDefault()">
                 <i class="ri-eye-fill text-info"></i>
@@ -29,6 +34,6 @@ const handleDialogOpen = (op) => {
                 <span class="hidden min-[426px]:block">Visualizar Pedido</span>
             </button>
         </DialogTrigger>
-        <DialogShowOrderContent :order-id="orderId"></DialogShowOrderContent>
+        <DialogShowOrderContent :order-id="orderId" :is-open="isOpen"></DialogShowOrderContent>
     </Dialog>
 </template>

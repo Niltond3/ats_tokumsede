@@ -24,6 +24,7 @@ const props = defineProps({
 
 const emits = defineEmits(['callback:editOrder', 'update:dialogOpen'])
 
+const { isOpen, toggleDialog } = dialogState()
 const isLoading = ref(true); // Estado de carregamento
 const data = ref({})
 const distributors = ref([])
@@ -32,7 +33,6 @@ const distributorExpedient = ref()
 const distributorTaxes = ref()
 const products = ref()
 
-const { isOpen, toggleDialog } = dialogState()
 const { toCurrency } = formatMoney()
 
 

@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const ultimoPedido = ref(null)
 const callback = ref(null)
-const jqueryStringTab = '#radix-vue-tabs-v-1-trigger-pedidos'
+const jqueryStringTab = '[id*=-trigger-pedidos]'
 const jqueryStringNotificationBadge = `${jqueryStringTab}>span>span>div`
 
 
@@ -92,5 +92,6 @@ export default function (props) {
         active: isActive,
         inactive: isInactive,
     }
-    activeOrNot[tab]()
+    if (tab) return activeOrNot[tab]()
+    console.log('sem tab: implementar para outros casos de uso')
 }

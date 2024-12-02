@@ -108,9 +108,6 @@ onMounted(() => {
     setTimeout(() => (document.body.style.pointerEvents = ""), 0)
 })
 
-const inputClass = 'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded  bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary text-slate-600'
-
-const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-info text-[13px] px-1 left-px bg-white'
 </script>
 
 <template>
@@ -121,7 +118,7 @@ const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-inf
                     <Input v-bind="componentField" placeholder="procure por um endereço" label="Endereço"
                         id="autocomplete" :class="cn(inputClass, '!pr-14 !pl-3')" />
                 </FormControl>
-                <FormLabel :class="cn(labelClass)">
+                <FormLabel>
                     pesquise
                 </FormLabel>
                 <FormMessage />
@@ -135,9 +132,9 @@ const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-inf
         <FormField v-slot="{ componentField }" name="cep">
             <FormItem class="relative sm:col-span-3">
                 <FormControl>
-                    <Input v-bind="componentField" type="text" :class="cn(inputClass)" v-mask="['#####-###']" />
+                    <Input v-bind="componentField" type="text" v-mask="['#####-###']" />
                 </FormControl>
-                <FormLabel :class="cn(labelClass)">
+                <FormLabel>
                     CEP
                 </FormLabel>
                 <FormMessage />
@@ -146,9 +143,9 @@ const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-inf
         <FormField v-slot="{ componentField }" name="cidade">
             <FormItem v-auto-animate class="relative sm:col-span-5">
                 <FormControl>
-                    <Input v-bind="componentField" autocomplete="name" type="text" :class="cn(inputClass)" />
+                    <Input v-bind="componentField" autocomplete="name" type="text" />
                 </FormControl>
-                <FormLabel :class="cn(labelClass)">
+                <FormLabel>
                     Cidade
                 </FormLabel>
                 <FormMessage />
@@ -158,9 +155,9 @@ const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-inf
         <FormField v-slot="{ componentField }" name="estado">
             <FormItem class="relative sm:col-span-2">
                 <FormControl>
-                    <Input v-bind="componentField" autocomplete="name" type="text" :class="cn(inputClass)" />
+                    <Input v-bind="componentField" autocomplete="name" type="text" />
                 </FormControl>
-                <FormLabel :class="cn(labelClass)">
+                <FormLabel>
                     Estado
                 </FormLabel>
                 <FormMessage />
@@ -169,9 +166,9 @@ const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-inf
         <FormField v-slot="{ componentField }" name="apelido">
             <FormItem class="relative sm:col-span-2">
                 <FormControl>
-                    <Input v-bind="componentField" autocomplete="name" type="text" :class="cn(inputClass)" />
+                    <Input v-bind="componentField" autocomplete="name" type="text" />
                 </FormControl>
-                <FormLabel :class="cn(labelClass)">
+                <FormLabel>
                     Apelido
                 </FormLabel>
                 <FormMessage />
@@ -180,9 +177,9 @@ const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-inf
         <FormField v-slot="{ componentField }" name="logradouro">
             <FormItem class="relative sm:col-span-6">
                 <FormControl>
-                    <Input v-bind="componentField" autocomplete="name" type="text" :class="cn(inputClass)" />
+                    <Input v-bind="componentField" autocomplete="name" type="text" />
                 </FormControl>
-                <FormLabel :class="cn(labelClass)">
+                <FormLabel>
                     Logradouro
                 </FormLabel>
                 <FormMessage />
@@ -192,9 +189,9 @@ const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-inf
         <FormField v-slot="{ componentField }" name="numero">
             <FormItem class="relative sm:col-span-2">
                 <FormControl>
-                    <Input v-bind="componentField" autocomplete="name" type="text" :class="cn(inputClass)" />
+                    <Input v-bind="componentField" autocomplete="name" type="text" />
                 </FormControl>
-                <FormLabel :class="cn(labelClass)">
+                <FormLabel>
                     Nº
                 </FormLabel>
                 <FormMessage />
@@ -203,9 +200,9 @@ const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-inf
         <FormField v-slot="{ componentField }" name="bairro">
             <FormItem class="relative sm:col-span-4">
                 <FormControl>
-                    <Input v-bind="componentField" autocomplete="name" type="text" :class="cn(inputClass)" />
+                    <Input v-bind="componentField" autocomplete="name" type="text" />
                 </FormControl>
-                <FormLabel :class="cn(labelClass)">
+                <FormLabel>
                     Bairro
                 </FormLabel>
                 <FormMessage />
@@ -214,9 +211,9 @@ const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-inf
         <FormField v-slot="{ componentField }" name="complemento">
             <FormItem class="relative sm:col-span-6">
                 <FormControl>
-                    <Input v-bind="componentField" autocomplete="name" type="text" :class="cn(inputClass)" />
+                    <Input v-bind="componentField" autocomplete="name" type="text" />
                 </FormControl>
-                <FormLabel :class="cn(labelClass)">
+                <FormLabel>
                     Complemento
                 </FormLabel>
                 <FormMessage />
@@ -226,9 +223,9 @@ const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-inf
         <FormField v-slot="{ componentField }" name="referencia">
             <FormItem class="relative sm:col-span-6">
                 <FormControl>
-                    <Input v-bind="componentField" autocomplete="name" type="text" :class="cn(inputClass)" />
+                    <Input v-bind="componentField" autocomplete="name" type="text" />
                 </FormControl>
-                <FormLabel :class="cn(labelClass)">
+                <FormLabel>
                     Referência
                 </FormLabel>
                 <FormMessage />
@@ -238,9 +235,9 @@ const labelClass = 'absolute -top-4 text-info/50 peer-placeholder-shown:text-inf
         <FormField v-slot="{ componentField }" name="observacao">
             <FormItem class="relative sm:col-span-12">
                 <FormControl>
-                    <Input v-bind="componentField" autocomplete="name" type="text" :class="cn(inputClass)" />
+                    <Input v-bind="componentField" autocomplete="name" type="text" />
                 </FormControl>
-                <FormLabel :class="cn(labelClass)">
+                <FormLabel>
                     Observação
                 </FormLabel>
                 <FormMessage />

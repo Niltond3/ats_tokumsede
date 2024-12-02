@@ -44,31 +44,6 @@ class ProdutoController extends Controller
         $produto = new Produto($request->all());
         $produto->status = Produto::ATIVO;
 
-        // Define o valor default para a variável que contém o nome da imagem
-        $nameFile = null;
-        // Verifica se informou o arquivo e se é válido
-        if ($request->hasFile('img') && $request->file('img')->isValid()) {
-            // Define um aleatório para o arquivo baseado no timestamps atual
-            $name = microtime(true);
-            // Recupera a extensão do arquivo
-            $extension = $request->img->extension();
-            // Define finalmente o nome
-            $nameFile = "{$name}.{$extension}";
-            // Faz o upload:
-            $upload = $request->img->storeAs('uploads', $nameFile);
-            // Se tiver funcionado o arquivo foi armazenado em storage/app/public/uploads/nomedinamicoarquivo.extensao
-
-            // Verifica se NÃO deu certo o upload (Redireciona de volta)
-            if ( !$upload )
-                return redirect()
-                    ->back()
-                    ->with('error', 'Falha ao fazer upload')
-                    ->withInput();
-
-            $produto->img = $nameFile;
-            //chmod($uploaddir . $produto->img, 0777);
-        }
-
         if ($produto->save()) {
 
             $distribuidores = Distribuidor::get();
@@ -85,6 +60,7 @@ class ProdutoController extends Controller
                 $request['idComposicao']=$produto->id;
                 $itens=explode(',',$request->itensComposicao);
                 foreach ($itens as $item) {
+                    //1-4 
                     $it=explode('-', $item);
                     $request['idComponente']=$it[0];
                     $request['quantidade']=$it[1];

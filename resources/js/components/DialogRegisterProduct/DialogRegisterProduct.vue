@@ -35,6 +35,7 @@ import {
     SelectTrigger,
     SelectValue
 } from '@/components/ui/select'
+import { Link } from '@inertiajs/vue3';
 
 // Utilities
 import { useDropzone } from "vue3-dropzone"
@@ -42,8 +43,8 @@ import { dialogState } from '@/hooks/useToggleDialog'
 import renderToast from '../renderPromiseToast'
 import { utf8Decode } from '@/util'
 import SelectImages from './SelectImages.vue'
-import { event } from 'jquery'
 import SelectCompositionProducts from './SelectCompositionProducts.vue'
+import { event } from 'jquery'
 
 const isLoading = ref(true)
 const categories = ref([])
@@ -64,24 +65,15 @@ const { getRootProps, getInputProps, open, ...rest } = useDropzone({ onDrop, mul
 const disabledButton = ref(false)
 
 const formSchema = z.object({
-    nome: z.string(),
-    idCategoria: z.string(),
-    descricao: z.string(),
-    img: z.string().nullable().optional(),
+    nome: z.string({ required_error: 'Informe o nome do produto' }),
+    idCategoria: z.string({ required_error: 'Informe a categoria do produto' }),
+    descricao: z.string({ required_error: 'Descreva o produto' }),
+    img: z.string({ required_error: 'Selecione uma imagem' }),
     itensComposicao: z.array(z.string()).nullable().optional(),
-})
-
-
-const props = defineProps({
-    triggerIcon: { type: String, required: true },
-    triggerLabel: { type: String, required: true },
 })
 
 const emits = defineEmits(["on:create", 'update:dialogOpen']);
 
-const handleCreate = () => {
-    console.log('create product')
-}
 
 const handleDialogOpen = (op) => {
     !op && emits('update:dialogOpen', false)
@@ -90,7 +82,6 @@ const handleDialogOpen = (op) => {
 
 function onDrop(acceptFiles, rejectReasons) {
     const src = URL.createObjectURL(acceptFiles[0]);
-    console.log(acceptFiles)
     img.value = {
         src,
         raw: acceptFiles,
@@ -111,7 +102,6 @@ const getImages = () => {
     const url = '/api/listImages'
     const promise = axios.get(url)
     renderToast(promise, 'carregando imagens ...', 'Imagens carregadas', (response) => {
-        console.log(response.data)
         const imageNames = response.data.img
         imagesSrc.value = imageNames.map(name => `images/uploads/${name}`)
     })
@@ -128,9 +118,7 @@ const handleDefaultImage = () => img.value = defaultImgValue
 const registerProduct = (payload) => {
     const url = '/produtos'
     const promise = axios.post(url, payload)
-    renderToast(promise, 'Salvando produto ...', 'Produto salvo', (response) => {
-        console.log(response.data)
-    })
+    renderToast(promise, 'Salvando produto ...', 'Produto salvo')
 }
 const uploadImage = (image, payload) => {
     const formData = new FormData();
@@ -153,77 +141,82 @@ const uploadImage = (image, payload) => {
 };
 
 const onSubmit = (values) => {
-    //setFieldValue('img', img.value.raw)
-    //uploadImage(img.value.raw)
-
+    console.log(values)
     const fileImage = img.value.raw
 
-
-    console.log(values)
-    const itensComposicao = JSON.stringify(values.itensComposicao).replace(/"/g, "'")
-    console.log(values)
     const payload = {
         ...values,
         composicao: values.itensComposicao?.length > 0 ? 1 : 0,
     }
 
     if (fileImage) return uploadImage(fileImage, payload)
-    console.log(payload)
     registerProduct(payload)
 }
+
+const handleSubmit = async (event, values, validate) => {
+    event.preventDefault()
+    const isValid = await validate()
+    if (isValid.valid) onSubmit(values)
+}
+
+const handleImageLoad = (setFieldValue) => {
+    const fileImage = img.value.raw
+    if (fileImage) setFieldValue('img', fileImage[0].name)
+}
+
 </script>
 
 <template>
-    <Dialog :open="true" @update:open="handleDialogOpen">
+    <Dialog :open="isOpen" @update:open="handleDialogOpen">
         <DialogTrigger as-child>
-            <NavigationMenuLink as-child class="cursor-pointer group gap-1" @select="(e) => e.preventDefault()">
-                <button class="h-8 w-8 rounded-full text-white shadow-sm hover:shadow-md transition-all ">
-                    <i :class="triggerIcon" class="transition-colors text-3xl"></i>
-                    <span class="hidden min-[426px]:block">{{ props.triggerLabel }}</span>
-                </button>
-            </NavigationMenuLink>
+            <button class="text-info">
+                <i class="ri-shopping-bag-3-fill text-3xl"></i>
+                <span class="hidden min-[426px]:block">Produto</span>
+            </button>
         </DialogTrigger>
         <DialogContent class="gap-2">
             <DialogHeader>
-                <DialogTitle class="leading-none flex gap-3 mr-4 text-lg">
-                    <i :class="triggerIcon"></i>
-                    <p class="font-semibold">{{ props.triggerLabel }}</p>
+                <DialogTitle class="leading-none flex gap-3 mr-4 text-lg text-info">
+                    <i class="ri-shopping-bag-3-fill"></i>
+                    <p class="font-semibold">Produto</p>
                 </DialogTitle>
-                <DialogDescription>
-                    {{ props.triggerLabel }}
+                <DialogDescription class="py-2">
+                    Cadastro de produto
                 </DialogDescription>
             </DialogHeader>
             <Form v-slot="{ meta, validate, setFieldValue, values, setValues }" as="" keep-values
                 :validation-schema="toTypedSchema(formSchema)" :initial-values="productDetails || {}">
-                <form form @submit="(event) => {
-                    event.preventDefault()
-                    validate()
-                    onSubmit(values, setFieldValue)
-                }">
+                <form form @submit="(event) => handleSubmit(event, values, validate)">
                     <div class="flex gap-3 flex-col">
                         <div class="flex gap-3 flex-col sm:flex-row">
-                            <div class="flex flex-col gap-3 sm:w-2/3">
-                                <SelectImages @image-selected="(img) => setFieldValue('img', img)"
-                                    :disabled-button="!!img.src" />
-                                <div class="relative">
-                                    <div v-bind="getRootProps()"
-                                        class="border border-info/70 border-dashed rounded-md cursor-pointer p-5 flex items-center justify-center relative overflow-hidden h-[182px]">
-                                        <input v-bind="getInputProps()" />
-                                        <img v-if="img.src" :src="img.src" alt="preview"
-                                            class="absolute inset-0 h-32 w-auto object-cover top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                                            @change="" />
-                                        <span v-if="!img.src"
-                                            class="text-center text-info pointer-events-none select-none">
-                                            Arraste e solte
-                                            <p>ou clique e selecione uma imagem</p>
-                                        </span>
+                            <FormField name="img">
+                                <div class="flex flex-col gap-3 sm:w-2/3">
+                                    <SelectImages @image-selected="(img) => setFieldValue('img', img)"
+                                        :disabled-button="!!img.src" />
+                                    <div class="relative">
+                                        <div v-bind="getRootProps()"
+                                            class="border border-info/70 border-dashed rounded-md cursor-pointer p-5 flex items-center justify-center relative overflow-hidden h-[182px]">
+                                            <input v-bind="getInputProps()" />
+                                            <img v-if="img.src" :src="img.src" alt="preview"
+                                                class="absolute inset-0 h-32 w-auto object-cover top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                                                @load="() => handleImageLoad(setFieldValue)" />
+                                            <span v-if="!img.src"
+                                                class="text-center text-info pointer-events-none select-none">
+                                                Arraste e solte
+                                                <p>ou clique e selecione uma imagem</p>
+                                            </span>
+                                        </div>
+                                        <button v-if="img.src" class="absolute top-2 right-2 z-50 text-danger text-3xl"
+                                            @click="() => {
+                                                handleDefaultImage()
+                                                setFieldValue('img', undefined)
+                                            }">
+                                            <i class="ri-close-circle-fill"></i>
+                                        </button>
                                     </div>
-                                    <button v-if="img.src" class="absolute top-2 right-2 z-50 text-danger text-3xl"
-                                        @click="handleDefaultImage">
-                                        <i class="ri-close-circle-fill"></i>
-                                    </button>
+                                    <FormMessage />
                                 </div>
-                            </div>
+                            </FormField>
                             <div class="flex flex-col gap-3 w-full">
                                 <FormField v-slot="{ componentField }" name="nome">
                                     <FormItem>
@@ -264,6 +257,7 @@ const onSubmit = (values) => {
                                                 </SelectGroup>
                                             </SelectContent>
                                         </Select>
+                                        <FormMessage />
                                     </FormItem>
                                 </FormField>
                                 <SelectCompositionProducts

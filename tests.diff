@@ -14874,3 +14874,607 @@ index 9dcc276..5d8c14b 100644
  });
  
  
+diff --git a/app/Http/Controllers/FileUploadController.php b/app/Http/Controllers/FileUploadController.php
+index 69e6638..1d2fd38 100644
+--- a/app/Http/Controllers/FileUploadController.php
++++ b/app/Http/Controllers/FileUploadController.php
+@@ -30,7 +30,8 @@ public function upload(Request $request)
+             // Return response
+             return response()->json([
+                 'message' => 'Image uploaded successfully',
+-                'path' => '/images/uploads/' . $filename
++                'path' => '/images/uploads/' . $filename,
++                'fineName' => $filename
+             ], 200);
+         }
+ 
+diff --git a/app/Http/Controllers/ProdutoController.php b/app/Http/Controllers/ProdutoController.php
+index 5461acd..2c7846d 100644
+--- a/app/Http/Controllers/ProdutoController.php
++++ b/app/Http/Controllers/ProdutoController.php
+@@ -58,9 +58,9 @@ public function store(Request $request)
+ 
+             if($request->composicao==1){
+                 $request['idComposicao']=$produto->id;
+-                $itens=explode(',',$request->itensComposicao);
++                $itens=$request->itensComposicao;
+                 foreach ($itens as $item) {
+-                    //1-4 
++                    //1-4
+                     $it=explode('-', $item);
+                     $request['idComponente']=$it[0];
+                     $request['quantidade']=$it[1];
+diff --git a/resources/js/components/DialogRegisterProduct/DialogRegisterProduct.vue b/resources/js/components/DialogRegisterProduct/DialogRegisterProduct.vue
+index ed9f4d9..1b6fa09 100644
+--- a/resources/js/components/DialogRegisterProduct/DialogRegisterProduct.vue
++++ b/resources/js/components/DialogRegisterProduct/DialogRegisterProduct.vue
+@@ -1,8 +1,22 @@
+ <script setup>
+-import { ref } from 'vue';
++// Vue core
++import { ref, onMounted } from 'vue'
++
++// Form validation
+ import * as z from 'zod'
+-import { Form, FormField } from '@/components/ui/form'
++import { toTypedSchema } from '@vee-validate/zod'
++
++// UI Components
+ import { Button } from '@/components/ui/button'
++import { Input } from '@/components/ui/input'
++import { Textarea } from '@/components/ui/textarea'
++import { Form, FormField } from '@/components/ui/form'
++import {
++    FormItem,
++    FormLabel,
++    FormControl,
++    FormMessage
++} from '../ui/form'
+ import {
+     Dialog,
+     DialogContent,
+@@ -12,43 +26,52 @@ import {
+     DialogTrigger,
+ } from '@/components/ui/dialog'
+ import { NavigationMenuLink } from '@/components/ui/navigation-menu'
+-import { dialogState } from '@/hooks/useToggleDialog'
+-import { toTypedSchema } from '@vee-validate/zod'
+-import renderToast from '../renderPromiseToast';
+ import {
+-    FormItem,
+-    FormLabel,
+-    FormControl,
+-    FormDescription,
+-    FormMessage
+-} from '../ui/form';
+-import { useDropzone } from "vue3-dropzone";
+-import { Input } from '@/components/ui/input'
+-import { Textarea } from '@/components/ui/textarea'
+-import { onMounted } from 'vue';
+-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+-import { Label } from '../ui/label';
+-import { utf8Decode } from '@/util';
+-import SelectCompositionProducts from './SelectCompositionProducts.vue';
++    Select,
++    SelectContent,
++    SelectGroup,
++    SelectItem,
++    SelectLabel,
++    SelectTrigger,
++    SelectValue
++} from '@/components/ui/select'
++
++// Utilities
++import { useDropzone } from "vue3-dropzone"
++import { dialogState } from '@/hooks/useToggleDialog'
++import renderToast from '../renderPromiseToast'
++import { utf8Decode } from '@/util'
++import SelectImages from './SelectImages.vue'
++import { event } from 'jquery'
++import SelectCompositionProducts from './SelectCompositionProducts.vue'
+ 
+-const categories = ref([])
+ const isLoading = ref(true)
++const categories = ref([])
++const imagesSrc = ref([])
+ const productDetails = ref()
++const itensComposicao = ref('')
++const defaultImgValue = {
++    src: null,
++    raw: null
++}
++const img = ref(defaultImgValue)
+ 
+ const { isOpen, toggleDialog } = dialogState()
+ 
+-const { getRootProps, getInputProps, ...rest } = useDropzone({ onDrop });
++
++const { getRootProps, getInputProps, open, ...rest } = useDropzone({ onDrop, multiple: false });
+ 
+ const disabledButton = ref(false)
+ 
+ const formSchema = z.object({
+-    idCategoria: z.string().nullable().optional(),
+-    nome: z.string().nullable().optional(),
+-    descricao: z.string().nullable().optional(),
++    nome: z.string(),
++    idCategoria: z.string(),
++    descricao: z.string(),
+     img: z.string().nullable().optional(),
+     itensComposicao: z.array(z.string()).nullable().optional(),
+ })
+ 
++
+ const props = defineProps({
+     triggerIcon: { type: String, required: true },
+     triggerLabel: { type: String, required: true },
+@@ -66,50 +89,88 @@ const handleDialogOpen = (op) => {
+ }
+ 
+ function onDrop(acceptFiles, rejectReasons) {
+-    console.log(acceptFiles);
+-    console.log(rejectReasons);
+-    //uploadImage(acceptFiles)
+-}
+-
+-const uploadImage = async (image) => {
+-    //if (!image.value) {
+-    //    errorMessage.value = "Por favor, selecione uma imagem.";
+-    //    return;
+-    //}
+-
+-    const formData = new FormData();
+-    formData.append('image', image[0]);
+-
+-    try {
+-        const response = await axios.post('/upload', formData, {
+-            headers: {
+-                'Content-Type': 'multipart/form-data',
+-            },
+-        });
+-
+-        // Exibe a imagem carregada
+-        console.log(response.data.path)
+-        //errorMessage.value = ''; // Limpar mensagens de erro
+-
+-    } catch (error) {
+-        console.error(error);
+-        //errorMessage.value = "Erro ao enviar a imagem.";
++    const src = URL.createObjectURL(acceptFiles[0]);
++    console.log(acceptFiles)
++    img.value = {
++        src,
++        raw: acceptFiles,
+     }
+-};
++}
+ 
+ const getCategorie = () => {
+     const url = '/categorias'
+     const promise = axios.get(url)
+     renderToast(promise, 'carregando categorias ...', 'Categorias carregadas', (response) => {
+-        console.log(response.data)
+         const dataToUtf8 = response.data.map((category) => { return { ...category, nome: utf8Decode(category.nome) } })
+         categories.value = dataToUtf8
+         isLoading.value = false
+     })
+ }
+ 
+-onMounted(() => getCategorie())
++const getImages = () => {
++    const url = '/api/listImages'
++    const promise = axios.get(url)
++    renderToast(promise, 'carregando imagens ...', 'Imagens carregadas', (response) => {
++        console.log(response.data)
++        const imageNames = response.data.img
++        imagesSrc.value = imageNames.map(name => `images/uploads/${name}`)
++    })
++}
++onMounted(() => {
++    getCategorie()
++    getImages()
++})
++
++const handleDefaultImage = () => img.value = defaultImgValue
++
++
++
++const registerProduct = (payload) => {
++    const url = '/produtos'
++    const promise = axios.post(url, payload)
++    renderToast(promise, 'Salvando produto ...', 'Produto salvo', (response) => {
++        console.log(response.data)
++    })
++}
++const uploadImage = (image, payload) => {
++    const formData = new FormData();
++    formData.append('image', image[0]);
+ 
++    const promise = axios.post('/upload', formData, {
++        headers: {
++            'Content-Type': 'multipart/form-data',
++        },
++    });
++
++    renderToast(promise, 'Salvando imagem ...', 'Imagem salva', (response) => {
++        // Exibe a imagem carregada
++        const img = response.data.fineName
++        registerProduct({
++            ...payload,
++            img
++        })
++    })
++};
++
++const onSubmit = (values) => {
++    //setFieldValue('img', img.value.raw)
++    //uploadImage(img.value.raw)
++
++    const fileImage = img.value.raw
++
++
++    console.log(values)
++    const itensComposicao = JSON.stringify(values.itensComposicao).replace(/"/g, "'")
++    console.log(values)
++    const payload = {
++        ...values,
++        composicao: values.itensComposicao?.length > 0 ? 1 : 0,
++    }
++
++    if (fileImage) return uploadImage(fileImage, payload)
++    console.log(payload)
++    registerProduct(payload)
++}
+ </script>
+ 
+ <template>
+@@ -137,25 +198,31 @@ onMounted(() => getCategorie())
+                 <form form @submit="(event) => {
+                     event.preventDefault()
+                     validate()
+-                    console.log(values)
+-                    //onSubmit(values)
++                    onSubmit(values, setFieldValue)
+                 }">
+                     <div class="flex gap-3 flex-col">
+-                        <div class="flex gap-3">
+-                            <div v-bind="getRootProps()"
+-                                class="w-2/3 border border-info/70 border-dashed rounded-md  p-5 flex items-center justify-center">
+-                                <FormField v-slot="{ field }" name="img">
+-                                    <FormItem>
+-                                        <FormControl>
+-                                            <input v-bind="{ ...getInputProps(), ...field }" />
+-                                        </FormControl>
+-                                        <FormMessage />
+-                                    </FormItem>
+-                                </FormField>
+-                                <span class="text-center text-info pointer-events-none select-none">
+-                                    Arraste e solte
+-                                    <p>ou clique e selecione uma imagem</p>
+-                                </span>
++                        <div class="flex gap-3 flex-col sm:flex-row">
++                            <div class="flex flex-col gap-3 sm:w-2/3">
++                                <SelectImages @image-selected="(img) => setFieldValue('img', img)"
++                                    :disabled-button="!!img.src" />
++                                <div class="relative">
++                                    <div v-bind="getRootProps()"
++                                        class="border border-info/70 border-dashed rounded-md cursor-pointer p-5 flex items-center justify-center relative overflow-hidden h-[182px]">
++                                        <input v-bind="getInputProps()" />
++                                        <img v-if="img.src" :src="img.src" alt="preview"
++                                            class="absolute inset-0 h-32 w-auto object-cover top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
++                                            @change="" />
++                                        <span v-if="!img.src"
++                                            class="text-center text-info pointer-events-none select-none">
++                                            Arraste e solte
++                                            <p>ou clique e selecione uma imagem</p>
++                                        </span>
++                                    </div>
++                                    <button v-if="img.src" class="absolute top-2 right-2 z-50 text-danger text-3xl"
++                                        @click="handleDefaultImage">
++                                        <i class="ri-close-circle-fill"></i>
++                                    </button>
++                                </div>
+                             </div>
+                             <div class="flex flex-col gap-3 w-full">
+                                 <FormField v-slot="{ componentField }" name="nome">
+@@ -199,7 +266,9 @@ onMounted(() => getCategorie())
+                                         </Select>
+                                     </FormItem>
+                                 </FormField>
+-                                <SelectCompositionProducts></SelectCompositionProducts>
++                                <SelectCompositionProducts
++                                    @update:model-value="(val) => setFieldValue('itensComposicao', val)">
++                                </SelectCompositionProducts>
+                             </div>
+                         </div>
+                         <div>
+diff --git a/resources/js/components/DialogRegisterProduct/SelectCompositionProducts.vue b/resources/js/components/DialogRegisterProduct/SelectCompositionProducts.vue
+index c983fda..f10ccf9 100644
+--- a/resources/js/components/DialogRegisterProduct/SelectCompositionProducts.vue
++++ b/resources/js/components/DialogRegisterProduct/SelectCompositionProducts.vue
+@@ -1,5 +1,5 @@
+ <script setup>
+-import { computed, ref } from 'vue'
++import { computed, ref, watch } from 'vue'
+ import * as z from 'zod'
+ import { Form, FormField } from '@/components/ui/form'
+ import { Button } from '@/components/ui/button'
+@@ -30,36 +30,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
+ import { CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
+ import { TagsInput, TagsInputInput, TagsInputItem, TagsInputItemDelete, TagsInputItemText } from '@/components/ui/tags-input'
+ import { ComboboxAnchor, ComboboxContent, ComboboxInput, ComboboxPortal, ComboboxRoot } from 'radix-vue'
+-import { Label } from '../ui/label';
+ import { utf8Decode } from '@/util';
+ 
+ const products = ref([])
+-const modelValue = ([])
++const modelValue = ref([])
+ const open = ref(false)
+ const searchTerm = ref('')
+ 
+-const filteredProducts = computed(() => products.value.filter(i => !modelValue.value.includes(i.nome)))
+-
+-function getFirstLetter(str) {
+-    // Divide a string em palavras e pega a primeira letra de cada palavra
+-    const palavras = str.split(' ');
+-    const iniciais = palavras.map(palavra => palavra.charAt(0).toUpperCase());
++const emits = defineEmits(['update:modelValue'])
+ 
+-    // Junta as iniciais em uma única string
+-    return iniciais.join('');
+-}
+ const getProducts = () => {
+     const url = '/produtos'
+     const promise = axios.get(url)
+     renderToast(promise, 'carregando produtos ...', 'Produtos carregados', (response) => {
+-        console.log(response.data)
+         const recomposeProducts = response.data.map((product) => {
+             const nome = utf8Decode(product.nome)
+-            const label = getFirstLetter(nome)
+             return {
+                 ...product,
+                 nome,
+-                label
+             }
+         })
+         products.value = recomposeProducts
+@@ -70,12 +58,18 @@ onMounted(() => {
+     getProducts()
+ })
+ 
++const filteredProducts = computed(() => products.value.filter(i => !modelValue.value.includes(i.nome)))
++
++const handleModelValue = value => {
++    const compositionValue = value.map(item => `${item.id}-1`)
++    emits('update:modelValue', compositionValue)
++}
+ </script>
+ 
+ <template>
+-    <TagsInput class="px-0 gap-0 w-80" :model-value="modelValue">
++    <TagsInput class="py-0 px-0 gap-0" :model-value="modelValue" @update:model-value="handleModelValue">
+         <div class="flex gap-2 flex-wrap items-center px-3">
+-            <TagsInputItem v-for="item in modelValue" :key="item" :value="item">
++            <TagsInputItem v-for="item in modelValue" :key="item.id" :value="item.nome">
+                 <TagsInputItemText />
+                 <TagsInputItemDelete />
+             </TagsInputItem>
+@@ -83,8 +77,8 @@ onMounted(() => {
+ 
+         <ComboboxRoot v-model="modelValue" v-model:open="open" v-model:search-term="searchTerm" class="w-full">
+             <ComboboxAnchor as-child>
+-                <ComboboxInput placeholder="Framework..." as-child>
+-                    <TagsInputInput class="w-full px-3" :class="modelValue.length > 0 ? 'mt-2' : ''"
++                <ComboboxInput placeholder="Produtos da composição..." as-child>
++                    <TagsInputInput class="w-full px-3 " :class="modelValue.length > 0 ? 'mt-2' : ''"
+                         @keydown.enter.prevent />
+                 </ComboboxInput>
+             </ComboboxAnchor>
+@@ -92,22 +86,31 @@ onMounted(() => {
+             <ComboboxPortal>
+                 <ComboboxContent>
+                     <CommandList position="popper"
+-                        class="w-[--radix-popper-anchor-width] rounded-md mt-2 border bg-popover text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2">
++                        class="w-[--radix-popper-anchor-width] rounded-md mt-2 border border-input bg-popover text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 scrollbar !scrollbar-w-1.5 !scrollbar-h-1.5 !scrollbar-thumb-slate-200 !scrollbar-track-tr!scrollbar-thumb-rounded scrollbar-track-rounded dark:scrollbar-track:!bg-slate-500/[0.16] dark:scrollbar-thumb:!bg-slate-500/50 lg:supports-scrollbars:pr-2">
+                         <CommandEmpty />
+                         <CommandGroup>
+-                            <CommandItem v-for="product in filteredProducts" :key="product.id" :value="product.label"
+-                                @select.prevent="(ev) => {
+-                                    if (typeof ev.detail.value === 'string') {
+-                                        searchTerm = ''
+-                                        modelValue.push(ev.detail.value)
+-                                    }
++                            <div v-if="filteredProducts.length === 0" class="px-2 py-1 text-sm text-muted-foreground">
++
++                            </div>
++                            <div v-else>
++                                <CommandItem v-for="product in filteredProducts" :key="product.id" :value="product.nome"
++                                    @select.prevent="(ev) => {
++                                        if (typeof ev.detail.value === 'string') {
++                                            searchTerm = ''
++                                            const modelObject = {
++                                                id: product.id,
++                                                nome: ev.detail.value,
++                                            }
++                                            modelValue.push(modelObject)
++                                        }
+ 
+-                                    if (filteredProducts.length === 0) {
+-                                        open = false
+-                                    }
+-                                }">
+-                                {{ product.label }}
+-                            </CommandItem>
++                                        if (filteredProducts.length === 0) {
++                                            open = false
++                                        }
++                                    }">
++                                    {{ product.nome }}
++                                </CommandItem>
++                            </div>
+                         </CommandGroup>
+                     </CommandList>
+                 </ComboboxContent>
+diff --git a/resources/js/components/ui/command/CommandDialog.vue b/resources/js/components/ui/command/CommandDialog.vue
+index 61eeb89..7234e69 100644
+--- a/resources/js/components/ui/command/CommandDialog.vue
++++ b/resources/js/components/ui/command/CommandDialog.vue
+@@ -4,9 +4,9 @@ import Command from "./Command.vue";
+ import { Dialog, DialogContent } from "@/components/ui/dialog";
+ 
+ const props = defineProps({
+-  open: { type: Boolean, required: false },
+-  defaultOpen: { type: Boolean, required: false },
+-  modal: { type: Boolean, required: false },
++    open: { type: Boolean, required: false },
++    defaultOpen: { type: Boolean, required: false },
++    modal: { type: Boolean, required: false },
+ });
+ const emits = defineEmits(["update:open"]);
+ 
+@@ -14,13 +14,12 @@ const forwarded = useForwardPropsEmits(props, emits);
+ </script>
+ 
+ <template>
+-  <Dialog v-bind="forwarded">
+-    <DialogContent class="overflow-hidden p-0 shadow-lg">
+-      <Command
+-        class="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5"
+-      >
+-        <slot />
+-      </Command>
+-    </DialogContent>
+-  </Dialog>
++    <Dialog v-bind="forwarded">
++        <DialogContent class="overflow-hidden p-0 shadow-lg">
++            <Command
++                class="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
++                <slot />
++            </Command>
++        </DialogContent>
++    </Dialog>
+ </template>
+diff --git a/resources/js/components/ui/tags-input/TagsInput.vue b/resources/js/components/ui/tags-input/TagsInput.vue
+index 9aecef2..61e5ab6 100644
+--- a/resources/js/components/ui/tags-input/TagsInput.vue
++++ b/resources/js/components/ui/tags-input/TagsInput.vue
+@@ -4,46 +4,42 @@ import { TagsInputRoot, useForwardPropsEmits } from 'radix-vue';
+ import { computed } from 'vue';
+ 
+ const props = defineProps({
+-  modelValue: { type: Array, required: false },
+-  defaultValue: { type: Array, required: false },
+-  addOnPaste: { type: Boolean, required: false },
+-  addOnTab: { type: Boolean, required: false },
+-  addOnBlur: { type: Boolean, required: false },
+-  duplicate: { type: Boolean, required: false },
+-  disabled: { type: Boolean, required: false },
+-  delimiter: { type: String, required: false },
+-  dir: { type: String, required: false },
+-  max: { type: Number, required: false },
+-  required: { type: Boolean, required: false },
+-  name: { type: String, required: false },
+-  id: { type: String, required: false },
+-  convertValue: { type: Function, required: false },
+-  displayValue: { type: Function, required: false },
+-  asChild: { type: Boolean, required: false },
+-  as: { type: null, required: false },
+-  class: { type: null, required: false },
++    modelValue: { type: Array, required: false },
++    defaultValue: { type: Array, required: false },
++    addOnPaste: { type: Boolean, required: false },
++    addOnTab: { type: Boolean, required: false },
++    addOnBlur: { type: Boolean, required: false },
++    duplicate: { type: Boolean, required: false },
++    disabled: { type: Boolean, required: false },
++    delimiter: { type: String, required: false },
++    dir: { type: String, required: false },
++    max: { type: Number, required: false },
++    required: { type: Boolean, required: false },
++    name: { type: String, required: false },
++    id: { type: String, required: false },
++    convertValue: { type: Function, required: false },
++    displayValue: { type: Function, required: false },
++    asChild: { type: Boolean, required: false },
++    as: { type: null, required: false },
++    class: { type: null, required: false },
+ });
+ const emits = defineEmits(['update:modelValue', 'invalid']);
+ 
+ const delegatedProps = computed(() => {
+-  const { class: _, ...delegated } = props;
++    const { class: _, ...delegated } = props;
+ 
+-  return delegated;
++    return delegated;
+ });
+ 
+ const forwarded = useForwardPropsEmits(delegatedProps, emits);
+ </script>
+ 
+ <template>
+-  <TagsInputRoot
+-    v-bind="forwarded"
+-    :class="
+-      cn(
++    <TagsInputRoot v-bind="forwarded" :class="cn(
+         'flex flex-wrap gap-2 items-center rounded-md border border-input bg-background px-3 py-2 text-sm',
+         props.class,
+-      )
+-    "
+-  >
+-    <slot />
+-  </TagsInputRoot>
++    )
++        ">
++        <slot />
++    </TagsInputRoot>
+ </template>
+diff --git a/resources/js/components/ui/tags-input/TagsInputInput.vue b/resources/js/components/ui/tags-input/TagsInputInput.vue
+index 698e709..93687c7 100644
+--- a/resources/js/components/ui/tags-input/TagsInputInput.vue
++++ b/resources/js/components/ui/tags-input/TagsInputInput.vue
+@@ -4,31 +4,27 @@ import { TagsInputInput, useForwardProps } from 'radix-vue';
+ import { computed } from 'vue';
+ 
+ const props = defineProps({
+-  placeholder: { type: String, required: false },
+-  autoFocus: { type: Boolean, required: false },
+-  maxLength: { type: Number, required: false },
+-  asChild: { type: Boolean, required: false },
+-  as: { type: null, required: false },
+-  class: { type: null, required: false },
++    placeholder: { type: String, required: false },
++    autoFocus: { type: Boolean, required: false },
++    maxLength: { type: Number, required: false },
++    asChild: { type: Boolean, required: false },
++    as: { type: null, required: false },
++    class: { type: null, required: false },
+ });
+ 
+ const delegatedProps = computed(() => {
+-  const { class: _, ...delegated } = props;
++    const { class: _, ...delegated } = props;
+ 
+-  return delegated;
++    return delegated;
+ });
+ 
+ const forwardedProps = useForwardProps(delegatedProps);
+ </script>
+ 
+ <template>
+-  <TagsInputInput
+-    v-bind="forwardedProps"
+-    :class="
+-      cn(
+-        'text-sm min-h-6 focus:outline-none flex-1 bg-transparent px-1',
++    <TagsInputInput v-bind="forwardedProps" :class="cn(
++        'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded  bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary text-slate-600 border-input',
+         props.class,
+-      )
+-    "
+-  />
++    )
++        " />
+ </template>

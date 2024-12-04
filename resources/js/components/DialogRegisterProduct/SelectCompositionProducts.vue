@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import * as z from 'zod'
 import { Form, FormField } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
@@ -30,36 +30,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
 import { TagsInput, TagsInputInput, TagsInputItem, TagsInputItemDelete, TagsInputItemText } from '@/components/ui/tags-input'
 import { ComboboxAnchor, ComboboxContent, ComboboxInput, ComboboxPortal, ComboboxRoot } from 'radix-vue'
-import { Label } from '../ui/label';
 import { utf8Decode } from '@/util';
 
 const products = ref([])
-const modelValue = ([])
+const modelValue = ref([])
 const open = ref(false)
 const searchTerm = ref('')
 
-const filteredProducts = computed(() => products.value.filter(i => !modelValue.value.includes(i.nome)))
+const emits = defineEmits(['update:modelValue'])
 
-function getFirstLetter(str) {
-    // Divide a string em palavras e pega a primeira letra de cada palavra
-    const palavras = str.split(' ');
-    const iniciais = palavras.map(palavra => palavra.charAt(0).toUpperCase());
-
-    // Junta as iniciais em uma única string
-    return iniciais.join('');
-}
 const getProducts = () => {
     const url = '/produtos'
     const promise = axios.get(url)
     renderToast(promise, 'carregando produtos ...', 'Produtos carregados', (response) => {
-        console.log(response.data)
         const recomposeProducts = response.data.map((product) => {
             const nome = utf8Decode(product.nome)
-            const label = getFirstLetter(nome)
             return {
                 ...product,
                 nome,
-                label
             }
         })
         products.value = recomposeProducts
@@ -70,12 +58,18 @@ onMounted(() => {
     getProducts()
 })
 
+const filteredProducts = computed(() => products.value.filter(i => !modelValue.value.includes(i.nome)))
+
+const handleModelValue = value => {
+    const compositionValue = value.map(item => `${item.id}-1`)
+    emits('update:modelValue', compositionValue)
+}
 </script>
 
 <template>
-    <TagsInput class="px-0 gap-0 w-80" :model-value="modelValue">
+    <TagsInput class="py-0 px-0 gap-0" :model-value="modelValue" @update:model-value="handleModelValue">
         <div class="flex gap-2 flex-wrap items-center px-3">
-            <TagsInputItem v-for="item in modelValue" :key="item" :value="item">
+            <TagsInputItem v-for="item in modelValue" :key="item.id" :value="item.nome">
                 <TagsInputItemText />
                 <TagsInputItemDelete />
             </TagsInputItem>
@@ -83,8 +77,8 @@ onMounted(() => {
 
         <ComboboxRoot v-model="modelValue" v-model:open="open" v-model:search-term="searchTerm" class="w-full">
             <ComboboxAnchor as-child>
-                <ComboboxInput placeholder="Framework..." as-child>
-                    <TagsInputInput class="w-full px-3" :class="modelValue.length > 0 ? 'mt-2' : ''"
+                <ComboboxInput placeholder="Produtos da composição..." as-child>
+                    <TagsInputInput class="w-full px-3 " :class="modelValue.length > 0 ? 'mt-2' : ''"
                         @keydown.enter.prevent />
                 </ComboboxInput>
             </ComboboxAnchor>
@@ -92,22 +86,31 @@ onMounted(() => {
             <ComboboxPortal>
                 <ComboboxContent>
                     <CommandList position="popper"
-                        class="w-[--radix-popper-anchor-width] rounded-md mt-2 border bg-popover text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2">
+                        class="w-[--radix-popper-anchor-width] rounded-md mt-2 border border-input bg-popover text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 scrollbar !scrollbar-w-1.5 !scrollbar-h-1.5 !scrollbar-thumb-slate-200 !scrollbar-track-tr!scrollbar-thumb-rounded scrollbar-track-rounded dark:scrollbar-track:!bg-slate-500/[0.16] dark:scrollbar-thumb:!bg-slate-500/50 lg:supports-scrollbars:pr-2">
                         <CommandEmpty />
                         <CommandGroup>
-                            <CommandItem v-for="product in filteredProducts" :key="product.id" :value="product.label"
-                                @select.prevent="(ev) => {
-                                    if (typeof ev.detail.value === 'string') {
-                                        searchTerm = ''
-                                        modelValue.push(ev.detail.value)
-                                    }
+                            <div v-if="filteredProducts.length === 0" class="px-2 py-1 text-sm text-muted-foreground">
 
-                                    if (filteredProducts.length === 0) {
-                                        open = false
-                                    }
-                                }">
-                                {{ product.label }}
-                            </CommandItem>
+                            </div>
+                            <div v-else>
+                                <CommandItem v-for="product in filteredProducts" :key="product.id" :value="product.nome"
+                                    @select.prevent="(ev) => {
+                                        if (typeof ev.detail.value === 'string') {
+                                            searchTerm = ''
+                                            const modelObject = {
+                                                id: product.id,
+                                                nome: ev.detail.value,
+                                            }
+                                            modelValue.push(modelObject)
+                                        }
+
+                                        if (filteredProducts.length === 0) {
+                                            open = false
+                                        }
+                                    }">
+                                    {{ product.nome }}
+                                </CommandItem>
+                            </div>
                         </CommandGroup>
                     </CommandList>
                 </ComboboxContent>

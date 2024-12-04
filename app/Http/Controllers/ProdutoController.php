@@ -58,9 +58,9 @@ class ProdutoController extends Controller
 
             if($request->composicao==1){
                 $request['idComposicao']=$produto->id;
-                $itens=explode(',',$request->itensComposicao);
+                $itens=$request->itensComposicao;
                 foreach ($itens as $item) {
-                    //1-4 
+                    //1-4
                     $it=explode('-', $item);
                     $request['idComponente']=$it[0];
                     $request['quantidade']=$it[1];

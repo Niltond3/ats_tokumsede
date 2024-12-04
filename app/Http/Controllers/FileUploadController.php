@@ -30,7 +30,8 @@ class FileUploadController extends Controller
             // Return response
             return response()->json([
                 'message' => 'Image uploaded successfully',
-                'path' => '/images/uploads/' . $filename
+                'path' => '/images/uploads/' . $filename,
+                'fineName' => $filename
             ], 200);
         }
 

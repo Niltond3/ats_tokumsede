@@ -1,8 +1,22 @@
 <script setup>
-import { ref } from 'vue';
+// Vue core
+import { ref, onMounted } from 'vue'
+
+// Form validation
 import * as z from 'zod'
-import { Form, FormField } from '@/components/ui/form'
+import { toTypedSchema } from '@vee-validate/zod'
+
+// UI Components
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Form, FormField } from '@/components/ui/form'
+import {
+    FormItem,
+    FormLabel,
+    FormControl,
+    FormMessage
+} from '../ui/form'
 import {
     Dialog,
     DialogContent,
@@ -12,42 +26,51 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { NavigationMenuLink } from '@/components/ui/navigation-menu'
-import { dialogState } from '@/hooks/useToggleDialog'
-import { toTypedSchema } from '@vee-validate/zod'
-import renderToast from '../renderPromiseToast';
 import {
-    FormItem,
-    FormLabel,
-    FormControl,
-    FormDescription,
-    FormMessage
-} from '../ui/form';
-import { useDropzone } from "vue3-dropzone";
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { onMounted } from 'vue';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '../ui/label';
-import { utf8Decode } from '@/util';
-import SelectCompositionProducts from './SelectCompositionProducts.vue';
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue
+} from '@/components/ui/select'
 
-const categories = ref([])
+// Utilities
+import { useDropzone } from "vue3-dropzone"
+import { dialogState } from '@/hooks/useToggleDialog'
+import renderToast from '../renderPromiseToast'
+import { utf8Decode } from '@/util'
+import SelectImages from './SelectImages.vue'
+import { event } from 'jquery'
+import SelectCompositionProducts from './SelectCompositionProducts.vue'
+
 const isLoading = ref(true)
+const categories = ref([])
+const imagesSrc = ref([])
 const productDetails = ref()
+const itensComposicao = ref('')
+const defaultImgValue = {
+    src: null,
+    raw: null
+}
+const img = ref(defaultImgValue)
 
 const { isOpen, toggleDialog } = dialogState()
 
-const { getRootProps, getInputProps, ...rest } = useDropzone({ onDrop });
+
+const { getRootProps, getInputProps, open, ...rest } = useDropzone({ onDrop, multiple: false });
 
 const disabledButton = ref(false)
 
 const formSchema = z.object({
-    idCategoria: z.string().nullable().optional(),
-    nome: z.string().nullable().optional(),
-    descricao: z.string().nullable().optional(),
+    nome: z.string(),
+    idCategoria: z.string(),
+    descricao: z.string(),
     img: z.string().nullable().optional(),
     itensComposicao: z.array(z.string()).nullable().optional(),
 })
+
 
 const props = defineProps({
     triggerIcon: { type: String, required: true },
@@ -66,50 +89,88 @@ const handleDialogOpen = (op) => {
 }
 
 function onDrop(acceptFiles, rejectReasons) {
-    console.log(acceptFiles);
-    console.log(rejectReasons);
-    //uploadImage(acceptFiles)
-}
-
-const uploadImage = async (image) => {
-    //if (!image.value) {
-    //    errorMessage.value = "Por favor, selecione uma imagem.";
-    //    return;
-    //}
-
-    const formData = new FormData();
-    formData.append('image', image[0]);
-
-    try {
-        const response = await axios.post('/upload', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-
-        // Exibe a imagem carregada
-        console.log(response.data.path)
-        //errorMessage.value = ''; // Limpar mensagens de erro
-
-    } catch (error) {
-        console.error(error);
-        //errorMessage.value = "Erro ao enviar a imagem.";
+    const src = URL.createObjectURL(acceptFiles[0]);
+    console.log(acceptFiles)
+    img.value = {
+        src,
+        raw: acceptFiles,
     }
-};
+}
 
 const getCategorie = () => {
     const url = '/categorias'
     const promise = axios.get(url)
     renderToast(promise, 'carregando categorias ...', 'Categorias carregadas', (response) => {
-        console.log(response.data)
         const dataToUtf8 = response.data.map((category) => { return { ...category, nome: utf8Decode(category.nome) } })
         categories.value = dataToUtf8
         isLoading.value = false
     })
 }
 
-onMounted(() => getCategorie())
+const getImages = () => {
+    const url = '/api/listImages'
+    const promise = axios.get(url)
+    renderToast(promise, 'carregando imagens ...', 'Imagens carregadas', (response) => {
+        console.log(response.data)
+        const imageNames = response.data.img
+        imagesSrc.value = imageNames.map(name => `images/uploads/${name}`)
+    })
+}
+onMounted(() => {
+    getCategorie()
+    getImages()
+})
 
+const handleDefaultImage = () => img.value = defaultImgValue
+
+
+
+const registerProduct = (payload) => {
+    const url = '/produtos'
+    const promise = axios.post(url, payload)
+    renderToast(promise, 'Salvando produto ...', 'Produto salvo', (response) => {
+        console.log(response.data)
+    })
+}
+const uploadImage = (image, payload) => {
+    const formData = new FormData();
+    formData.append('image', image[0]);
+
+    const promise = axios.post('/upload', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+
+    renderToast(promise, 'Salvando imagem ...', 'Imagem salva', (response) => {
+        // Exibe a imagem carregada
+        const img = response.data.fineName
+        registerProduct({
+            ...payload,
+            img
+        })
+    })
+};
+
+const onSubmit = (values) => {
+    //setFieldValue('img', img.value.raw)
+    //uploadImage(img.value.raw)
+
+    const fileImage = img.value.raw
+
+
+    console.log(values)
+    const itensComposicao = JSON.stringify(values.itensComposicao).replace(/"/g, "'")
+    console.log(values)
+    const payload = {
+        ...values,
+        composicao: values.itensComposicao?.length > 0 ? 1 : 0,
+    }
+
+    if (fileImage) return uploadImage(fileImage, payload)
+    console.log(payload)
+    registerProduct(payload)
+}
 </script>
 
 <template>
@@ -137,25 +198,31 @@ onMounted(() => getCategorie())
                 <form form @submit="(event) => {
                     event.preventDefault()
                     validate()
-                    console.log(values)
-                    //onSubmit(values)
+                    onSubmit(values, setFieldValue)
                 }">
                     <div class="flex gap-3 flex-col">
-                        <div class="flex gap-3">
-                            <div v-bind="getRootProps()"
-                                class="w-2/3 border border-info/70 border-dashed rounded-md  p-5 flex items-center justify-center">
-                                <FormField v-slot="{ field }" name="img">
-                                    <FormItem>
-                                        <FormControl>
-                                            <input v-bind="{ ...getInputProps(), ...field }" />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                </FormField>
-                                <span class="text-center text-info pointer-events-none select-none">
-                                    Arraste e solte
-                                    <p>ou clique e selecione uma imagem</p>
-                                </span>
+                        <div class="flex gap-3 flex-col sm:flex-row">
+                            <div class="flex flex-col gap-3 sm:w-2/3">
+                                <SelectImages @image-selected="(img) => setFieldValue('img', img)"
+                                    :disabled-button="!!img.src" />
+                                <div class="relative">
+                                    <div v-bind="getRootProps()"
+                                        class="border border-info/70 border-dashed rounded-md cursor-pointer p-5 flex items-center justify-center relative overflow-hidden h-[182px]">
+                                        <input v-bind="getInputProps()" />
+                                        <img v-if="img.src" :src="img.src" alt="preview"
+                                            class="absolute inset-0 h-32 w-auto object-cover top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                                            @change="" />
+                                        <span v-if="!img.src"
+                                            class="text-center text-info pointer-events-none select-none">
+                                            Arraste e solte
+                                            <p>ou clique e selecione uma imagem</p>
+                                        </span>
+                                    </div>
+                                    <button v-if="img.src" class="absolute top-2 right-2 z-50 text-danger text-3xl"
+                                        @click="handleDefaultImage">
+                                        <i class="ri-close-circle-fill"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="flex flex-col gap-3 w-full">
                                 <FormField v-slot="{ componentField }" name="nome">
@@ -199,7 +266,9 @@ onMounted(() => getCategorie())
                                         </Select>
                                     </FormItem>
                                 </FormField>
-                                <SelectCompositionProducts></SelectCompositionProducts>
+                                <SelectCompositionProducts
+                                    @update:model-value="(val) => setFieldValue('itensComposicao', val)">
+                                </SelectCompositionProducts>
                             </div>
                         </div>
                         <div>

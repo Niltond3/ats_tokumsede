@@ -11,7 +11,7 @@ const CustomDiv = (title, description) => defineComponent({
 
 const renderToast = (promise, callbackSuccess, message) => {
     toast.promise(promise, {
-        loading: 'Aguarde...',
+        loading: 'Aguarde...',e
 
         success: (data) => {
             callbackSuccess(data)

@@ -33,9 +33,9 @@ const entregadores = ref([]);
 const loadTableData = () => {
     var urlPedidos = 'pedidos';
 
-    const pedidos = axios.get(urlPedidos);
+    const promise = axios.get(urlPedidos);
 
-    renderToast(pedidos, 'Atualizando Tabela, aguarde...', 'tabela de pedidos atualizada', (response) => {
+    renderToast(promise, 'Atualizando Tabela, aguarde...', 'tabela de pedidos atualizada', (response) => {
         entregadores.value = response.data[7];
 
         const concatArray = [...response.data[0], ...response.data[1], ...response.data[2], ...response.data[3], ...response.data[4]]
@@ -70,7 +70,7 @@ const loadTableData = () => {
                 }
             }
         })
-        
+
         data.value = newData
     })
 }

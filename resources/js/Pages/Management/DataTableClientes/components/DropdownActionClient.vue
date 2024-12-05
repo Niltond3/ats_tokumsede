@@ -1,12 +1,11 @@
 <script setup>
-import { defineComponent, h, markRaw, onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import axios from 'axios'
 import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub,
     DropdownMenuSubContent,
     DropdownMenuSubTrigger, DropdownMenuPortal
 } from '@/components/ui/dropdown-menu'
-import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { MoreVertical } from 'lucide-vue-next'
 import DialogConfirmAction from './DialogConfirmAction.vue'
@@ -26,29 +25,10 @@ function copy() {
     navigator.clipboard.writeText(props.payloadData)
 }
 
-const CustomDiv = (title, description) => defineComponent({
-    setup() {
-        return () => h('div', { class: 'flex flex-col' }, title, h('span', { class: 'text-xs opacity-80' }, description))
-    }
-})
-
-const renderToast = (promise, status) => {
-    toast.promise(promise, {
-        loading: 'Aguarde...',
-        success: (data) => {
-            props.dataTable.ajax.reload()
-            return markRaw(CustomDiv('sucesso', `O cliente ${idCliente} foi ${status} com sucesso!`));
-        },
-        error: (data) => {
-            return markRaw(CustomDiv('Error', data.response.data));
-        }
-    });
-}
-
 const handleStatusClientChange = ({ id, status }) => {
     var url = `clientes/${idCliente}`
-    const response = axios.put(url, { status: id })
-    renderToast(response, status)
+    const promise = axios.put(url, { status: id })
+    renderToast(promise, 'alterando status do cliente', `O cliente ${idCliente} foi ${status} com sucesso!`, () => props.dataTable.ajax.reload())
 }
 
 const handleUpdateDataTable = () => props.dataTable.ajax.reload()

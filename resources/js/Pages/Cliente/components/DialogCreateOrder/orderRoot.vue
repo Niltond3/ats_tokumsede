@@ -27,6 +27,7 @@ import ExchangeInput from '@/components/orderComponents/ExchangeInput.vue'
 import DateTimePicker from '@/components/orderComponents/DateTimePicker.vue'
 import DialogCreateOrderNote from '../DialogCreateOrderNote.vue';
 import { Check } from 'lucide-vue-next'
+import renderToast from '@/components/renderPromiseToast';
 
 
 const { isOpen, toggleDialog } = dialogState()
@@ -55,25 +56,6 @@ const disabledButton = ref(true)
 const interableProducts = ref([])
 
 const forwarded = useForwardPropsEmits(props, emits);
-
-const CustomDiv = (title, description) => defineComponent({
-    setup() {
-        return () => h('div', { class: 'flex flex-col' }, title, h('span', { class: 'text-xs opacity-80' }, description))
-    }
-})
-
-
-const renderToast = (promise) => {
-    toast.promise(promise, {
-        loading: 'Aguarde...',
-
-        success: (data) => {
-            toggleDialog()
-            return markRaw(CustomDiv('sucesso', `O pedido foi cadastrado com sucesso!`));
-        },
-        error: (data) => markRaw(CustomDiv('Error', data.response)),
-    });
-}
 
 const whenDialogOpen = async () => {
     const { id } = props.address
@@ -203,8 +185,9 @@ watch(() => payload.value.itens, (newVal) => disabledButton.value = newVal.map(p
 const handleCallbackPedido = () => {
     disabledButton.value = true
     var url = "pedidos";
-    const response = axios.post(url, payload.value)
-    renderToast(response)
+    const promise = axios.post(url, payload.value)
+    toggleDialog()
+    renderToast(promise, 'Cadastrando pedido', 'o pedido foi cadastrado com sucesso', () => toggleDialog())
 }
 
 //class="flex flex-col items-start"

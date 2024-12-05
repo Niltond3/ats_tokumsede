@@ -1,5 +1,5 @@
 <script setup>
-import { ref, markRaw, defineComponent, h } from 'vue';
+import { ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { Stepper, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from '@/components/ui/stepper'
 import { Form } from '@/components/ui/form'
@@ -12,7 +12,7 @@ import validator from 'validator'
 import { toTypedSchema } from '@vee-validate/zod'
 import { User, BookUser, Check } from 'lucide-vue-next'
 import { getClientFormat } from "@/Pages/Management/utils";
-import { toast } from 'vue-sonner';
+import renderToast from '@/components/renderPromiseToast';
 
 const props = defineProps({})
 
@@ -96,25 +96,6 @@ const steps = [
 
 const { getTipoPessoaPayload } = getClientFormat();
 
-const CustomDiv = (title, description) => defineComponent({
-    setup() {
-        return () => h('div', { class: 'flex flex-col' }, title, h('span', { class: 'text-xs opacity-80' }, description))
-    }
-})
-
-
-const renderToast = (promise) => {
-    disabledButton.value = true
-    toast.promise(promise, {
-        loading: 'Aguarde...',
-
-        success: (data) => {
-            emit('create:success')
-            return markRaw(CustomDiv('sucesso', `O Cliente foi cadastrado com sucesso!`));
-        },
-        error: (data) => markRaw(CustomDiv('Error', data.response)),
-    });
-}
 
 const onSubmit = (values) => {
     const { tipoPessoa, documento } = getTipoPessoaPayload(values.tipoPessoa);
@@ -141,9 +122,8 @@ const onSubmit = (values) => {
         senha: values.senha,
     }
 
-    const response = tipoAdministrador === 'Administrador' ? axios.post('clientes', payload) : axios.post(route('cliente.register'), payload);
-
-    renderToast(response)
+    const promise = tipoAdministrador === 'Administrador' ? axios.post('clientes', payload) : axios.post(route('cliente.register'), payload);
+    renderToast(promise, 'Cadastrando Cliente ...', 'Cliente cadastrado com sucesso!', () => emit('create:success'))
 
 }
 

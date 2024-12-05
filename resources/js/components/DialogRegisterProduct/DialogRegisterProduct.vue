@@ -141,7 +141,6 @@ const uploadImage = (image, payload) => {
 };
 
 const onSubmit = (values) => {
-    console.log(values)
     const fileImage = img.value.raw
 
     const payload = {

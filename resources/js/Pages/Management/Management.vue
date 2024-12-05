@@ -5,7 +5,6 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
@@ -16,7 +15,7 @@ import {
     TabsTrigger,
 } from '@/components/ui/tabs'
 import { useToggleTabs } from './useTabs'
-import { Link, usePage, } from '@inertiajs/vue3';
+import { usePage, } from '@inertiajs/vue3';
 
 const page = usePage()
 // const isAuth = computed(() => page.props.auth.user)

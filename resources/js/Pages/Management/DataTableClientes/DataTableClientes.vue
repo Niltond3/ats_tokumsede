@@ -1,6 +1,10 @@
 <script setup>
+// Vue and Core imports
 import { ref, onMounted } from 'vue';
-import axios from 'axios'
+import axios from 'axios';
+import { toast } from 'vue-sonner';
+
+// DataTables Core and Extensions
 import DataTable from 'datatables.net-vue3';
 import DataTablesCore from 'datatables.net';
 import 'datatables.net-autofill-dt';
@@ -14,11 +18,12 @@ import 'datatables.net-searchbuilder-dt';
 import 'datatables.net-searchpanes-dt';
 import 'datatables.net-select-dt';
 import 'datatables.net-staterestore-dt';
+
+// Utility imports
 import { errorUtils, utf8Decode } from '../../../util';
 import { dialogState } from '../../../hooks/useToggleDialog';
 import languagePtBR from './dataTablePtBR.mjs';
 import { formatOrder } from '../utils';
-import { toast } from 'vue-sonner';
 
 import rowChildtable from './components/rowChildTable/index';
 import DialogShowOrder from './components/DialogShowOrder.vue';
@@ -51,163 +56,183 @@ const addressTarget = ref({})
 let dt;
 const table = ref();
 
-onMounted(() => {
-    dt = table.value.dt;
-    // `d` is the original data object for the row
+// Add these methods outside onMounted but inside the script setup
 
-
+const initializeDataTable = (dt) => {
     const format = (d) => rowChildtable(d)
 
-    const dragScrollList = (elementId) => {
-        const ele = document.getElementById(elementId);
+    setupChildRowHandler(dt, format)
+    setupSearchStyling()
+    setupEventHandlers(dt)
+}
+
+const dragScrollList = (elementId) => {
+    const ele = document.getElementById(elementId);
+    ele.style.cursor = 'pointer';
+
+    let pos = { top: 0, left: 0, x: 0, y: 0 };
+
+    const mouseDownHandler = function (e) {
+        e.preventDefault();
+        ele.style.cursor = 'grabbing';
+        ele.style.userSelect = 'none';
+
+        pos = {
+            left: ele.scrollLeft,
+            top: ele.scrollTop,
+            // Get the current mouse position
+            x: e.clientX,
+            y: e.clientY,
+        };
+
+        document.addEventListener('mousemove', mouseMoveHandler);
+        document.addEventListener('mouseup', mouseUpHandler);
+    };
+
+    const mouseMoveHandler = function (e) {
+        e.preventDefault();
+        // How far the mouse has been moved
+        const dx = e.clientX - pos.x;
+        const dy = e.clientY - pos.y;
+
+        // Scroll the element
+        ele.scrollTop = pos.top - dy;
+        ele.scrollLeft = pos.left - dx;
+    };
+
+    const mouseUpHandler = function () {
         ele.style.cursor = 'pointer';
+        ele.style.removeProperty('user-select');
 
-        let pos = { top: 0, left: 0, x: 0, y: 0 };
+        document.removeEventListener('mousemove', mouseMoveHandler);
+        document.removeEventListener('mouseup', mouseUpHandler);
+    };
 
-        const mouseDownHandler = function (e) {
-            e.preventDefault();
-            ele.style.cursor = 'grabbing';
-            ele.style.userSelect = 'none';
+    // Attach the handler
+    ele.addEventListener('mousedown', mouseDownHandler);
+}
 
-            pos = {
-                left: ele.scrollLeft,
-                top: ele.scrollTop,
-                // Get the current mouse position
-                x: e.clientX,
-                y: e.clientY,
-            };
-
-            document.addEventListener('mousemove', mouseMoveHandler);
-            document.addEventListener('mouseup', mouseUpHandler);
-        };
-
-        const mouseMoveHandler = function (e) {
-            e.preventDefault();
-            // How far the mouse has been moved
-            const dx = e.clientX - pos.x;
-            const dy = e.clientY - pos.y;
-
-            // Scroll the element
-            ele.scrollTop = pos.top - dy;
-            ele.scrollLeft = pos.left - dx;
-        };
-
-        const mouseUpHandler = function () {
-            ele.style.cursor = 'pointer';
-            ele.style.removeProperty('user-select');
-
-            document.removeEventListener('mousemove', mouseMoveHandler);
-            document.removeEventListener('mouseup', mouseUpHandler);
-        };
-
-        // Attach the handler
-        ele.addEventListener('mousedown', mouseDownHandler);
-    }
-
-    $('.dt-search').addClass('flex items-center py-2 px-4 gap-2 !text-info/80')
-
-    $('.dt-search > label').html(/*html*/`
-    <span class="hidden">pesquisar</span>
-    <i class="ri-search-2-fill"></i>
-    `)
-
-    const inputClasses = 'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded  bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary !border-input placeholder:text-info/50 !text-info/80'
-
-    $('.dt-search > input').addClass(inputClasses)
-
+const setupChildRowHandler = (dt, format) => {
     $('#datatable-clientes tbody').on('click', 'td.dt-control', async function () {
-        var tr = $(this).closest('tr');
-        var row = dt.row(tr);
+        const tr = $(this).closest('tr');
+        const row = dt.row(tr);
         const client = row.data()
-
-        var url = "clientes/" + client.id;
-
-        const response = await axios.get(url)
-
-        const pedidos = response.data.pedidos.map((pedido) => formatOrder(pedido))
-
-
-        const childData = {
-            ...client,
-            pedidos
-        }
 
         if (row.child.isShown()) {
             addressTarget.value == null && dt.ajax.reload()
-            return row.child.hide(); // This row is already open - close it
+            return row.child.hide();
         }
-        row.child(format(childData)).show();// Open this row
+
+        const response = await axios.get(`clientes/${client.id}`)
+        const pedidos = response.data.pedidos.map((pedido) => formatOrder(pedido))
+        const childData = { ...client, pedidos }
+
+        row.child(format(childData)).show();
 
         dragScrollList('enderecos')
         dragScrollList('pedidos')
     });
+}
+
+const setupSearchStyling = () => {
+    $('.dt-search').addClass('flex items-center py-2 px-4 gap-2 !text-info/80')
+    $('.dt-search > label').html(/*html*/`
+        <span class="hidden">pesquisar</span>
+        <i class="ri-search-2-fill"></i>
+    `)
+
+    const inputClasses = 'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary !border-input placeholder:text-info/50 !text-info/80'
+    $('.dt-search > input').addClass(inputClasses)
+}
+
+const setupEventHandlers = (dt) => {
+    setupOrderHandlers()
+    setupAddressHandlers(dt)
+    setupCopyHandler(dt)
+    setupAccordionHandler()
+}
+
+const setupOrderHandlers = () => {
     $('#datatable-clientes').on("click", '.iniciarPedido', function () {
         clientName.value = this.getAttribute('data-client')
         idClienteAddress.value = this.id
         toggleDialog()
     })
-    $('#datatable-clientes').on("click", '.editarEndereco', function () {
 
-        const idAddress = this.getAttribute('addr_id')
-        const idClient = this.getAttribute('cli_id')
-
-        const data = dt.data()
-
-        address.value = Object.values(data).filter(cli => cli.id == idClient)[0].enderecos.filter(addr => addr.id == idAddress)[0]
-
-        toggleEditAddress()
-    })
-    $("#datatable-clientes").on("click", ".novoEndereco", function () {
-        idClient.value = this.id
-        toggleRegisterAddress()
-    })
     $('#datatable-clientes').on("click", '.visualizarPedido', function () {
         idOrder.value = parseInt(this.id)
         toggleShowOrderDialog()
     })
-    $('#datatable-clientes').on("click", '.copiarEndereco', function () {
+}
 
+const setupAddressHandlers = (dt) => {
+    $('#datatable-clientes').on("click", '.editarEndereco', function () {
+        const idAddress = this.getAttribute('addr_id')
+        const idClient = this.getAttribute('cli_id')
         const data = dt.data()
-
-        const payload = Object.values(data).filter(cli => cli.id == idClient.value)[0].enderecos.filter(addr => addr.id == idAddress.value)[0]
-        const clipboard = `
-------------- endereço -------------
-${payload.cep ? 'CEP: ' + payload.cep : ''}
-Cidade: ${payload.cidade}
-${payload.estado !== null ? 'Estado: ' + payload.estado : ''}
-${payload.apelido ? 'Apelido: ' + payload.apelido : ''}
-Logradouro: ${payload.logradouro}
-Número: ${payload.numero}
-Bairro: ${payload.bairro}
-${payload.complemento ? 'Complemento: ' + payload.complemento : ''}
-${payload.referencia ? 'Referência: ' + payload.referencia : ''}
-`.replace(/(^[ \t]*\n)/gm, "")
-
-        navigator.clipboard.writeText(clipboard)
-        toast.info('Copiado para a área de transferência')
+        address.value = Object.values(data)
+            .filter(cli => cli.id == idClient)[0]
+            .enderecos.filter(addr => addr.id == idAddress)[0]
+        toggleEditAddress()
     })
-    $('#datatable-clientes').on("click", '.excluirEndereco', function () {
-        toggleConfirmDialog()
+
+    $("#datatable-clientes").on("click", ".novoEndereco", function () {
+        idClient.value = this.id
+        toggleRegisterAddress()
     })
+
+    $('#datatable-clientes').on("click", '.excluirEndereco', toggleConfirmDialog)
+
     $('#datatable-clientes').on("long-press", '.deleteEndereco', function (e) {
-
         idClient.value = e.target.id
         idAddress.value = e.target.getAttribute('addr_id')
-
         e.target.setAttribute('aria-selected', e.target.getAttribute('aria-selected') === 'true' ? 'false' : 'true');
-
         addressTarget.value = e.target
-
         e.target.parentNode.classList.toggle("[&>li[aria-selected='false']]:pointer-events-none");
-
     })
+}
+
+const setupCopyHandler = (dt) => {
+    $('#datatable-clientes').on("click", '.copiarEndereco', function () {
+        const data = dt.data()
+        const payload = Object.values(data)
+            .filter(cli => cli.id == idClient.value)[0]
+            .enderecos.filter(addr => addr.id == idAddress.value)[0]
+
+        const clipboard = formatAddressForClipboard(payload)
+        navigator.clipboard.writeText(clipboard)
+        toast.info('Copiado para a área de transferência')
+    })
+}
+
+const setupAccordionHandler = () => {
     $('#datatable-clientes').on("click", '.accordionController', function (e) {
         e.target.classList.toggle('after:!content-["-"]')
         const panel = e.target.parentNode.nextElementSibling
         panel.firstChild.nextElementSibling.classList.toggle('!max-h-[11rem]')
     })
+}
 
-});
+const formatAddressForClipboard = (address) => {
+    return `
+------------- endereço -------------
+${address.cep ? 'CEP: ' + address.cep : ''}
+Cidade: ${address.cidade}
+${address.estado !== null ? 'Estado: ' + address.estado : ''}
+${address.apelido ? 'Apelido: ' + address.apelido : ''}
+Logradouro: ${address.logradouro}
+Número: ${address.numero}
+Bairro: ${address.bairro}
+${address.complemento ? 'Complemento: ' + address.complemento : ''}
+${address.referencia ? 'Referência: ' + address.referencia : ''}
+`.replace(/(^[ \t]*\n)/gm, "")
+}
+
+// Replace the existing onMounted with:
+onMounted(() => {
+    dt = table.value.dt
+    initializeDataTable(dt)
+})
 
 const columns = [
     {

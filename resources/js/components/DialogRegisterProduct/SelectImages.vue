@@ -2,7 +2,7 @@
     <div>
         <UseTemplate>
             <Command>
-                <CommandInput placeholder="imagens..." :disabled="props.disabledButton" />
+                <CommandInput placeholder="imagens..." :disabled="props.disabledButton" class="mb-1" />
                 <CommandList>
                     <CommandEmpty>Nenhuma imagem encontrada.</CommandEmpty>
                     <CommandGroup>

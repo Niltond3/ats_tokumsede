@@ -32,7 +32,7 @@ const forwardedProps = useForwardProps(delegatedProps);
         <div class="flex items-center ">
             <Search class="mr-2 h-4 w-4 shrink-0 opacity-50" />
             <ComboboxInput v-bind="{ ...forwardedProps, ...$attrs }" auto-focus :class="cn(
-                'flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+                'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded  bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary text-slate-600 border-input',
                 props.class,
             )
                 " />

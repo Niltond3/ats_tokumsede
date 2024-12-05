@@ -71,8 +71,11 @@ const handleDialogOpen = () => {
 
 const handleRealizarPedido = (payload) => {
     var url = "pedidos";
-    const response = axios.post(url, payload)
-    renderToast(response)
+    const promise = axios.post(url, payload)
+    renderToast(promise, 'realizando pedido', 'Pedido realizado com sucesso!', () => {
+        props.toggleDialog()
+        props.setTab('pedidos')
+    })
 }
 
 </script>

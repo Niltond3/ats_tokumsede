@@ -71,6 +71,7 @@
         "v-mask": "^2.3.0",
         "v-money3": "^3.24.1",
         "validator": "^13.12.0",
+        "vaul-vue": "^0.2.0",
         "vee-validate": "^4.13.2",
         "vue-router": "^4.4.5",
         "vue-sonner": "^1.2.5",

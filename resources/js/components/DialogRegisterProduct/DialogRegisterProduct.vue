@@ -190,8 +190,10 @@ const handleImageLoad = (setFieldValue) => {
                         <div class="flex gap-3 flex-col sm:flex-row">
                             <FormField name="img">
                                 <div class="flex flex-col gap-3 sm:w-2/3">
-                                    <SelectImages @image-selected="(img) => setFieldValue('img', img)"
-                                        :disabled-button="!!img.src" />
+                                    <SelectImages @image-selected="(img) => {
+                                        console.log(img)
+                                        setFieldValue('img', img)
+                                    }" :disabled-button="!!img.src" />
                                     <div class="relative">
                                         <div v-bind="getRootProps()"
                                             class="border border-info/70 border-dashed rounded-md cursor-pointer p-5 flex items-center justify-center relative overflow-hidden h-[182px]">

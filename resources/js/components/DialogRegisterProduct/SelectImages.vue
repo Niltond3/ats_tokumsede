@@ -1,32 +1,73 @@
 <template>
-    <Select @update:modelValue="selectImage" :disabled="props.disabledButton" v-model="selectedImage">
-        <SelectTrigger class="max-w-[174px]">
-            <SelectValue placeholder="Imagens salvas" />
-        </SelectTrigger>
-        <SelectContent>
-            <SelectGroup>
-                <SelectItem v-for="image in images" :key="image.name" :value="image.name">
-                    <div class="flex gap-2">
-                        <img :src="image.src" alt="" class="h-6 w-6 rounded-md object-cover" />
-                        <span class="block truncate">{{ image.name }}</span>
+    <div>
+        <UseTemplate>
+            <Command>
+                <CommandInput placeholder="imagens..." :disabled="props.disabledButton" />
+                <CommandList>
+                    <CommandEmpty>Nenhuma imagem encontrada.</CommandEmpty>
+                    <CommandGroup>
+                        <CommandItem v-for="image of images" :key="image.name" :value="image.name"
+                            @select="selectImage(image)">
+                            <div class="flex gap-2">
+                                <img :src="image.src" alt="" class="h-6 w-6 rounded-md object-cover" />
+                                <span class="block truncate">{{ image.name }}</span>
+                            </div>
+                        </CommandItem>
+                    </CommandGroup>
+                </CommandList>
+            </Command>
+        </UseTemplate>
+
+        <Popover v-if="isDesktop" v-model:open="isOpen">
+            <PopoverTrigger as-child>
+                <button
+                    class="text-info w-[174px] rounded-md border border-input h-9 disabled:opacity-60 disabled:cursor-not-allowed"
+                    :disabled="props.disabledButton">
+                    <div class="flex gap-2" v-if="selectedImage">
+                        <img :src="selectedImage.src" alt="" class="h-6 w-6 rounded-md object-cover" />
+                        <span class="block truncate">{{ selectedImage.name }}</span>
                     </div>
-                </SelectItem>
-            </SelectGroup>
-        </SelectContent>
-    </Select>
+                    <p v-else>
+                        + Imagens
+                    </p>
+                </button>
+            </PopoverTrigger>
+            <PopoverContent class="p-0" align="start">
+                <StatusList />
+            </PopoverContent>
+        </Popover>
+
+        <Drawer v-else v-model:open="isOpen">
+            <DrawerTrigger as-child>
+                <button
+                    class="text-info w-[174px] rounded-md border border-input h-9 disabled:opacity-60 disabled:cursor-not-allowed"
+                    :disabled="props.disabledButton">
+                    <div class="flex gap-2" v-if="selectedImage">
+                        <img :src="selectedImage.src" alt="" class="h-6 w-6 rounded-md object-cover" />
+                        <span class="block truncate">{{ selectedImage.name }}</span>
+                    </div>
+                    <p v-else>
+                        + Imagens
+                    </p>
+                </button>
+            </DrawerTrigger>
+            <DrawerContent>
+                <div class="mt-4 border-t">
+                    <StatusList />
+                </div>
+            </DrawerContent>
+        </Drawer>
+
+    </div>
 </template>
 
 <script setup>
 import { onMounted, ref, watch } from 'vue'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { createReusableTemplate, useMediaQuery } from '@vueuse/core'
 import renderToast from '../renderPromiseToast'
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue
-} from '@/components/ui/select'
 
 
 const selectedImage = ref(null)
@@ -34,6 +75,11 @@ const images = ref([])
 
 const emits = defineEmits(['image-selected'])
 const props = defineProps({ disabledButton: Boolean })
+
+const [UseTemplate, StatusList] = createReusableTemplate()
+const isDesktop = useMediaQuery('(min-width: 768px)')
+
+const isOpen = ref(false)
 
 const getImages = () => {
     const url = '/api/listImages'
@@ -59,8 +105,9 @@ watch(
 
 
 const selectImage = (image) => {
+    isOpen.value = false
     selectedImage.value = image;
-    emits("image-selected", image);
+    emits("image-selected", image.name);
 }
 
 onMounted(() => {
@@ -72,4 +119,5 @@ const cleanSelectImage = () => {
     selectedImage.value = null
     emits("image-selected", undefined)
 }
+
 </script>

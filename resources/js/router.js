@@ -5,14 +5,14 @@ import Dashboard from './Pages/Dashboard.vue'
 import ClienteDashboard from './Pages/Cliente/Dashboard.vue'
 
 const routes = [
-    { path: '/', component: Welcome },
+    { path: '/', component: Welcome, name: 'Welcome' },
     { path: '/home', component: Management, name: 'home' },
-    { path: '/home/dashboard', component: Dashboard },
+    { path: '/home/dashboard', component: Dashboard, name: 'dashboard' },
     // { path: '/home/register/client', component: Dashboard },
     // { path: '/home/register/order', component: Dashboard },
     // { path: '/home/register/distribuidor', component: Dashboard },
     // { path: '/home/register/entregador', component: Dashboard },
-    { path: '/cliente/dashboard', component: ClienteDashboard },
+    { path: '/cliente/dashboard', component: ClienteDashboard, name: 'cliente-dashboard' },
 ]
 
 

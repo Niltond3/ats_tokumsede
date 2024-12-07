@@ -4,6 +4,7 @@ import vue from "@vitejs/plugin-vue";
 import svgLoader from "vite-svg-loader";
 
 export default defineConfig({
+    assetsInclude: ["**/*.pem", "**/*.txt"],
     plugins: [
         laravel({
             input: "resources/js/app.js",
@@ -26,7 +27,7 @@ export default defineConfig({
     ],
     server: {
         proxy: {
-            '/api': 'http://localhost:8000',  // Se o backend Laravel estiver rodando na porta 8000
+            "/api": "http://localhost:8000", // Se o backend Laravel estiver rodando na porta 8000
         },
     },
     optimizeDeps: {

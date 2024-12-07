@@ -48,16 +48,16 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('clientes', ClienteController::class,['except' => 'create']);
+    Route::resource('clientes', ClienteController::class, ['except' => 'create']);
 
     Route::post('/upload', [FileUploadController::class, 'upload']);
 
     //ENDERECOS CLIENTES
-    Route::resource('enderecos', EnderecoClienteController::class,['except' => 'create']);
+    Route::resource('enderecos', EnderecoClienteController::class, ['except' => 'create']);
 
     //PEDIDOS
-    Route::group(['prefix' => 'pedidos'], function(){
-        Route::resource('/', PedidoController::class,['except' => 'create']);
+    Route::group(['prefix' => 'pedidos'], function () {
+        Route::resource('/', PedidoController::class, ['except' => 'create']);
         Route::get('visualizar/{id}', [PedidoController::class, 'visualizar']);
         Route::put('aceitar/{id}', [PedidoController::class, 'aceitar']);
         Route::put('despachar/{id}', [PedidoController::class, 'despachar']);
@@ -75,14 +75,14 @@ Route::middleware('auth')->group(function () {
     });
 
     //PRODUTOS
-    Route::group(['prefix' => 'produtos'], function(){
-        Route::resource('/', ProdutoController::class,['except' => 'create']);
-        Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class,'listarProdutos']);
-        Route::get('{idEnderecoCliente}', [ProdutoController::class,'show']);
+    Route::group(['prefix' => 'produtos'], function () {
+        Route::resource('/', ProdutoController::class, ['except' => 'create']);
+        Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class, 'listarProdutos']);
+        Route::get('{idEnderecoCliente}', [ProdutoController::class, 'show']);
     });
 
     //CATEGORIAS
-    Route::resource('categorias', CategoriaController::class,['except' => 'create']);
+    Route::resource('categorias', CategoriaController::class, ['except' => 'create']);
 });
 
 
@@ -90,8 +90,8 @@ Route::middleware('auth')->group(function () {
 Route::get('/homepage', [HomeController::class, 'getHomepage'])->name('homepage');
 
 
- //PEDIDOS
- Route::group(['prefix' => 'api'], function () {
+//PEDIDOS
+Route::group(['prefix' => 'api'], function () {
     Route::resource('/', Api::class, ['except' => 'create']);
 
     // Demais rotas configuradas
@@ -119,5 +119,5 @@ Route::get('/homepage', [HomeController::class, 'getHomepage'])->name('homepage'
 });
 
 
-require __DIR__.'/auth.php';
-require __DIR__.'/cliente.php';
+require __DIR__ . '/auth.php';
+require __DIR__ . '/cliente.php';

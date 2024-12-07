@@ -1,4 +1,6 @@
 <script setup>
+import { onMounted, ref } from 'vue'
+import qz from 'qz-tray';
 import { TableClientes } from './DataTableClientes'
 import { TablePedidos } from './DataTablePedidos'
 import {
@@ -16,8 +18,17 @@ import {
 } from '@/components/ui/tabs'
 import { useToggleTabs } from './useTabs'
 import { usePage, } from '@inertiajs/vue3';
+import { useQzTray } from '@/composables/useQzTray'
+
+const { isConnected, selectedPrinter, connect, findPrinter, listPrinters, print } = useQzTray()
 
 const page = usePage()
+
+// Estados
+const printerConnection = ref(null)
+const certificate = ref(null)
+const printerList = ref([]);
+
 // const isAuth = computed(() => page.props.auth.user)
 
 const typeAdmin = page.props.auth.user.tipoAdministrador
@@ -41,11 +52,61 @@ const { activeTab, setActiveTab } = useToggleTabs(tab)
 
 const handleSetActiveTab = (tab) => setActiveTab(tab)
 
+// Função para desconectar do QZ Tray
+function disconnectQZTray() {
+    qz.websocket.disconnect();
+    isConnected.value = false;
+}
+
+const handleConnect = async () => {
+    if (await connect()) {
+        console.log('connected')
+        const printers = await listPrinters();
+        console.log(printers);
+        printerList.value = printers;
+    }
+}
+
+// Função para conectar ao QZ Tray
+async function connectQZTray() {
+    try {
+        await handleConnect()
+    } catch (err) {
+        console.error('Failed to setup QZ Tray:', err)
+        printerConnection.value = false
+    }
+}
+
+const handlePrint = async () => {
+    await findPrinter(selectedPrinter.value)
+    const data = [
+        { type: 'raw', format: 'plain', data: 'Olá, este é um teste de impressão!\n' }
+    ]
+    await print(data)
+}
+
+onMounted(() => {
+    connectQZTray()
+})
+
 </script>
 
 <template>
     <!-- MODAL REALIZAR PEDIDOS -->
     <div class="row">
+        <div>
+            <button @click="connectQZTray" :disabled="isConnected">Conectar ao QZ Tray</button>
+            <button @click="disconnectQZTray" :disabled="!isConnected">Desconectar</button>
+            <div v-if="isConnected">
+                <h3>Impressoras disponíveis</h3>
+                <select v-model="selectedPrinter">
+                    <option v-for="printer in printerList" :key="printer" :value="printer">
+                        {{ printer }}
+                    </option>
+                </select>
+                <button @click="handlePrint" :disabled="!selectedPrinter">Imprimir</button>
+            </div>
+        </div>
         <!-- Column -->
         <Tabs default-value="account" :default-value="tab" :model-value="activeTab">
             <TabsList class="grid w-full grid-cols-2">
@@ -357,30 +418,30 @@ export default {
         //    /// Authentication setup ///
         //    qz.security.setCertificatePromise(function (resolve, reject) {
         //        //Alternate method 2 - direct
-        //        resolve("-----BEGIN CERTIFICATE-----\n" +
-        //            "MIIEBjCCAu6gAwIBAgIJAOJrQsHMj2TaMA0GCSqGSIb3DQEBCwUAMIGXMQswCQYD\n" +
-        //            "VQQGEwJCUjEQMA4GA1UECAwHUGFyYWliYTEPMA0GA1UEBwwGSmVyaWNvMRIwEAYD\n" +
-        //            "VQQKDAlUb2t1bXNlZGUxCzAJBgNVBAsMAlRJMRswGQYDVQQDDBIqLnRva3Vtc2Vk\n" +
-        //            "ZS5jb20uYnIxJzAlBgkqhkiG9w0BCQEWGHR1bGlvZ2FsdmFvLnBiQGdtYWlsLmNv\n" +
-        //            "bTAeFw0xNzA5MjQxNzM3NTZaFw00OTAzMTkxNzM3NTZaMIGXMQswCQYDVQQGEwJC\n" +
-        //            "UjEQMA4GA1UECAwHUGFyYWliYTEPMA0GA1UEBwwGSmVyaWNvMRIwEAYDVQQKDAlU\n" +
-        //            "b2t1bXNlZGUxCzAJBgNVBAsMAlRJMRswGQYDVQQDDBIqLnRva3Vtc2VkZS5jb20u\n" +
-        //            "YnIxJzAlBgkqhkiG9w0BCQEWGHR1bGlvZ2FsdmFvLnBiQGdtYWlsLmNvbTCCASIw\n" +
-        //            "DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALsZvyHqUsupDlATczH99sPo5dak\n" +
-        //            "s1CwdqrAbBRG24HiTuk51ianCvA4RYacApJsoVQKQQhqEitMCcJ1LMW/sFfCT2aG\n" +
-        //            "bc6FXo8Kpgg383jnmrxcDZGou4qDOOS1Kksbz8CJYlD/UVucayfXRqYRi7DHSDQC\n" +
-        //            "ix5bfiumZFxqPGd3i6N09/nm37Zb9zKpTJFpsY6fw1WPKZFZ6x4UOnZ7NDcNHse/\n" +
-        //            "7qQl4M84KM5RV8c9Bq17C8N+OMMfIRJNpAzUo+KOv/9kvXQl7YffUANB5Br4QWEi\n" +
-        //            "bET+Etac8OeT6Qy31K9gERKTE6olS3HzuLUIY2Jq4Tyja83v0WvU/M8x0zUCAwEA\n" +
-        //            "AaNTMFEwHQYDVR0OBBYEFNQ1pt/TYpH24TPPmBjZXL03KfN3MB8GA1UdIwQYMBaA\n" +
-        //            "FNQ1pt/TYpH24TPPmBjZXL03KfN3MA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcN\n" +
-        //            "AQELBQADggEBABnoCtapmJ4dj6MW9Uy6vTYsXy4RtKqoPTxRsNVaBE0BQgYeocVu\n" +
-        //            "f08vRoXBEMKQVJruY/G8yhKbNYBPmqohgONsvhI5Rcf6ZvS1NqD3OQ8sBiwI2yCg\n" +
-        //            "YBpSu7JcuJuaiXiU9pv90YdUf4WI/jUIOKiAmGQpcFHdexVFW0mb2VfxOooahdBP\n" +
-        //            "elApY3vYRlTtjcmU4JaQ+dt5H+ebjUs4sJsroHfxJuQLxExDdvy/0M264hnqm1ad\n" +
-        //            "iW0Tb2wlgBb7r3xgISxGIFeI7V1tqB90qidrFu8F/pUXwl6c02qr/zwjS5m9QnaP\n" +
-        //            "FEFhTIKoFft56SNdx3U143h/NvnAccxVa0s=\n" +
-        //            "-----END CERTIFICATE-----");
+        //resolve("-----BEGIN CERTIFICATE-----\n" +
+        //    "MIIEBjCCAu6gAwIBAgIJAOJrQsHMj2TaMA0GCSqGSIb3DQEBCwUAMIGXMQswCQYD\n" +
+        //    "VQQGEwJCUjEQMA4GA1UECAwHUGFyYWliYTEPMA0GA1UEBwwGSmVyaWNvMRIwEAYD\n" +
+        //    "VQQKDAlUb2t1bXNlZGUxCzAJBgNVBAsMAlRJMRswGQYDVQQDDBIqLnRva3Vtc2Vk\n" +
+        //    "ZS5jb20uYnIxJzAlBgkqhkiG9w0BCQEWGHR1bGlvZ2FsdmFvLnBiQGdtYWlsLmNv\n" +
+        //    "bTAeFw0xNzA5MjQxNzM3NTZaFw00OTAzMTkxNzM3NTZaMIGXMQswCQYDVQQGEwJC\n" +
+        //    "UjEQMA4GA1UECAwHUGFyYWliYTEPMA0GA1UEBwwGSmVyaWNvMRIwEAYDVQQKDAlU\n" +
+        //    "b2t1bXNlZGUxCzAJBgNVBAsMAlRJMRswGQYDVQQDDBIqLnRva3Vtc2VkZS5jb20u\n" +
+        //    "YnIxJzAlBgkqhkiG9w0BCQEWGHR1bGlvZ2FsdmFvLnBiQGdtYWlsLmNvbTCCASIw\n" +
+        //    "DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALsZvyHqUsupDlATczH99sPo5dak\n" +
+        //    "s1CwdqrAbBRG24HiTuk51ianCvA4RYacApJsoVQKQQhqEitMCcJ1LMW/sFfCT2aG\n" +
+        //    "bc6FXo8Kpgg383jnmrxcDZGou4qDOOS1Kksbz8CJYlD/UVucayfXRqYRi7DHSDQC\n" +
+        //    "ix5bfiumZFxqPGd3i6N09/nm37Zb9zKpTJFpsY6fw1WPKZFZ6x4UOnZ7NDcNHse/\n" +
+        //    "7qQl4M84KM5RV8c9Bq17C8N+OMMfIRJNpAzUo+KOv/9kvXQl7YffUANB5Br4QWEi\n" +
+        //    "bET+Etac8OeT6Qy31K9gERKTE6olS3HzuLUIY2Jq4Tyja83v0WvU/M8x0zUCAwEA\n" +
+        //    "AaNTMFEwHQYDVR0OBBYEFNQ1pt/TYpH24TPPmBjZXL03KfN3MB8GA1UdIwQYMBaA\n" +
+        //    "FNQ1pt/TYpH24TPPmBjZXL03KfN3MA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcN\n" +
+        //    "AQELBQADggEBABnoCtapmJ4dj6MW9Uy6vTYsXy4RtKqoPTxRsNVaBE0BQgYeocVu\n" +
+        //    "f08vRoXBEMKQVJruY/G8yhKbNYBPmqohgONsvhI5Rcf6ZvS1NqD3OQ8sBiwI2yCg\n" +
+        //    "YBpSu7JcuJuaiXiU9pv90YdUf4WI/jUIOKiAmGQpcFHdexVFW0mb2VfxOooahdBP\n" +
+        //    "elApY3vYRlTtjcmU4JaQ+dt5H+ebjUs4sJsroHfxJuQLxExDdvy/0M264hnqm1ad\n" +
+        //    "iW0Tb2wlgBb7r3xgISxGIFeI7V1tqB90qidrFu8F/pUXwl6c02qr/zwjS5m9QnaP\n" +
+        //    "FEFhTIKoFft56SNdx3U143h/NvnAccxVa0s=\n" +
+        //    "-----END CERTIFICATE-----");
         //    });
         //    qz.security.setSignaturePromise(function (toSign) {
         //        return function (resolve, reject) {

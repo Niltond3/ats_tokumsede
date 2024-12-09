@@ -38,7 +38,12 @@ export function useQzTray() {
         return printer;
     };
 
-    const print = async (data) => {};
+    const print = async (data) => {
+        if (!selectedPrinter.value) {
+            throw new Error("No printer selected");
+        }
+        return await qzTrayService.print(selectedPrinter.value, data);
+    };
 
     return {
         isConnected,

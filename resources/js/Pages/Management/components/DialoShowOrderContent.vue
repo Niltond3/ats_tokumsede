@@ -6,11 +6,15 @@ import {
     DialogHeader,
     DialogTitle
 } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue, SelectLabel } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { utf8Decode, formatMoney } from '@/util';
 import { formatOrder, orderToClipboard } from '../utils';
 import renderToast from '@/components/renderPromiseToast';
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
+import { useQzTray } from '@/composables/useQzTray'
+
+const { checkConnection, selectedPrinter, connect, findPrinter, listPrinters, print } = useQzTray()
 
 const props = defineProps({
     orderId: { type: Number, required: true },
@@ -19,6 +23,7 @@ const props = defineProps({
 
 const isLoading = ref(true); // Estado de carregamento
 const data = ref({})
+const printerList = ref([]);
 
 const { toCurrency } = formatMoney()
 
@@ -40,6 +45,19 @@ watch(() => props.isOpen, async () => fetchOrder())
 
 const handleCopyOrder = (order) => orderToClipboard(order)
 
+const handlePrintOrder = () => {
+    renderToast(checkConnection(), 'Verificando conexão', 'Conectando', () => {
+        renderToast(findPrinter(selectedPrinter.value), 'Procurando impressora padrão', 'impressora encontrada', () => {
+
+        }, 'Impressora não encontrada', () => {
+            const promise = listPrinters()
+            renderToast(promise, 'Listando impressoras', 'Lista Obtida', (response) => {
+                printerList.value = response
+            })
+        })
+    })
+}
+
 </script>
 
 <template>
@@ -52,9 +70,32 @@ const handleCopyOrder = (order) => orderToClipboard(order)
                     <Skeleton class="w-48 h-5" />
                 </div>
                 <div class="leading-none flex gap-3 justify-between" v-else>
-                    <button class="group" @click="handleCopyOrder(data)">
-                        #{{ data.id }} <i class="ri-file-copy-fill opacity-75 group-hover:opacity-100 transition-all" />
-                    </button>
+                    <div class="flex gap-2 ">
+                        <button class="group" @click="handleCopyOrder(data)">
+                            #{{ data.id }} <i
+                                class="ri-file-copy-fill opacity-75 group-hover:opacity-100 transition-all" />
+                        </button>
+                        <button
+                            class="relative min-w-[32px] min-h-[32px] w-[32px] h-[32px] text-2xl shadow-md rounded-full hover:text-info/100 text-info/60 transition-all group-hover/line:bg-white group-aria-selected/line:!bg-white hover:shadow-lg flex justify-center items-center"
+                            @click="handlePrintOrder">
+                            <i class="ri-printer-fill"></i>
+                        </button>
+                        <Select v-if="printerList.length > 0" :default-value="selectedPrinter" @update:modelValue="(value) => {
+                            selectedPrinter = value
+                        }">
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecione uma impressora" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Impressoras</SelectLabel>
+                                    <SelectItem v-for="printer in printerList" :value="printer">
+                                        {{ printer }}
+                                    </SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
                     <span class="text-sm">{{ data.distribuidor?.nome }}</span>
                 </div>
             </DialogTitle>

@@ -20,16 +20,11 @@ import { useToggleTabs } from './useTabs'
 import { usePage, } from '@inertiajs/vue3';
 import { useQzTray } from '@/composables/useQzTray'
 
-const { isConnected, selectedPrinter, connect, findPrinter, listPrinters, print } = useQzTray()
+// const isAuth = computed(() => page.props.auth.user)
+
+const { connect } = useQzTray()
 
 const page = usePage()
-
-// Estados
-const printerConnection = ref(null)
-const certificate = ref(null)
-const printerList = ref([]);
-
-// const isAuth = computed(() => page.props.auth.user)
 
 const typeAdmin = page.props.auth.user.tipoAdministrador
 
@@ -52,61 +47,16 @@ const { activeTab, setActiveTab } = useToggleTabs(tab)
 
 const handleSetActiveTab = (tab) => setActiveTab(tab)
 
-// Função para desconectar do QZ Tray
-function disconnectQZTray() {
-    qz.websocket.disconnect();
-    isConnected.value = false;
-}
-
-const handleConnect = async () => {
-    if (await connect()) {
-        console.log('connected')
-        const printers = await listPrinters();
-        console.log(printers);
-        printerList.value = printers;
-    }
-}
-
 // Função para conectar ao QZ Tray
-async function connectQZTray() {
-    try {
-        await handleConnect()
-    } catch (err) {
-        console.error('Failed to setup QZ Tray:', err)
-        printerConnection.value = false
-    }
-}
+const connectQZTray = () => renderToast(connect(), 'Conectando ao QZ Tray', 'Conectado ao QZ Tray')
 
-const handlePrint = async () => {
-    await findPrinter(selectedPrinter.value)
-    const data = [
-        { type: 'raw', format: 'plain', data: 'Olá, este é um teste de impressão!\n' }
-    ]
-    await print(data)
-}
-
-onMounted(() => {
-    connectQZTray()
-})
+onMounted(() => connectQZTray())
 
 </script>
 
 <template>
     <!-- MODAL REALIZAR PEDIDOS -->
     <div class="row">
-        <div>
-            <button @click="connectQZTray" :disabled="isConnected">Conectar ao QZ Tray</button>
-            <button @click="disconnectQZTray" :disabled="!isConnected">Desconectar</button>
-            <div v-if="isConnected">
-                <h3>Impressoras disponíveis</h3>
-                <select v-model="selectedPrinter">
-                    <option v-for="printer in printerList" :key="printer" :value="printer">
-                        {{ printer }}
-                    </option>
-                </select>
-                <button @click="handlePrint" :disabled="!selectedPrinter">Imprimir</button>
-            </div>
-        </div>
         <!-- Column -->
         <Tabs default-value="account" :default-value="tab" :model-value="activeTab">
             <TabsList class="grid w-full grid-cols-2">
@@ -163,6 +113,7 @@ onMounted(() => {
 <script>
 import axios from 'axios'
 import Dashboard from '../Dashboard.vue'
+import renderToast from '@/components/renderPromiseToast';
 export default {
     data() {
         return {

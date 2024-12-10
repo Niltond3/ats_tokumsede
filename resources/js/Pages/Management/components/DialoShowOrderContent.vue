@@ -46,6 +46,7 @@ const fetchOrder = () => {
     renderToast(promise, `carregando pedido ${props.orderId}`, 'Pedido carregado', (response) => {
         const formatedOrder = formatOrder(response.data)
 
+        
         const itensPedido = response.data.itensPedido.map((order) => { return { ...order, preco: toCurrency(order.preco), subtotal: toCurrency(order.subtotal), produto: { ...order.produto, nome: utf8Decode(order.produto.nome) } } })
 
         data.value = { ...formatedOrder, itensPedido }

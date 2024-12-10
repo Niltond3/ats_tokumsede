@@ -99,6 +99,15 @@ export const getStatusString = (agendado, dataAgendada, horaInicio, status) => {
     return statusString[statusKey]
 }
 
+function removeSegundos(horario) {
+    // Verifica se o formato contém segundos
+    if (/^\d{2}:\d{2}:\d{2}$/.test(horario)) {
+        // Remove os segundos
+        return horario.slice(0, 5);
+    }
+    // Caso já esteja no formato HH:mm, retorna sem alterações
+    return horario;
+}
 
 export const formatOrder = (order) => {
     const { toCurrency } = formatMoney()
@@ -113,13 +122,10 @@ export const formatOrder = (order) => {
     const cepMatch = postalCode.replace(/\D/g, '').match(cepRegex) || []
 
     const statusId = order.status
-    const status = getStatusString(order.agendado, order.dataAgendada, order.horaInicio, order.status)
-    const reason = order.retorno
 
-    const label = {
-        short: '',
-        long: ''
-    }
+    const horaInicio = removeSegundos(order.horaInicio)
+    const status = getStatusString(order.agendado, order.dataAgendada, horaInicio, order.status)
+    const reason = order.retorno
 
     const details = [
         { classColor: '', classIcon: 'ri-calendar-fill', label: { short: 'Criado', long: 'Horário Criado' }, data: order.horarioPedido, author: order.administrador },
@@ -174,7 +180,7 @@ export const formatOrder = (order) => {
         ...order,
         distribuidor: { ...order.distribuidor, nome: utf8Decode(order.distribuidor.nome) },
         cliente: { ...order.cliente, telefone, nome },
-        endereco, status, statusId, details, total, troco, trocoPara, formaPagamento, origem
+        endereco, status, statusId, details, total, troco, trocoPara, formaPagamento, origem, horaInicio
     }
 }
 

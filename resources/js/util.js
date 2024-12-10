@@ -152,13 +152,3 @@ export function generatePassword(options) {
 }
 
 export const isObjectEmpty = (objectName) => Object.keys(objectName).length === 0
-
-// // Tests
-// console.log('Running tests...');
-// for (let i = 0; i < 1e5; ++i) {
-//     const pass = generatePassword();
-//     if (!/[A-Z]/.test(pass) || !/[a-z]/.test(pass) || !/[0-9]/.test(pass) || !/[!@#$%^&()_+~`|}{[\]:;?><,./-=]/.test(pass)) {
-//         console.log('generatePassword() failed with: ' + pass);
-//     }
-// }
-// console.log('Tests finished');

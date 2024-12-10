@@ -344,6 +344,8 @@ const handlePrintOrder = () => {
     if (isMobile.value) {
         renderToast(connectPrinter(), 'conectando-se a impressora', 'conectado', () => {
             renderToast(printData(printOrder.imprimirPedido(data.value, 'tks')), 'imprimindo pedido', 'pedido impresso')
+        }, '', (err) => {
+            console.log(err)
         })
         return
     }

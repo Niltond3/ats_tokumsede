@@ -26,10 +26,12 @@ const canPrint = ref(false)
 const isMobile = ref(false)
 
 const print = async () => {
+    toast.info('Printing...')
     try {
         await printerRef.value.printData('Test Print\n\n')
+        toast.success('Printed!')
     } catch (err) {
-        toast.error(err.message)
+        toast.error(errorUtils.getErrorMessage(err))
     }
 }
 
@@ -66,8 +68,10 @@ const connectQZTray = () => renderToast(connect(), 'Conectando ao QZ Tray', 'Con
 onMounted(() => {
     connectQZTray()
     if (!(/mobile|android/i.test(navigator.userAgent))) {
+        console.log('Não é mobile')
         isMobile.value = false
     } else {
+        console.log('É mobile')
         isMobile.value = true
     }
 })
@@ -139,6 +143,7 @@ import axios from 'axios'
 import Dashboard from '../Dashboard.vue'
 import renderToast from '@/components/renderPromiseToast';
 import { toast } from 'vue-sonner';
+import { errorUtils } from '@/util';
 export default {
     data() {
         return {

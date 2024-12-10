@@ -16,13 +16,13 @@ import {
     TabsList,
     TabsTrigger,
 } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
 import { useToggleTabs } from './useTabs'
 import { usePage, } from '@inertiajs/vue3';
 import { useQzTray } from '@/composables/useQzTray'
 import BluetoothPrinter from './components/BluetoothPrinter.vue'
 
 const printerRef = ref(null)
-const canPrint = ref(false)
 const isMobile = ref(false)
 
 const print = async () => {
@@ -81,10 +81,8 @@ onMounted(() => {
 <template>
     <!-- MODAL REALIZAR PEDIDOS -->
     <div class="row">
-        <div v-if="isMobile">
-            <BluetoothPrinter ref="printerRef" />
-            <button @click="print" :disabled="!canPrint">Print Test</button>
-        </div>
+        <BluetoothPrinter ref="printerRef" />
+        <Button @click="print">Print Test</Button>
         <!-- Column -->
         <Tabs default-value="account" :default-value="tab" :model-value="activeTab">
             <TabsList class="grid w-full grid-cols-2">

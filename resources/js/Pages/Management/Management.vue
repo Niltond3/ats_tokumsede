@@ -16,24 +16,9 @@ import {
     TabsList,
     TabsTrigger,
 } from '@/components/ui/tabs'
-import { Button } from '@/components/ui/button'
 import { useToggleTabs } from './useTabs'
 import { usePage, } from '@inertiajs/vue3';
 import { useQzTray } from '@/composables/useQzTray'
-import BluetoothPrinter from './components/BluetoothPrinter.vue'
-
-const printerRef = ref(null)
-const isMobile = ref(false)
-
-const print = async () => {
-    toast.info('Printing...')
-    try {
-        await printerRef.value.printData('Test Print\n\n')
-        toast.success('Printed!')
-    } catch (err) {
-        toast.error(errorUtils.getErrorMessage(err))
-    }
-}
 
 // const isAuth = computed(() => page.props.auth.user)
 
@@ -65,24 +50,13 @@ const handleSetActiveTab = (tab) => setActiveTab(tab)
 // Função para conectar ao QZ Tray
 const connectQZTray = () => renderToast(connect(), 'Conectando ao QZ Tray', 'Conectado ao QZ Tray')
 
-onMounted(() => {
-    connectQZTray()
-    if (!(/mobile|android/i.test(navigator.userAgent))) {
-        console.log('Não é mobile')
-        isMobile.value = false
-    } else {
-        console.log('É mobile')
-        isMobile.value = true
-    }
-})
+onMounted(() => connectQZTray())
 
 </script>
 
 <template>
     <!-- MODAL REALIZAR PEDIDOS -->
     <div class="row">
-        <BluetoothPrinter ref="printerRef" />
-        <Button @click="print">Print Test</Button>
         <!-- Column -->
         <Tabs default-value="account" :default-value="tab" :model-value="activeTab">
             <TabsList class="grid w-full grid-cols-2">

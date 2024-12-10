@@ -1,13 +1,3 @@
-<template>
-    <div>
-        <button @click="connectPrinter" :disabled="isConnected">
-            {{ isConnected ? 'Connected' : 'Connect Printer' }}
-        </button>
-        <div v-if="error" class="error">{{ error }}</div>
-    </div>
-</template>
-
-<script setup>
 import { ref } from 'vue'
 
 const isConnected = ref(false)
@@ -45,7 +35,6 @@ const connectPrinter = async () => {
     }
 }
 
-// Function to print data
 const printData = async (data) => {
     if (!window.printerCharacteristic) {
         throw new Error('Printer not connected')
@@ -56,6 +45,7 @@ const printData = async (data) => {
     await window.printerCharacteristic.writeValue(dataArray)
 }
 
-// Expose print function
-defineExpose({ printData })
-</script>
+export {
+    connectPrinter,
+    printData,
+}

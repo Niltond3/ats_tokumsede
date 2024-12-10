@@ -13,6 +13,7 @@ import { formatOrder, orderToClipboard } from '../utils';
 import renderToast from '@/components/renderPromiseToast';
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 import { useQzTray } from '@/composables/useQzTray'
+import { connectPrinter, printData } from '@/services/MobilePrinterService';
 
 const { checkConnection, selectedPrinter, connect, findPrinter, listPrinters, print } = useQzTray()
 
@@ -24,6 +25,18 @@ const props = defineProps({
 const isLoading = ref(true); // Estado de carregamento
 const data = ref({})
 const printerList = ref([]);
+
+// Variável reativa para armazenar o tipo de dispositivo
+const isMobile = ref(false);
+
+// Função para detectar dispositivo
+const detectDevice = () => {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    // Verifica dispositivos móveis comuns
+    isMobile.value = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+};
+
+onMounted(() => detectDevice())
 
 const { toCurrency } = formatMoney()
 
@@ -209,39 +222,7 @@ const printOrder = {
             printData.push('\x10' + '\x14' + '\x01' + '\x00' + '\x05'); // Generate Pulse to kick-out cash drawer**
         }
         return printData;
-        // if (this.config != null) {
-        //     if (qz.websocket.isActive()) {
-        //         qz.print(this.config, printData).catch(function (e) { alert("Erro na impressão."); });
-        //     } else {
-        //         this.connect();
-        //         alert("A impressora foi desconectada. Tente novamente! Caso não consiga, atualize a página.");
-        //     }
-        // } else {
-        //     if (!qz.websocket.isActive()) {
-        //         alert("Não foi possível localizar a impressora. Conecte-a e atualize a página.");
-        //     } else {
-        //         var este = this;
-        //         qz.printers.find().then(function (printers) {
-        //             for (let i = 0; i < este.impressoras.length; i++) {
-        //                 for (let p = 0; p < printers.length; p++) {
-        //                     if (este.impressoras[i] == printers[p]) {
-        //                         este.printer = printers[p];
-        //                     }
-        //                     if (este.printer) { break; }
-        //                 }
-        //                 if (este.printer) { break; }
-        //             }
-        //             este.config = qz.configs.create(este.printer);
-        //             qz.print(este.config, printData).catch(function (e) { alert("Erro na impressão."); });
-        //         }).catch(function (error) {
-        //             Toast.fire({
-        //                 type: 'warning',
-        //                 title: "Impressora não localizada",
-        //                 text: error
-        //             });
-        //         });
-        //     }
-        // }
+
     },
     produtoL1: function (pedido, pos) {
         var padding1 = Array(5).join('0');
@@ -360,9 +341,14 @@ const handlePrint = async () => {
     }
 }
 const handlePrintOrder = () => {
+    if (isMobile.value) {
+        renderToast(connectPrinter(), 'conectando-se a impressora', 'conectado', () => {
+            renderToast(printData(printOrder.imprimirPedido(data.value, 'tks')), 'imprimindo pedido', 'pedido impresso')
+        })
+        return
+    }
     renderToast(checkConnection(), 'Verificando conexão', 'Conectando', () => {
         renderToast(findPrinter(selectedPrinter.value), 'Procurando impressora padrão', 'impressora encontrada', () => {
-            console.log(data.value)
             handlePrint()
         }, 'Impressora não encontrada', () => {
             const promise = listPrinters()

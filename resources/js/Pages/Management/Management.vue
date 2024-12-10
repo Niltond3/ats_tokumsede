@@ -23,12 +23,13 @@ import BluetoothPrinter from './components/BluetoothPrinter.vue'
 
 const printerRef = ref(null)
 const canPrint = ref(false)
+const isMobile = ref(false)
 
 const print = async () => {
     try {
         await printerRef.value.printData('Test Print\n\n')
     } catch (err) {
-        console.error('Print error:', err)
+        toast.error(err.message)
     }
 }
 
@@ -65,9 +66,9 @@ const connectQZTray = () => renderToast(connect(), 'Conectando ao QZ Tray', 'Con
 onMounted(() => {
     connectQZTray()
     if (!(/mobile|android/i.test(navigator.userAgent))) {
-        console.log('teste')
+        isMobile.value = false
     } else {
-        console.log('alguma outra coisa')
+        isMobile.value = true
     }
 })
 
@@ -76,7 +77,7 @@ onMounted(() => {
 <template>
     <!-- MODAL REALIZAR PEDIDOS -->
     <div class="row">
-        <div>
+        <div v-if="isMobile">
             <BluetoothPrinter ref="printerRef" />
             <button @click="print" :disabled="!canPrint">Print Test</button>
         </div>
@@ -137,6 +138,7 @@ onMounted(() => {
 import axios from 'axios'
 import Dashboard from '../Dashboard.vue'
 import renderToast from '@/components/renderPromiseToast';
+import { toast } from 'vue-sonner';
 export default {
     data() {
         return {

@@ -8,6 +8,7 @@ import Support from '@/components/welcome/Support.vue';
 import GetInTouch from '@/components/welcome/GetInTouch.vue';
 import Footer from '@/components/welcome/Footer.vue';
 import DeliveryService from '@/components/welcome/DeliveryService.vue';
+import PrivacyPolicy from '@/components/welcome/PrivacyPolicy.vue';
 
 
 defineProps({
@@ -47,6 +48,7 @@ function handleImageError() {
         <Informations />
         <Support />
         <GetInTouch />
+        <PrivacyPolicy />
         <Footer />
     </div>
 </template>

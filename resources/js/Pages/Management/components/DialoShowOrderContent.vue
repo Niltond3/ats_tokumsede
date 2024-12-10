@@ -209,39 +209,6 @@ const printOrder = {
             printData.push('\x10' + '\x14' + '\x01' + '\x00' + '\x05'); // Generate Pulse to kick-out cash drawer**
         }
         return printData;
-        // if (this.config != null) {
-        //     if (qz.websocket.isActive()) {
-        //         qz.print(this.config, printData).catch(function (e) { alert("Erro na impressão."); });
-        //     } else {
-        //         this.connect();
-        //         alert("A impressora foi desconectada. Tente novamente! Caso não consiga, atualize a página.");
-        //     }
-        // } else {
-        //     if (!qz.websocket.isActive()) {
-        //         alert("Não foi possível localizar a impressora. Conecte-a e atualize a página.");
-        //     } else {
-        //         var este = this;
-        //         qz.printers.find().then(function (printers) {
-        //             for (let i = 0; i < este.impressoras.length; i++) {
-        //                 for (let p = 0; p < printers.length; p++) {
-        //                     if (este.impressoras[i] == printers[p]) {
-        //                         este.printer = printers[p];
-        //                     }
-        //                     if (este.printer) { break; }
-        //                 }
-        //                 if (este.printer) { break; }
-        //             }
-        //             este.config = qz.configs.create(este.printer);
-        //             qz.print(este.config, printData).catch(function (e) { alert("Erro na impressão."); });
-        //         }).catch(function (error) {
-        //             Toast.fire({
-        //                 type: 'warning',
-        //                 title: "Impressora não localizada",
-        //                 text: error
-        //             });
-        //         });
-        //     }
-        // }
     },
     produtoL1: function (pedido, pos) {
         var padding1 = Array(5).join('0');

@@ -44,9 +44,7 @@ const printData = async (data) => {
 
     while (offset < dataArray.length) {
         const chunk = dataArray.slice(offset, offset + MAX_CHUNK_SIZE);
-        setTimeout(async () => {
-            await window.printerCharacteristic.writeValue(chunk); // Enviar cada pacote
-        }, 250);
+        await window.printerCharacteristic.writeValue(chunk); // Enviar cada pacote
         offset += MAX_CHUNK_SIZE;
     }
 

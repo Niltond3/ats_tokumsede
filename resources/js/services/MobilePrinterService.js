@@ -3,6 +3,7 @@ import { ref } from 'vue'
 const isConnected = ref(false)
 const error = ref(null)
 const device = ref(null)
+const MAX_CHUNK_SIZE = 300; // Tamanho máximo permitido por pacote
 
 const connectPrinter = async () => {
     // Request Bluetooth device with printer service
@@ -33,12 +34,22 @@ const connectPrinter = async () => {
 
 const printData = async (data) => {
     if (!window.printerCharacteristic) {
-        throw new Error('Printer not connected')
+        throw new Error('Impressora não conectada')
     }
 
-    const encoder = new TextEncoder()
-    const dataArray = encoder.encode(data)
-    await window.printerCharacteristic.writeValue(dataArray)
+    const encoder = new TextEncoder();
+    const dataArray = encoder.encode(data);
+
+    let offset = 0;
+
+    while (offset < dataArray.length) {
+        const chunk = dataArray.slice(offset, offset + MAX_CHUNK_SIZE);
+        setTimeout(async () => {
+            await window.printerCharacteristic.writeValue(chunk); // Enviar cada pacote
+        }, 250);
+        offset += MAX_CHUNK_SIZE;
+    }
+
 }
 
 export {

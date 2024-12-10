@@ -63,7 +63,7 @@ export function dateToDayMonthYearFormat(date) {
 
     return {
         date: `${dd}/${MM}/${YYYY}`,
-        time: `${hh}:${mm}:00`
+        time: `${hh}:${mm}`
     }
 }
 
@@ -80,7 +80,7 @@ export function dateToISOFormat(dateTimeString) {
     const [HH, mm] = time.split(':');
 
     // Retornamos a data formatada em um padrão compatível com ISO:
-    const formattedDate = `${YYYY}-${MM}-${DD}T${HH}:${mm}`;;
+    const formattedDate = `${YYYY}-${MM}-${DD}T${HH}:${mm}`;
     return new Date(formattedDate)
 }
 

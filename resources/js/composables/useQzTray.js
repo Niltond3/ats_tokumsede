@@ -1,6 +1,5 @@
 import { ref } from "vue";
 import { qzTrayService } from "@/services/qzTrayService";
-import { errorUtils } from "@/util";
 
 export function useQzTray() {
     const isConnected = ref(false);

@@ -19,6 +19,18 @@ import {
 import { useToggleTabs } from './useTabs'
 import { usePage, } from '@inertiajs/vue3';
 import { useQzTray } from '@/composables/useQzTray'
+import BluetoothPrinter from './components/BluetoothPrinter.vue'
+
+const printerRef = ref(null)
+const canPrint = ref(false)
+
+const print = async () => {
+    try {
+        await printerRef.value.printData('Test Print\n\n')
+    } catch (err) {
+        console.error('Print error:', err)
+    }
+}
 
 // const isAuth = computed(() => page.props.auth.user)
 
@@ -50,13 +62,24 @@ const handleSetActiveTab = (tab) => setActiveTab(tab)
 // Função para conectar ao QZ Tray
 const connectQZTray = () => renderToast(connect(), 'Conectando ao QZ Tray', 'Conectado ao QZ Tray')
 
-onMounted(() => connectQZTray())
+onMounted(() => {
+    connectQZTray()
+    if (!(/mobile|android/i.test(navigator.userAgent))) {
+        console.log('teste')
+    } else {
+        console.log('alguma outra coisa')
+    }
+})
 
 </script>
 
 <template>
     <!-- MODAL REALIZAR PEDIDOS -->
     <div class="row">
+        <div>
+            <BluetoothPrinter ref="printerRef" />
+            <button @click="print" :disabled="!canPrint">Print Test</button>
+        </div>
         <!-- Column -->
         <Tabs default-value="account" :default-value="tab" :model-value="activeTab">
             <TabsList class="grid w-full grid-cols-2">

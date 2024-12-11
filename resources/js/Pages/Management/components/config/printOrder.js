@@ -217,7 +217,7 @@ const imprimirPedido = (pedido, printer) => {
         : printData.push("\x1B" + "\x33" + "\x00"); //Spacing
     printData.push("\x1B" + "\x61" + "\x32"); // right align
     printData.push(Array(characters + 1).join("-") + "\x0A");
-    if (pedido.entregador.nome) {
+    if (pedido.entregador) {
         printData.push(
             "Entregador " + removeAccents(pedido.entregador.nome) + "\x0A"
         );

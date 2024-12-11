@@ -76,7 +76,6 @@ const loadTableData = () => {
 }
 
 const handleLoadTableData = () => {
-    console.log('handleLoadTableData')
     loadTableData()
 }
 

@@ -63,7 +63,7 @@ export function dateToDayMonthYearFormat(date) {
 
     return {
         date: `${dd}/${MM}/${YYYY}`,
-        time: `${hh}:${mm}:00`
+        time: `${hh}:${mm}`
     }
 }
 
@@ -80,7 +80,7 @@ export function dateToISOFormat(dateTimeString) {
     const [HH, mm] = time.split(':');
 
     // Retornamos a data formatada em um padrão compatível com ISO:
-    const formattedDate = `${YYYY}-${MM}-${DD}T${HH}:${mm}`;;
+    const formattedDate = `${YYYY}-${MM}-${DD}T${HH}:${mm}`;
     return new Date(formattedDate)
 }
 
@@ -152,13 +152,3 @@ export function generatePassword(options) {
 }
 
 export const isObjectEmpty = (objectName) => Object.keys(objectName).length === 0
-
-// // Tests
-// console.log('Running tests...');
-// for (let i = 0; i < 1e5; ++i) {
-//     const pass = generatePassword();
-//     if (!/[A-Z]/.test(pass) || !/[a-z]/.test(pass) || !/[0-9]/.test(pass) || !/[!@#$%^&()_+~`|}{[\]:;?><,./-=]/.test(pass)) {
-//         console.log('generatePassword() failed with: ' + pass);
-//     }
-// }
-// console.log('Tests finished');

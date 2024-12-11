@@ -55,7 +55,7 @@ const renderToast = (
             return markRaw(
                 CustomDiv(
                     "Error",
-                    errorMessage || errorUtils.getError(getError)
+                    errorMessage || getError
                 )
             );
         },

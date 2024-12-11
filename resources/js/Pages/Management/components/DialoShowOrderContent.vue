@@ -13,7 +13,8 @@ import { formatOrder, orderToClipboard } from '../utils';
 import renderToast from '@/components/renderPromiseToast';
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 import { useQzTray } from '@/composables/useQzTray'
-import printOrder from './config/printOrder'
+import { connectPrinter, printMobileData } from '@/services/MobilePrinterService';
+import getPrintData from './config/printOrder'
 
 const { checkConnection, selectedPrinter, connect, findPrinter, listPrinters, print } = useQzTray()
 
@@ -26,6 +27,18 @@ const isLoading = ref(true); // Estado de carregamento
 const data = ref({})
 const printerList = ref([]);
 
+// Variável reativa para armazenar o tipo de dispositivo
+const isMobile = ref(false);
+
+// Função para detectar dispositivo
+const detectDevice = () => {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    // Verifica dispositivos móveis comuns
+    isMobile.value = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+};
+
+onMounted(() => detectDevice())
+
 const { toCurrency } = formatMoney()
 
 const fetchOrder = () => {
@@ -33,6 +46,7 @@ const fetchOrder = () => {
     const promise = axios.get(url)
     renderToast(promise, `carregando pedido ${props.orderId}`, 'Pedido carregado', (response) => {
         const formatedOrder = formatOrder(response.data)
+
 
         const itensPedido = response.data.itensPedido.map((order) => { return { ...order, preco: toCurrency(order.preco), subtotal: toCurrency(order.subtotal), produto: { ...order.produto, nome: utf8Decode(order.produto.nome) } } })
 
@@ -49,16 +63,24 @@ const handleCopyOrder = (order) => orderToClipboard(order)
 
 const handlePrint = async () => {
     try {
-        const printerData = printOrder(data.value, selectedPrinter.value)
+        const printerData = getPrintData(data.value, selectedPrinter.value)
         await print(printerData)
     } catch (error) {
         console.log(error)
     }
 }
 const handlePrintOrder = () => {
+    if (isMobile.value) {
+        renderToast(connectPrinter(), 'conectando-se a impressora', 'conectado', () => {
+            const printerData = getPrintData(data.value, selectedPrinter.value)
+            renderToast(printMobileData(printerData), 'imprimindo pedido', 'pedido impresso')
+        }, '', (err) => {
+            console.log(err)
+        })
+        return
+    }
     renderToast(checkConnection(), 'Verificando conexão', 'Conectando', () => {
         renderToast(findPrinter(selectedPrinter.value), 'Procurando impressora padrão', 'impressora encontrada', () => {
-            console.log(data.value)
             handlePrint()
         }, 'Impressora não encontrada', () => {
             const promise = listPrinters()

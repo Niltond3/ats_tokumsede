@@ -150,8 +150,8 @@
             <p class="text-justify indent-8">
                 Após a efetivação do seu cadastro você poderá consultar essa política de privacidade a qualquer momento
                 no endereço
-                <a href="tks.tokumsede.com.br/privacidade.html" class="font-medium text-primary hover:underline">
-                    tks.tokumsede.com.br/privacidade.html
+                <a href="#privacidade" class="font-medium text-primary hover:underline">
+                    tks.tokumsede.com.br/#privacidade
                 </a>
             </p>
         </div>

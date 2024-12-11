@@ -272,7 +272,9 @@ const imprimirPedido = (pedido, printer) => {
         pedido.cliente.outrosContatos.length > 0
     ) {
         printData.push(
-            "Outros Contatos: " + removeAccents(cliente.outrosContatos) + "\x0A"
+            "Outros Contatos: " +
+                removeAccents(pedido.cliente.outrosContatos) +
+                "\x0A"
         );
         printData.push(Array(characters + 1).join("-") + "\x0A");
     }

@@ -26,6 +26,7 @@ const handleConfirm = (confirm) => {
         return toggleDialog()
     }
     emits('on:confirm', reson.value == '' ? true : reson.value)
+    return toggleDialog()
 }
 
 const getVariant = {

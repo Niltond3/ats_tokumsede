@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { MoreVertical } from 'lucide-vue-next'
 import DialogConfirmAction from './DialogConfirmAction.vue'
 import DialogEditClient from './DialogEditClient.vue'
+import renderToast from '@/components/renderPromiseToast'
 
 const props = defineProps({
     payloadData: { type: null, required: true },
@@ -25,16 +26,18 @@ function copy() {
     navigator.clipboard.writeText(props.payloadData)
 }
 
-const handleStatusClientChange = ({ id, status }) => {
-    var url = `clientes/${idCliente}`
-    const promise = axios.put(url, { status: id })
-    renderToast(promise, 'alterando status do cliente', `O cliente ${idCliente} foi ${status} com sucesso!`, () => props.dataTable.ajax.reload())
-}
-
 const handleUpdateDataTable = () => props.dataTable.ajax.reload()
 const handleToggleDropdown = (op) => {
     if (op || op == false) dropdownOpen.value = !dropdownOpen.value
 }
+
+const handleStatusClientChange = ({ id, status }) => {
+    var url = `clientes/${idCliente}`
+    handleToggleDropdown(true)
+    const promise = axios.put(url, { status: id })
+    renderToast(promise, 'alterando status do cliente', `O cliente ${idCliente} foi ${status} com sucesso!`, () => handleUpdateDataTable())
+}
+
 </script>
 
 <template>

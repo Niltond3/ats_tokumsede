@@ -1,6 +1,9 @@
 <script setup>
+// Vue Core
 import { ref, onMounted, reactive, watch } from 'vue'
 import { useWindowSize } from '@vueuse/core'
+
+// UI Components
 import {
     Table,
     TableBody,
@@ -9,6 +12,11 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import { Separator } from '@/components/ui/separator'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+
+// Table Logic
 import {
     FlexRender,
     getCoreRowModel,
@@ -20,21 +28,25 @@ import {
     getSortedRowModel,
     useVueTable,
 } from '@tanstack/vue-table'
-import { Separator } from '@/components/ui/separator'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
+
+// Custom Hooks
 import { editRow } from './hooks/useEditRow'
 import { dataTable } from './hooks/useDataTable'
 import { payloadPedido } from '@/hooks/usePayloadPedido'
+
+// Configuration
 import { columns } from './config/Columns'
+
+// Components
 import { SelectDistributor, DialogCreateOrderNote } from './components'
 import SelectPayment from '@/components/orderComponents/SelectPayment.vue'
 import ExchangeInput from '@/components/orderComponents/ExchangeInput.vue'
 import DateTimePicker from '@/components/orderComponents/DateTimePicker.vue'
+import DebouncedInput from './components/DebouncedInput.vue'
+
+// Utilities
 import { toast } from 'vue-sonner'
 import { dateToDayMonthYearFormat, dateToISOFormat, formatMoney } from '@/util'
-import DebouncedInput from './components/DebouncedInput.vue'
 
 const props = defineProps({
     createOrderData: { type: null, required: false },
@@ -294,8 +306,7 @@ const table = useVueTable(tableOptions)
         <div class="relative flex flex-wrap items-center pt-4 pb-1 justify-between gap-3 group">
             <div class="flex flex-col gap-1 w-full md:flex-row">
                 <DebouncedInput :modelValue="globalFilter ?? ''"
-                    @update:modelValue="value => (globalFilter = String(value))"
-                    className="p-2 font-lg shadow border border-block" placeholder="Search all columns..." />
+                    @update:modelValue="value => (globalFilter = String(value))" placeholder="Search all columns..." />
                 <SelectDistributor v-if="props.distributors" :distributors="props.distributors"
                     @update:distributor="handleDistributor" :default="`${payload.idDistribuidor}`"></SelectDistributor>
                 <span v-else class="font-medium flex items-center justify-center text-info py-1 px-2 w-full">

@@ -20,7 +20,6 @@ import {
     getSortedRowModel,
     useVueTable,
 } from '@tanstack/vue-table'
-import { rankItem } from '@tanstack/match-sorter-utils'
 import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -35,7 +34,7 @@ import ExchangeInput from '@/components/orderComponents/ExchangeInput.vue'
 import DateTimePicker from '@/components/orderComponents/DateTimePicker.vue'
 import { toast } from 'vue-sonner'
 import { dateToDayMonthYearFormat, dateToISOFormat, formatMoney } from '@/util'
-
+import DebouncedInput from './components/DebouncedInput.vue'
 
 const props = defineProps({
     createOrderData: { type: null, required: false },
@@ -72,40 +71,6 @@ const { width } = useWindowSize()
 
 
 const emit = defineEmits(['callback:payloadPedido'])
-
-// Define a custom fuzzy filter function that will apply ranking info to rows (using match-sorter utils)
-const fuzzyFilter = (row, columnId, value, addMeta) => {
-
-    //get column keys in row
-    const columnKeys = row.getAllCells().map((x) => x.column.id);
-
-    //map through column keys and rank each column, producing an array
-    const rowsValues = columnKeys.map((k) => {
-        const rowVal = row.getValue(k);
-        if (k != 'globalSort' && k != 'enderecos' && k != 'actions' && rowVal !== null) return rowVal.toString().toLowerCase()
-        return null
-    }).filter((x) => x).toString().replace(/,/g, " ");
-
-    const rankedValue = rankItem(rowsValues, value, {
-        threshold: 0.1,
-        keepDiacritics: true
-    });
-
-    //calculate aggregate rank
-    const aggregateRank = rankedValue.rank;
-
-    //create an object to add to columnFiltersMeta
-    const metaItem = { aggregateRank, rankedValues: rankedValue };
-
-    //add filter results to meta
-    addMeta(metaItem);
-
-    //set logic for does the filter pass
-    const doesItemPass = rankedValue.rank >= 1.01;
-
-    // Return if the item should be filtered in/out
-    return doesItemPass; //itemRank.passed;
-}
 
 const handleCallbackPedido = () => {
     setPayload({ ...payload.value, observacao: addressNote.value })
@@ -288,18 +253,10 @@ onMounted(() => {
 const tableOptions = reactive({
     get data() { return tableData.value },
     get columns() { return resizebleColumns.value },
-    filterFns: {
-        fuzzy: fuzzyFilter, //define as a filter function that can be used in column definitions
-    },
     state: {
         get globalFilter() { return globalFilter.value },
-        get sorting() {
-            return sorting.value
-        },
-        columnVisibility: {
-            // globalSort: false,
-        },
-
+        get sorting() { return sorting.value },
+        columnVisibility: { /* globalSort: false,*/ },
     },
     onSortingChange: updaterOrValue => {
         sorting.value =
@@ -307,19 +264,21 @@ const tableOptions = reactive({
                 ? updaterOrValue(sorting.value)
                 : updaterOrValue
     },
+    onGlobalFilterChange: (updaterOrValue) => {
+        globalFilter.value =
+            typeof updaterOrValue === 'function'
+                ? updaterOrValue(globalFilter.value)
+                : updaterOrValue;
+    },
     meta: {
         updateData,
         editedRows,
         setEditedRows,
         payload
     },
-    globalFilterFn: 'fuzzy', //apply fuzzy filter to the global filter (most common use case for fuzzy filter)
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(), //client side filtering
     getSortedRowModel: getSortedRowModel(), //client side sorting needed if you want to use sorting too.
-    //no need to pass pageCount or rowCount with client-side pagination as it is calculated automatically
-    onSortingChange: updaterOrValue => valueUpdater(updaterOrValue, sorting),
-    onGlobalFilterChange: updaterOrValue => valueUpdater(updaterOrValue, globalFilter),
     getPaginationRowModel: getPaginationRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
@@ -334,8 +293,9 @@ const table = useVueTable(tableOptions)
     <div>
         <div class="relative flex flex-wrap items-center pt-4 pb-1 justify-between gap-3 group">
             <div class="flex flex-col gap-1 w-full md:flex-row">
-                <Input class="w-full" placeholder="Pesquisar..." :modelValue="globalFilter ?? ''"
-                    @update:modelValue="value => (globalFilter = String(value))" />
+                <DebouncedInput :modelValue="globalFilter ?? ''"
+                    @update:modelValue="value => (globalFilter = String(value))"
+                    className="p-2 font-lg shadow border border-block" placeholder="Search all columns..." />
                 <SelectDistributor v-if="props.distributors" :distributors="props.distributors"
                     @update:distributor="handleDistributor" :default="`${payload.idDistribuidor}`"></SelectDistributor>
                 <span v-else class="font-medium flex items-center justify-center text-info py-1 px-2 w-full">

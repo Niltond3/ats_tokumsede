@@ -39,42 +39,26 @@ const connectToQZ = async () => {
 
 export const qzTrayService = {
     async connect() {
-        try {
-            await setCertificatePromise();
-            await connectToQZ();
-            if (!connected.value) {
-                return;
-            }
-            return true;
-        } catch (err) {
-            return false;
+        await setCertificatePromise();
+        await connectToQZ();
+        if (!connected.value) {
+            return;
         }
+        return true;
     },
 
     async listPrinters() {
-        try {
-            const printers = await qz.printers.find();
-            return printers;
-        } catch (err) {
-            return false;
-        }
+        const printers = await qz.printers.find();
+        return printers;
     },
     async findPrinter(printerName) {
         const printer = await qz.printers.find(printerName);
         return printer;
     },
     async print(printer, data) {
-        try {
-            const config = qz.configs.create(printer);
-            await qz.print(config, data);
-            return true;
-        } catch (err) {
-            return false;
-        }
+        const config = qz.configs.create(printer);
+        await qz.print(config, data);
+        return true;
     },
-    async checkConnection() {
-        const isConnected = await qz.websocket.isActive();
-        if (isConnected) return true;
-        return false;
-    },
+    async checkConnection() {},
 };

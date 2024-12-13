@@ -306,7 +306,7 @@ const table = useVueTable(tableOptions)
         <div class="relative flex flex-wrap items-center pt-4 pb-1 justify-between gap-3 group">
             <div class="flex flex-col gap-1 w-full md:flex-row">
                 <DebouncedInput :modelValue="globalFilter ?? ''"
-                    @update:modelValue="value => (globalFilter = String(value))" placeholder="Search all columns..." />
+                    @update:modelValue="value => (globalFilter = String(value))" placeholder="Todos os produtos..." />
                 <SelectDistributor v-if="props.distributors" :distributors="props.distributors"
                     @update:distributor="handleDistributor" :default="`${payload.idDistribuidor}`"></SelectDistributor>
                 <span v-else class="font-medium flex items-center justify-center text-info py-1 px-2 w-full">

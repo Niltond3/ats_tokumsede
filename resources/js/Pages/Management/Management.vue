@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import qz from 'qz-tray';
 import { TableClientes } from './DataTableClientes'
 import { TablePedidos } from './DataTablePedidos'
@@ -19,11 +19,12 @@ import {
 import { useToggleTabs } from './useTabs'
 import { usePage, } from '@inertiajs/vue3';
 import { useQzTray } from '@/composables/useQzTray'
+import useIsMobile from '@/composables/useIsMobile'
 
 // const isAuth = computed(() => page.props.auth.user)
 
 const { connect } = useQzTray()
-
+const { detectDevice, isMobile } = useIsMobile()
 const page = usePage()
 
 const typeAdmin = page.props.auth.user.tipoAdministrador
@@ -48,9 +49,14 @@ const { activeTab, setActiveTab } = useToggleTabs(tab)
 const handleSetActiveTab = (tab) => setActiveTab(tab)
 
 // Função para conectar ao QZ Tray
-const connectQZTray = () => renderToast(connect(), 'Conectando ao QZ Tray', 'Conectado ao QZ Tray')
+const connectQZTray = () => renderToast(connect(), 'Conectando ao QZ Tray', 'Conectado ao QZ Tray', () => { }, 'QZ não encontrado, atualize a página e tente novamente')
 
-onMounted(() => connectQZTray())
+onMounted(() => {
+    console.log(isMobile.value)
+    detectDevice()
+    console.log(isMobile.value)
+    !isMobile.value && connectQZTray()
+})
 
 </script>
 
@@ -116,6 +122,7 @@ import Dashboard from '../Dashboard.vue'
 import renderToast from '@/components/renderPromiseToast';
 import { toast } from 'vue-sonner';
 import { errorUtils } from '@/util';
+import useIsMobile from '@/composables/useIsMobile';
 export default {
     data() {
         return {

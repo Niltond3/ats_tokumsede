@@ -6,40 +6,34 @@ export function useQzTray() {
     const selectedPrinter = ref("tks");
 
     const connect = async () => {
-        try {
-            isConnected.value = await qzTrayService.connect();
-            return isConnected.value;
-        } catch (error) {
-            return error;
-        }
+        isConnected.value = await qzTrayService.connect();
+        return isConnected.value;
     };
 
     const listPrinters = async () => {
-        try {
-            const printers = await qzTrayService.listPrinters();
-            if (printers) return printers;
-        } catch (error) {
-            return error;
-        }
+        const printers = await qzTrayService.listPrinters();
+        console.log(printers);
+        if (printers) return printers;
     };
     const checkConnection = async () => {
-        try {
-            const response = await qzTrayService.checkConnection();
-            isConnected.value = response;
-            return response;
-        } catch (error) {
-            return error;
-        }
+        const response = await qzTrayService.checkConnection();
+        isConnected.value = response;
+        return response;
     };
     const findPrinter = async (name) => {
-        const printer = await qzTrayService.findPrinter(name);
-        if (printer) selectedPrinter.value = printer;
-        return printer;
+        try {
+            const printer = await qzTrayService.findPrinter(name);
+            console.log(printer);
+            if (printer) selectedPrinter.value = printer;
+            return printer;
+        } catch (error) {
+            throw new Error(error);
+        }
     };
 
     const print = async (data) => {
         if (!selectedPrinter.value) {
-            throw new Error("No printer selected");
+            throw new Error("Nenhuma impressora selecionada");
         }
         return await qzTrayService.print(selectedPrinter.value, data);
     };

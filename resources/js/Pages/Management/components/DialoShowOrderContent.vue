@@ -15,8 +15,10 @@ import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 import { useQzTray } from '@/composables/useQzTray'
 import { connectPrinter, printMobileData } from '@/services/MobilePrinterService';
 import getPrintData from './config/printOrder'
+import useIsMobile from '@/composables/useIsMobile';
 
-const { checkConnection, selectedPrinter, connect, findPrinter, listPrinters, print } = useQzTray()
+const { checkConnection, selectedPrinter, findPrinter, listPrinters, print } = useQzTray()
+const { isMobile, detectDevice } = useIsMobile()
 
 const props = defineProps({
     orderId: { type: Number, required: true },
@@ -27,15 +29,7 @@ const isLoading = ref(true); // Estado de carregamento
 const data = ref({})
 const printerList = ref([]);
 
-// Variável reativa para armazenar o tipo de dispositivo
-const isMobile = ref(false);
 
-// Função para detectar dispositivo
-const detectDevice = () => {
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    // Verifica dispositivos móveis comuns
-    isMobile.value = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-};
 
 onMounted(() => detectDevice())
 
@@ -79,12 +73,15 @@ const handlePrintOrder = () => {
         })
         return
     }
-    renderToast(checkConnection(), 'Verificando conexão', 'Conectando', () => {
-        renderToast(findPrinter(selectedPrinter.value), 'Procurando impressora padrão', 'impressora encontrada', () => {
+    const promiseConnection = checkConnection()
+    renderToast(promiseConnection, 'Verificando conexão', 'Conectando', () => {
+        const promiseFindPrinter = findPrinter(selectedPrinter.value)
+        renderToast(promiseFindPrinter, 'Procurando impressora padrão', 'impressora encontrada', () => {
             handlePrint()
         }, 'Impressora não encontrada', () => {
-            const promise = listPrinters()
-            renderToast(promise, 'Listando impressoras', 'Lista Obtida', (response) => {
+            const promiseListPrinters = listPrinters()
+            renderToast(promiseListPrinters, 'Listando impressoras', 'Lista Obtida', (response) => {
+                console.log(response)
                 printerList.value = response
             })
         })

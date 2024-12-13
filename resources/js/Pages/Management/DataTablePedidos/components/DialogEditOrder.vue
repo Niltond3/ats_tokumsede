@@ -1,5 +1,5 @@
 <script setup>
-import { ref, markRaw, defineComponent, h, onMounted, watch } from 'vue';
+import { ref, watch } from 'vue';
 import {
     Dialog,
     DialogContent,
@@ -11,7 +11,6 @@ import {
 import { utf8Decode, formatMoney } from '@/util';
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
 import { formatOrder, orderToClipboard } from '../../utils';
-import { toast } from 'vue-sonner'
 import { DataTableProducts } from '../../DataTableProducts';
 import { dialogState } from '../../../../hooks/useToggleDialog'
 import renderToast from '@/components/renderPromiseToast';
@@ -42,7 +41,6 @@ const fetchOrder = () => {
 
     renderToast(promise, `carregando pedido #${props.orderId}`, 'sucesso ao carregar pedido', (responseOrder) => {
         const { data: orderEditData } = responseOrder
-        console.log(orderEditData)
         const orderData = orderEditData[0]
         const distributorsData = orderEditData[1]
         const clientName = utf8Decode(orderEditData[0].cliente.nome)

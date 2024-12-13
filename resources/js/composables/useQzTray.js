@@ -6,13 +6,17 @@ export function useQzTray() {
     const selectedPrinter = ref("tks");
 
     const connect = async () => {
-        isConnected.value = await qzTrayService.connect();
-        return isConnected.value;
+        const response = await qzTrayService.connect();
+        if (response) {
+            isConnected.value = true;
+        } else {
+            isConnected.value = false;
+            throw new Error("Impossível conectar com a impressora");
+        }
     };
 
     const listPrinters = async () => {
         const printers = await qzTrayService.listPrinters();
-        console.log(printers);
         if (printers) return printers;
     };
     const checkConnection = async () => {
@@ -23,7 +27,6 @@ export function useQzTray() {
     const findPrinter = async (name) => {
         try {
             const printer = await qzTrayService.findPrinter(name);
-            console.log(printer);
             if (printer) selectedPrinter.value = printer;
             return printer;
         } catch (error) {

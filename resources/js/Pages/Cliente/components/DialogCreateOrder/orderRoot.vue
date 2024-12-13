@@ -61,7 +61,6 @@ const whenDialogOpen = async () => {
     const { id } = props.address
     const url = `produtos/${id}`
     const responseOrder = await axios.get(url)
-    console.log(responseOrder)
     const { data: orderData } = responseOrder
     const products = orderData[0].map(product => { return { ...product, nome: utf8Decode(product.nome) } }).filter(product => product.id != 3 && product.id != 334).sort();
     const responseDistributor = orderData[1];
@@ -89,7 +88,6 @@ const whenDialogOpen = async () => {
         distributorExpedient: orderData[6],
         distributorTaxes: orderData[4],
     }
-    console.log(products)
     readbleOrderData.value = values
 
     const { distributorTaxes: { taxaUnica: taxaEntrega }, distributor: { id: idDistribuidor, observacao }, address: { id: idEndereco } } = readbleOrderData.value
@@ -105,7 +103,6 @@ watch(() => isOpen.value, () => {
 
 
 watch(() => readbleOrderData.value.products, (newValue) => {
-    console.log(newValue)
     interableProducts.value = newValue
 })
 

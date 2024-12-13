@@ -60,7 +60,7 @@ const handlePrint = async () => {
         const printerData = getPrintData(data.value, selectedPrinter.value)
         await print(printerData)
     } catch (error) {
-        console.log(error)
+        console.error(error)
     }
 }
 const handlePrintOrder = () => {
@@ -69,7 +69,7 @@ const handlePrintOrder = () => {
             const printerData = getPrintData(data.value, selectedPrinter.value)
             renderToast(printMobileData(printerData), 'imprimindo pedido', 'pedido impresso')
         }, '', (err) => {
-            console.log(err)
+            console.error(err)
         })
         return
     }
@@ -81,7 +81,6 @@ const handlePrintOrder = () => {
         }, 'Impressora não encontrada', () => {
             const promiseListPrinters = listPrinters()
             renderToast(promiseListPrinters, 'Listando impressoras', 'Lista Obtida', (response) => {
-                console.log(response)
                 printerList.value = response
             })
         })

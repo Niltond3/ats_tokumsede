@@ -311,7 +311,7 @@ const ajax = {
         return JSON.stringify(newObj);
     },
     error: function (err) {
-        console.log(errorUtils.getError(err))
+        console.error(errorUtils.getError(err))
         toast.error('Ocorreu um erro ao carregar os clientes!' + errorUtils.getError(err))
     }
 }

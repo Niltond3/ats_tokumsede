@@ -24,23 +24,15 @@ export const tableProdutcs = () => {
 
         const rowValue = row.getValue(columnId);
 
-        console.log(rowValue);
-        console.log(columnId);
-        console.log(value);
-
         const itemValue =
             columnId === "preco"
                 ? rowValue[0].val.toString()
                 : rowValue.toString();
 
-        console.log(itemValue);
-
         const rankedItem = rankItem(itemValue, value, {
             threshold: 0.2,
             keepDiacritics: true,
         });
-
-        console.log(rankedItem);
 
         addMeta({
             rank: rankedItem.rank,

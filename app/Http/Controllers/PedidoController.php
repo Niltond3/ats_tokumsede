@@ -655,7 +655,16 @@ class PedidoController extends Controller
             // }
             //****************************** */
             $fcmService = new FCMNotificationService();
-            $fcmService->sendOrderNotification($pedido, $cliente, $endereco, $administradores);
+
+            $msg =  [
+                'title' => "Pedido {$pedido->id} - {$cliente->nome}",
+                'body' => $endereco ? "{$endereco->logradouro} {$endereco->numero}, {$endereco->bairro} - {$endereco->cidade}/{$endereco->estado}" : "Novo pedido recebido",
+                'tag' => $pedido->id,
+                'icon' => '/images/logo-icon.png',
+                'click_action' => 'https://tks.tokumsede.com.br'
+            ];
+
+            $fcmService->sendOrderNotification($administradores, $msg);
 
             return $pedido->id;//return response('Pedido '.$pedido.' cadastrado com sucesso.', 200);
         } else {
@@ -702,47 +711,8 @@ class PedidoController extends Controller
 
 //////////////////////////////////////////////////////////////////////////////////////////////
     function notification($msg, $administradores){
-        $headers = array(
-            'Authorization: key=AAAA92nZhZY:APA91bFbwC0HrbjmBGjQIrXtPrPZcH5gmCFK9y1jlQucH03VlNOHlO45Ru5Dk69iplWGYcnsVUbhG2hMH5AgoZzU9GCK0DmFplBjLz-QAmlFM5YOpmFFOr5ak--7l-yLahiaJKPPIUct',
-            'Content-Type: application/json'
-        );
-        foreach ($administradores as $administrador) {
-            // set only for one for safety
-            if($administrador->token_fcm!=null){
-                $fields = array(
-                    'priority' => 'high',
-                    'to' => $administrador->token_fcm,
-                    'notification' => $msg
-                );
-                $ch = curl_init();
-                curl_setopt( $ch,CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send' );
-                curl_setopt( $ch,CURLOPT_POST, true );
-                curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
-                curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
-                curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, true );
-                curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $fields ) );
-                $result = curl_exec($ch );
-                curl_close( $ch );
-            }
-            // set only for one for safety
-            if($administrador->token_fcm_mobile!=null){
-                $fields = array(
-                    'priority' => 'high',
-                    'to' => $administrador->token_fcm_mobile,
-                    'notification' => $msg
-                );
-                $ch = curl_init();
-                curl_setopt( $ch,CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send' );
-                curl_setopt( $ch,CURLOPT_POST, true );
-                curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
-                curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
-                curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, true );
-                curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $fields ) );
-                $result = curl_exec($ch );
-                curl_close( $ch );
-            }
-        }
-
+        $fcmService = new FCMNotificationService();
+        $fcmService->sendOrderNotification($administradores, $msg);
     }
     public function atualizar(Request $request, $idPedido){
         $request['dataAgendada'] = $request->dataAgendada == "" ? null : implode("-", array_reverse(explode("/", $request->dataAgendada)));
@@ -812,46 +782,10 @@ class PedidoController extends Controller
             'icon' => '/images/logo-icon.png',
             'click_action' => 'https://adm.tokumsede.com'
         );
-        $headers = array(
-            'Authorization: key=AAAA92nZhZY:APA91bFbwC0HrbjmBGjQIrXtPrPZcH5gmCFK9y1jlQucH03VlNOHlO45Ru5Dk69iplWGYcnsVUbhG2hMH5AgoZzU9GCK0DmFplBjLz-QAmlFM5YOpmFFOr5ak--7l-yLahiaJKPPIUct',
-            'Content-Type: application/json'
-        );
-        foreach ($administradores as $administrador) {
-            // set only for one for safety
-            if($administrador->token_fcm!=null){
-                $fields = array(
-                    'priority' => 'high',
-                    'to' => $administrador->token_fcm,
-                    'notification' => $msg
-                );
-                $ch = curl_init();
-                curl_setopt( $ch,CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send' );
-                curl_setopt( $ch,CURLOPT_POST, true );
-                curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
-                curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
-                curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, true );
-                curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $fields ) );
-                $result = curl_exec($ch );
-                curl_close( $ch );
-            }
-            // set only for one for safety
-            if($administrador->token_fcm_mobile!=null){
-                $fields = array(
-                    'priority' => 'high',
-                    'to' => $administrador->token_fcm_mobile,
-                    'notification' => $msg
-                );
-                $ch = curl_init();
-                curl_setopt( $ch,CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send' );
-                curl_setopt( $ch,CURLOPT_POST, true );
-                curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
-                curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
-                curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, true );
-                curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $fields ) );
-                $result = curl_exec($ch );
-                curl_close( $ch );
-            }
-        }
+
+        $fcmService = new FCMNotificationService();
+        $fcmService->sendOrderNotification($administradores, $msg);
+
         $pedido->editadoPor = auth()->user()->nome;
         if ($pedido->update($request->all())) {
             //Zerar todos os itens do pedido

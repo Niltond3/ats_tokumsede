@@ -17,17 +17,9 @@ class FCMNotificationService
         ];
     }
 
-    public function sendOrderNotification($pedido, $cliente, $endereco, $administradores)
+    public function sendOrderNotification( $administradores,  $notification)
     {
         try {
-            $notification = [
-                'title' => "Pedido {$pedido->id} - {$cliente->nome}",
-                'body' => "{$endereco->logradouro} {$endereco->numero}, {$endereco->bairro} - {$endereco->cidade}/{$endereco->estado}",
-                'tag' => $pedido->id,
-                'icon' => '/images/logo-icon.png',
-                'click_action' => 'https://tks.tokumsede.com.br'
-            ];
-
             $tokens = [];
             foreach ($administradores as $admin) {
                 $tokens = array_merge($tokens, array_filter([$admin->token_fcm, $admin->token_fcm_mobile]));

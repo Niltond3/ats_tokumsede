@@ -8,7 +8,7 @@ import 'datatables.net-buttons-dt';
 import 'datatables.net-responsive-dt';
 import 'datatables.net-searchpanes-dt';
 import 'datatables.net-select-dt';
-import { utf8Decode, dateToISOFormat } from '@/util';
+import { utf8Decode, dateToISOFormat, dateToDayMonthYearFormat, checkDate } from '@/util';
 import { getStatusString } from '../utils';
 import DropDownPedidos from './components/DropDownPedidos.vue';
 import ActionOrders from './components/ActionOrders.vue';
@@ -54,12 +54,26 @@ const loadTableData = () => {
 
         const newData = orders.map(pedido => {
             const status = getStatusString(pedido.agendado, pedido.dataAgendada, pedido.horaInicio, pedido.status)
-
             const distribuidorNome = utf8Decode(pedido.distribuidor.nome)
             const clienteNome = utf8Decode(pedido.cliente.nome)
+            const rawOrderDate = pedido.dataPedido ? pedido.dataPedido : dateToDayMonthYearFormat(pedido.horarioPedido)
+
+            const [orderDate, orderTime] = rawOrderDate.split(" ");
+
+
+            const getFormatedScheduleDate = () => {
+                if (!pedido.dataAgendada) return pedido.dataAgendada
+                const rawScheduleDate = `${pedido.dataAgendada} ${pedido.horaInicio}`
+                return `${checkDate(rawScheduleDate)} às ${pedido.horaInicio}`
+            }
+
+            const horarioPedido = `${checkDate(rawOrderDate)} às ${orderTime}`
+            const dataAgendada = getFormatedScheduleDate()
 
             return {
                 ...pedido, status,
+                horarioPedido,
+                dataAgendada,
                 distribuidor: {
                     ...pedido.distribuidor,
                     nome: distribuidorNome.substr(distribuidorNome.indexOf(" ") + 1)
@@ -70,7 +84,7 @@ const loadTableData = () => {
                 }
             }
         })
-
+        console.log(newData)
         data.value = newData
     })
 }

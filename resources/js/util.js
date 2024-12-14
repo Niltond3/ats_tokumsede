@@ -51,23 +51,33 @@ export function utf8Decode(utf8String) {
 }
 
 export function dateToDayMonthYearFormat(date) {
-    const YYYY = date.getFullYear();
-    const unformattedMonth = date.getMonth() + 1;
-    const unformattedDay = date.getDate();
-    const unformattedHour = date.getHours();
-    const unformattedMinutes = date.getMinutes();
+    try {
+        date == "2024-12-14 12:39:10" ? console.log(date) : null;
+        const YYYY = date.getFullYear();
+        const unformattedMonth = date.getMonth() + 1;
+        const unformattedDay = date.getDate();
+        const unformattedHour = date.getHours();
+        const unformattedMinutes = date.getMinutes();
 
-    const dd = unformattedDay < 10 ? `0${unformattedDay}` : unformattedDay;
-    const MM =
-        unformattedMonth < 10 ? `0${unformattedMonth}` : unformattedMonth;
-    const hh = unformattedHour < 10 ? `0${unformattedHour}` : unformattedHour;
-    const mm =
-        unformattedMinutes < 10 ? `0${unformattedMinutes}` : unformattedMinutes;
+        const dd = unformattedDay < 10 ? `0${unformattedDay}` : unformattedDay;
+        const MM =
+            unformattedMonth < 10 ? `0${unformattedMonth}` : unformattedMonth;
+        const hh =
+            unformattedHour < 10 ? `0${unformattedHour}` : unformattedHour;
+        const mm =
+            unformattedMinutes < 10
+                ? `0${unformattedMinutes}`
+                : unformattedMinutes;
 
-    return {
-        date: `${dd}/${MM}/${YYYY}`,
-        time: `${hh}:${mm}`,
-    };
+        return {
+            date: `${dd}/${MM}/${YYYY}`,
+            time: `${hh}:${mm}`,
+        };
+    } catch (error) {
+        console.log(error);
+        date == "2024-12-14 12:39:10" ? console.log(date) : null;
+        return date;
+    }
 }
 
 // A data passada deve estar no padrão:
@@ -85,6 +95,34 @@ export function dateToISOFormat(dateTimeString) {
     // Retornamos a data formatada em um padrão compatível com ISO:
     const formattedDate = `${YYYY}-${MM}-${DD}T${HH}:${mm}`;
     return new Date(formattedDate);
+}
+
+export function checkDate(date) {
+    // Get today's date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset to start of day (00:00:00)
+
+    // Get tomorrow's and yesterday's date
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    // Check if the date is today, tomorrow, or yesterday
+    const checkDate = dateToISOFormat(date);
+    checkDate.setHours(0, 0, 0, 0); // Reset to start of day (00:00:00)
+
+    if (checkDate.getTime() === today.getTime()) {
+        return "Hoje";
+    } else if (checkDate.getTime() === tomorrow.getTime()) {
+        return "Amanhã";
+    } else if (checkDate.getTime() === yesterday.getTime()) {
+        return "Ontem";
+    } else {
+        const [rawDate, _] = date.split(" ");
+        return rawDate;
+    }
 }
 
 export const removeEmptyValues = (array) => {

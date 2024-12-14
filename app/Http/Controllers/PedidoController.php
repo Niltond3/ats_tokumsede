@@ -11,6 +11,7 @@ use App\Models\Cliente;
 use App\Models\Produto;
 use App\Models\ItemPedido;
 use App\Models\Preco;
+use App\Services\FCMNotificationService;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -597,7 +598,11 @@ class PedidoController extends Controller
         //$request->idDistribuidor==23?$pedido->idDistribuidor=14:'';//PASSAR PEDIDOS DA TKS PRAIA PARA O TREZE DE MAIO
         Debugbar::info($pedido);
         if ($pedido->save()) {
+            Debugbar::info('Pedido salvo com sucesso');
+
             foreach ($request->itens as $item) {
+                Debugbar::info($item);
+
                 //Cria novo objeto referente ao Item
                 $itemPedido = new Itempedido();
 
@@ -628,8 +633,10 @@ class PedidoController extends Controller
                 // }
                 //**************************** */
                 //Salva o Item
+                Debugbar::info($itemPedido->idPedido);
                 $itemPedido->save();
             }
+            Debugbar::info('Itens salvos com sucesso');
             //PREMIAÇÕES DESCONTO NO PEDIDO
             // if($premiacoes && $cliente->tipoPessoa==1){
             //     $pedido->pontuacaoAcumulada=$cliente->pontuacao+$pedido->pontuacao;
@@ -647,56 +654,13 @@ class PedidoController extends Controller
             //     $pedido->save();
             // }
             //****************************** */
-            $headers = array(
-                'Authorization: key=AAAA92nZhZY:APA91bFbwC0HrbjmBGjQIrXtPrPZcH5gmCFK9y1jlQucH03VlNOHlO45Ru5Dk69iplWGYcnsVUbhG2hMH5AgoZzU9GCK0DmFplBjLz-QAmlFM5YOpmFFOr5ak--7l-yLahiaJKPPIUct',
-                'Content-Type: application/json'
-            );
-            $msg = array(
-                'title' => 'Pedido '.$pedido->id.' - '.$cliente->nome,
-                'body' => $endereco->logradouro.' '.$endereco->numero.', '.$endereco->bairro.' - '.$endereco->cidade.'/'.$endereco->estado,
-                'tag' => $pedido->id,
-                'icon' => '/images/logo-icon.png',
-                'click_action' => 'https://adm.tokumsede.com'
-            );
-            foreach ($administradores as $administrador) {
-                // set only for one for safety
-                if($administrador->token_fcm!=null){
-                    $fields = array(
-                        'priority' => 'high',
-                        'to' => $administrador->token_fcm,
-                        'notification' => $msg
-                    );
-                    $ch = curl_init();
-                    curl_setopt( $ch,CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send' );
-                    curl_setopt( $ch,CURLOPT_POST, true );
-                    curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
-                    curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
-                    curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, true );
-                    curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $fields ) );
-                    $result = curl_exec($ch );
-                    curl_close( $ch );
-                }
-                // set only for one for safety
-                if($administrador->token_fcm_mobile!=null){
-                    $fields = array(
-                        'priority' => 'high',
-                        'to' => $administrador->token_fcm_mobile,
-                        'notification' => $msg
-                    );
-                    $ch = curl_init();
-                    curl_setopt( $ch,CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send' );
-                    curl_setopt( $ch,CURLOPT_POST, true );
-                    curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
-                    curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
-                    curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, true );
-                    curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $fields ) );
-                    $result = curl_exec($ch );
-                    curl_close( $ch );
-                }
-            }
+            $fcmService = new FCMNotificationService();
+            $fcmService->sendOrderNotification($pedido, $cliente, $endereco, $administradores);
+
             return $pedido->id;//return response('Pedido '.$pedido.' cadastrado com sucesso.', 200);
         } else {
-            return response("Erro ao cadastrar o produto. Tente novamente ou contate a central.");
+            Debugbar::error('Erro ao cadastrar o pedido. Tente novamente ou contate a central');
+            return response("Erro ao cadastrar o pedido. Tente novamente ou contate a central.");
         }
         return $itens;
         //CADASTRAR PEDIDO

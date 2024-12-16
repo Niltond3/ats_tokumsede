@@ -9,9 +9,10 @@ import {
     NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu'
 import { Link, } from '@inertiajs/vue3';
-import logo from '../../../public/images/tokumsede-logo.png';
+import logo from '@/../../public/images/tokumsede-logo.png';
 import { onBeforeRouteUpdate, onBeforeRouteLeave, useRouter, useRoute } from 'vue-router';
-import { DialogRegisterProduct } from './DialogRegisterProduct';
+import { DialogRegisterProduct } from './components/DialogRegisterProduct';
+import DialogRegisterClient from './components/DialogRegisterClient.vue';
 
 
 const router = useRouter();
@@ -155,13 +156,16 @@ function irParaProdutosComFiltro() {
             </NavigationMenuItem>
             <NavigationMenuItem>
                 <NavigationMenuTrigger
-                    class="text-info/80 hover:text-info transition-colors font-semibold focus:text-accepted">Cadastros
+                    class="text-info/80 hover:text-info transition-colors font-semibold focus:text-accepted">Cadastrar
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                     <ul
                         class="grid w-[90vw] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] max-h-[64vh] overflow-auto">
                         <li key="product_register">
                             <DialogRegisterProduct />
+                        </li>
+                        <li key="client_register">
+                            <DialogRegisterClient />
                         </li>
                     </ul>
                 </NavigationMenuContent>

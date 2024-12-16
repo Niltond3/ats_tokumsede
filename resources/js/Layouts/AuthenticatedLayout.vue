@@ -8,7 +8,7 @@ import NavLink from '@/components/NavLink.vue';
 import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
 import { Link, usePage, } from '@inertiajs/vue3';
 import { Toggle } from '@/components/ui/toggle'
-import NavigationMenu from '@/components/NavigationMenu.vue';
+import NavigationMenu from '@/components/NavigationMenu/NavigationMenu.vue';
 
 const page = usePage()
 // const isAuth = computed(() => page.props.auth.user)

@@ -75,7 +75,6 @@ const fetchOrder = () => {
             const order = {
                 ...formatedOrder, itensPedido
             }
-
             createOrderData.value = {
                 clientName,
                 order,
@@ -84,6 +83,7 @@ const fetchOrder = () => {
                 address: order.endereco,
                 distributorExpedient: distributorExpedient.value,
                 distributorTaxes: distributorTaxes.value,
+                formaPagamento: orderData.formaPagamento
             }
             data.value = order
 

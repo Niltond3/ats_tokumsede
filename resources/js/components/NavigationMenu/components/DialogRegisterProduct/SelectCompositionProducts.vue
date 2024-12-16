@@ -14,14 +14,14 @@ import {
 import { NavigationMenuLink } from '@/components/ui/navigation-menu'
 import { dialogState } from '@/hooks/useToggleDialog'
 import { toTypedSchema } from '@vee-validate/zod'
-import renderToast from '../renderPromiseToast';
+import renderToast from '../../../renderPromiseToast';
 import {
     FormItem,
     FormLabel,
     FormControl,
     FormDescription,
     FormMessage
-} from '../ui/form';
+} from '../../../ui/form';
 import { useDropzone } from "vue3-dropzone";
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'

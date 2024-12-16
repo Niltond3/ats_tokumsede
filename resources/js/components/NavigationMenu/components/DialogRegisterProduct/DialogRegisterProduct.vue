@@ -16,7 +16,7 @@ import {
     FormLabel,
     FormControl,
     FormMessage
-} from '../ui/form'
+} from '../../../ui/form'
 import {
     Dialog,
     DialogContent,
@@ -40,7 +40,7 @@ import { Link } from '@inertiajs/vue3';
 // Utilities
 import { useDropzone } from "vue3-dropzone"
 import { dialogState } from '@/hooks/useToggleDialog'
-import renderToast from '../renderPromiseToast'
+import renderToast from '../../../renderPromiseToast'
 import { utf8Decode } from '@/util'
 import SelectImages from './SelectImages.vue'
 import SelectCompositionProducts from './SelectCompositionProducts.vue'

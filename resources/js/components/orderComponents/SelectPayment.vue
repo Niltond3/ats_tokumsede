@@ -8,6 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { onMounted } from 'vue';
 import { watch, ref } from 'vue';
 
 const paymentForms = [{
@@ -25,20 +26,20 @@ const paymentForms = [{
 }
 ]
 
-const props = defineProps(['default'])
-
-const defaultValue = ref(props.default)
+const props = defineProps({
+    default: { type: String, required: false, default: '1' },
+})
 
 const emit = defineEmits(['update:paymentForm'])
 
 const handlePaymentForm = (paymentForm) => emit('update:paymentForm', paymentForm)
 
-watch(() => props.default, (newValue) => defaultValue.value = newValue)
+onMounted(() => props)
 
 </script>
 
 <template>
-    <Select @update:modelValue="handlePaymentForm" :modelValue="defaultValue">
+    <Select @update:modelValue="handlePaymentForm" :modelValue="`${props.default}`">
         <SelectTrigger class="min-w-32 max-w-32 focus:!ring-transparent text-slate-500">
             <SelectValue placeholder="Forma de pagamento" />
         </SelectTrigger>

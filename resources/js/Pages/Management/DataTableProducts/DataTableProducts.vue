@@ -152,7 +152,9 @@ const dataToTable = (data) => {
     const order = data.order
 
     if (order) {
-        const { obs, itensPedido, total, formaPagamento: { id: formaPagamento }, trocoPara: orderTroco, agendado, dataAgendada, horaInicio, endereco: { observacao }, idEndereco, id: idPedido, status: orderStatus } = order
+        console.log(order)
+        const { obs, itensPedido, total, trocoPara: orderTroco, agendado, dataAgendada, horaInicio, endereco: { observacao }, idEndereco, id: idPedido, status: orderStatus } = order
+        const formaPagamento = data.formaPagamento;
         isUpdate.value = true
 
         const newProducts = products.map(product => {

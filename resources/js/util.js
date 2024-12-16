@@ -52,7 +52,6 @@ export function utf8Decode(utf8String) {
 
 export function dateToDayMonthYearFormat(date) {
     try {
-        date == "2024-12-14 12:39:10" ? console.log(date) : null;
         const YYYY = date.getFullYear();
         const unformattedMonth = date.getMonth() + 1;
         const unformattedDay = date.getDate();
@@ -74,8 +73,6 @@ export function dateToDayMonthYearFormat(date) {
             time: `${hh}:${mm}`,
         };
     } catch (error) {
-        console.log(error);
-        date == "2024-12-14 12:39:10" ? console.log(date) : null;
         return date;
     }
 }

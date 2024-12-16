@@ -7,7 +7,6 @@ import DropdownLink from '@/components/DropdownLink.vue';
 import NavLink from '@/components/NavLink.vue';
 import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
 import { Link, usePage, } from '@inertiajs/vue3';
-import observeNewOrders from '@/Pages/Management/DataTablePedidos/components/observeNewOrders';
 import { Toggle } from '@/components/ui/toggle'
 import NavigationMenu from '@/components/NavigationMenu.vue';
 
@@ -15,10 +14,6 @@ const page = usePage()
 // const isAuth = computed(() => page.props.auth.user)
 
 const showingNavigationDropdown = ref(false);
-
-onMounted(() => {
-    window.setInterval(observeNewOrders, 10000);
-})
 
 </script>
 

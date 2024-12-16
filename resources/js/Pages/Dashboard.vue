@@ -1,10 +1,17 @@
 <script setup>
 import { DashboardCard, DashboardColumn, DashboardProgressBar, DashboardAvatar, DashboardDonutChart } from '@/components/dashboardColumn';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import observeNewOrders from '@/Pages/Management/DataTablePedidos/components/observeNewOrders';
+
+onMounted(() => {
+    console.log('Dashboard')
+    window.setInterval(observeNewOrders, 10000);
+})
 </script>
 
 <script>
 import { formatMoney } from '@/util';
+import { onMounted } from 'vue';
 
 const { toCurrency } = formatMoney()
 

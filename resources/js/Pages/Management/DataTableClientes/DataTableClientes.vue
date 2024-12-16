@@ -32,6 +32,7 @@ import DropdownActionClient from './components/DropdownActionClient.vue';
 import DialogRegisterClient from './components/DialogRegisterClient.vue';
 import DialogRegisterAddress from './components/DialogRegisterAddress.vue';
 import DialogConfirmAddressDelete from './components/DialogConfirmAddressDelete.vue';
+import observeNewOrders from '../DataTablePedidos/components/observeNewOrders';
 
 DataTable.use(DataTablesCore);
 
@@ -230,8 +231,10 @@ ${address.referencia ? 'Referência: ' + address.referencia : ''}
 
 // Replace the existing onMounted with:
 onMounted(() => {
+    console.log('Clients')
     dt = table.value.dt
     initializeDataTable(dt)
+    window.setInterval(observeNewOrders, 10000);
 })
 
 const columns = [

@@ -4,7 +4,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import observeNewOrders from '@/Pages/Management/DataTablePedidos/components/observeNewOrders';
 
 onMounted(() => {
-    console.log('Dashboard')
     window.setInterval(observeNewOrders, 10000);
 })
 </script>

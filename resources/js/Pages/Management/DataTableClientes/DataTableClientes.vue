@@ -231,7 +231,6 @@ ${address.referencia ? 'Referência: ' + address.referencia : ''}
 
 // Replace the existing onMounted with:
 onMounted(() => {
-    console.log('Clients')
     dt = table.value.dt
     initializeDataTable(dt)
     window.setInterval(observeNewOrders, 10000);

@@ -152,7 +152,6 @@ const dataToTable = (data) => {
     const order = data.order
 
     if (order) {
-        console.log(order)
         const { obs, itensPedido, total, trocoPara: orderTroco, agendado, dataAgendada, horaInicio, endereco: { observacao }, idEndereco, id: idPedido, status: orderStatus } = order
         const formaPagamento = data.formaPagamento;
         isUpdate.value = true
@@ -200,12 +199,9 @@ watch(() => width.value, (newVal) => {
         return
     }
     resizebleColumns.value = columns
-
 })
 
-watch(() => props.createOrderData, (newVal) => {
-    dataToTable(newVal)
-})
+watch(() => props.createOrderData, (newVal) => dataToTable(newVal))
 
 watch(() => payload.value.itens, (newVal) => disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false)
 

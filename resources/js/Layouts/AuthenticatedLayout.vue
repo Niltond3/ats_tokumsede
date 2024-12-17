@@ -18,7 +18,7 @@ const showingNavigationDropdown = ref(false);
 </script>
 
 <template>
-    <Toaster richColors />
+    <Toaster richColors position="top-right" />
     <div>
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
             <div class="fixed w-full z-10 top-0">

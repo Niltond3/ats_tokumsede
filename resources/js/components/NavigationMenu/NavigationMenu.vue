@@ -19,8 +19,6 @@ const router = useRouter();
 // Obtém os parâmetros da rota
 const route = useRoute()
 
-// Desestruturando para pegar o parâmetro 'id'
-
 // Observar mudanças no parâmetro 'id'
 watch(() => route, (newId, oldId) => {
     console.log(`Parâmetro mudou: de ${oldId} para ${newId}`)

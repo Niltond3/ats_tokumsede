@@ -9,7 +9,6 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { onMounted } from 'vue';
-import { watch, ref } from 'vue';
 
 const paymentForms = [{
     label: 'Dinheiro',

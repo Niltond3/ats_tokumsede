@@ -119,7 +119,6 @@ onMounted(() => {
 
     $('.dt-search > input').addClass(inputClasses)
 
-    console.log('Orders')
     loadTableData();
     window.setInterval(observeNewOrders(loadTableData), 10000);
 })

@@ -149,9 +149,18 @@ export const columns = [
         id: "actions",
         size: 38,
         enableHiding: false,
-        cell: ({ row }) => {
+        cell: (props) => {
+            const { row, table } = props;
             const payment = row.original;
-
+            console.log(row.original);
+            console.log(table.options.meta.payload);
+            const saveOffer = {
+                idProduto: payment.id,
+                idDistribuidor: table.options.meta.payload.idDistribuidor,
+                idCliente: table.options.meta.payload.idCliente,
+                valor: payment.preco,
+                qtdMin: 1,
+            };
             return h(
                 "div",
                 { class: "relative" },

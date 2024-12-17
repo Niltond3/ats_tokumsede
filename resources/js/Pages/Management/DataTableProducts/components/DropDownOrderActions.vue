@@ -1,21 +1,43 @@
 <script setup>
+import { ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { MoreVertical } from 'lucide-vue-next'
+import DialogConfirmAction from './DialogConfirAction.vue'
 
-defineProps({
+const props = defineProps({
     payment: {
         id: String
-    }
+    },
+    offer: { type: String }
 })
+
+const emit = defineEmits(['changed'])
+
+const dropdownOpen = ref(false)
 
 function copy(id) {
     navigator.clipboard.writeText(id)
 }
+
+const handleSaveOffer = (confirmSaveCallbak) => {
+    const { reason, toggleDialog } = confirmSaveCallbak
+
+    if (!reason) return
+    emit('changed', true)
+    // var url = `pedidos/recusar/${idPedido}`
+    // const promise = axios.put(url, { retorno: reason })
+    // renderToast(promise, 'Cancelado', toggleDialog)
+}
+
+const handleToggleDropdown = (op) => {
+    if (op || op == false) dropdownOpen.value = !dropdownOpen.value
+}
+// :dialog-description=""
 </script>
 
 <template>
-    <DropdownMenu>
+    <DropdownMenu :open="dropdownOpen" @update:open="handleToggleDropdown">
         <DropdownMenuTrigger as-child>
             <Button variant="ghost" class="transition-colors text-cyan-700 p-0">
                 <span class="sr-only">Abrir Menú</span>
@@ -32,10 +54,10 @@ function copy(id) {
                 <i class="ri-pencil-fill"></i>
                 Editar Produto
             </DropdownMenuItem>
-            <DropdownMenuItem class="gap-1">
-                <i class="ri-save-3-fill"></i>
-                Salvar Oferta
-            </DropdownMenuItem>
+
+            <DialogConfirmAction dialog-title="Salvar Oferta" trigger-icon="ri-save-3-fill"
+                trigger-label="Salvar Oferta" variant="warning" @update:dialog-open="handleToggleDropdown"
+                @on:confirm="handleSaveOffer" />
             <DropdownMenuItem>Visualizar</DropdownMenuItem>
         </DropdownMenuContent>
     </DropdownMenu>

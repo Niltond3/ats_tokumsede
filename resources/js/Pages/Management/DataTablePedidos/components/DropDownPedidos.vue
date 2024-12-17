@@ -75,12 +75,10 @@ const handleEntregar = (id) => {
 
 const handleCancelar = (confirmCancellCalback) => {
     const { reason, toggleDialog } = confirmCancellCalback
-
-    if (!reason) return toggleDialog()
-
-    var url = `pedidos/recusar/${idPedido}`
-    const promise = axios.put(url, { retorno: reason })
-    renderToast(promise, 'Cancelado', toggleDialog)
+    console.log(confirmCancellCalback)
+    // var url = `pedidos/recusar/${idPedido}`
+    // const promise = axios.put(url, { retorno: reason })
+    // renderToast(promise, 'Cancelado', toggleDialog)
 }
 const handleToggleDropdown = (op) => {
     if (op || op == false) dropdownOpen.value = !dropdownOpen.value
@@ -89,7 +87,7 @@ const handleToggleDropdown = (op) => {
 </script>
 
 <template>
-    <DropdownMenu class="" :open="dropdownOpen" @update:open="handleToggleDropdown">
+    <DropdownMenu :open="dropdownOpen" @update:open="handleToggleDropdown">
         <div>
             <DropdownMenuTrigger as-child>
                 <Button variant="ghost" class="transition-colors text-cyan-700 p-0 hidden min-[426px]:block"

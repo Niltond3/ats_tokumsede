@@ -79,7 +79,15 @@ export const columns = [
         },
         cell: ({ row, getValue, column, table, cell }) => {
             const price = row.original;
+            const rowIndex = row.index;
             const itens = table.options.meta.payload.itens;
+            const { tableData } = table.options.meta;
+
+            const getOffer = () => {
+                if (tableData[rowIndex].precoEspecial) return true;
+                return false;
+            };
+            const offer = getOffer();
 
             const payloadProduct = itens.filter(
                 (produto) => produto.idProduto == price.id
@@ -95,7 +103,7 @@ export const columns = [
                 {
                     cellValue,
                     cellkey: cell.id,
-                    row,
+                    offer,
                     onChanged: (val) => {
                         table.options.meta.updateData(
                             row.index,
@@ -149,23 +157,31 @@ export const columns = [
         id: "actions",
         size: 38,
         enableHiding: false,
-        cell: (props) => {
-            const { row, table } = props;
+        cell: ({ row, getValue, column, table, cell }) => {
             const payment = row.original;
-            console.log(row.original);
-            console.log(table.options.meta.payload);
-            const saveOffer = {
+            const { payload } = table.options.meta;
+            const { clientId } = table.options.meta;
+            const offer = {
                 idProduto: payment.id,
-                idDistribuidor: table.options.meta.payload.idDistribuidor,
-                idCliente: table.options.meta.payload.idCliente,
-                valor: payment.preco,
-                qtdMin: 1,
+                idDistribuidor: payload.idDistribuidor,
+                idCliente: clientId,
+                valor: payment.preco[0].val,
+                qtdMin: payment.preco[0].qtd,
             };
+
             return h(
                 "div",
                 { class: "relative" },
                 h(DropDownOrderActions, {
                     payment,
+                    offer,
+                    onChanged: (isOffer) => {
+                        table.options.meta.updateData(
+                            row.index,
+                            "precoEspecial",
+                            [{ qtd: offer.qtdMin, val: offer.valor }]
+                        );
+                    },
                 })
             );
         },

@@ -52,7 +52,6 @@ const handleDialogOpen = (op) => {
     !op && emits('update:dialogOpen', false)
     toggleDialog()
 }
-
 </script>
 
 <template>

@@ -6,6 +6,7 @@ import { formatMoney } from '@/util'
 const props = defineProps({
     cellvalue: { type: String, required: false },
     cellkey: { type: String, required: false },
+    offer: { type: Boolean, required: false, default: false }
 });
 
 const { toCurrency, config } = formatMoney()
@@ -31,7 +32,7 @@ function handleBlur() {
 </script>
 
 <template>
-    <div @click="handleClick">
+    <div @click="handleClick" class="relative">
         <div v-if="!showInput">
             <slot />
         </div>
@@ -42,6 +43,7 @@ function handleBlur() {
                 class="focus:ring-transparent focus:outline-none w-20 border border-gray-200 rounded-md p-1"
                 v-money3="config" />
         </div>
+        <i v-if="offer" class="ri-hand-coin-fill absolute left-[40%] xsm:-left-5 xsm:top-1/2 xsm:-translate-y-1/2"></i>
     </div>
 </template>
 

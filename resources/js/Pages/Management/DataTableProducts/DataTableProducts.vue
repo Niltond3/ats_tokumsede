@@ -59,6 +59,8 @@ const [editedRows, setEditedRows] = editRow()
 
 const [payload, setPayload] = payloadPedido()
 
+const clientId = ref(null)
+
 const isUpdate = ref(false)
 
 const pageSizes = ref([50])
@@ -143,7 +145,9 @@ const handleStatusChange = () => {
 }
 
 const dataToTable = (data) => {
-    const { products, distributorTaxes: { taxaUnica: taxaEntrega }, distributor: { id: idDistribuidor, nome: distributorName }, address: { id: idEndereco, observacao } } = data
+    const { products, distributorTaxes: { taxaUnica: taxaEntrega }, distributor: { id: idDistribuidor, nome: distributorName }, address: { id: idEndereco, observacao, idCliente } } = data
+
+    clientId.value = idCliente
 
     tableIdentifier.value = distributorName
 
@@ -162,7 +166,7 @@ const dataToTable = (data) => {
             if (productToChange) return { ...product, preco: [{ qtd: product.preco[0].qtd, val: toFloat(productToChange.preco) }] }
             return product
         })
-
+        console.log(newProducts)
         setTableData(newProducts)
 
         const itens = itensPedido.map(item => {
@@ -201,31 +205,39 @@ watch(() => width.value, (newVal) => {
     resizebleColumns.value = columns
 })
 
-watch(() => props.createOrderData, (newVal) => dataToTable(newVal))
-
 watch(() => payload.value.itens, (newVal) => disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false)
 
 const updateData = (rowIndex, columnId, value) => {
-    const newData = columnId !== 'quantidade' ? [...tableData.value.map((row, index) => {
+
+    const oldRow = tableData.value[rowIndex]
+
+    const updateTableData = (updateValue) => [...tableData.value.map((row, index) => {
         if (index == rowIndex) {
-            const oldRow = tableData.value[rowIndex]
             return {
                 ...oldRow,
-                [columnId]: [{ qtd: oldRow[columnId][0].qtd, val: toFloat(value) }]
-            }
-        }
-        return row;
-    })] : [...tableData.value.map((row, index) => {
-        if (index == rowIndex) {
-            const oldRow = tableData.value[rowIndex]
-            return {
-                ...oldRow,
-                [columnId]: value
+                [columnId]: updateValue
             }
         }
         return row;
     })]
 
+    const updatePrice = () => updateTableData([{ qtd: oldRow[columnId][0].qtd, val: toFloat(value) }])
+    const updateQuantity = () => updateTableData(value)
+    const setSpecialPrice = () => updateTableData(value)
+    const handleDefault = () => {
+        toast.error('ação desconhecida')
+        return tableData.value
+    }
+
+    const actions = {
+        preco: updatePrice,
+        quantidade: updateQuantity,
+        precoEspecial: setSpecialPrice,
+        default: handleDefault
+    }
+
+    const newData = actions[columnId] ? actions[columnId]() : actions.default()
+    console.log(newData)
     setTableData(newData)
 
     const itens = newData.map(product => {
@@ -257,7 +269,10 @@ const updateData = (rowIndex, columnId, value) => {
 
 onMounted(() => {
     table.setPageSize(pageSizes.value[0])
-    if (props.createOrderData) dataToTable(props.createOrderData)
+
+    if (props.createOrderData) {
+        dataToTable(props.createOrderData)
+    }
 })
 
 const tableOptions = reactive({
@@ -281,10 +296,12 @@ const tableOptions = reactive({
                 : updaterOrValue;
     },
     meta: {
+        clientId,
         updateData,
         editedRows,
         setEditedRows,
-        payload
+        payload,
+        tableData
     },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(), //client side filtering

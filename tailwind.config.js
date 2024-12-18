@@ -343,7 +343,7 @@ module.exports = {
                 "4xsm": "320px", // Pequenos dispositivos (ex: iPhone SE)
                 "3xsm": "375px", // Dispositivos com tela de 375px de largura (ex: iPhone 6/7/8)
                 "2xsm": "425px", // Dispositivos com tela de 425px de largura (ex: iPhone Plus)
-                xsm: "448px", // Dispositivos com tela de 448px de largura (ex: dispositivos com um pouco mais de tela)
+                xsm: "449px", // Dispositivos com tela de 448px de largura (ex: dispositivos com um pouco mais de tela)
             },
         },
     },

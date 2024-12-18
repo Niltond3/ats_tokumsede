@@ -113,6 +113,8 @@ const dragScrollList = (elementId) => {
     ele.addEventListener('mousedown', mouseDownHandler);
 }
 
+const handleUpdateDataTable = () => dt.ajax.reload();
+
 const setupChildRowHandler = (dt, format) => {
     $('#datatable-clientes tbody').on('click', 'td.dt-control', async function () {
         const tr = $(this).closest('tr');
@@ -120,7 +122,7 @@ const setupChildRowHandler = (dt, format) => {
         const client = row.data()
 
         if (row.child.isShown()) {
-            addressTarget.value == null && dt.ajax.reload()
+            addressTarget.value == null && handleUpdateDataTable()
             return row.child.hide();
         }
 
@@ -318,8 +320,6 @@ const ajax = {
     }
 }
 
-const handleUpdateDataTable = () => dt.ajax.reload();
-
 const handleDeleteAddress = (confirm) => {
 
     if (confirm === false) return toggleConfirmDialog()
@@ -343,7 +343,7 @@ const handleDeleteAddress = (confirm) => {
     <div class="[&_.dt-search]:relative [&_.dt-search>label]:ri-search-2-fill">
 
         <DialogCreateOrder :open="isOpen" :toggleDialog="toggleDialog" :id-cliente-address="idClienteAddress"
-            :client-name="clientName" :set-tab="props.setTab" />
+            :client-name="clientName" :set-tab="props.setTab" @update:data-table="handleUpdateDataTable" />
         <DialogShowOrder :open="openShowOrderDialog" :toggleDialog="toggleShowOrderDialog" :order-id="idOrder" />
         <DialogRegisterClient @update:data-table="handleUpdateDataTable" />
         <DialogRegisterAddress :open="openRegisterAddress" :toggleDialog="toggleRegisterAddress" :id-client="idClient"

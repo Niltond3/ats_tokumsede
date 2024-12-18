@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Preco;
 use App\Models\Estoque;
-
+use \Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Http\Request;
 
 class PrecoController extends Controller
@@ -20,12 +20,12 @@ class PrecoController extends Controller
         $produtoId = $request->idProduto;
         $distribuidorId = $request->idDistribuidor;
 
+        // $request['inicioValidade'] = null;
+        // $request['fimValidade'] = null;
+        // $request['inicioHora']= null;
+        // $request['fimHora']= null;
+        // $request['fimHora']= null;
 
-        $request['inicioValidade'] = null;
-        $request['fimValidade'] = null;
-        $request['inicioHora']= null;
-        $request['fimHora']= null;
-        $request['fimHora']= null;
         $request['status'] = Preco::ATIVO;
         $request['idProduto'] = $produtoId;
         $request['idDistribuidor'] = $distribuidorId;
@@ -33,9 +33,15 @@ class PrecoController extends Controller
         $request['valor'] = $request->valor;
         $request['qtdMin'] = $request->qtdMin;
 
-        $request['idEstoque'] = Estoque::where([["idDistribuidor", $distribuidorId], ["idProduto", $produtoId]])->get()->first();
+        Debugbar::info($request);
+
+        $estoque = Estoque::where([["idDistribuidor", $distribuidorId], ["idProduto", $produtoId]])->get()->first();
+
+        $request['idEstoque'] = $estoque->id;
 
         $preco = new Preco($request->all());
+
+        Debugbar::info($preco);
 
         if($preco->save()){
             return response()->json(['status' => 'success', 'message' => 'Preço cadastrado com sucesso!']);

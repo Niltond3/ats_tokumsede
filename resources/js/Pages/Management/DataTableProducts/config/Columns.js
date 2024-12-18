@@ -93,11 +93,19 @@ export const columns = [
                 (produto) => produto.idProduto == price.id
             );
 
-            const cellValue =
-                payloadProduct.length > 0
-                    ? payloadProduct[0].preco
-                    : toFloat(`${getValue()[0].val}`);
+            const getCellValue = () => {
+                if (payloadProduct.length > 0) return payloadProduct[0].preco;
+                const precoEspecial = price.precoEspecial;
+                if (precoEspecial)
+                    return toFloat(
+                        `${precoEspecial[precoEspecial.length - 1].val}`
+                    );
+                return toFloat(`${getValue()[0].val}`);
+            };
 
+            console.log(price);
+
+            const cellValue = getCellValue();
             return h(
                 TableCell,
                 {
@@ -133,9 +141,9 @@ export const columns = [
 
             const minQtd =
                 itens.length > 0 &&
-                    itens
-                        .map((product) => product.quantidade)
-                        .reduce((curr, prev) => curr + prev) < 2
+                itens
+                    .map((product) => product.quantidade)
+                    .reduce((curr, prev) => curr + prev) < 2
                     ? 1
                     : 0;
 
@@ -161,6 +169,7 @@ export const columns = [
             const payment = row.original;
             const { payload } = table.options.meta;
             const { clientId } = table.options.meta;
+
             const offer = {
                 idProduto: payment.id,
                 idDistribuidor: payload.idDistribuidor,
@@ -171,8 +180,8 @@ export const columns = [
 
             const pricePayload = {
                 payload: offer,
-                tableValue: [{ qtd: offer.qtdMin, val: offer.valor }]
-            }
+                tableValue: [{ qtd: offer.qtdMin, val: offer.valor }],
+            };
             return h(
                 "div",
                 { class: "relative" },

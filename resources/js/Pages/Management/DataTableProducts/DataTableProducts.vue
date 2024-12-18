@@ -85,12 +85,22 @@ const { toCurrency, toFloat } = formatMoney()
 const { width } = useWindowSize()
 
 
-const emit = defineEmits(['callback:payloadPedido'])
+const emit = defineEmits(['callback:payloadPedido', 'update:specialOfferCreated'])
 
 const handleCallbackPedido = () => {
     setPayload({ ...payload.value, observacao: addressNote.value })
     disabledButton.value = true
     emit('callback:payloadPedido', payload.value)
+}
+
+const createSpecialOffer = (payload) => {
+    const url = 'preco'
+    const promise = axios.post(url, payload)
+    renderToast(promise, 'Salvando oferta ...', 'oferta salva com sucesso!', () => {
+        emit('update:specialOfferCreated', true)
+    }, 'Erro ao Salvar oferta!', (err) => {
+        console.log(err)
+    })
 }
 
 const handlePayForm = (value) => setPayload({ ...payload.value, formaPagamento: value })
@@ -147,7 +157,7 @@ const handleStatusChange = () => {
 
 const dataToTable = (data) => {
     const { products, distributorTaxes: { taxaUnica: taxaEntrega }, distributor: { id: idDistribuidor, nome: distributorName }, address: { id: idEndereco, observacao, idCliente } } = data
-
+    console.log(data)
     clientId.value = idCliente
 
     tableIdentifier.value = distributorName
@@ -167,7 +177,7 @@ const dataToTable = (data) => {
             if (productToChange) return { ...product, preco: [{ qtd: product.preco[0].qtd, val: toFloat(productToChange.preco) }] }
             return product
         })
-        console.log(newProducts)
+
         setTableData(newProducts)
 
         const itens = itensPedido.map(item => {
@@ -191,7 +201,6 @@ const dataToTable = (data) => {
         setPayload({ ...payload.value, formaPagamento, trocoPara, agendado, dataAgendada, horaInicio, obs, observacao, totalProdutos, total: toFloat(total), idEndereco, idDistribuidor, itens, idPedido, status: order.statusId })
         return
     }
-
 
     setTableData(products)
 
@@ -226,16 +235,8 @@ const updateData = (rowIndex, columnId, value) => {
     const updateQuantity = () => updateTableData(value)
     const setSpecialPrice = () => {
         const { payload, tableValue } = value;
-        console.log(payload)
-        console.log(tableValue)
-        const urlSetPrice = 'preco'
-        const promise = axios.post(urlSetPrice, payload)
-        renderToast(promise, 'Salvando oferta ...', 'oferta salva com sucesso!', (mess) => {
-            console.log(mess)
-        }, 'Erro ao Salvar oferta!', (err) => {
-            console.log(err)
-        })
-        updateTableData(tableValue)
+        createSpecialOffer(payload)
+        return updateTableData(tableValue)
     }
     const handleDefault = () => {
         toast.error('ação desconhecida')
@@ -250,7 +251,6 @@ const updateData = (rowIndex, columnId, value) => {
     }
 
     const newData = actions[columnId] ? actions[columnId]() : actions.default()
-    console.log(newData)
     setTableData(newData)
 
     const itens = newData.map(product => {
@@ -280,13 +280,9 @@ const updateData = (rowIndex, columnId, value) => {
 
 }
 
-onMounted(() => {
-    table.setPageSize(pageSizes.value[0])
+watch(() => props.createOrderData, (newVal) => dataToTable(newVal))
 
-    if (props.createOrderData) {
-        dataToTable(props.createOrderData)
-    }
-})
+onMounted(() => table.setPageSize(pageSizes.value[0]))
 
 const tableOptions = reactive({
     get data() { return tableData.value },

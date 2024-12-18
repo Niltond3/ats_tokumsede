@@ -32,10 +32,10 @@ function handleBlur() {
 </script>
 
 <template>
-    <div @click="handleClick" class="relative">
-        <div v-if="!showInput">
+    <div @click="handleClick" class="relative cursor-pointer">
+        <p v-if="!showInput">
             <slot />
-        </div>
+        </p>
 
         <div v-else class="relative items-center flex">
             <input type="text" ref="inputElement" @blur="handleBlur" @keypress.enter="handleBlur"

@@ -23,7 +23,9 @@ const isLoading = ref(true); // Estado de carregamento
 
 const createOrderData = ref()
 
-const emits = defineEmits(["update:modelValue"]);
+const updateTable = ref(false)
+
+const emits = defineEmits(["update:modelValue", "update:dataTable"]);
 
 const forwarded = useForwardPropsEmits(props, emits);
 
@@ -51,10 +53,10 @@ const whenDialogOpen = () => {
             ...responseDistributor,
             nome: utf8Decode(responseDistributor.nome),
         }
-
+        const products = orderData[0]
         createOrderData.value = {
             clientName: props.clientName,
-            products: orderData[0],
+            products,
             distributor,
             address,
             distributorExpedient: orderData[6],
@@ -78,10 +80,17 @@ const handleRealizarPedido = (payload) => {
     })
 }
 
+const handleSpecialOfferCreated = (isCreated) => updateTable.value = isCreated
+
+const handleToggleDialog = () => {
+    if (updateTable.value) emits('update:dataTable', true)
+    props.toggleDialog()
+}
+
 </script>
 
 <template>
-    <Dialog v-bind="forwarded" :open="handleDialogOpen()" @update:open="(op) => toggleDialog()">
+    <Dialog v-bind="forwarded" :open="handleDialogOpen()" @update:open="handleToggleDialog">
         <DialogContent class="sm:max-w-3xl">
             <div v-if="isLoading">
                 <div class="border rounded-md border-gray-200 relative">
@@ -128,8 +137,8 @@ const handleRealizarPedido = (payload) => {
                 </div>
             </div>
             <div v-else>
-                <DataTableProducts :create-order-data="createOrderData"
-                    @callback:payload-pedido="handleRealizarPedido" />
+                <DataTableProducts :create-order-data="createOrderData" @callback:payload-pedido="handleRealizarPedido"
+                    @update:special-offer-created="handleSpecialOfferCreated" />
             </div>
         </DialogContent>
     </Dialog>

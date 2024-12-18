@@ -133,9 +133,9 @@ export const columns = [
 
             const minQtd =
                 itens.length > 0 &&
-                itens
-                    .map((product) => product.quantidade)
-                    .reduce((curr, prev) => curr + prev) < 2
+                    itens
+                        .map((product) => product.quantidade)
+                        .reduce((curr, prev) => curr + prev) < 2
                     ? 1
                     : 0;
 
@@ -169,6 +169,10 @@ export const columns = [
                 qtdMin: payment.preco[0].qtd,
             };
 
+            const pricePayload = {
+                payload: offer,
+                tableValue: [{ qtd: offer.qtdMin, val: offer.valor }]
+            }
             return h(
                 "div",
                 { class: "relative" },
@@ -179,7 +183,7 @@ export const columns = [
                         table.options.meta.updateData(
                             row.index,
                             "precoEspecial",
-                            [{ qtd: offer.qtdMin, val: offer.valor }]
+                            pricePayload
                         );
                     },
                 })

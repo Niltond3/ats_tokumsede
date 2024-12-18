@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Preco;
+use App\Models\Estoque;
+
 use Illuminate\Http\Request;
 
 class PrecoController extends Controller
@@ -15,12 +17,31 @@ class PrecoController extends Controller
      */
     public function store(Request $request)
     {
-        $request['inicioValidade'] = $request->inicioValidade == "" ? null : implode("-", array_reverse(explode("/", $request->inicioValidade)));
-        $request['fimValidade'] = $request->fimValidade == "" ? null : implode("-", array_reverse(explode("/", $request->fimValidade)));
-        $request['idDistribuidor'] = auth()->user()->idDistribuidor;
+        $produtoId = $request->idProduto;
+        $distribuidorId = $request->idDistribuidor;
+
+
+        $request['inicioValidade'] = null;
+        $request['fimValidade'] = null;
+        $request['inicioHora']= null;
+        $request['fimHora']= null;
+        $request['fimHora']= null;
         $request['status'] = Preco::ATIVO;
+        $request['idProduto'] = $produtoId;
+        $request['idDistribuidor'] = $distribuidorId;
+        $request['idCliente'] = $request->idCliente;
+        $request['valor'] = $request->valor;
+        $request['qtdMin'] = $request->qtdMin;
+
+        $request['idEstoque'] = Estoque::where([["idDistribuidor", $distribuidorId], ["idProduto", $produtoId]])->get()->first();
+
         $preco = new Preco($request->all());
-        $preco->save();
+
+        if($preco->save()){
+            return response()->json(['status' => 'success', 'message' => 'Preço cadastrado com sucesso!']);
+        }else{
+            return response()->json(['status' => 'error', 'message' => 'Erro ao cadastrar preço!']);
+        };
         //
     }
 

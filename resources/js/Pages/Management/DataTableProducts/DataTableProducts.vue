@@ -47,6 +47,7 @@ import DebouncedInput from './components/DebouncedInput.vue'
 // Utilities
 import { toast } from 'vue-sonner'
 import { dateToDayMonthYearFormat, dateToISOFormat, formatMoney } from '@/util'
+import renderToast from '@/components/renderPromiseToast'
 
 const props = defineProps({
     createOrderData: { type: null, required: false },
@@ -223,7 +224,19 @@ const updateData = (rowIndex, columnId, value) => {
 
     const updatePrice = () => updateTableData([{ qtd: oldRow[columnId][0].qtd, val: toFloat(value) }])
     const updateQuantity = () => updateTableData(value)
-    const setSpecialPrice = () => updateTableData(value)
+    const setSpecialPrice = () => {
+        const { payload, tableValue } = value;
+        console.log(payload)
+        console.log(tableValue)
+        const urlSetPrice = 'preco'
+        const promise = axios.post(urlSetPrice, payload)
+        renderToast(promise, 'Salvando oferta ...', 'oferta salva com sucesso!', (mess) => {
+            console.log(mess)
+        }, 'Erro ao Salvar oferta!', (err) => {
+            console.log(err)
+        })
+        updateTableData(tableValue)
+    }
     const handleDefault = () => {
         toast.error('ação desconhecida')
         return tableData.value

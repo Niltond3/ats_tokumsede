@@ -10,6 +10,7 @@ use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\PrecoController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -83,6 +84,9 @@ Route::middleware('auth')->group(function () {
 
     //CATEGORIAS
     Route::resource('categorias', CategoriaController::class, ['except' => 'create']);
+
+    //PRECO
+    Route::resource('preco', PrecoController::class, ['except' => 'create']);
 });
 
 
@@ -90,7 +94,7 @@ Route::middleware('auth')->group(function () {
 Route::get('/homepage', [HomeController::class, 'getHomepage'])->name('homepage');
 
 
-//PEDIDOS
+//API
 Route::group(['prefix' => 'api'], function () {
     Route::resource('/', Api::class, ['except' => 'create']);
 

@@ -1,4 +1,4 @@
-import { h } from "vue";
+import { h, ref } from "vue";
 import { ArrowUpDown } from "lucide-vue-next";
 import { utf8Decode } from "@/util";
 import { Button } from "@/components/ui/button";
@@ -93,33 +93,40 @@ export const columns = [
                 (produto) => produto.idProduto == price.id
             );
 
-            const getCellValue = () => {
+            const precoEspecial = price.precoEspecial;
+
+            const getCellValue = (value) => {
                 if (payloadProduct.length > 0) return payloadProduct[0].preco;
-                const precoEspecial = price.precoEspecial;
-                if (precoEspecial)
-                    return toFloat(
-                        `${precoEspecial[precoEspecial.length - 1].val}`
-                    );
-                return toFloat(`${getValue()[0].val}`);
+                return toFloat(`${value}`);
             };
 
-            const cellValue = getCellValue();
-            return h(
-                TableCell,
-                {
-                    cellValue,
-                    cellkey: cell.id,
-                    offer,
-                    onChanged: (val) => {
-                        table.options.meta.updateData(
-                            row.index,
-                            column.id,
-                            val.value
-                        );
+            const getPriceComponent = (value, columnId) => {
+                const cellValue = getCellValue(value);
+
+                return h(
+                    TableCell,
+                    {
+                        cellValue,
+                        cellkey: cell.id,
+                        offer,
+                        onChanged: (val) => {
+                            table.options.meta.updateData(
+                                row.index,
+                                columnId,
+                                val.value
+                            );
+                        },
                     },
-                },
-                () => toCurrency(cellValue)
-            );
+                    () => toCurrency(cellValue)
+                );
+            };
+
+            if (precoEspecial) {
+                const value = precoEspecial[precoEspecial.length - 1].val;
+                return getPriceComponent(value, "precoEspecial");
+            }
+            const value = getValue()[0].val;
+            return getPriceComponent(value, column.id);
         },
         meta: {},
         enableGlobalFilter: true,

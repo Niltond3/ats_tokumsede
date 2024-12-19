@@ -1,22 +1,22 @@
-import { ref } from 'vue';
+import { ref } from "vue";
 
 export const payloadPedido = () => {
     const payload = ref({
-        formaPagamento: '1',
+        formaPagamento: "1",
         trocoPara: 0,
         agendado: 0,
-        dataAgendada: '',
-        horaInicio: '',
-        horaFim: '',
-        obs: '',
-        observacao: '',
+        dataAgendada: "",
+        horaInicio: "",
+        horaFim: "",
+        obs: "",
+        observacao: "",
         taxaEntrega: 0,
         totalProdutos: 0,
         total: 0,
         idEndereco: 0,
         idDistribuidor: 0,
         itens: [{}],
-        origem: null
+        origem: null,
     });
 
     function setPayload(newPayload) {

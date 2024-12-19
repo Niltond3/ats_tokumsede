@@ -30,9 +30,11 @@ import {
 } from '@tanstack/vue-table'
 
 // Custom Hooks
-import { editRow } from './hooks/useEditRow'
 import { dataTable } from './hooks/useDataTable'
 import { payloadPedido } from '@/hooks/usePayloadPedido'
+
+//composable
+import { useOrderState } from './composable/orderState'
 
 // Configuration
 import { columns } from './config/Columns'
@@ -48,17 +50,20 @@ import DebouncedInput from './components/DebouncedInput.vue'
 import { toast } from 'vue-sonner'
 import { dateToDayMonthYearFormat, dateToISOFormat, formatMoney } from '@/util'
 import renderToast from '@/components/renderPromiseToast'
+import { computed } from 'vue'
 
 const props = defineProps({
     createOrderData: { type: null, required: false },
     distributors: { type: Array, required: false },
 })
 
+const { editedRows } = useOrderState()
+
 const [tableData, setTableData] = dataTable([])
 
-const [editedRows, setEditedRows] = editRow()
-
 const [payload, setPayload] = payloadPedido()
+
+const status = ref(null)
 
 const clientId = ref(null)
 
@@ -67,8 +72,6 @@ const isUpdate = ref(false)
 const pageSizes = ref([50])
 
 const sorting = ref([])
-
-const status = ref(null)
 
 const globalFilter = ref('')
 
@@ -173,8 +176,9 @@ const dataToTable = (data) => {
         const newProducts = products.map(product => {
             const productToChange = itensPedido.filter(prod => prod.idProduto == product.id)[0]
 
-            if (productToChange) return { ...product, preco: [{ qtd: product.preco[0].qtd, val: toFloat(productToChange.preco) }] }
-            return product
+            if (!productToChange) return product
+            if (product.precoEspecial) return { ...product, preco: [{ qtd: product.preco[0].qtd, val: toFloat(productToChange.preco) }], precoEspecial: [{ qtd: product.precoEspecial[0].qtd, val: toFloat(productToChange.precoEspecial.val) }] }
+            return { ...product, preco: [{ qtd: product.preco[0].qtd, val: toFloat(productToChange.preco) }] }
         })
 
         setTableData(newProducts)
@@ -207,76 +211,87 @@ const dataToTable = (data) => {
 }
 
 watch(() => width.value, (newVal) => {
-    if (newVal <= 448) {
+    if (newVal <= 768) {
+        resizebleColumns.value = [...columns].filter(column => !['nome', 'descricao'].includes(column.id))
+    } else if (newVal <= 448) {
         resizebleColumns.value = [...columns].filter(column => column.id !== "nome")
-        return
+    } else {
+        resizebleColumns.value = columns
     }
-    resizebleColumns.value = columns
 })
 
 watch(() => payload.value.itens, (newVal) => disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false)
 
 const updateData = (rowIndex, columnId, value) => {
-
     const oldRow = tableData.value[rowIndex]
 
-    const updateTableData = (updateValue) => [...tableData.value.map((row, index) => {
-        if (index == rowIndex) {
-            return {
-                ...oldRow,
-                [columnId]: updateValue
-            }
-        }
-        return row;
-    })]
-
-    const updatePrice = () => updateTableData([{ qtd: oldRow[columnId][0].qtd, val: toFloat(value) }])
-    const updateQuantity = () => updateTableData(value)
-    const setSpecialPrice = () => {
-        const { payload, tableValue } = value;
-        createSpecialOffer(payload)
-        return updateTableData(tableValue)
-    }
-    const handleDefault = () => {
-        toast.error('ação desconhecida')
-        return tableData.value
-    }
+    const updateTableData = (updateValue) =>
+        tableData.value.map((row, index) =>
+            index === rowIndex ? { ...oldRow, [columnId]: updateValue } : row
+        )
 
     const actions = {
-        preco: updatePrice,
-        quantidade: updateQuantity,
-        precoEspecial: setSpecialPrice,
-        default: handleDefault
+        preco: () => updateTableData([{ qtd: oldRow[columnId][0].qtd, val: toFloat(value) }]),
+        quantidade: () => updateTableData(value),
+        precoEspecial: () => {
+            if (value.payload) {
+                const { payload, tableValue } = value
+                createSpecialOffer(payload)
+                return updateTableData(tableValue)
+            }
+            return updateTableData([{
+                qtd: oldRow[columnId][0].qtd,
+                val: toFloat(value)
+            }])
+        },
     }
 
-    const newData = actions[columnId] ? actions[columnId]() : actions.default()
-    setTableData(newData)
+    const newData = actions[columnId]
+        ? actions[columnId]()
+        : (toast.error('ação desconhecida'), tableData.value)
 
-    const itens = newData.map(product => {
-        if (product.quantidade > 0) {
-            const { id, preco, quantidade } = product
+    setTableData(newData)
+    calculateOrderTotals(newData)
+}
+
+// Helper function to calculate order totals
+const calculateOrderTotals = (newData) => {
+    const itens = newData
+        .filter(product => product.quantidade > 0)
+        .map(product => {
+            const { id, quantidade } = product
+            const precoEspecial = product.precoEspecial
+            const preco = precoEspecial
+                ? precoEspecial[precoEspecial.length - 1].val
+                : product.preco[0].val
+            const subtotal = quantidade * preco
+
             return {
                 idProduto: id,
-                quantidade: quantidade,
-                preco: preco[0].val,
-                subtotal: quantidade * preco[0].val,
-                precoAcertado: null,
+                quantidade,
+                preco,
+                subtotal,
+                precoAcertado: null
             }
-        }
-        return null
-    }).filter(x => x)
+        })
 
-    const taxaEntrega = payload.value.taxaEntrega
     try {
-        const totalProdutos = itens.map(product => product.subtotal).reduce((curr, prev) => curr + prev);
-        const total = totalProdutos + taxaEntrega
+        const totalCalculations = computed(() => ({
+            totalProdutos: itens.reduce((sum, product) => sum + product.subtotal, 0),
+            total: totalProdutos.value + payload.value.taxaEntrega
+        }))
+        const { totalProdutos, total } = totalCalculations.value
 
-        setPayload({ ...payload.value, totalProdutos, total, itens })
+        setPayload({
+            ...payload.value,
+            totalProdutos,
+            total,
+            itens
+        })
     } catch (error) {
         disabledButton.value = true
         toast.error('Adicione ao menos um produto')
     }
-
 }
 
 onMounted(() => {
@@ -309,7 +324,6 @@ const tableOptions = reactive({
         clientId,
         updateData,
         editedRows,
-        setEditedRows,
         payload,
         tableData
     },

@@ -21,13 +21,10 @@ function copy(id) {
 }
 
 const handleSaveOffer = (confirmSaveCallbak) => {
-    const { reason, toggleDialog } = confirmSaveCallbak
+    const { reason } = confirmSaveCallbak
 
     if (!reason) return
     emit('changed', true)
-    // var url = `pedidos/recusar/${idPedido}`
-    // const promise = axios.put(url, { retorno: reason })
-    // renderToast(promise, 'Cancelado', toggleDialog)
 }
 
 const handleToggleDropdown = (op) => {

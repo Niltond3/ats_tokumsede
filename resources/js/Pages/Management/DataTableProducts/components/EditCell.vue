@@ -19,11 +19,16 @@ const emits = defineEmits(['update:modelValue', 'callback:editedRow']);
 const tableMeta = ref(props.table.options.meta)
 
 
+
 const setEditedRows = (e) => {
     const elName = e.currentTarget.name;
-    tableMeta.value.setEditedRows();
+    const { editedRows } = tableMeta.value
 
-    emits('callback:editedRow', tableMeta.value.editedRows);
+    if (editedRows) editedRows = false
+    else editedRows = true
+
+
+    emits('callback:editedRow', editedRows);
 
     if (elName !== "edit") {
         tableMeta.value?.revertData(row.index, e.currentTarget.name === "cancel");

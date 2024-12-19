@@ -1,7 +1,7 @@
-import { ref } from 'vue';
+import { shallowRef } from "vue";
 
 export const dataTable = (data) => {
-    const tableData = ref(data);
+    const tableData = shallowRef(data);
 
     function setTableData(newTableData) {
         tableData.value = newTableData;

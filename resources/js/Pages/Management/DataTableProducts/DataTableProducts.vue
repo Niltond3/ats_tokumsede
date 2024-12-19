@@ -57,13 +57,13 @@ const props = defineProps({
     distributors: { type: Array, required: false },
 })
 
-const { editedRows } = useOrderState()
+const orderState = useOrderState()
+
+const { editedRows, status } = orderState
 
 const [tableData, setTableData] = dataTable([])
 
 const [payload, setPayload] = payloadPedido()
-
-const status = ref(null)
 
 const clientId = ref(null)
 
@@ -130,11 +130,11 @@ const handleDistributor = (value) => setPayload({ ...payload.value, idDistribuid
 const handleOrderNote = (value) => setPayload({ ...payload.value, obs: value })
 
 const handleStatusChange = () => {
-    if (status.value.label == 'Agendado') return toast.info('Pedido Agendado!')
-    if (status.value.label == 'Pendente' && !status.value.oldStatus) return toast.info('Pedido Pendente!')
-    if (status.value.label == 'Pendente' && status.value.oldStatus) {
-        status.value = status.value.oldStatus
-        setPayload({ ...payload.value, status: status.value.statusId })
+    if (orderState.status.label == 'Agendado') return toast.info('Pedido Agendado!')
+    if (orderState.status.label == 'Pendente' && !orderState.status.oldStatus) return toast.info('Pedido Pendente!')
+    if (orderState.status.label == 'Pendente' && orderState.status.oldStatus) {
+        orderState.status = orderState.status.oldStatus
+        setPayload({ ...payload.value, status: orderState.status.statusId })
         return toast.info('Status Restaurado!')
     }
 
@@ -149,11 +149,11 @@ const handleStatusChange = () => {
     }
 
     const oldStatus = {
-        ...status.value,
+        ...orderState.status,
         statusId: payload.value.status
     }
 
-    status.value = { ...pendente, oldStatus }
+    orderState.status = { ...pendente, oldStatus }
     setPayload({ ...payload.value, status: 1 })
     return toast.info('Status Alterado!')
 }
@@ -177,7 +177,8 @@ const dataToTable = (data) => {
             const productToChange = itensPedido.filter(prod => prod.idProduto == product.id)[0]
 
             if (!productToChange) return product
-            if (product.precoEspecial) return { ...product, preco: [{ qtd: product.preco[0].qtd, val: toFloat(productToChange.preco) }], precoEspecial: [{ qtd: product.precoEspecial[0].qtd, val: toFloat(productToChange.precoEspecial.val) }] }
+            if (product.precoEspecial) console.log(product.precoEspecial)
+            // if (product.precoEspecial) return { ...product, preco: [{ qtd: product.preco[0].qtd, val: toFloat(productToChange.preco) }], precoEspecial: [{ qtd: product.precoEspecial[0].qtd, val: toFloat(productToChange.precoEspecial.val) }] }
             return { ...product, preco: [{ qtd: product.preco[0].qtd, val: toFloat(productToChange.preco) }] }
         })
 
@@ -196,8 +197,7 @@ const dataToTable = (data) => {
                 subtotal
             }
         })
-
-        status.value = orderStatus
+        orderState.status = orderStatus
         const trocoPara = toFloat(orderTroco)
         const totalProdutos = itens.map(product => parseFloat(product.subtotal)).reduce((curr, prev) => curr + prev);
 
@@ -323,7 +323,7 @@ const tableOptions = reactive({
     meta: {
         clientId,
         updateData,
-        editedRows,
+        editedRows: orderState.editedRows,
         payload,
         tableData
     },
@@ -353,17 +353,17 @@ const table = useVueTable(tableOptions)
                 </span>
             </div>
             <div class="flex flex-col gap-1 w-full md:flex-row pb-2">
-                <button v-if="status"
-                    :class="[status.classes.bg, status.label == 'Agendado' ? 'text-slate-700' : 'text-white',]"
+                <button v-if="orderState.status"
+                    :class="[orderState.status.classes.bg, orderState.status.label == 'Agendado' ? 'text-slate-700' : 'text-white',]"
                     class="relative font-semibold px-2 py-1 rounded-lg opacity-80 hover:opacity-100 "
                     @click="handleStatusChange">
-                    <i v-if="status.label != 'Agendado' && status.label != 'Pendente'"
+                    <i v-if="orderState.status.label != 'Agendado' && orderState.status.label != 'Pendente'"
                         class="ri-edit-2-fill absolute bg-white rounded-full w-5 h-5 flex justify-center items-center -top-3 -right-1"
-                        :class="status.classes.text"></i>
-                    <i v-if="status.oldStatus"
+                        :class="orderState.status.classes.text"></i>
+                    <i v-if="orderState.status.oldStatus"
                         class="ri-arrow-go-back-fill absolute bg-white rounded-full w-5 h-5 flex justify-center items-center -top-3 -right-1"
-                        :class="status.classes.text"></i>
-                    {{ status.label }}
+                        :class="orderState.status.classes.text"></i>
+                    {{ orderState.status.label }}
                 </button>
                 <p class="text-sm font-semibold px-2 py-1 rounded-lg text-info ">
                     Cliente:

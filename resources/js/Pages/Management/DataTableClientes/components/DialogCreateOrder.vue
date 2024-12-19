@@ -10,6 +10,7 @@ import { DataTableProducts } from '../../DataTableProducts'
 import { utf8Decode } from '@/util';
 import renderToast from '@/components/renderPromiseToast';
 import { Skeleton } from '@/components/ui/skeleton'
+import { watch } from 'vue';
 
 const props = defineProps({
     open: { type: Boolean, required: false },
@@ -62,7 +63,6 @@ const whenDialogOpen = () => {
             distributorExpedient: orderData[6],
             distributorTaxes: orderData[4],
         }
-        isLoading.value = false
     })
 }
 
@@ -70,6 +70,8 @@ const handleDialogOpen = () => {
     props.open && whenDialogOpen()
     return props.open
 }
+
+watch(() => createOrderData.value, () => isLoading.value = false)
 
 const handleRealizarPedido = (payload) => {
     var url = "pedidos";
@@ -83,6 +85,7 @@ const handleRealizarPedido = (payload) => {
 const handleSpecialOfferCreated = (isCreated) => updateTable.value = isCreated
 
 const handleToggleDialog = () => {
+    isLoading.value = true
     if (updateTable.value) emits('update:dataTable', true)
     props.toggleDialog()
 }

@@ -1,6 +1,6 @@
 <script setup>
 // Vue Core
-import { ref, onMounted, reactive, watch } from 'vue'
+import { ref, onMounted, reactive, watch, onUnmounted } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 
 // UI Components
@@ -157,7 +157,6 @@ const handleStatusChange = () => {
 
 const dataToTable = (data) => {
     const { products, distributorTaxes: { taxaUnica: taxaEntrega }, distributor: { id: idDistribuidor, nome: distributorName }, address: { id: idEndereco, observacao, idCliente } } = data
-    console.log(data)
     clientId.value = idCliente
 
     tableIdentifier.value = distributorName
@@ -280,9 +279,11 @@ const updateData = (rowIndex, columnId, value) => {
 
 }
 
-watch(() => props.createOrderData, (newVal) => dataToTable(newVal))
+onMounted(() => {
+    table.setPageSize(pageSizes.value[0])
+    dataToTable(props.createOrderData)
+})
 
-onMounted(() => table.setPageSize(pageSizes.value[0]))
 
 const tableOptions = reactive({
     get data() { return tableData.value },

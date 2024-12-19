@@ -103,8 +103,6 @@ export const columns = [
                 return toFloat(`${getValue()[0].val}`);
             };
 
-            console.log(price);
-
             const cellValue = getCellValue();
             return h(
                 TableCell,

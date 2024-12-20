@@ -1,6 +1,6 @@
 <script setup>
 // Vue Core
-import { ref, onMounted, reactive, watch, onUnmounted } from 'vue'
+import { ref, onMounted, reactive, watch } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 
 // UI Components
@@ -29,12 +29,8 @@ import {
     useVueTable,
 } from '@tanstack/vue-table'
 
-// Custom Hooks
-import { dataTable } from './hooks/useDataTable'
-import { payloadPedido } from '@/hooks/usePayloadPedido'
-
 //composable
-import { useOrderState } from './composable/orderState'
+import { useOrderState } from '@/composables/orderState'
 
 // Configuration
 import { columns } from './config/Columns'
@@ -58,12 +54,6 @@ const props = defineProps({
 })
 
 const orderState = useOrderState()
-
-const { editedRows, status } = orderState
-
-const [tableData, setTableData] = dataTable([])
-
-const [payload, setPayload] = payloadPedido()
 
 const clientId = ref(null)
 
@@ -91,9 +81,9 @@ const { width } = useWindowSize()
 const emit = defineEmits(['callback:payloadPedido', 'update:specialOfferCreated'])
 
 const handleCallbackPedido = () => {
-    setPayload({ ...payload.value, observacao: addressNote.value })
+    orderState.payload = { ...orderState.payload, observacao: addressNote.value }
     disabledButton.value = true
-    emit('callback:payloadPedido', payload.value)
+    emit('callback:payloadPedido', orderState.payload)
 }
 
 const createSpecialOffer = (payload) => {
@@ -106,11 +96,9 @@ const createSpecialOffer = (payload) => {
     })
 }
 
-const handlePayForm = (value) => setPayload({ ...payload.value, formaPagamento: value })
+const handlePayForm = (value) => orderState.payload = { ...orderState.payload, formaPagamento: value }
 
-const handleExchange = ({ value }) => {
-    setPayload({ ...payload.value, trocoPara: parseFloat(value.split(' ')[1]) })
-}
+const handleExchange = ({ value }) => orderState.payload = { ...orderState.payload, trocoPara: parseFloat(value.split(' ')[1]) }
 
 const handleScheduling = (date) => {
     if (date) {
@@ -120,21 +108,21 @@ const handleScheduling = (date) => {
 
         const horaInicio = time
 
-        return setPayload({ ...payload.value, agendado: 1, dataAgendada, horaInicio })
+        return orderState.payload = { ...orderState.payload, agendado: 1, dataAgendada, horaInicio }
     }
-    return setPayload({ ...payload.value, agendado: 0, dataAgendada: '', horaInicio: '' })
+    return orderState.payload = { ...orderState.payload, agendado: 0, dataAgendada: '', horaInicio: '' }
 }
 
-const handleDistributor = (value) => setPayload({ ...payload.value, idDistribuidor: value })
+const handleDistributor = (value) => orderState.payload = { ...orderState.payload, idDistribuidor: value }
 
-const handleOrderNote = (value) => setPayload({ ...payload.value, obs: value })
+const handleOrderNote = (value) => orderState.payload = { ...orderState.payload, obs: value }
 
 const handleStatusChange = () => {
     if (orderState.status.label == 'Agendado') return toast.info('Pedido Agendado!')
     if (orderState.status.label == 'Pendente' && !orderState.status.oldStatus) return toast.info('Pedido Pendente!')
     if (orderState.status.label == 'Pendente' && orderState.status.oldStatus) {
         orderState.status = orderState.status.oldStatus
-        setPayload({ ...payload.value, status: orderState.status.statusId })
+        orderState.payload = { ...orderState.payload, status: orderState.status.statusId }
         return toast.info('Status Restaurado!')
     }
 
@@ -150,16 +138,88 @@ const handleStatusChange = () => {
 
     const oldStatus = {
         ...orderState.status,
-        statusId: payload.value.status
+        statusId: orderState.payload.status
     }
 
     orderState.status = { ...pendente, oldStatus }
-    setPayload({ ...payload.value, status: 1 })
+    orderState.payload = { ...orderState.payload, status: 1 }
     return toast.info('Status Alterado!')
 }
 
+const paymentFormToIndex = {
+    'Dinheiro': 1,
+    'Cartão': 2,
+    'Pix': 3,
+    'Transferência': 4
+}
+
+const handleOrderData = (order, products) => {
+    console.log(order)
+    const { obs, itensPedido, total, endereco, distribuidor, formaPagamento: paymentString, trocoPara: orderTroco, agendado, dataAgendada, horaInicio, idEndereco, id: idPedido, status: orderStatus } = order
+    const { id: idDistribuidor } = distribuidor
+    const { observacao } = endereco
+    const trocoPara = toFloat(orderTroco)
+    const formaPagamento = paymentFormToIndex[paymentString]
+    isUpdate.value = true
+
+    const newProducts = mapProductsWithPrices(products, itensPedido)
+    orderState.tableData = newProducts
+
+    const itens = mapOrderItems(itensPedido)
+
+    orderState.status = orderStatus
+
+    const totalProdutos = itens.map(product => parseFloat(product.subtotal)).reduce((curr, prev) => curr + prev);
+
+    orderState.payload = { ...orderState.payload, formaPagamento, trocoPara, agendado, dataAgendada, horaInicio, obs, observacao, totalProdutos, total: toFloat(total), idEndereco, itens, idPedido, idDistribuidor, status: order.statusId }
+}
+
+const mapProductsWithPrices = (products, orderItems) => {
+    return products.map(product => {
+        const productToChange = orderItems.find(prod => prod.idProduto === product.id)
+        if (!productToChange) return product
+
+        return mapProductPrice(product, productToChange)
+    })
+}
+
+const mapProductPrice = (product, orderItem) => {
+    if (product.precoEspecial) {
+        const precoEspecial = product.precoEspecial[product.precoEspecial.length - 1]
+        return {
+            ...product,
+            preco: [{ qtd: product.preco[0].qtd, val: toFloat(orderItem.preco) }],
+            precoEspecial: [{ qtd: precoEspecial.qtd, val: precoEspecial.val }]
+        }
+    }
+    return {
+        ...product,
+        preco: [{ qtd: product.preco[0].qtd, val: toFloat(orderItem.preco) }]
+    }
+}
+
+const mapOrderItems = (itensPedido) => {
+    return itensPedido.map(item => {
+        const { preco: itemPreco, qtd: quantidade, subtotal: itemSubtotal, id, precoAcertado, idProduto } = item
+        const preco = toFloat(itemPreco)
+        const subtotal = toFloat(itemSubtotal)
+
+        return {
+            idProduto,
+            preco,
+            precoAcertado,
+            quantidade,
+            subtotal
+        }
+    })
+}
+
 const dataToTable = (data) => {
-    const { products, distributorTaxes: { taxaUnica: taxaEntrega }, distributor: { id: idDistribuidor, nome: distributorName }, address: { id: idEndereco, observacao, idCliente } } = data
+    const { products, distributorTaxes, distributor, address } = data
+    const { taxaUnica: taxaEntrega } = distributorTaxes
+    const { id: idDistribuidor, nome: distributorName } = distributor
+    const { id: idEndereco, observacao, idCliente } = address
+
     clientId.value = idCliente
 
     tableIdentifier.value = distributorName
@@ -169,45 +229,14 @@ const dataToTable = (data) => {
     const order = data.order
 
     if (order) {
-        const { obs, itensPedido, total, trocoPara: orderTroco, agendado, dataAgendada, horaInicio, endereco: { observacao }, idEndereco, id: idPedido, status: orderStatus } = order
-        const formaPagamento = data.formaPagamento;
-        isUpdate.value = true
-
-        const newProducts = products.map(product => {
-            const productToChange = itensPedido.filter(prod => prod.idProduto == product.id)[0]
-
-            if (!productToChange) return product
-            if (product.precoEspecial) console.log(product.precoEspecial)
-            // if (product.precoEspecial) return { ...product, preco: [{ qtd: product.preco[0].qtd, val: toFloat(productToChange.preco) }], precoEspecial: [{ qtd: product.precoEspecial[0].qtd, val: toFloat(productToChange.precoEspecial.val) }] }
-            return { ...product, preco: [{ qtd: product.preco[0].qtd, val: toFloat(productToChange.preco) }] }
-        })
-
-        setTableData(newProducts)
-
-        const itens = itensPedido.map(item => {
-            const { preco: itemPreco, qtd: quantidade, subtotal: itemSubtotal, id, precoAcertado, idProduto } = item
-            const preco = toFloat(itemPreco)
-            const subtotal = toFloat(itemSubtotal)
-
-            return {
-                idProduto,
-                preco,
-                precoAcertado,
-                quantidade,
-                subtotal
-            }
-        })
-        orderState.status = orderStatus
-        const trocoPara = toFloat(orderTroco)
-        const totalProdutos = itens.map(product => parseFloat(product.subtotal)).reduce((curr, prev) => curr + prev);
-
-        setPayload({ ...payload.value, formaPagamento, trocoPara, agendado, dataAgendada, horaInicio, obs, observacao, totalProdutos, total: toFloat(total), idEndereco, idDistribuidor, itens, idPedido, status: order.statusId })
+        console.log(data.formaPagamento)
+        handleOrderData(order, products)
         return
     }
 
-    setTableData(products)
+    orderState.tableData = products
 
-    setPayload({ ...payload.value, taxaEntrega, idDistribuidor, idEndereco })
+    orderState.payload = { ...orderState.payload, taxaEntrega, idDistribuidor, idEndereco }
 }
 
 watch(() => width.value, (newVal) => {
@@ -220,13 +249,13 @@ watch(() => width.value, (newVal) => {
     }
 })
 
-watch(() => payload.value.itens, (newVal) => disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false)
+watch(() => orderState.payload.itens, (newVal) => disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false)
 
 const updateData = (rowIndex, columnId, value) => {
-    const oldRow = tableData.value[rowIndex]
+    const oldRow = orderState.tableData[rowIndex]
 
     const updateTableData = (updateValue) =>
-        tableData.value.map((row, index) =>
+        orderState.tableData.map((row, index) =>
             index === rowIndex ? { ...oldRow, [columnId]: updateValue } : row
         )
 
@@ -248,9 +277,9 @@ const updateData = (rowIndex, columnId, value) => {
 
     const newData = actions[columnId]
         ? actions[columnId]()
-        : (toast.error('ação desconhecida'), tableData.value)
+        : (toast.error('ação desconhecida'), orderState.tableData)
 
-    setTableData(newData)
+    orderState.tableData = newData
     calculateOrderTotals(newData)
 }
 
@@ -276,19 +305,21 @@ const calculateOrderTotals = (newData) => {
         })
 
     try {
-        const totalCalculations = computed(() => ({
-            totalProdutos: itens.reduce((sum, product) => sum + product.subtotal, 0),
-            total: totalProdutos.value + payload.value.taxaEntrega
-        }))
-        const { totalProdutos, total } = totalCalculations.value
+        const totalProdutos = itens.reduce((sum, product) => sum + product.subtotal, 0)
+        const total = totalProdutos + orderState.payload.taxaEntrega
 
-        setPayload({
-            ...payload.value,
+        console.log(orderState.payload)
+
+        orderState.payload = {
+            ...orderState.payload,
             totalProdutos,
             total,
             itens
-        })
+        }
+
+        console.log(orderState.payload)
     } catch (error) {
+        console.log(error)
         disabledButton.value = true
         toast.error('Adicione ao menos um produto')
     }
@@ -301,7 +332,7 @@ onMounted(() => {
 
 
 const tableOptions = reactive({
-    get data() { return tableData.value },
+    get data() { return orderState.tableData },
     get columns() { return resizebleColumns.value },
     state: {
         get globalFilter() { return globalFilter.value },
@@ -320,13 +351,13 @@ const tableOptions = reactive({
                 ? updaterOrValue(globalFilter.value)
                 : updaterOrValue;
     },
-    meta: {
-        clientId,
+    meta: computed(() => ({
+        clientId: clientId.value,
         updateData,
         editedRows: orderState.editedRows,
-        payload,
-        tableData
-    },
+        payload: orderState.payload,
+        tableData: orderState.tableData
+    })),
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(), //client side filtering
     getSortedRowModel: getSortedRowModel(), //client side sorting needed if you want to use sorting too.
@@ -347,7 +378,8 @@ const table = useVueTable(tableOptions)
                 <DebouncedInput :modelValue="globalFilter ?? ''"
                     @update:modelValue="value => (globalFilter = String(value))" placeholder="Todos os produtos..." />
                 <SelectDistributor v-if="props.distributors" :distributors="props.distributors"
-                    @update:distributor="handleDistributor" :default="`${payload.idDistribuidor}`"></SelectDistributor>
+                    @update:distributor="handleDistributor" :default="`${orderState.payload.idDistribuidor}`">
+                </SelectDistributor>
                 <span v-else class="font-medium flex items-center justify-center text-info py-1 px-2 w-full">
                     {{ tableIdentifier }}
                 </span>
@@ -374,7 +406,7 @@ const table = useVueTable(tableOptions)
             </div>
         </div>
         <div class="border rounded-md border-gray-200 relative">
-            <DialogCreateOrderNote @callback:order-note="handleOrderNote" :order-note="payload.obs">
+            <DialogCreateOrderNote @callback:order-note="handleOrderNote" :order-note="orderState.payload.obs">
             </DialogCreateOrderNote>
             <Table
                 class="rounded-md [&_tbody]:h-[235px] [&_tbody]:table-fixed [&_tbody]:block [&_tbody]:overflow-y-auto [&_tbody]:overflow-x-hidden [&_tr]:table [&_tr]:w-full [&_tr]:table-fixed">
@@ -413,28 +445,28 @@ const table = useVueTable(tableOptions)
                         <span class="text-sm font-medium relative text-info"> <span
                                 class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">Produtos</span>
                             {{
-                                toCurrency(payload.totalProdutos)
+                                toCurrency(orderState.payload.totalProdutos)
                             }}</span>
                         <span class="text-sm font-medium relative text-info"> <span
                                 class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">Entrega</span>
                             {{
-                                toCurrency(payload.taxaEntrega)
+                                toCurrency(orderState.payload.taxaEntrega)
                             }}</span>
                         <span class="text-sm font-medium relative text-info"> <span
                                 class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">Total</span>
                             {{
-                                toCurrency(payload.total)
+                                toCurrency(orderState.payload.total)
                             }}</span>
                     </div>
                 </div>
                 <Separator label="Detalhes" class="z-100" />
                 <div class="flex flex-wrap gap-2 p-2 sm:h-14 justify-center">
-                    <SelectPayment @update:payment-form="handlePayForm" :default="payload.formaPagamento" />
+                    <SelectPayment @update:payment-form="handlePayForm" :default="orderState.payload.formaPagamento" />
                     <Separator orientation="vertical" class="" />
-                    <ExchangeInput @update:exchange="handleExchange" :value="payload.trocoPara" />
+                    <ExchangeInput @update:exchange="handleExchange" :value="orderState.payload.trocoPara" />
                     <Separator orientation="vertical" class="hidden sm:block" />
                     <DateTimePicker @update:scheduling="handleScheduling"
-                        :default:scheduling="dateToISOFormat(`${payload.dataAgendada} ${payload.horaInicio}`)" />
+                        :default:scheduling="dateToISOFormat(`${orderState.payload.dataAgendada} ${orderState.payload.horaInicio}`)" />
                 </div>
             </div>
         </div>

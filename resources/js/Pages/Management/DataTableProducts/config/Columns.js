@@ -82,9 +82,11 @@ export const columns = [
             const rowIndex = row.index;
             const itens = table.options.meta.payload.itens;
             const { tableData } = table.options.meta;
-
+            console.log(table.options.meta);
+            console.log(tableData);
+            console.log(tableData[rowIndex]);
             const getOffer = () => {
-                if (tableData[rowIndex].precoEspecial) return true;
+                if (tableData[rowIndex]?.precoEspecial) return true;
                 return false;
             };
             const offer = getOffer();

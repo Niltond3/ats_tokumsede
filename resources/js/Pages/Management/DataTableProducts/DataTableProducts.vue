@@ -47,6 +47,7 @@ import { toast } from 'vue-sonner'
 import { dateToDayMonthYearFormat, dateToISOFormat, formatMoney } from '@/util'
 import renderToast from '@/components/renderPromiseToast'
 import { computed } from 'vue'
+import useDataToTableFormat from './composable/dataToTableFormat'
 
 const props = defineProps({
     createOrderData: { type: null, required: false },
@@ -76,7 +77,6 @@ const resizebleColumns = ref(columns)
 const { toCurrency, toFloat } = formatMoney()
 
 const { width } = useWindowSize()
-
 
 const emit = defineEmits(['callback:payloadPedido', 'update:specialOfferCreated'])
 
@@ -144,99 +144,6 @@ const handleStatusChange = () => {
     orderState.status = { ...pendente, oldStatus }
     orderState.payload = { ...orderState.payload, status: 1 }
     return toast.info('Status Alterado!')
-}
-
-const paymentFormToIndex = {
-    'Dinheiro': 1,
-    'Cartão': 2,
-    'Pix': 3,
-    'Transferência': 4
-}
-
-const handleOrderData = (order, products) => {
-    console.log(order)
-    const { obs, itensPedido, total, endereco, distribuidor, formaPagamento: paymentString, trocoPara: orderTroco, agendado, dataAgendada, horaInicio, idEndereco, id: idPedido, status: orderStatus } = order
-    const { id: idDistribuidor } = distribuidor
-    const { observacao } = endereco
-    const trocoPara = toFloat(orderTroco)
-    const formaPagamento = paymentFormToIndex[paymentString]
-    isUpdate.value = true
-
-    const newProducts = mapProductsWithPrices(products, itensPedido)
-    orderState.tableData = newProducts
-
-    const itens = mapOrderItems(itensPedido)
-
-    orderState.status = orderStatus
-
-    const totalProdutos = itens.map(product => parseFloat(product.subtotal)).reduce((curr, prev) => curr + prev);
-
-    orderState.payload = { ...orderState.payload, formaPagamento, trocoPara, agendado, dataAgendada, horaInicio, obs, observacao, totalProdutos, total: toFloat(total), idEndereco, itens, idPedido, idDistribuidor, status: order.statusId }
-}
-
-const mapProductsWithPrices = (products, orderItems) => {
-    return products.map(product => {
-        const productToChange = orderItems.find(prod => prod.idProduto === product.id)
-        if (!productToChange) return product
-
-        return mapProductPrice(product, productToChange)
-    })
-}
-
-const mapProductPrice = (product, orderItem) => {
-    if (product.precoEspecial) {
-        const precoEspecial = product.precoEspecial[product.precoEspecial.length - 1]
-        return {
-            ...product,
-            preco: [{ qtd: product.preco[0].qtd, val: toFloat(orderItem.preco) }],
-            precoEspecial: [{ qtd: precoEspecial.qtd, val: precoEspecial.val }]
-        }
-    }
-    return {
-        ...product,
-        preco: [{ qtd: product.preco[0].qtd, val: toFloat(orderItem.preco) }]
-    }
-}
-
-const mapOrderItems = (itensPedido) => {
-    return itensPedido.map(item => {
-        const { preco: itemPreco, qtd: quantidade, subtotal: itemSubtotal, id, precoAcertado, idProduto } = item
-        const preco = toFloat(itemPreco)
-        const subtotal = toFloat(itemSubtotal)
-
-        return {
-            idProduto,
-            preco,
-            precoAcertado,
-            quantidade,
-            subtotal
-        }
-    })
-}
-
-const dataToTable = (data) => {
-    const { products, distributorTaxes, distributor, address } = data
-    const { taxaUnica: taxaEntrega } = distributorTaxes
-    const { id: idDistribuidor, nome: distributorName } = distributor
-    const { id: idEndereco, observacao, idCliente } = address
-
-    clientId.value = idCliente
-
-    tableIdentifier.value = distributorName
-
-    addressNote.value = observacao
-
-    const order = data.order
-
-    if (order) {
-        console.log(data.formaPagamento)
-        handleOrderData(order, products)
-        return
-    }
-
-    orderState.tableData = products
-
-    orderState.payload = { ...orderState.payload, taxaEntrega, idDistribuidor, idEndereco }
 }
 
 watch(() => width.value, (newVal) => {
@@ -308,16 +215,12 @@ const calculateOrderTotals = (newData) => {
         const totalProdutos = itens.reduce((sum, product) => sum + product.subtotal, 0)
         const total = totalProdutos + orderState.payload.taxaEntrega
 
-        console.log(orderState.payload)
-
         orderState.payload = {
             ...orderState.payload,
             totalProdutos,
             total,
             itens
         }
-
-        console.log(orderState.payload)
     } catch (error) {
         console.log(error)
         disabledButton.value = true
@@ -326,8 +229,22 @@ const calculateOrderTotals = (newData) => {
 }
 
 onMounted(() => {
+    const { products: rawProducts, distributorTaxes, distributor, address } = props.createOrderData
+    const { taxaUnica: taxaEntrega } = distributorTaxes
+    const { id: idDistribuidor, nome: distributorName } = distributor
+    const { id: idEndereco, observacao, idCliente } = address
+    const order = props.createOrderData.order
+
+    const { updateOrder, orderPayload, orderStatus, products } = useDataToTableFormat(rawProducts, taxaEntrega, idDistribuidor, idEndereco, order)
+
+    isUpdate.value = updateOrder
+    orderState.payload = { ...orderState.payload, ...orderPayload }
+    orderState.status = orderStatus
+    orderState.tableData = products
+    clientId.value = idCliente
+    tableIdentifier.value = distributorName
+    addressNote.value = observacao
     table.setPageSize(pageSizes.value[0])
-    dataToTable(props.createOrderData)
 })
 
 

@@ -41,73 +41,72 @@ class DistribuidorController extends Controller
      */
     public function show($id)
     {
-        $id = auth()->user()->tipoAdministrador == "Distribuidor"?auth()->user()->idDistribuidor:$id;
-        $distribuidor = Distribuidor::find($id)->load('taxaEntrega','horarioFuncionamento','novoHorarioFuncionamento','enderecoDistribuidor');
+        $id = auth()->user()->tipoAdministrador == "Distribuidor" ? auth()->user()->idDistribuidor : $id;
+        $distribuidor = Distribuidor::find($id)->load('taxaEntrega', 'horarioFuncionamento', 'novoHorarioFuncionamento', 'enderecoDistribuidor');
         $data = array(
-            'id'                => $distribuidor->id,
-            'nome'              => $distribuidor->nome,
-            'cnpj'              => $distribuidor->cnpj,
-            'dddTelefone'       => $distribuidor->dddTelefone,
+            'id' => $distribuidor->id,
+            'nome' => $distribuidor->nome,
+            'cnpj' => $distribuidor->cnpj,
+            'dddTelefone' => $distribuidor->dddTelefone,
             'telefonePrincipal' => $distribuidor->telefonePrincipal,
-            'email'             => $distribuidor->email,
-            'outrosContatos'    => $distribuidor->outrosContatos,
+            'email' => $distribuidor->email,
+            'outrosContatos' => $distribuidor->outrosContatos,
 
-            'logradouro'        => $distribuidor->enderecoDistribuidor->logradouro,
-            'numero'            => $distribuidor->enderecoDistribuidor->numero,
-            'bairro'            => $distribuidor->enderecoDistribuidor->bairro,
-            'complemento'       => $distribuidor->enderecoDistribuidor->complemento,
-            'cep'               => $distribuidor->enderecoDistribuidor->cep,
-            'cidade'            => $distribuidor->enderecoDistribuidor->cidade,
-            'estado'            => $distribuidor->enderecoDistribuidor->estado,
-            'referencia'        => $distribuidor->enderecoDistribuidor->referencia,
+            'logradouro' => $distribuidor->enderecoDistribuidor->logradouro,
+            'numero' => $distribuidor->enderecoDistribuidor->numero,
+            'bairro' => $distribuidor->enderecoDistribuidor->bairro,
+            'complemento' => $distribuidor->enderecoDistribuidor->complemento,
+            'cep' => $distribuidor->enderecoDistribuidor->cep,
+            'cidade' => $distribuidor->enderecoDistribuidor->cidade,
+            'estado' => $distribuidor->enderecoDistribuidor->estado,
+            'referencia' => $distribuidor->enderecoDistribuidor->referencia,
 
-            'inicioSemana'      => $distribuidor->horarioFuncionamento->inicioSemana,
-            'fimSemana'         => $distribuidor->horarioFuncionamento->fimSemana,
-            'inicioSabado'      => $distribuidor->horarioFuncionamento->inicioSabado,
-            'fimSabado'         => $distribuidor->horarioFuncionamento->fimSabado,
-            'domingo'           => $distribuidor->horarioFuncionamento->domingo,
-            'inicioDomingo'     => $distribuidor->horarioFuncionamento->inicioDomingo,
-            'fimDomingo'        => $distribuidor->horarioFuncionamento->fimDomingo,
+            'inicioSemana' => $distribuidor->horarioFuncionamento->inicioSemana,
+            'fimSemana' => $distribuidor->horarioFuncionamento->fimSemana,
+            'inicioSabado' => $distribuidor->horarioFuncionamento->inicioSabado,
+            'fimSabado' => $distribuidor->horarioFuncionamento->fimSabado,
+            'domingo' => $distribuidor->horarioFuncionamento->domingo,
+            'inicioDomingo' => $distribuidor->horarioFuncionamento->inicioDomingo,
+            'fimDomingo' => $distribuidor->horarioFuncionamento->fimDomingo,
 
-            'novo_domingo'      => $distribuidor->novoHorarioFuncionamento->domingo,
-            'novo_inicioDomingo'=> $distribuidor->novoHorarioFuncionamento->inicioDomingo,
-            'novo_fimDomingo'   => $distribuidor->novoHorarioFuncionamento->fimDomingo,
-            'segunda'           => $distribuidor->novoHorarioFuncionamento->segunda,
-            'inicioSegunda'     => $distribuidor->novoHorarioFuncionamento->inicioSegunda,
-            'fimSegunda'        => $distribuidor->novoHorarioFuncionamento->fimSegunda,
-            'terca'             => $distribuidor->novoHorarioFuncionamento->terca,
-            'inicioTerca'       => $distribuidor->novoHorarioFuncionamento->inicioTerca,
-            'fimTerca'          => $distribuidor->novoHorarioFuncionamento->fimTerca,
-            'quarta'            => $distribuidor->novoHorarioFuncionamento->quarta,
-            'inicioQuarta'      => $distribuidor->novoHorarioFuncionamento->inicioQuarta,
-            'fimQuarta'         => $distribuidor->novoHorarioFuncionamento->fimQuarta,
-            'quinta'            => $distribuidor->novoHorarioFuncionamento->quinta,
-            'inicioQuinta'      => $distribuidor->novoHorarioFuncionamento->inicioQuinta,
-            'fimQuinta'         => $distribuidor->novoHorarioFuncionamento->fimQuinta,
-            'sexta'             => $distribuidor->novoHorarioFuncionamento->sexta,
-            'inicioSexta'       => $distribuidor->novoHorarioFuncionamento->inicioSexta,
-            'fimSexta'          => $distribuidor->novoHorarioFuncionamento->fimSexta,
-            'novo_sabado'       => $distribuidor->novoHorarioFuncionamento->sabado,
+            'novo_domingo' => $distribuidor->novoHorarioFuncionamento->domingo,
+            'novo_inicioDomingo' => $distribuidor->novoHorarioFuncionamento->inicioDomingo,
+            'novo_fimDomingo' => $distribuidor->novoHorarioFuncionamento->fimDomingo,
+            'segunda' => $distribuidor->novoHorarioFuncionamento->segunda,
+            'inicioSegunda' => $distribuidor->novoHorarioFuncionamento->inicioSegunda,
+            'fimSegunda' => $distribuidor->novoHorarioFuncionamento->fimSegunda,
+            'terca' => $distribuidor->novoHorarioFuncionamento->terca,
+            'inicioTerca' => $distribuidor->novoHorarioFuncionamento->inicioTerca,
+            'fimTerca' => $distribuidor->novoHorarioFuncionamento->fimTerca,
+            'quarta' => $distribuidor->novoHorarioFuncionamento->quarta,
+            'inicioQuarta' => $distribuidor->novoHorarioFuncionamento->inicioQuarta,
+            'fimQuarta' => $distribuidor->novoHorarioFuncionamento->fimQuarta,
+            'quinta' => $distribuidor->novoHorarioFuncionamento->quinta,
+            'inicioQuinta' => $distribuidor->novoHorarioFuncionamento->inicioQuinta,
+            'fimQuinta' => $distribuidor->novoHorarioFuncionamento->fimQuinta,
+            'sexta' => $distribuidor->novoHorarioFuncionamento->sexta,
+            'inicioSexta' => $distribuidor->novoHorarioFuncionamento->inicioSexta,
+            'fimSexta' => $distribuidor->novoHorarioFuncionamento->fimSexta,
+            'novo_sabado' => $distribuidor->novoHorarioFuncionamento->sabado,
             'novo_inicioSabado' => $distribuidor->novoHorarioFuncionamento->inicioSabado,
-            'novo_fimSabado'    => $distribuidor->novoHorarioFuncionamento->fimSabado,
-            'pausaAlmoco'       => $distribuidor->novoHorarioFuncionamento->pausaAlmoco,
-            'inicioAlmoco'      => $distribuidor->novoHorarioFuncionamento->inicioAlmoco,
-            'fimAlmoco'         => $distribuidor->novoHorarioFuncionamento->fimAlmoco,
+            'novo_fimSabado' => $distribuidor->novoHorarioFuncionamento->fimSabado,
+            'pausaAlmoco' => $distribuidor->novoHorarioFuncionamento->pausaAlmoco,
+            'inicioAlmoco' => $distribuidor->novoHorarioFuncionamento->inicioAlmoco,
+            'fimAlmoco' => $distribuidor->novoHorarioFuncionamento->fimAlmoco,
 
-            'taxaUnica'         => $distribuidor->taxaEntrega->taxaUnica,
-            'valorTaxaUnica'    => $distribuidor->taxaEntrega->valorTaxaUnica,
-            'taxaDomingo'       => $distribuidor->taxaEntrega->taxaDomingo,
-            'valorTaxaDomingo'  => $distribuidor->taxaEntrega->valorTaxaDomingo,
-            'taxaCompraMinima'  => $distribuidor->taxaEntrega->taxaCompraMinima,
+            'taxaUnica' => $distribuidor->taxaEntrega->taxaUnica,
+            'valorTaxaUnica' => $distribuidor->taxaEntrega->valorTaxaUnica,
+            'taxaDomingo' => $distribuidor->taxaEntrega->taxaDomingo,
+            'valorTaxaDomingo' => $distribuidor->taxaEntrega->valorTaxaDomingo,
+            'taxaCompraMinima' => $distribuidor->taxaEntrega->taxaCompraMinima,
             'valorCompraMinima' => $distribuidor->taxaEntrega->valorCompraMinima,
-           'taxaEntregaDistante'=> $distribuidor->taxaEntrega->taxaEntregaDistante,
-            'distanciaMaxima'   => $distribuidor->taxaEntrega->distanciaMaxima,
-            'valorKmAdicional'  => $distribuidor->taxaEntrega->valorKmAdicional
+            'taxaEntregaDistante' => $distribuidor->taxaEntrega->taxaEntregaDistante,
+            'distanciaMaxima' => $distribuidor->taxaEntrega->distanciaMaxima,
+            'valorKmAdicional' => $distribuidor->taxaEntrega->valorKmAdicional
         );
         return $data;
         //RETORNA DISTRIBUIDOR
     }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -120,7 +119,7 @@ class DistribuidorController extends Controller
         $novoHorarioFuncionamento = new NovoHorarioFuncionamento($request->all());
         $novoHorarioFuncionamento->domingo = $request->novo_domingo;
         $novoHorarioFuncionamento->inicioDomingo = $request->novo_inicioDomingo;
-        $novoHorarioFuncionamento->fimDomingo =  $request->novo_fimDomingo;
+        $novoHorarioFuncionamento->fimDomingo = $request->novo_fimDomingo;
         $novoHorarioFuncionamento->inicioSabado = $request->novo_inicioSabado;
         $novoHorarioFuncionamento->fimSabado = $request->novo_fimSabado;
         $enderecoDistribuidor = new EnderecoDistribuidor($request->all());
@@ -130,7 +129,7 @@ class DistribuidorController extends Controller
         $enderecoDistribuidor->longitude = $coordenadas[1];
         //$enderecoDistribuidor->cidade = $coordenadas[2] == "" ? $enderecoDistribuidor->cidade : $coordenadas[2];
         $taxaEntrega = new TaxaEntrega($request->all());
-        $v = Distribuidor::get()->where('cnpj', 'like ',$request->cnpj);
+        $v = Distribuidor::get()->where('cnpj', 'like ', $request->cnpj);
         if ($v->count() == 0 || strcmp($request->cnpj, "") == 0) {
             if ($horarioFuncionamento->save()) {
                 if ($novoHorarioFuncionamento->save()) {
@@ -149,7 +148,7 @@ class DistribuidorController extends Controller
                             $distribuidor->tipoDistribuidor = $request->tipoDistribuidor;
                             $distribuidor->idDistribuidor = $request->idDistribuidor;
                             if ($distribuidor->save()) {
-                                if($distribuidor->tipoDistribuidor != "distribuidor"){
+                                if ($distribuidor->tipoDistribuidor != "distribuidor") {
                                     $produtos = Produto::get();
                                     foreach ($produtos as $produto) {
                                         $estoque = new Estoque();
@@ -159,7 +158,7 @@ class DistribuidorController extends Controller
                                         $estoque->save();
                                     }
                                 }
-                                return response('Distribuidor '.$distribuidor->nome.' cadastrado com sucesso.', 200);
+                                return response('Distribuidor ' . $distribuidor->nome . ' cadastrado com sucesso.', 200);
                             }
                         }
                     } else {
@@ -184,32 +183,36 @@ class DistribuidorController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if($request->status){//*Ativa ou Inativa
+        if ($request->status) {//*Ativa ou Inativa
             $distribuidor = Distribuidor::find($id);
             $distribuidor->status = $request->status;
             $distribuidor->save();
-            return  response('Distribuidor '.$distribuidor->nome.' ativado com sucesso.', 200);
-        }else{//*Atualiza cadastro do distribuiodor
+            return response('Distribuidor ' . $distribuidor->nome . ' ativado com sucesso.', 200);
+        } else {//*Atualiza cadastro do distribuiodor
             $telefone = explode(" ", $request->telefonePrincipal);
             $formatacaoTelefone = array("(", ")");
             $coordenadas = $this->buscarLatitudeLongitude($request->logradouro, $request->numero, $request->cidade, $request->estado, $request->cep);
             $request->latitude = $coordenadas[0];
             $request->longitude = $coordenadas[1];
             //$request->cidade = $coordenadas[2] == "" ? $request->cidade : $coordenadas[2];
-            $distribuidor = Distribuidor::find($id)->load('taxaEntrega','horarioFuncionamento','novoHorarioFuncionamento','enderecoDistribuidor');
-            $v = Distribuidor::get()->where('cnpj','like',$request->cnpj)->where('id','!=',$id);
+            $distribuidor = Distribuidor::find($id)->load('taxaEntrega', 'horarioFuncionamento', 'novoHorarioFuncionamento', 'enderecoDistribuidor');
+            $v = Distribuidor::get()->where('cnpj', 'like', $request->cnpj)->where('id', '!=', $id);
             if ($v->count() == 0 || strcmp($request->cnpj, "") == 0) {
                 if ($distribuidor->horarioFuncionamento->update(array_filter($request->all(), 'is_numeric'))) {//salvar novo domingo
-                    if ($distribuidor->novoHorarioFuncionamento->update(array_filter($request->all(), function($value) {return ($value !== false);}))) {
+                    if (
+                        $distribuidor->novoHorarioFuncionamento->update(array_filter($request->all(), function ($value) {
+                            return ($value !== false);
+                        }))
+                    ) {
                         $distribuidor->novoHorarioFuncionamento->domingo = $request->novo_domingo;
                         $distribuidor->novoHorarioFuncionamento->inicioDomingo = $request->novo_inicioDomingo;
-                        $distribuidor->novoHorarioFuncionamento->fimDomingo =  $request->novo_fimDomingo;
+                        $distribuidor->novoHorarioFuncionamento->fimDomingo = $request->novo_fimDomingo;
                         $distribuidor->novoHorarioFuncionamento->sabado = $request->novo_sabado;
                         $distribuidor->novoHorarioFuncionamento->inicioSabado = $request->novo_inicioSabado;
                         $distribuidor->novoHorarioFuncionamento->fimSabado = $request->novo_fimSabado;
                         if ($distribuidor->enderecoDistribuidor->update(array_filter($request->except('distanciaMaxima')))) {
                             if ($distribuidor->taxaEntrega->update(array_filter($request->all(), 'is_numeric'))) {
-                                if($request->nome){
+                                if ($request->nome) {
                                     $distribuidor->nome = $request->nome;
                                     $distribuidor->cnpj = $request->cnpj;
                                     $distribuidor->email = $request->email;
@@ -249,11 +252,12 @@ class DistribuidorController extends Controller
         return $distribuidor->nome;
         //EXCLUI DISTRIBUIDOR
     }
-    function buscarLatitudeLongitude($logradouro, $numero, $cidade, $estado, $cep) {
+    function buscarLatitudeLongitude($logradouro, $numero, $cidade, $estado, $cep)
+    {
         //$address = {nm_bairro}.", ".{nm_cidade}.", ".{nm_estado}.", ".{nm_brasil};
         $key = "AIzaSyDIt2CSa_K8P64daT3v4Hv8Ml-8IJsFic8";
         $address = $logradouro . ", " . $numero . ", " . $cidade . ", " . $estado . ", " . $cep . "," . "Brasil";
-        $request_url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $address . "&sensor=true&key=".$key; // A URL que vc manda pro google para pegar o XML
+        $request_url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $address . "&sensor=true&key=" . $key; // A URL que vc manda pro google para pegar o XML
 
         // $context = stream_context_create(array('ssl'=>array(
         //     'verify_peer' => true,
@@ -289,5 +293,82 @@ class DistribuidorController extends Controller
             // geralmente indica que a query (address or latlng) está faltando.
             //echo "Endereço não está preenchido corretamente";
         }
+    }
+
+    public function getAllDistributors()
+    {
+        $distribuidores = Distribuidor::with([
+            'enderecoDistribuidor',
+            'horarioFuncionamento',
+            'novoHorarioFuncionamento',
+            'taxaEntrega'
+        ])->where('status', Distribuidor::ATIVO)->get();
+        $distribuidoresArray = array();
+
+        foreach ($distribuidores as $distribuidor) {
+            $distribuidoresArray[] = array(
+                'id' => $distribuidor->id,
+                'nome' => $distribuidor->nome,
+                'cnpj' => $distribuidor->cnpj,
+                'dddTelefone' => $distribuidor->dddTelefone,
+                'telefonePrincipal' => $distribuidor->telefonePrincipal,
+                'email' => $distribuidor->email,
+                'outrosContatos' => $distribuidor->outrosContatos,
+                'logradouro' => $distribuidor->enderecoDistribuidor->logradouro,
+                'numero' => $distribuidor->enderecoDistribuidor->numero,
+                'bairro' => $distribuidor->enderecoDistribuidor->bairro,
+                'complemento' => $distribuidor->enderecoDistribuidor->complemento,
+                'cep' => $distribuidor->enderecoDistribuidor->cep,
+                'cidade' => $distribuidor->enderecoDistribuidor->cidade,
+                'estado' => $distribuidor->enderecoDistribuidor->estado,
+                'referencia' => $distribuidor->enderecoDistribuidor->referencia,
+                'inicioSemana' => $distribuidor->horarioFuncionamento->inicioSemana,
+                'fimSemana' => $distribuidor->horarioFuncionamento->fimSemana,
+                'inicioSabado' => $distribuidor->horarioFuncionamento->inicioSabado,
+                'fimSabado' => $distribuidor->horarioFuncionamento->fimSabado,
+                'domingo' => $distribuidor->horarioFuncionamento->domingo,
+                'inicioDomingo' => $distribuidor->horarioFuncionamento->inicioDomingo,
+                'fimDomingo' => $distribuidor->horarioFuncionamento->fimDomingo,
+                'novo_domingo' => $distribuidor->novoHorarioFuncionamento->domingo,
+                'novo_inicioDomingo' => $distribuidor->novoHorarioFuncionamento->inicioDomingo,
+                'novo_fimDomingo' => $distribuidor->novoHorarioFuncionamento->fimDomingo,
+                'segunda' => $distribuidor->novoHorarioFuncionamento->segunda,
+                'inicioSegunda' => $distribuidor->novoHorarioFuncionamento->inicioSegunda,
+                'fimSegunda' => $distribuidor->novoHorarioFuncionamento->fimSegunda,
+                'terca' => $distribuidor->novoHorarioFuncionamento->terca,
+                'inicioTerca' => $distribuidor->novoHorarioFuncionamento->inicioTerca,
+                'fimTerca' => $distribuidor->novoHorarioFuncionamento->fimTerca,
+                'quarta' => $distribuidor->novoHorarioFuncionamento->quarta,
+                'inicioQuarta' => $distribuidor->novoHorarioFuncionamento->inicioQuarta,
+                'fimQuarta' => $distribuidor->novoHorarioFuncionamento->fimQuarta,
+                'quinta' => $distribuidor->novoHorarioFuncionamento->quinta,
+                'inicioQuinta' => $distribuidor->novoHorarioFuncionamento->inicioQuinta,
+                'fimQuinta' => $distribuidor->novoHorarioFuncionamento->fimQuinta,
+                'sexta' => $distribuidor->novoHorarioFuncionamento->sexta,
+                'inicioSexta' => $distribuidor->novoHorarioFuncionamento->inicioSexta,
+                'fimSexta' => $distribuidor->novoHorarioFuncionamento->fimSexta,
+                'novo_sabado' => $distribuidor->novoHorarioFuncionamento->sabado,
+                'novo_inicioSabado' => $distribuidor->novoHorarioFuncionamento->inicioSabado,
+                'novo_fimSabado' => $distribuidor->novoHorarioFuncionamento->fimSabado,
+                'pausaAlmoco' => $distribuidor->novoHorarioFuncionamento->pausaAlmoco,
+                'inicioAlmoco' => $distribuidor->novoHorarioFuncionamento->inicioAlmoco,
+                'fimAlmoco' => $distribuidor->novoHorarioFuncionamento->fimAlmoco,
+                'taxaUnica' => $distribuidor->taxaEntrega->taxaUnica,
+                'valorTaxaUnica' => $distribuidor->taxaEntrega->valorTaxaUnica,
+                'taxaDomingo' => $distribuidor->taxaEntrega->taxaDomingo,
+                'valorTaxaDomingo' => $distribuidor->taxaEntrega->valorTaxaDomingo,
+                'taxaCompraMinima' => $distribuidor->taxaEntrega->taxaCompraMinima,
+                'valorCompraMinima' => $distribuidor->taxaEntrega->valorCompraMinima,
+                'taxaEntregaDistante' => $distribuidor->taxaEntrega->taxaEntregaDistante,
+                'distanciaMaxima' => $distribuidor->taxaEntrega->distanciaMaxima,
+                'valorKmAdicional' => $distribuidor->taxaEntrega->valorKmAdicional
+            );
+        }
+        return response()->json([
+            'data' => $distribuidoresArray,
+            'meta' => [
+                'total' => count($distribuidoresArray)
+            ]
+        ]);
     }
 }

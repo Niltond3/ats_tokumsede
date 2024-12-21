@@ -309,6 +309,34 @@ class ProdutoController extends Controller
         ];
     }
 
+    public function showByDistribuidor($distribuidorId)
+    {
+        return DB::table('preco')
+            ->leftJoin('produto', 'produto.id', '=', 'preco.idProduto')
+            ->leftJoin('estoque', 'estoque.id', '=', 'preco.idEstoque')
+            ->select([
+                'preco.*',
+                'produto.id as idProd',
+                'produto.nome as nome',
+                'produto.img as img'
+            ])
+            ->where([
+                ['preco.status', '=', 1],
+                ['preco.idDistribuidor', '=', $distribuidorId],
+                ['preco.idCliente', '=', null],
+            ])
+            ->where(function ($query) {
+                $query->whereNull('preco.inicioValidade')
+                    ->orWhere('preco.inicioValidade', '<=', DB::raw('curdate()'));
+            })
+            ->where(function ($query) {
+                $query->whereNull('preco.fimValidade')
+                    ->orWhere('preco.fimValidade', '>', DB::raw('curdate()'));
+            })
+            ->orderBy('produto.id')
+            ->orderBy('preco.qtdMin')
+            ->get();
+    }
 
     // public function show($idEnderecoCliente)
     // {

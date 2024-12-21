@@ -18,15 +18,15 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\EnderecoClienteController;
 use Inertia\Inertia;
 
-Route::prefix('cliente')->name('cliente.')->group(function (){
+Route::prefix('cliente')->name('cliente.')->group(function () {
     Route::middleware('guest:cliente')->group(function () {
         Route::get('register', [RegisteredUserController::class, 'create'])
-                    ->name('register');
+            ->name('register');
 
         Route::post('register', [RegisteredUserController::class, 'store']);
 
         Route::get('login', [AuthenticatedSessionController::class, 'create'])
-                    ->name('login');
+            ->name('login');
 
         Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
@@ -63,10 +63,10 @@ Route::prefix('cliente')->name('cliente.')->group(function (){
         //ENDERECOS CLIENTES
         // Route::get('/enderecos', [EnderecoClienteController::class,'show'])->name('enderecos.show');
 
-        Route::resource('clientes', ClienteController::class,['except' => 'create']);
+        Route::resource('clientes', ClienteController::class, ['except' => 'create']);
 
         //ENDERECOS CLIENTES
-        Route::resource('enderecos', EnderecoClienteController::class,['except' => 'create']);
+        Route::resource('enderecos', EnderecoClienteController::class, ['except' => 'create']);
 
 
         Route::get('/dashboard', function () {
@@ -80,10 +80,18 @@ Route::prefix('cliente')->name('cliente.')->group(function (){
         Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-                    ->name('logout');
+            ->name('logout');
         //PEDIDOS
-        Route::group(['prefix' => 'pedidos'], function(){
-            Route::resource('/', PedidoController::class,['except' => 'create']);
+        Route::group(['prefix' => 'pedidos'], function () {
+            Route::resource('/', PedidoController::class, ['except' => 'create'])
+                ->names([
+                    'index' => 'pedidos.index',
+                    'show' => 'pedidos.show',
+                    'store' => 'pedidos.store',
+                    'edit' => 'pedidos.edit',
+                    'update' => 'pedidos.update',
+                    'destroy' => 'pedidos.destroy'
+                ]);
             Route::get('visualizar/{id}', [PedidoController::class, 'visualizar']);
             Route::put('aceitar/{id}', [PedidoController::class, 'aceitar']);
             Route::put('despachar/{id}', [PedidoController::class, 'despachar']);
@@ -99,11 +107,19 @@ Route::prefix('cliente')->name('cliente.')->group(function (){
             Route::get('ultimoPedido', [PedidoController::class, 'ultimoPedido']);
             Route::get('listaClientes', [PedidoController::class, 'listaClientes']);
         });
-            //PRODUTOS
-        Route::group(['prefix' => 'produtos'], function(){
-            Route::resource('/', ProdutoController::class,['except' => 'create']);
-            Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class,'listarProdutos']);
-            Route::get('{idEnderecoCliente}', [ProdutoController::class,'show']);
+        //PRODUTOS
+        Route::group(['prefix' => 'produtos'], function () {
+            Route::resource('/', ProdutoController::class, ['except' => 'create'])
+                ->names([
+                    'index' => 'produtos.index',
+                    'show' => 'produtos.show',
+                    'store' => 'produtos.store',
+                    'edit' => 'produtos.edit',
+                    'update' => 'produtos.update',
+                    'destroy' => 'produtos.destroy'
+                ]);
+            Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class, 'listarProdutos']);
+            Route::get('{idEnderecoCliente}', [ProdutoController::class, 'show']);
         });
     });
 });

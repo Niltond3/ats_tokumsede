@@ -130,7 +130,7 @@ export const handleActions = (props) => {
                         ...product,
                         preco: [
                             {
-                                qtd: product.preco[0].qtd,
+                                qtd: product.preco[preco.length - 1].qtd,
                                 val: toFloat(productToChange.preco),
                             },
                         ],

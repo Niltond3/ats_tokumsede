@@ -156,7 +156,13 @@ watch(() => width.value, (newVal) => {
     }
 })
 
-watch(() => orderState.payload.itens, (newVal) => disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false)
+watch(() => orderState.payload.itens, (newVal) => {
+    console.log(newVal)
+    if (newVal.length && Object.keys(newVal[0]).length) {
+        console.log(newVal)
+        disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false, { deep: true }
+    }
+})
 
 const updateData = (rowIndex, columnId, value) => {
     const oldRow = orderState.tableData[rowIndex]
@@ -167,7 +173,13 @@ const updateData = (rowIndex, columnId, value) => {
         )
 
     const actions = {
-        preco: () => updateTableData([{ qtd: oldRow[columnId][0].qtd, val: toFloat(value) }]),
+        preco: () => {
+            console.log(oldRow[columnId])
+            console.log(oldRow)
+            console.log(columnId)
+            const endRowLength = oldRow[columnId].length - 1
+            updateTableData([{ qtd: oldRow[columnId][endRowLength].qtd, val: toFloat(value) }])
+        },
         quantidade: () => updateTableData(value),
         precoEspecial: () => {
             if (value.payload) {
@@ -175,8 +187,9 @@ const updateData = (rowIndex, columnId, value) => {
                 createSpecialOffer(payload)
                 return updateTableData(tableValue)
             }
+            const endRowLength = oldRow[columnId].length - 1
             return updateTableData([{
-                qtd: oldRow[columnId][0].qtd,
+                qtd: oldRow[columnId][endRowLength].qtd,
                 val: toFloat(value)
             }])
         },
@@ -197,9 +210,10 @@ const calculateOrderTotals = (newData) => {
         .map(product => {
             const { id, quantidade } = product
             const precoEspecial = product.precoEspecial
+            const precoProduto = product.preco
             const preco = precoEspecial
                 ? precoEspecial[precoEspecial.length - 1].val
-                : product.preco[0].val
+                : precoProduto[precoProduto.length - 1].val
             const subtotal = quantidade * preco
 
             return {
@@ -323,8 +337,7 @@ const table = useVueTable(tableOptions)
             </div>
         </div>
         <div class="border rounded-md border-gray-200 relative">
-            <DialogCreateOrderNote @callback:order-note="handleOrderNote" :order-note="orderState.payload.obs">
-            </DialogCreateOrderNote>
+            <DialogCreateOrderNote @callback:order-note="handleOrderNote" :order-note="orderState.payload.obs" />
             <Table
                 class="rounded-md [&_tbody]:h-[235px] [&_tbody]:table-fixed [&_tbody]:block [&_tbody]:overflow-y-auto [&_tbody]:overflow-x-hidden [&_tr]:table [&_tr]:w-full [&_tr]:table-fixed">
                 <TableHeader class="bg-info rounded-md">
@@ -355,44 +368,44 @@ const table = useVueTable(tableOptions)
                     </template>
                 </TableBody>
             </Table>
-            <div class="flex flex-col gap-1 p-2">
-                <Separator />
-                <div class="flex items-center h-11 justify-around ">
+        </div>
+        <div class="flex mt-3 gap-3 flex-col sm:grid sm:grid-cols-3 ">
+            <div class="flex items-center h-11 justify-around ">
+                <div class="w-full flex flex-col items-center justify-center">
+                    <Separator class="mt-1 mb-[0.35rem]" />
                     <div class="flex gap-8">
                         <span class="text-sm font-medium relative text-info"> <span
-                                class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">Produtos</span>
+                                class="absolute -top-5 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">Produtos</span>
                             {{
                                 toCurrency(orderState.payload.totalProdutos)
                             }}</span>
                         <span class="text-sm font-medium relative text-info"> <span
-                                class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">Entrega</span>
+                                class="absolute -top-5 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">Entrega</span>
                             {{
                                 toCurrency(orderState.payload.taxaEntrega)
                             }}</span>
                         <span class="text-sm font-medium relative text-info"> <span
-                                class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">Total</span>
+                                class="absolute -top-5 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">Total</span>
                             {{
                                 toCurrency(orderState.payload.total)
                             }}</span>
                     </div>
                 </div>
-                <Separator label="Detalhes" class="z-100" />
-                <div class="flex flex-wrap gap-2 p-2 sm:h-14 justify-center">
-                    <SelectPayment @update:payment-form="handlePayForm" :default="orderState.payload.formaPagamento" />
-                    <Separator orientation="vertical" class="" />
-                    <ExchangeInput @update:exchange="handleExchange" :value="orderState.payload.trocoPara" />
-                    <Separator orientation="vertical" class="hidden sm:block" />
-                    <DateTimePicker @update:scheduling="handleScheduling"
-                        :default:scheduling="dateToISOFormat(`${orderState.payload.dataAgendada} ${orderState.payload.horaInicio}`)" />
-                </div>
             </div>
-        </div>
-        <div class="flex mt-3 gap-3">
-            <div class="w-full relative">
+            <div class="flex flex-wrap gap-2 px-2 pb-2 sm:h-14 justify-center">
+                <Separator label="Detalhes" class="z-100 my-1" />
+                <SelectPayment @update:payment-form="handlePayForm" :default="orderState.payload.formaPagamento" />
+                <Separator orientation="vertical" class="" />
+                <ExchangeInput @update:exchange="handleExchange" :value="orderState.payload.trocoPara" />
+                <Separator orientation="vertical" class="hidden sm:block" />
+                <DateTimePicker @update:scheduling="handleScheduling"
+                    :default:scheduling="dateToISOFormat(`${orderState.payload.dataAgendada} ${orderState.payload.horaInicio}`)" />
+            </div>
+            <div class="w-full sm:w-1/2 relative flex gap-1 p-2">
                 <Textarea
-                    class="border rounded-md border-gray-200 min-h-11 h-11 focus-visible:ring-0 focus-visible:ring-offset-0 "
+                    class="border rounded-md border-gray-200 min-h-11 h-11 sm:min-h-16 focus-visible:ring-0 focus-visible:ring-offset-0 "
                     v-model:model-value="addressNote" />
-                <span class="absolute text-xs text-muted-foreground left-2 -top-2 bg-white">observação do
+                <span class="absolute text-xs text-muted-foreground left-2 -top-0 bg-white">observação do
                     endereço</span>
             </div>
             <Button :disabled="disabledButton" type="submit"

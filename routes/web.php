@@ -4,6 +4,7 @@ include 'cors.php';
 use App\Http\Controllers\Api\IndexController as Api;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\DistribuidorController;
 use App\Http\Controllers\EnderecoClienteController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PedidoController;
@@ -58,7 +59,14 @@ Route::middleware('auth')->group(function () {
 
     //PEDIDOS
     Route::group(['prefix' => 'pedidos'], function () {
-        Route::resource('/', PedidoController::class, ['except' => 'create']);
+        Route::resource('/', PedidoController::class, ['except' => 'create'])
+            ->names([
+                'index' => 'pedidos.index',
+                'store' => 'pedidos.store',
+                'show' => 'pedidos.show',
+                'update' => 'pedidos.update',
+                'destroy' => 'pedidos.destroy',
+            ]);
         Route::get('visualizar/{id}', [PedidoController::class, 'visualizar']);
         Route::put('aceitar/{id}', [PedidoController::class, 'aceitar']);
         Route::put('despachar/{id}', [PedidoController::class, 'despachar']);
@@ -77,9 +85,32 @@ Route::middleware('auth')->group(function () {
 
     //PRODUTOS
     Route::group(['prefix' => 'produtos'], function () {
-        Route::resource('/', ProdutoController::class, ['except' => 'create']);
-        Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class, 'listarProdutos']);
-        Route::get('{idEnderecoCliente}', [ProdutoController::class, 'show']);
+        Route::resource('/', ProdutoController::class, ['except' => 'create'])
+            ->names([
+                'index' => 'produtos.index',
+                'store' => 'produtos.store',
+                'show' => 'produtos.show',
+                'edit' => 'produtos.edit',
+                'update' => 'produtos.update',
+                'destroy' => 'produtos.destroy'
+            ]);
+        Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class, 'listarProdutos'])->name('produtos.listar');
+        Route::get('listarPorDistribuidor/{idDistribuidor}', [ProdutoController::class, 'showByDistribuidor'])->name('produtos.por-distribuidor');
+        Route::get('{idEnderecoCliente}', [ProdutoController::class, 'show'])->name('produtos.show-by-endereco');
+    });
+
+    //DISTRIBUIDORES
+    Route::group(['prefix' => 'distribuidores'], function () {
+        Route::resource('/', DistribuidorController::class, ['except' => 'create'])
+            ->names([
+                'index' => 'distribuidores.index',
+                'show' => 'distribuidores.show',
+                'store' => 'distribuidores.store',
+                'edit' => 'distribuidores.edit',
+                'update' => 'distribuidores.update',
+                'destroy' => 'distribuidores.destroy'
+            ]);
+        Route::get('todosOsDistribuidores', [DistribuidorController::class, 'getAllDistributors']);
     });
 
     //CATEGORIAS
@@ -96,8 +127,15 @@ Route::get('/homepage', [HomeController::class, 'getHomepage'])->name('homepage'
 
 //API
 Route::group(['prefix' => 'api'], function () {
-    Route::resource('/', Api::class, ['except' => 'create']);
-
+    Route::resource('/', Api::class, ['except' => 'create'])
+        ->names([
+            'index' => 'api.index',
+            'show' => 'api.show',
+            'store' => 'api.store',
+            'edit' => 'api.edit',
+            'update' => 'api.update',
+            'destroy' => 'api.destroy'
+        ]);
     // Demais rotas configuradas
     Route::get('verificaPedidoAlterado', [Api::class, 'verificaPedidoAlterado']);
     Route::get('verificaEmail', [Api::class, 'verificaEmail']);

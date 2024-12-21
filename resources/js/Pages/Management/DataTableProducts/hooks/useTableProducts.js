@@ -6,9 +6,10 @@ export const tableProdutcs = () => {
             const searchableColumns = ["nome", "preco"];
             return searchableColumns.some((col) => {
                 const rowValue = row.getValue(col);
+                const rowEndArray = rowValue.length - 1;
                 const itemValue =
                     col === "preco"
-                        ? rowValue[0].val.toString()
+                        ? rowValue[rowEndArray].val.toString()
                         : rowValue.toString();
 
                 const rankedItem = rankItem(itemValue, value, {
@@ -23,10 +24,11 @@ export const tableProdutcs = () => {
         if (columnId !== "nome" && columnId !== "preco") return true;
 
         const rowValue = row.getValue(columnId);
+        const rowEndArray = rowValue.length - 1;
 
         const itemValue =
             columnId === "preco"
-                ? rowValue[0].val.toString()
+                ? rowValue[rowEndArray].val.toString()
                 : rowValue.toString();
 
         const rankedItem = rankItem(itemValue, value, {

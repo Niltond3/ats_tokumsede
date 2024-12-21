@@ -10,14 +10,22 @@ const mapProductPrice = (product, orderItem) => {
         return {
             ...product,
             preco: [
-                { qtd: product.preco[0].qtd, val: toFloat(orderItem.preco) },
+                {
+                    qtd: product.preco[preco.length - 1].qtd,
+                    val: toFloat(orderItem.preco),
+                },
             ],
             precoEspecial: [{ qtd: precoEspecial.qtd, val: precoEspecial.val }],
         };
     }
     return {
         ...product,
-        preco: [{ qtd: product.preco[0].qtd, val: toFloat(orderItem.preco) }],
+        preco: [
+            {
+                qtd: product.preco[preco.length - 1].qtd,
+                val: toFloat(orderItem.preco),
+            },
+        ],
     };
 };
 

@@ -43,11 +43,12 @@ class PrecoController extends Controller
 
         Debugbar::info($preco);
 
-        if($preco->save()){
+        if ($preco->save()) {
             return response()->json(['status' => 'success', 'message' => 'Preço cadastrado com sucesso!']);
-        }else{
+        } else {
             return response()->json(['status' => 'error', 'message' => 'Erro ao cadastrar preço!']);
-        };
+        }
+        ;
         //
     }
 
@@ -60,12 +61,12 @@ class PrecoController extends Controller
     public function show($idProduto)
     {
         $distribuidor = auth()->user()->idDistribuidor;
-        $precos = Preco::where('status','!=', Preco::EXCLUIDO)->where('idDistribuidor',  $distribuidor)->where('idProduto', $idProduto)->with('distribuidor','estoque','produto')
-        ->selectRaw("preco.*, CONCAT('R$', REPLACE(REPLACE(REPLACE(FORMAT( preco.valor , 2),'.',';'),',','.'),';',',')) AS valor, "
-                        . "date_format(preco.inicioValidade, '%d/%m/%Y') as inicioValidade, date_format(preco.inicioHora, '%H:%i') as inicioHora, "
-                        . "date_format(preco.fimValidade, '%d/%m/%Y') as fimValidade, date_format(preco.fimHora, '%H:%i') as fimHora")
+        $precos = Preco::where('status', '!=', Preco::EXCLUIDO)->where('idDistribuidor', $distribuidor)->where('idProduto', $idProduto)->with('distribuidor', 'estoque', 'produto')
+            ->selectRaw("preco.*, CONCAT('R$', REPLACE(REPLACE(REPLACE(FORMAT( preco.valor , 2),'.',';'),',','.'),';',',')) AS valor, "
+                . "date_format(preco.inicioValidade, '%d/%m/%Y') as inicioValidade, date_format(preco.inicioHora, '%H:%i') as inicioHora, "
+                . "date_format(preco.fimValidade, '%d/%m/%Y') as fimValidade, date_format(preco.fimHora, '%H:%i') as fimHora")
 
-        ->get();//->with('distribuidor','estoque','produto')
+            ->get();//->with('distribuidor','estoque','produto')
         return $precos;
     }
 
@@ -78,7 +79,7 @@ class PrecoController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if(!$request->status){//*Ativa ou Inativa
+        if (!$request->status) {//*Ativa ou Inativa
             $request['inicioValidade'] = $request->inicioValidade == "" ? null : implode("-", array_reverse(explode("/", $request->inicioValidade)));
             $request['fimValidade'] = $request->fimValidade == "" ? null : implode("-", array_reverse(explode("/", $request->fimValidade)));
         }

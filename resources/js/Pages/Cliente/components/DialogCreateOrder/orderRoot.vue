@@ -57,8 +57,8 @@ const interableProducts = ref([])
 const forwarded = useForwardPropsEmits(props, emits);
 
 const whenDialogOpen = async () => {
-    const { id } = props.address
-    const url = `produtos/${id}`
+    const { id: addredId } = props.address
+    const url = `produtos/${addredId}`
     const responseOrder = await axios.get(url)
     const { data: orderData } = responseOrder
     const products = orderData[0].map(product => { return { ...product, nome: utf8Decode(product.nome) } }).filter(product => product.id != 3 && product.id != 334).sort();
@@ -113,7 +113,7 @@ const updateData = (rowIndex, columnId, value) => {
             const oldRow = readbleOrderData.value.products[rowIndex]
             return {
                 ...oldRow,
-                [columnId]: [{ qtd: oldRow[columnId][0].qtd, val: toFloat(value) }]
+                [columnId]: [{ qtd: oldRow[columnId][oldRow[columnId].length - 1].qtd, val: toFloat(value) }]
             }
         }
         return row;
@@ -135,8 +135,8 @@ const updateData = (rowIndex, columnId, value) => {
             return {
                 idProduto: id,
                 quantidade: quantidade,
-                preco: preco[0].val,
-                subtotal: quantidade * preco[0].val,
+                preco: preco[preco.length - 1].val,
+                subtotal: quantidade * preco[preco.length - 1].val,
                 precoAcertado: null,
             }
         }
@@ -241,7 +241,7 @@ const handleCallbackPedido = () => {
                                                 <div class="flex flex-col items-center justify-center">
                                                     <h3 class="text-white/50 text-sm">{{ product.nome }}</h3>
                                                     <h2 class="text-white text-base mb-4">{{
-                                                        toCurrency(parseFloat(product.preco[0].val)) }}
+                                                        toCurrency(parseFloat(product.preco[preco.length - 1].val)) }}
                                                     </h2>
                                                 </div>
                                                 <img :src="`public/images/uploads/${product.img}`" class="h-[227px]" />

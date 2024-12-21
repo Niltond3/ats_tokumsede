@@ -31,7 +31,7 @@ class Distribuidor extends Model
     ];
     public $timestamps = false;
     const ATIVO = 1;
-	const INATIVO = 2;
+    const INATIVO = 2;
     const EXCLUIDO = 3;
     //relacionamento UM para Muitos Inverso
     public function enderecoDistribuidor(): BelongsTo

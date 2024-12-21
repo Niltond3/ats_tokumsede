@@ -124,7 +124,9 @@ export const columns = [
                 const value = precoEspecial[precoEspecial.length - 1].val;
                 return getPriceComponent(value, "precoEspecial");
             }
-            const value = getValue()[0].val;
+            const rowValue = getValue();
+            const rowEndArray = rowValue.length - 1;
+            const value = rowValue[rowEndArray].val;
             return getPriceComponent(value, column.id);
         },
         meta: {},
@@ -171,6 +173,9 @@ export const columns = [
         enableHiding: false,
         cell: ({ row, getValue, column, table, cell }) => {
             const payment = row.original;
+            const preco = payment.preco;
+            const precoEndArray = preco.length - 1;
+
             const { payload } = table.options.meta;
             const { clientId } = table.options.meta;
 
@@ -178,8 +183,8 @@ export const columns = [
                 idProduto: payment.id,
                 idDistribuidor: payload.idDistribuidor,
                 idCliente: clientId,
-                valor: payment.preco[0].val,
-                qtdMin: payment.preco[0].qtd,
+                valor: preco[precoEndArray].val,
+                qtdMin: preco[precoEndArray].qtd,
             };
 
             const pricePayload = {

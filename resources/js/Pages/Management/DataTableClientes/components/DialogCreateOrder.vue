@@ -30,7 +30,6 @@ const emits = defineEmits(["update:modelValue", "update:dataTable"]);
 
 const forwarded = useForwardPropsEmits(props, emits);
 
-
 const whenDialogOpen = () => {
     const url = `produtos/${props.idClienteAddress}`
     const promise = axios.get(url)

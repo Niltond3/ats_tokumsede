@@ -48,6 +48,8 @@ import { dateToDayMonthYearFormat, dateToISOFormat, formatMoney } from '@/util'
 import renderToast from '@/components/renderPromiseToast'
 import { computed } from 'vue'
 import useDataToTableFormat from './composable/dataToTableFormat'
+import DataTableProductsHeader from './components/DataTableProducts/DataTableProductsHeader.vue'
+import DataTableProducts from './components/DataTableProducts'
 
 const props = defineProps({
     createOrderData: { type: null, required: false },
@@ -304,7 +306,7 @@ const table = useVueTable(tableOptions)
 
 <template>
     <div>
-        <div class="relative flex flex-wrap items-center pt-4 pb-1 justify-between gap-3 group">
+        <!-- <div class="relative flex flex-wrap items-center pb-1 justify-between gap-3 group">
             <div class="flex flex-col gap-1 w-full md:flex-row">
                 <DebouncedInput :modelValue="globalFilter ?? ''"
                     @update:modelValue="value => (globalFilter = String(value))" placeholder="Todos os produtos..." />
@@ -335,8 +337,12 @@ const table = useVueTable(tableOptions)
                     </span>
                 </p>
             </div>
-        </div>
-        <div class="border rounded-md border-gray-200 relative">
+        </div> -->
+        <DataTableProducts.Header :distributors="props.distributors"
+            :id-distribuidor="orderState.payload.idDistribuidor" :table-identifier="tableIdentifier"
+            :status="orderState.status" :client-name="props.createOrderData.clientName" :global-filter="globalFilter"
+            @update:global-filter="value => (globalFilter = String(value))" />
+        <!-- <div class="border rounded-md border-gray-200 relative">
             <DialogCreateOrderNote @callback:order-note="handleOrderNote" :order-note="orderState.payload.obs" />
             <Table
                 class="rounded-md [&_tbody]:h-[235px] [&_tbody]:table-fixed [&_tbody]:block [&_tbody]:overflow-y-auto [&_tbody]:overflow-x-hidden [&_tr]:table [&_tr]:w-full [&_tr]:table-fixed">
@@ -359,18 +365,19 @@ const table = useVueTable(tableOptions)
                             </TableCell>
                         </TableRow>
                     </template>
-                    <template v-else>
+<template v-else>
                         <TableRow>
                             <TableCell :colspan="resizebleColumns.length" class="h-24 text-center">
                                 No results.
                             </TableCell>
                         </TableRow>
                     </template>
-                </TableBody>
-            </Table>
-        </div>
-        <div class="flex mt-3 gap-3 flex-col sm:grid sm:grid-cols-3 ">
-            <div class="flex items-center h-11 justify-around ">
+</TableBody>
+</Table>
+</div> -->
+        <DataTableProducts.Table :obs="orderState.payload.obs" :resizeble-columns="resizebleColumns" :table="table" />
+        <div class="flex mt-3 gap-3 flex-col sm:grid sm:grid-cols-12 sm:grid-rows-2">
+            <div class="flex items-center h-11 justify-around sm:col-span-4">
                 <div class="w-full flex flex-col items-center justify-center">
                     <Separator class="mt-1 mb-[0.35rem]" />
                     <div class="flex gap-8">
@@ -392,7 +399,8 @@ const table = useVueTable(tableOptions)
                     </div>
                 </div>
             </div>
-            <div class="flex flex-wrap gap-2 px-2 pb-2 sm:h-14 justify-center">
+            <div
+                class="flex flex-wrap gap-2 px-2 pb-2 sm:h-14 justify-center sm:row-start-2 sm:col-start-1 sm:col-span-10">
                 <Separator label="Detalhes" class="z-100 my-1" />
                 <SelectPayment @update:payment-form="handlePayForm" :default="orderState.payload.formaPagamento" />
                 <Separator orientation="vertical" class="" />
@@ -401,7 +409,7 @@ const table = useVueTable(tableOptions)
                 <DateTimePicker @update:scheduling="handleScheduling"
                     :default:scheduling="dateToISOFormat(`${orderState.payload.dataAgendada} ${orderState.payload.horaInicio}`)" />
             </div>
-            <div class="w-full sm:w-1/2 relative flex gap-1 p-2">
+            <div class="w-full relative flex gap-1 p-2 sm:col-start-5 sm:col-end-11">
                 <Textarea
                     class="border rounded-md border-gray-200 min-h-11 h-11 sm:min-h-16 focus-visible:ring-0 focus-visible:ring-offset-0 "
                     v-model:model-value="addressNote" />
@@ -409,7 +417,7 @@ const table = useVueTable(tableOptions)
                     endereço</span>
             </div>
             <Button :disabled="disabledButton" type="submit"
-                class="border-none rounded-xl px-4 py-2 text-base font-semibold bg-info/80 hover:bg-info/100 transition-all disabled:bg-info/60 disabled:hover:bg-info/60 disabled:cursor-not-allowed "
+                class="sm:col-span-2 sm:col-end-13 sm:row-span-2 sm:my-3 border-none rounded-xl px-4 py-2 text-base font-semibold bg-info/80 hover:bg-info/100 transition-all disabled:bg-info/60 disabled:hover:bg-info/60 disabled:cursor-not-allowed "
                 @click="handleCallbackPedido">
                 <span v-if="isUpdate"> Salvar </span>
                 <span v-else> Cadastrar </span>

@@ -87,13 +87,6 @@ const computedOrderTotals = computed(() => {
     }
 })
 
-watch(() => width.value, (newWidth) => resizebleColumns.value = useResponsiveColumns(columns, newWidth).value)
-
-watch(() => orderState.payload.itens, (newVal) => {
-    if (!newVal?.length) return
-    disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false, { deep: true }
-})
-
 const updateOrderState = () => {
     orderState.payload = {
         ...orderState.payload,
@@ -104,6 +97,13 @@ const updateOrderState = () => {
 }
 
 watch(() => orderState.tableData, () => updateOrderState(), { deep: true })
+
+watch(() => width.value, (newWidth) => resizebleColumns.value = useResponsiveColumns(columns, newWidth).value)
+
+watch(() => orderState.payload.itens, (newVal) => {
+    if (!newVal?.length) return
+    disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false, { deep: true }
+})
 
 const updateData = (rowIndex, columnId, value) => {
     const oldRow = orderState.tableData[rowIndex]
@@ -143,45 +143,6 @@ const updateData = (rowIndex, columnId, value) => {
     orderState.tableData = newData
 }
 
-// Helper function to calculate order totals
-// const calculateOrderTotals = (newData) => {
-//     const itens = newData
-//         .filter(product => product.quantidade > 0)
-//         .map(product => {
-//             const { id, quantidade } = product
-//             const precoEspecial = product.precoEspecial
-//             const precoProduto = product.preco
-//             const preco = precoEspecial
-//                 ? precoEspecial[precoEspecial.length - 1].val
-//                 : precoProduto[precoProduto.length - 1].val
-//             const subtotal = quantidade * preco
-
-//             return {
-//                 idProduto: id,
-//                 quantidade,
-//                 preco,
-//                 subtotal,
-//                 precoAcertado: null
-//             }
-//         })
-
-//     try {
-//         const totalProdutos = itens.reduce((sum, product) => sum + product.subtotal, 0)
-//         const total = totalProdutos + orderState.payload.taxaEntrega
-
-//         orderState.payload = {
-//             ...orderState.payload,
-//             totalProdutos,
-//             total,
-//             itens
-//         }
-//     } catch (error) {
-//         console.log(error)
-//         disabledButton.value = true
-//         toast.error('Adicione ao menos um produto')
-//     }
-// }
-
 const tableOptions = reactive(createTableOptions(
     orderState,
     globalFilter,
@@ -216,38 +177,6 @@ onMounted(() => {
 
 <template>
     <div>
-        <!-- <div class="relative flex flex-wrap items-center pb-1 justify-between gap-3 group">
-            <div class="flex flex-col gap-1 w-full md:flex-row">
-                <DebouncedInput :modelValue="globalFilter ?? ''"
-                    @update:modelValue="value => (globalFilter = String(value))" placeholder="Todos os produtos..." />
-                <SelectDistributor v-if="props.distributors" :distributors="props.distributors"
-                    @update:distributor="handleDistributor" :default="`${orderState.payload.idDistribuidor}`">
-                </SelectDistributor>
-                <span v-else class="font-medium flex items-center justify-center text-info py-1 px-2 w-full">
-                    {{ tableIdentifier }}
-                </span>
-            </div>
-            <div class="flex flex-col gap-1 w-full md:flex-row pb-2">
-                <button v-if="orderState.status"
-                    :class="[orderState.status.classes.bg, orderState.status.label == 'Agendado' ? 'text-slate-700' : 'text-white',]"
-                    class="relative font-semibold px-2 py-1 rounded-lg opacity-80 hover:opacity-100 "
-                    @click="handleUpdateStatus">
-                    <i v-if="orderState.status.label != 'Agendado' && orderState.status.label != 'Pendente'"
-                        class="ri-edit-2-fill absolute bg-white rounded-full w-5 h-5 flex justify-center items-center -top-3 -right-1"
-                        :class="orderState.status.classes.text"></i>
-                    <i v-if="orderState.status.oldStatus"
-                        class="ri-arrow-go-back-fill absolute bg-white rounded-full w-5 h-5 flex justify-center items-center -top-3 -right-1"
-                        :class="orderState.status.classes.text"></i>
-                    {{ orderState.status.label }}
-                </button>
-                <p class="text-sm font-semibold px-2 py-1 rounded-lg text-info ">
-                    Cliente:
-                    <span class="font-medium">
-                        {{ props.createOrderData?.clientName ?? '' }}
-                    </span>
-                </p>
-            </div>
-        </div> -->
         <DataTableProducts.Header :distributors="props.distributors"
             :id-distribuidor="orderState.payload.idDistribuidor" :table-identifier="tableIdentifier"
             :status="orderState.status" :client-name="props.createOrderData.clientName" :global-filter="globalFilter"

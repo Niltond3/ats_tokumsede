@@ -13,8 +13,6 @@ import { toFloat } from "validator";
 
 const { toCurrency } = formatMoney();
 
-const columnHelper = createColumnHelper();
-
 export const columns = [
     {
         id: "img",
@@ -50,8 +48,37 @@ export const columns = [
                 ]
             );
         },
-        cell: ({ row }) =>
-            h("div", { class: "" }, utf8Decode(row.getValue("nome"))),
+        cell: ({ row }) => {
+            const handleRowToClipboard = () => {
+                console.log(row.original);
+                const { nome, preco } = row.original;
+                const precoEspecial = row.original.precoEspecial;
+                const quantidade = row.original.quantidade;
+                const value = precoEspecial
+                    ? precoEspecial[precoEspecial.length - 1].val
+                    : preco[preco.length - 1].val;
+                const subtotal = quantidade ? quantidade * value : 0;
+
+                const clipboard = `${utf8Decode(nome)} un ${toCurrency(
+                    value
+                )} ${
+                    subtotal !== 0 ? `subtotal: ${toCurrency(subtotal)}` : ""
+                }`;
+                navigator.clipboard.writeText(clipboard);
+            };
+
+            return h(
+                "div",
+                {
+                    class: "flex gap-2 group cursor-pointer",
+                    onClick: handleRowToClipboard,
+                },
+                utf8Decode(row.getValue("nome")),
+                h("i", {
+                    class: "ri-file-copy-2-fill opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-info",
+                })
+            );
+        },
         enableGlobalFilter: true,
     },
     {

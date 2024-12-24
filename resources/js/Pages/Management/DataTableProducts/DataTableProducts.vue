@@ -1,54 +1,25 @@
 <script setup>
 // Vue Core
-import { ref, onMounted, reactive, watch } from 'vue'
+import { ref, onMounted, reactive, watch, computed } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 
-// UI Components
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table'
-import { Separator } from '@/components/ui/separator'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-
 // Table Logic
-import {
-    FlexRender,
-    getCoreRowModel,
-    getFacetedMinMaxValues,
-    getFacetedRowModel,
-    getPaginationRowModel,
-    getFacetedUniqueValues,
-    getFilteredRowModel,
-    getSortedRowModel,
-    useVueTable,
-} from '@tanstack/vue-table'
+import { useVueTable } from '@tanstack/vue-table'
 
 //composable
 import { useOrderState } from '@/composables/orderState'
+import { useResponsiveColumns } from './composable/useResponsiveColumns'
+import { useEventHandlers } from './composable/useEventHandlers'
 
 // Configuration
 import { columns } from './config/Columns'
-
-// Components
-import { SelectDistributor, DialogCreateOrderNote } from './components'
-import SelectPayment from '@/components/orderComponents/SelectPayment.vue'
-import ExchangeInput from '@/components/orderComponents/ExchangeInput.vue'
-import DateTimePicker from '@/components/orderComponents/DateTimePicker.vue'
-import DebouncedInput from './components/DebouncedInput.vue'
+import { createTableOptions } from './config/tableConfig'
 
 // Utilities
 import { toast } from 'vue-sonner'
-import { dateToDayMonthYearFormat, dateToISOFormat, formatMoney } from '@/util'
+import { formatMoney } from '@/util'
 import renderToast from '@/components/renderPromiseToast'
-import { computed } from 'vue'
 import useDataToTableFormat from './composable/dataToTableFormat'
-import DataTableProductsHeader from './components/DataTableProducts/DataTableProductsHeader.vue'
 import DataTableProducts from './components/DataTableProducts'
 
 const props = defineProps({
@@ -76,17 +47,11 @@ const disabledButton = ref(true)
 
 const resizebleColumns = ref(columns)
 
-const { toCurrency, toFloat } = formatMoney()
+const { toFloat } = formatMoney()
 
 const { width } = useWindowSize()
 
 const emit = defineEmits(['callback:payloadPedido', 'update:specialOfferCreated'])
-
-const handleCallbackPedido = () => {
-    orderState.payload = { ...orderState.payload, observacao: addressNote.value }
-    disabledButton.value = true
-    emit('callback:payloadPedido', orderState.payload)
-}
 
 const createSpecialOffer = (payload) => {
     const url = 'preco'
@@ -98,73 +63,47 @@ const createSpecialOffer = (payload) => {
     })
 }
 
-const handlePayForm = (value) => orderState.payload = { ...orderState.payload, formaPagamento: value }
+const { handleDistributor, handleCallbackPedido, handleExchange, handlePayForm, handleScheduling, handleUpdateOrderNote, handleUpdateStatus } = useEventHandlers(orderState, emit, addressNote, disabledButton)
 
-const handleExchange = ({ value }) => orderState.payload = { ...orderState.payload, trocoPara: parseFloat(value.split(' ')[1]) }
+const computedOrderTotals = computed(() => {
+    const itens = orderState.tableData
+        .filter(product => product.quantidade > 0)
+        .map(product => ({
+            idProduto: product.id,
+            quantidade: product.quantidade,
+            preco: product.precoEspecial
+                ? product.precoEspecial[product.precoEspecial.length - 1].val
+                : product.preco[product.preco.length - 1].val,
+            subtotal: product.quantidade * (product.precoEspecial
+                ? product.precoEspecial[product.precoEspecial.length - 1].val
+                : product.preco[product.preco.length - 1].val),
+            precoAcertado: null
+        }))
 
-const handleScheduling = (date) => {
-    if (date) {
-        const { date: formattedDate, time } = dateToDayMonthYearFormat(date)
-
-        const dataAgendada = formattedDate
-
-        const horaInicio = time
-
-        return orderState.payload = { ...orderState.payload, agendado: 1, dataAgendada, horaInicio }
-    }
-    return orderState.payload = { ...orderState.payload, agendado: 0, dataAgendada: '', horaInicio: '' }
-}
-
-const handleDistributor = (value) => orderState.payload = { ...orderState.payload, idDistribuidor: value }
-
-const handleOrderNote = (value) => orderState.payload = { ...orderState.payload, obs: value }
-
-const handleStatusChange = () => {
-    if (orderState.status.label == 'Agendado') return toast.info('Pedido Agendado!')
-    if (orderState.status.label == 'Pendente' && !orderState.status.oldStatus) return toast.info('Pedido Pendente!')
-    if (orderState.status.label == 'Pendente' && orderState.status.oldStatus) {
-        orderState.status = orderState.status.oldStatus
-        orderState.payload = { ...orderState.payload, status: orderState.status.statusId }
-        return toast.info('Status Restaurado!')
-    }
-
-    const pendente = {
-        label: 'Pendente',
-        classes: {
-            bg: 'bg-warning',
-            text: 'text-warning',
-            icon: 'ri-error-warning-fill'
-        }
-
-    }
-
-    const oldStatus = {
-        ...orderState.status,
-        statusId: orderState.payload.status
-    }
-
-    orderState.status = { ...pendente, oldStatus }
-    orderState.payload = { ...orderState.payload, status: 1 }
-    return toast.info('Status Alterado!')
-}
-
-watch(() => width.value, (newVal) => {
-    if (newVal <= 768) {
-        resizebleColumns.value = [...columns].filter(column => !['nome', 'descricao'].includes(column.id))
-    } else if (newVal <= 448) {
-        resizebleColumns.value = [...columns].filter(column => column.id !== "nome")
-    } else {
-        resizebleColumns.value = columns
+    return {
+        itens,
+        totalProdutos: itens.reduce((sum, product) => sum + product.subtotal, 0),
+        total: itens.reduce((sum, product) => sum + product.subtotal, 0) + orderState.payload.taxaEntrega
     }
 })
+
+watch(() => width.value, (newWidth) => resizebleColumns.value = useResponsiveColumns(columns, newWidth).value)
 
 watch(() => orderState.payload.itens, (newVal) => {
-    console.log(newVal)
-    if (newVal.length && Object.keys(newVal[0]).length) {
-        console.log(newVal)
-        disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false, { deep: true }
-    }
+    if (!newVal?.length) return
+    disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false, { deep: true }
 })
+
+const updateOrderState = () => {
+    orderState.payload = {
+        ...orderState.payload,
+        totalProdutos: computedOrderTotals.value.totalProdutos,
+        total: computedOrderTotals.value.total,
+        itens: computedOrderTotals.value.itens
+    }
+}
+
+watch(() => orderState.tableData, () => updateOrderState(), { deep: true })
 
 const updateData = (rowIndex, columnId, value) => {
     const oldRow = orderState.tableData[rowIndex]
@@ -202,47 +141,57 @@ const updateData = (rowIndex, columnId, value) => {
         : (toast.error('ação desconhecida'), orderState.tableData)
 
     orderState.tableData = newData
-    calculateOrderTotals(newData)
 }
 
 // Helper function to calculate order totals
-const calculateOrderTotals = (newData) => {
-    const itens = newData
-        .filter(product => product.quantidade > 0)
-        .map(product => {
-            const { id, quantidade } = product
-            const precoEspecial = product.precoEspecial
-            const precoProduto = product.preco
-            const preco = precoEspecial
-                ? precoEspecial[precoEspecial.length - 1].val
-                : precoProduto[precoProduto.length - 1].val
-            const subtotal = quantidade * preco
+// const calculateOrderTotals = (newData) => {
+//     const itens = newData
+//         .filter(product => product.quantidade > 0)
+//         .map(product => {
+//             const { id, quantidade } = product
+//             const precoEspecial = product.precoEspecial
+//             const precoProduto = product.preco
+//             const preco = precoEspecial
+//                 ? precoEspecial[precoEspecial.length - 1].val
+//                 : precoProduto[precoProduto.length - 1].val
+//             const subtotal = quantidade * preco
 
-            return {
-                idProduto: id,
-                quantidade,
-                preco,
-                subtotal,
-                precoAcertado: null
-            }
-        })
+//             return {
+//                 idProduto: id,
+//                 quantidade,
+//                 preco,
+//                 subtotal,
+//                 precoAcertado: null
+//             }
+//         })
 
-    try {
-        const totalProdutos = itens.reduce((sum, product) => sum + product.subtotal, 0)
-        const total = totalProdutos + orderState.payload.taxaEntrega
+//     try {
+//         const totalProdutos = itens.reduce((sum, product) => sum + product.subtotal, 0)
+//         const total = totalProdutos + orderState.payload.taxaEntrega
 
-        orderState.payload = {
-            ...orderState.payload,
-            totalProdutos,
-            total,
-            itens
-        }
-    } catch (error) {
-        console.log(error)
-        disabledButton.value = true
-        toast.error('Adicione ao menos um produto')
-    }
-}
+//         orderState.payload = {
+//             ...orderState.payload,
+//             totalProdutos,
+//             total,
+//             itens
+//         }
+//     } catch (error) {
+//         console.log(error)
+//         disabledButton.value = true
+//         toast.error('Adicione ao menos um produto')
+//     }
+// }
+
+const tableOptions = reactive(createTableOptions(
+    orderState,
+    globalFilter,
+    sorting,
+    resizebleColumns,
+    clientId,
+    updateData
+))
+
+const table = useVueTable(tableOptions)
 
 onMounted(() => {
     const { products: rawProducts, distributorTaxes, distributor, address } = props.createOrderData
@@ -263,45 +212,6 @@ onMounted(() => {
     table.setPageSize(pageSizes.value[0])
 })
 
-
-const tableOptions = reactive({
-    get data() { return orderState.tableData },
-    get columns() { return resizebleColumns.value },
-    state: {
-        get globalFilter() { return globalFilter.value },
-        get sorting() { return sorting.value },
-        columnVisibility: { /* globalSort: false,*/ },
-    },
-    onSortingChange: updaterOrValue => {
-        sorting.value =
-            typeof updaterOrValue === 'function'
-                ? updaterOrValue(sorting.value)
-                : updaterOrValue
-    },
-    onGlobalFilterChange: (updaterOrValue) => {
-        globalFilter.value =
-            typeof updaterOrValue === 'function'
-                ? updaterOrValue(globalFilter.value)
-                : updaterOrValue;
-    },
-    meta: computed(() => ({
-        clientId: clientId.value,
-        updateData,
-        editedRows: orderState.editedRows,
-        payload: orderState.payload,
-        tableData: orderState.tableData
-    })),
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(), //client side filtering
-    getSortedRowModel: getSortedRowModel(), //client side sorting needed if you want to use sorting too.
-    getPaginationRowModel: getPaginationRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
-})
-
-const table = useVueTable(tableOptions)
-
 </script>
 
 <template>
@@ -321,7 +231,7 @@ const table = useVueTable(tableOptions)
                 <button v-if="orderState.status"
                     :class="[orderState.status.classes.bg, orderState.status.label == 'Agendado' ? 'text-slate-700' : 'text-white',]"
                     class="relative font-semibold px-2 py-1 rounded-lg opacity-80 hover:opacity-100 "
-                    @click="handleStatusChange">
+                    @click="handleUpdateStatus">
                     <i v-if="orderState.status.label != 'Agendado' && orderState.status.label != 'Pendente'"
                         class="ri-edit-2-fill absolute bg-white rounded-full w-5 h-5 flex justify-center items-center -top-3 -right-1"
                         :class="orderState.status.classes.text"></i>
@@ -341,87 +251,12 @@ const table = useVueTable(tableOptions)
         <DataTableProducts.Header :distributors="props.distributors"
             :id-distribuidor="orderState.payload.idDistribuidor" :table-identifier="tableIdentifier"
             :status="orderState.status" :client-name="props.createOrderData.clientName" :global-filter="globalFilter"
-            @update:global-filter="value => (globalFilter = String(value))" />
-        <!-- <div class="border rounded-md border-gray-200 relative">
-            <DialogCreateOrderNote @callback:order-note="handleOrderNote" :order-note="orderState.payload.obs" />
-            <Table
-                class="rounded-md [&_tbody]:h-[235px] [&_tbody]:table-fixed [&_tbody]:block [&_tbody]:overflow-y-auto [&_tbody]:overflow-x-hidden [&_tr]:table [&_tr]:w-full [&_tr]:table-fixed">
-                <TableHeader class="bg-info rounded-md">
-                    <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-                        <TableHead v-for="header in headerGroup.headers" :key="header.id"
-                            :style="{ width: header.getSize() + 'px' }">
-                            <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header"
-                                :props="header.getContext()" />
-                        </TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    <template v-if="table.getRowModel().rows?.length">
-                        <TableRow v-for="row in table.getRowModel().rows" :key="row.id"
-                            :data-state="row.getIsSelected() ? 'selected' : undefined">
-                            <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id"
-                                :style="{ width: cell.column.getSize() + 'px' }">
-                                <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
-                            </TableCell>
-                        </TableRow>
-                    </template>
-<template v-else>
-                        <TableRow>
-                            <TableCell :colspan="resizebleColumns.length" class="h-24 text-center">
-                                No results.
-                            </TableCell>
-                        </TableRow>
-                    </template>
-</TableBody>
-</Table>
-</div> -->
-        <DataTableProducts.Table :obs="orderState.payload.obs" :resizeble-columns="resizebleColumns" :table="table" />
-        <div class="flex mt-3 gap-3 flex-col sm:grid sm:grid-cols-12 sm:grid-rows-2">
-            <div class="flex items-center h-11 justify-around sm:col-span-4">
-                <div class="w-full flex flex-col items-center justify-center">
-                    <Separator class="mt-1 mb-[0.35rem]" />
-                    <div class="flex gap-8">
-                        <span class="text-sm font-medium relative text-info"> <span
-                                class="absolute -top-5 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">Produtos</span>
-                            {{
-                                toCurrency(orderState.payload.totalProdutos)
-                            }}</span>
-                        <span class="text-sm font-medium relative text-info"> <span
-                                class="absolute -top-5 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">Entrega</span>
-                            {{
-                                toCurrency(orderState.payload.taxaEntrega)
-                            }}</span>
-                        <span class="text-sm font-medium relative text-info"> <span
-                                class="absolute -top-5 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">Total</span>
-                            {{
-                                toCurrency(orderState.payload.total)
-                            }}</span>
-                    </div>
-                </div>
-            </div>
-            <div
-                class="flex flex-wrap gap-2 px-2 pb-2 sm:h-14 justify-center sm:row-start-2 sm:col-start-1 sm:col-span-10">
-                <Separator label="Detalhes" class="z-100 my-1" />
-                <SelectPayment @update:payment-form="handlePayForm" :default="orderState.payload.formaPagamento" />
-                <Separator orientation="vertical" class="" />
-                <ExchangeInput @update:exchange="handleExchange" :value="orderState.payload.trocoPara" />
-                <Separator orientation="vertical" class="hidden sm:block" />
-                <DateTimePicker @update:scheduling="handleScheduling"
-                    :default:scheduling="dateToISOFormat(`${orderState.payload.dataAgendada} ${orderState.payload.horaInicio}`)" />
-            </div>
-            <div class="w-full relative flex gap-1 p-2 sm:col-start-5 sm:col-end-11">
-                <Textarea
-                    class="border rounded-md border-gray-200 min-h-11 h-11 sm:min-h-16 focus-visible:ring-0 focus-visible:ring-offset-0 "
-                    v-model:model-value="addressNote" />
-                <span class="absolute text-xs text-muted-foreground left-2 -top-0 bg-white">observação do
-                    endereço</span>
-            </div>
-            <Button :disabled="disabledButton" type="submit"
-                class="sm:col-span-2 sm:col-end-13 sm:row-span-2 sm:my-3 border-none rounded-xl px-4 py-2 text-base font-semibold bg-info/80 hover:bg-info/100 transition-all disabled:bg-info/60 disabled:hover:bg-info/60 disabled:cursor-not-allowed "
-                @click="handleCallbackPedido">
-                <span v-if="isUpdate"> Salvar </span>
-                <span v-else> Cadastrar </span>
-            </Button>
-        </div>
+            @update:global-filter="value => (globalFilter = String(value))" @update:status="handleUpdateStatus" />
+        <DataTableProducts.Table :obs="orderState.payload.obs" :resizeble-columns="resizebleColumns" :table="table"
+            @update:order-note="handleUpdateOrderNote" />
+        <DataTableProducts.Footer :payload="orderState.payload" :is-update="isUpdate" :disabled-button="disabledButton"
+            :address-note="addressNote" @update:payment-form="handlePayForm" @update:exchange="handleExchange"
+            @update:scheduling="handleScheduling" @update:address-note="addressNote = $event"
+            @callback:pedido="handleCallbackPedido" />
     </div>
 </template>

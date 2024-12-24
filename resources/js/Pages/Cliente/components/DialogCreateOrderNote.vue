@@ -17,7 +17,7 @@ import { twMerge } from 'tailwind-merge'
 const { isOpen, toggleDialog } = dialogState()
 
 
-const emit = defineEmits(['callback:orderNote'])
+const emit = defineEmits(['callback:order-note'])
 
 const props = defineProps(['orderNote', 'class'])
 
@@ -25,7 +25,7 @@ const note = ref(props.orderNote);
 
 
 const handleClick = () => {
-    emit('callback:orderNote', note.value)
+    emit('callback:order-note', note.value)
     toggleDialog()
 }
 

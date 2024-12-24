@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted, watch } from 'vue'
 // UI Components
 import {
     Table,
@@ -24,24 +23,17 @@ const props = defineProps({
     },
     obs: {
         type: String,
-        required: true
+        required: false
     }
 })
-const emits = defineEmits(['callback:order-note'])
-
-const handleOrderNote = (value) => emits('callback:order-note', value)
-
-onMounted(() => {
-    console.log(props.table)
-})
-
-watch(props.table, (newValue) => { console.log(newValue) })
+const emits = defineEmits(['update:order-note'])
 
 </script>
 
 <template>
     <div class="border rounded-md border-gray-200 relative">
-        <DialogCreateOrderNote v-if="obs" @callback:order-note="handleOrderNote" :order-note="props.obs" />
+        <DialogCreateOrderNote v-if="obs || obs == ''" @callback:order-note="value => emits('update:order-note', value)"
+            :order-note="props.obs" />
         <Table
             class="rounded-md [&_tbody]:h-[235px] [&_tbody]:table-fixed [&_tbody]:block [&_tbody]:overflow-y-auto [&_tbody]:overflow-x-hidden [&_tr]:table [&_tr]:w-full [&_tr]:table-fixed">
             <TableHeader class="bg-info rounded-md">

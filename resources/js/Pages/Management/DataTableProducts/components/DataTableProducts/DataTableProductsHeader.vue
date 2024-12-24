@@ -4,26 +4,54 @@ import DebouncedInput from '../DebouncedInput.vue'
 
 const props = defineProps({
     distributors: { type: Array, required: true },
-    idDistribuidor: { type: null, required: true },
+    idDistribuidor: { type: [String, Number], required: true },
     tableIdentifier: { type: String, required: true },
     status: { type: Object, required: false },
     clientName: { type: String, required: false },
     globalFilter: { type: String, required: true },
 })
-const emits = defineEmits(['update:distributor', 'update:globalFilter'])
+const emits = defineEmits(['update:distributor', 'update:globalFilter', 'update:status'])
 
-const handleDistributor = (value) => emits('update:distributor', value)
-const handleUpdateDebouncedInput = (value) => emits('update:globalFilter', value)
+const handleStatusChange = () => {
+    if (props.status.label == 'Agendado') return toast.info('Pedido Agendado!')
+    if (props.status.label == 'Pendente' && !props.status.oldStatus) return toast.info('Pedido Pendente!')
+    if (props.status.label == 'Pendente' && props.status.oldStatus) {
+        emits('update:status', {
+            status: props.status.oldStatus,
+            payload: props.status.statusId
+        })
+        return toast.info('Status Restaurado!')
+    }
+
+    const pendente = {
+        label: 'Pendente',
+        classes: {
+            bg: 'bg-warning',
+            text: 'text-warning',
+            icon: 'ri-error-warning-fill'
+        }
+
+    }
+
+    const oldStatus = {
+        ...props.status,
+        statusId: props.payload.status
+    }
+    emits('update:status', {
+        status: { ...pendente, oldStatus },
+        payload: 1
+    })
+    return toast.info('Status Alterado!')
+}
 
 </script>
 <template>
     <div class="relative flex flex-wrap items-center pb-1 justify-between gap-3 group">
         <div class="flex flex-col gap-1 w-full md:flex-row">
-            <DebouncedInput :modelValue="props.globalFilter" @update:modelValue="handleUpdateDebouncedInput"
+            <DebouncedInput :modelValue="globalFilter" @update:modelValue="value => emit('update:globalFilter', value)"
                 placeholder="Todos os produtos..." />
-            <SelectDistributor v-if="props.distributors" :distributors="props.distributors"
-                @update:distributor="handleDistributor" :default="`${props.idDistribuidor}`">
-            </SelectDistributor>
+            <SelectDistributor v-if="distributors" :distributors="distributors"
+                @update:distributor="value => emits('update:distributor', value)" :default="`${idDistribuidor}`" />
             <span v-else class="font-medium flex items-center justify-center text-info py-1 px-2 w-full">
                 {{ tableIdentifier }}
             </span>

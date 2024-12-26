@@ -8,25 +8,14 @@ import { Input } from '@/components/ui/input'
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue
-} from '@/components/ui/select'
-
 // Utilities
 import { dialogState } from '@/hooks/useToggleDialog'
 import renderToast from '@/components/renderPromiseToast'
 import { utf8Decode } from '@/util'
-import { Skeleton } from '@/components/ui/skeleton'
+import DialogHeader from './components/DialogHeader.vue'
+import DialogBody from './components/DialogBody.vue'
 
 const loadingDistributors = ref(true)
 const loadingProducts = ref(true)
@@ -57,7 +46,6 @@ const getDistributors = () => {
     })
 }
 
-
 const handleUpdateDistributorSelect = (distributorId) => {
     console.log(distributorId)
     const url = `produtos/listarPorDistribuidor/${distributorId}`
@@ -71,7 +59,7 @@ const handleUpdateDistributorSelect = (distributorId) => {
                 nome: utf8Decode(product.nome)
             }
         })
-        // loadingDistributors.value = false
+        loadingProducts.value = false
         console.log(products.value)
     })
 }
@@ -99,34 +87,9 @@ onMounted(() => {
             </button>
         </DialogTrigger>
         <DialogContent class="gap-2">
-            <DialogHeader>
-                <DialogTitle class="leading-none flex gap-3 mr-4 text-lg text-info">
-                    <i class="ri-shopping-bag-3-fill"></i>
-                    <p class="font-semibold">Preços</p>
-                </DialogTitle>
-                <div class="flex gap-2">
-                    <DialogDescription class="py-2 w-min text-nowrap">
-                        Cadastro de preços
-                    </DialogDescription>
-                    <Skeleton v-if="loadingDistributors" class="w-full h-10" />
-                    <Select v-else @update:modelValue="handleUpdateDistributorSelect">
-                        <SelectTrigger>
-                            <SelectValue placeholder="Selecione um distribuidor" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectItem v-for="distributor in distributors" :key="distributor.id"
-                                    :value="`${distributor.id}`">
-                                    {{ distributor.nome }}
-                                </SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                </div>
-            </DialogHeader>
-            <div>
-                table products with prices, later ....
-            </div>
+            <DialogHeader :loading-distributors="loadingDistributors" :distributors="distributors"
+                @update:distributor="handleUpdateDistributorSelect" />
+            <DialogBody :loading-products="loadingProducts" :products="products" />
         </DialogContent>
     </Dialog>
 </template>

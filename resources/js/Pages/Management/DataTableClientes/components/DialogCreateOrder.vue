@@ -88,7 +88,6 @@ const handleToggleDialog = () => {
     if (updateTable.value) emits('update:dataTable', true)
     updateTable.value = false
     props.toggleDialog()
-
 }
 
 </script>

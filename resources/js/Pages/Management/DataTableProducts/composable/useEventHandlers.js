@@ -2,25 +2,28 @@ import { dateToDayMonthYearFormat } from "@/util";
 import { toast } from "vue-sonner";
 
 export const useEventHandlers = (
-    orderState,
+    tableProductsState,
     emit,
     addressNote,
     disabledButton
 ) => ({
     handleCallbackPedido: () => {
-        orderState.payload = {
-            ...orderState.payload,
+        tableProductsState.payload = {
+            ...tableProductsState.payload,
             observacao: addressNote.value,
         };
         disabledButton.value = true;
-        console.log(orderState.payload);
-        emit("callback:payloadPedido", orderState.payload);
+        console.log(tableProductsState.payload);
+        emit("callback:payloadPedido", tableProductsState.payload);
     },
     handlePayForm: (value) =>
-        (orderState.payload = { ...orderState.payload, formaPagamento: value }),
+        (tableProductsState.payload = {
+            ...tableProductsState.payload,
+            formaPagamento: value,
+        }),
     handleExchange: ({ value }) =>
-        (orderState.payload = {
-            ...orderState.payload,
+        (tableProductsState.payload = {
+            ...tableProductsState.payload,
             trocoPara: parseFloat(value.split(" ")[1]),
         }),
     handleScheduling: (date) => {
@@ -32,34 +35,40 @@ export const useEventHandlers = (
 
             const horaInicio = time;
 
-            return (orderState.payload = {
-                ...orderState.payload,
+            return (tableProductsState.payload = {
+                ...tableProductsState.payload,
                 agendado: 1,
                 dataAgendada,
                 horaInicio,
             });
         }
-        return (orderState.payload = {
-            ...orderState.payload,
+        return (tableProductsState.payload = {
+            ...tableProductsState.payload,
             agendado: 0,
             dataAgendada: "",
             horaInicio: "",
         });
     },
     handleDistributor: (value) =>
-        (orderState.payload = {
-            ...orderState.payload,
+        (tableProductsState.payload = {
+            ...tableProductsState.payload,
             idDistribuidor: value.toString(),
         }),
     handleUpdateOrderNote: (value) => {
         console.log(value);
-        orderState.payload = { ...orderState.payload, obs: value };
+        tableProductsState.payload = {
+            ...tableProductsState.payload,
+            obs: value,
+        };
     },
     handleUpdateStatus: (value) => {
         console.log(value);
         const { info, payload, status } = value;
-        orderState.status = status;
-        orderState.payload = { ...orderState.payload, status: payload };
+        tableProductsState.status = status;
+        tableProductsState.payload = {
+            ...tableProductsState.payload,
+            status: payload,
+        };
         return toast.info(info);
     },
 });

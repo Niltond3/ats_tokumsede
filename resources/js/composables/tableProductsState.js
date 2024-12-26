@@ -1,5 +1,5 @@
 import { reactive, ref, shallowRef } from "vue";
-export const useOrderState = () =>
+export const useTableProductsState = () =>
     reactive({
         payload: reactive({
             formaPagamento: ref("1"),

@@ -10,7 +10,7 @@ import {
 import { computed } from "vue";
 
 export const createTableOptions = (
-    orderState,
+    tableProductsState,
     globalFilter,
     sorting,
     resizebleColumns,
@@ -18,7 +18,7 @@ export const createTableOptions = (
     updateData
 ) => ({
     get data() {
-        return orderState.tableData;
+        return tableProductsState.tableData;
     },
     get columns() {
         return resizebleColumns.value;
@@ -47,9 +47,9 @@ export const createTableOptions = (
     meta: computed(() => ({
         clientId: clientId.value,
         updateData,
-        editedRows: orderState.editedRows,
-        payload: orderState.payload,
-        tableData: orderState.tableData,
+        editedRows: tableProductsState.editedRows,
+        payload: tableProductsState.payload,
+        tableData: tableProductsState.tableData,
     })),
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),

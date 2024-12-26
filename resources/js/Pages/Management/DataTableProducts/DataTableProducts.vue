@@ -7,18 +7,17 @@ import { useWindowSize } from '@vueuse/core'
 import { useVueTable } from '@tanstack/vue-table'
 
 //composable
-import { useOrderState } from '@/composables/orderState'
+import { useTableProductsState } from '@/composables/tableProductsState'
 import { useResponsiveColumns } from './composable/useResponsiveColumns'
 import { useEventHandlers } from './composable/useEventHandlers'
+import { useUpdateData } from './composable/useUpdateData'
 
 // Configuration
 import { columns } from './config/Columns'
 import { createTableOptions } from './config/tableConfig'
 
 // Utilities
-import { toast } from 'vue-sonner'
 import { formatMoney } from '@/util'
-import renderToast from '@/components/renderPromiseToast'
 import useDataToTableFormat from './composable/dataToTableFormat'
 import DataTableProducts from './components/DataTableProducts'
 
@@ -26,8 +25,6 @@ const props = defineProps({
     createOrderData: { type: null, required: false },
     distributors: { type: Array, required: false },
 })
-
-const orderState = useOrderState()
 
 const clientId = ref(null)
 
@@ -53,20 +50,12 @@ const { width } = useWindowSize()
 
 const emit = defineEmits(['callback:payloadPedido', 'update:specialOfferCreated'])
 
-const createSpecialOffer = (payload) => {
-    const url = 'preco'
-    const promise = axios.post(url, payload)
-    renderToast(promise, 'Salvando oferta ...', 'oferta salva com sucesso!', () => {
-        emit('update:specialOfferCreated', true)
-    }, 'Erro ao Salvar oferta!', (err) => {
-        console.log(err)
-    })
-}
-
-const { handleDistributor, handleCallbackPedido, handleExchange, handlePayForm, handleScheduling, handleUpdateOrderNote, handleUpdateStatus } = useEventHandlers(orderState, emit, addressNote, disabledButton)
+const tableProductsState = useTableProductsState()
+const { handleDistributor, handleCallbackPedido, handleExchange, handlePayForm, handleScheduling, handleUpdateOrderNote, handleUpdateStatus } = useEventHandlers(tableProductsState, emit, addressNote, disabledButton)
+const { updateData } = useUpdateData(tableProductsState)
 
 const computedOrderTotals = computed(() => {
-    const itens = orderState.tableData
+    const itens = tableProductsState.tableData
         .filter(product => product.quantidade > 0)
         .map(product => ({
             idProduto: product.id,
@@ -83,64 +72,31 @@ const computedOrderTotals = computed(() => {
     return {
         itens,
         totalProdutos: itens.reduce((sum, product) => sum + product.subtotal, 0),
-        total: itens.reduce((sum, product) => sum + product.subtotal, 0) + orderState.payload.taxaEntrega
+        total: itens.reduce((sum, product) => sum + product.subtotal, 0) + tableProductsState.payload.taxaEntrega
     }
 })
 
-const updateOrderState = () => {
-    orderState.payload = {
-        ...orderState.payload,
+const updateTableProductsState = () => {
+    tableProductsState.payload = {
+        ...tableProductsState.payload,
         totalProdutos: computedOrderTotals.value.totalProdutos,
         total: computedOrderTotals.value.total,
         itens: computedOrderTotals.value.itens
     }
 }
 
-watch(() => orderState.tableData, () => updateOrderState(), { deep: true })
+watch(() => tableProductsState.tableData, () => updateTableProductsState(), { deep: true })
 
 watch(() => width.value, (newWidth) => resizebleColumns.value = useResponsiveColumns(columns, newWidth).value)
 
-watch(() => orderState.payload.itens, (newVal) => {
+watch(() => tableProductsState.payload.itens, (newVal) => {
     if (!newVal?.length) return
     disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false, { deep: true }
 })
 
-const updateData = (rowIndex, columnId, value) => {
-
-    const oldRow = orderState.tableData[rowIndex]
-
-    const updateTableData = (updateValue) => orderState.tableData.map((row, index) =>
-        index === rowIndex ? { ...oldRow, [columnId]: updateValue } : row
-    )
-
-    const actions = {
-        preco: () => {
-            const endRowLength = oldRow[columnId].length - 1
-            return updateTableData([{ qtd: oldRow[columnId][endRowLength].qtd, val: toFloat(value) }])
-        },
-        quantidade: () => updateTableData(value),
-        precoEspecial: () => {
-            if (value.payload) {
-                const { payload, tableValue } = value
-                createSpecialOffer(payload)
-                return updateTableData(tableValue)
-            }
-            const endRowLength = oldRow[columnId].length - 1
-            return updateTableData([{
-                qtd: oldRow[columnId][endRowLength].qtd,
-                val: toFloat(value)
-            }])
-        },
-    }
-
-    const newData = actions[columnId]
-        ? actions[columnId]()
-        : (toast.error('ação desconhecida'), orderState.tableData)
-    orderState.tableData = newData
-}
 
 const tableOptions = reactive(createTableOptions(
-    orderState,
+    tableProductsState,
     globalFilter,
     sorting,
     resizebleColumns,
@@ -160,9 +116,9 @@ onMounted(() => {
     const { updateOrder, orderPayload, orderStatus, products } = useDataToTableFormat(rawProducts, taxaEntrega, idDistribuidor, idEndereco, order)
 
     isUpdate.value = updateOrder
-    orderState.payload = { ...orderState.payload, ...orderPayload }
-    orderState.status = orderStatus
-    orderState.tableData = products
+    tableProductsState.payload = { ...tableProductsState.payload, ...orderPayload }
+    tableProductsState.status = orderStatus
+    tableProductsState.tableData = products
     clientId.value = idCliente
     tableIdentifier.value = distributorName
     addressNote.value = observacao
@@ -174,15 +130,15 @@ onMounted(() => {
 <template>
     <div>
         <DataTableProducts.Header :distributors="props.distributors"
-            :id-distribuidor="orderState.payload.idDistribuidor" :table-identifier="tableIdentifier"
-            :status="orderState.status" :client-name="props.createOrderData.clientName" :global-filter="globalFilter"
-            @update:global-filter="value => (globalFilter = String(value))" @update:status="handleUpdateStatus"
-            @update:distributor="handleDistributor" />
-        <DataTableProducts.Table :obs="orderState.payload.obs" :resizeble-columns="resizebleColumns" :table="table"
-            @update:order-note="handleUpdateOrderNote" />
-        <DataTableProducts.Footer :payload="orderState.payload" :is-update="isUpdate" :disabled-button="disabledButton"
-            :address-note="addressNote" @update:payment-form="handlePayForm" @update:exchange="handleExchange"
-            @update:scheduling="handleScheduling" @update:address-note="addressNote = $event"
-            @callback:pedido="handleCallbackPedido" />
+            :id-distribuidor="tableProductsState.payload.idDistribuidor" :table-identifier="tableIdentifier"
+            :status="tableProductsState.status" :client-name="props.createOrderData.clientName"
+            :global-filter="globalFilter" @update:global-filter="value => (globalFilter = String(value))"
+            @update:status="handleUpdateStatus" @update:distributor="handleDistributor" />
+        <DataTableProducts.Table :obs="tableProductsState.payload.obs" :resizeble-columns="resizebleColumns"
+            :table="table" @update:order-note="handleUpdateOrderNote" />
+        <DataTableProducts.Footer :payload="tableProductsState.payload" :is-update="isUpdate"
+            :disabled-button="disabledButton" :address-note="addressNote" @update:payment-form="handlePayForm"
+            @update:exchange="handleExchange" @update:scheduling="handleScheduling"
+            @update:address-note="addressNote = $event" @callback:pedido="handleCallbackPedido" />
     </div>
 </template>

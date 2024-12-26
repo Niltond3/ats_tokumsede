@@ -27,11 +27,11 @@ import DateTimePicker from '@/components/orderComponents/DateTimePicker.vue'
 import DialogCreateOrderNote from '../DialogCreateOrderNote.vue';
 import { Check } from 'lucide-vue-next'
 import renderToast from '@/components/renderPromiseToast';
-import { useOrderState } from '@/composables/orderState'
+import { useTableProductsState } from '@/composables/tableProductsState'
 
 const { isOpen, toggleDialog } = dialogState()
 
-const orderState = useOrderState()
+const tableProductsState = useTableProductsState()
 
 const { toCurrency, toFloat } = formatMoney()
 
@@ -90,7 +90,7 @@ const whenDialogOpen = async () => {
     readbleOrderData.value = values
 
     const { distributorTaxes: { taxaUnica: taxaEntrega }, distributor: { id: idDistribuidor, observacao }, address: { id: idEndereco } } = readbleOrderData.value
-    orderState.payload = { ...orderState.payload, taxaEntrega, idDistribuidor, idEndereco, observacao }
+    tableProductsState.payload = { ...tableProductsState.payload, taxaEntrega, idDistribuidor, idEndereco, observacao }
 }
 
 watch(() => isOpen.value, () => whenDialogOpen())
@@ -138,21 +138,21 @@ const updateData = (rowIndex, columnId, value) => {
         return null
     }).filter(x => x)
 
-    const taxaEntrega = orderState.payload.taxaEntrega
+    const taxaEntrega = tableProductsState.payload.taxaEntrega
     try {
         const totalProdutos = itens.map(product => product.subtotal).reduce((curr, prev) => curr + prev);
         const total = totalProdutos + taxaEntrega
 
-        orderState.payload = { ...orderState.payload, totalProdutos, total, itens, origem: 4 }
+        tableProductsState.payload = { ...tableProductsState.payload, totalProdutos, total, itens, origem: 4 }
     } catch (error) {
         disabledButton.value = true
         toast.error('Adicione ao menos um produto')
     }
 }
 
-const handlePayForm = (value) => orderState.payload = { ...orderState.payload, formaPagamento: value }
+const handlePayForm = (value) => tableProductsState.payload = { ...tableProductsState.payload, formaPagamento: value }
 
-const handleExchange = ({ value }) => orderState.payload = { ...orderState.payload, trocoPara: parseFloat(value.split(' ')[1]) }
+const handleExchange = ({ value }) => tableProductsState.payload = { ...tableProductsState.payload, trocoPara: parseFloat(value.split(' ')[1]) }
 const handleScheduling = (date) => {
     if (date) {
         const { date: formattedDate, time } = dateToDayMonthYearFormat(date)
@@ -161,19 +161,19 @@ const handleScheduling = (date) => {
 
         const horaInicio = time
 
-        return orderState.payload = { ...orderState.payload, agendado: 1, dataAgendada, horaInicio }
+        return tableProductsState.payload = { ...tableProductsState.payload, agendado: 1, dataAgendada, horaInicio }
     }
-    return orderState.payload = { ...orderState.payload, agendado: 0, dataAgendada: '', horaInicio: '' }
+    return tableProductsState.payload = { ...tableProductsState.payload, agendado: 0, dataAgendada: '', horaInicio: '' }
 }
 
-const handleOrderNote = (value) => orderState.payload = { ...orderState.payload, obs: value }
+const handleOrderNote = (value) => tableProductsState.payload = { ...tableProductsState.payload, obs: value }
 
-watch(() => orderState.payload.itens, (newVal) => disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false)
+watch(() => tableProductsState.payload.itens, (newVal) => disabledButton.value = newVal.map(product => product.quantidade).reduce((curr, prev) => curr + prev) < 1 ? true : false)
 
 const handleCallbackPedido = () => {
     disabledButton.value = true
     var url = "pedidos";
-    const promise = axios.post(url, orderState.payload)
+    const promise = axios.post(url, tableProductsState.payload)
     toggleDialog()
     renderToast(promise, 'Cadastrando pedido', 'o pedido foi cadastrado com sucesso', () => toggleDialog())
 }
@@ -207,22 +207,24 @@ const handleCallbackPedido = () => {
                     <DialogDescription class="text-white/50 text-sm flex flex-col gap-3 justify-between items-center">
                         Informações do pedido
                         <div class="flex justify-between items-center w-full">
-                            <div class="flex flex-col">subtotal <p>{{ toCurrency(orderState.payload.totalProdutos) }}
+                            <div class="flex flex-col">subtotal <p>{{
+                                toCurrency(tableProductsState.payload.totalProdutos) }}
                                 </p>
                             </div>
                             <Separator orientation="vertical" class="h-[32px] bg-white/20"></Separator>
-                            <div class="flex flex-col">taxa de entrega <p>{{ toCurrency(orderState.payload.taxaEntrega)
+                            <div class="flex flex-col">taxa de entrega <p>{{
+                                toCurrency(tableProductsState.payload.taxaEntrega)
                                     }}</p>
                             </div>
                             <Separator orientation="vertical" class="h-[32px] bg-white/20"></Separator>
-                            <div class="flex flex-col">total <p>{{ toCurrency(orderState.payload.total) }}</p>
+                            <div class="flex flex-col">total <p>{{ toCurrency(tableProductsState.payload.total) }}</p>
                             </div>
                         </div>
                     </DialogDescription>
                 </DialogHeader>
                 <Carousel v-slot="{ canScrollNext }" class="relative w-full max-w-xs sm:max-w-full">
-                    <DialogCreateOrderNote @callback:order-note="handleOrderNote" :order-note="orderState.payload.obs"
-                        class="top-[6%] right-[6%]">
+                    <DialogCreateOrderNote @callback:order-note="handleOrderNote"
+                        :order-note="tableProductsState.payload.obs" class="top-[6%] right-[6%]">
                     </DialogCreateOrderNote>
                     <CarouselContent class="bg-transparent relative">
                         <Suspense>
@@ -260,13 +262,14 @@ const handleCallbackPedido = () => {
                         class="right-[1rem] bg-transparent text-white !border-input/30 ring-0" />
                 </Carousel>
                 <div class="flex flex-wrap gap-2 p-2 sm:h-14 justify-center mb-3">
-                    <SelectPayment @update:payment-form="handlePayForm" :default="orderState.payload.formaPagamento" />
+                    <SelectPayment @update:payment-form="handlePayForm"
+                        :default="tableProductsState.payload.formaPagamento" />
                     <Separator orientation="vertical" class="" />
-                    <ExchangeInput @update:exchange="handleExchange" :value="orderState.payload.trocoPara"
+                    <ExchangeInput @update:exchange="handleExchange" :value="tableProductsState.payload.trocoPara"
                         class="[&_input]:bg-white [&_label]:bg-transparent [&_label]:top-[-1rem] [&_label]:left-0 [&_label]:!text-input" />
                     <Separator orientation="vertical" class="hidden sm:block" />
                     <DateTimePicker @update:scheduling="handleScheduling"
-                        :default:scheduling="dateToISOFormat(`${orderState.payload.dataAgendada} ${orderState.payload.horaInicio}`)" />
+                        :default:scheduling="dateToISOFormat(`${tableProductsState.payload.dataAgendada} ${tableProductsState.payload.horaInicio}`)" />
                 </div>
                 <DialogFooter>
 

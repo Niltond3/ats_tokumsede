@@ -53,7 +53,7 @@ const values = computed(() => ([
         <div class="flex flex-wrap gap-2 px-2 pb-2 sm:h-14 justify-center sm:row-start-2 sm:col-start-1 sm:col-span-10">
             <Separator label="Detalhes" class="z-100 my-1" />
             <SelectPayment @update:payment-form="$emit('update:paymentForm', $event)"
-                :default="payload.formaPagamento" />
+                :default="payload.formaPagamento.toString()" />
             <Separator orientation="vertical" class="" />
             <ExchangeInput @update:exchange="$emit('update:exchange', $event)" :value="payload.trocoPara" />
             <Separator orientation="vertical" class="hidden sm:block" />

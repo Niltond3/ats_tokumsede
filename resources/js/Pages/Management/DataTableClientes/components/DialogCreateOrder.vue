@@ -86,7 +86,9 @@ const handleSpecialOfferCreated = (isCreated) => updateTable.value = isCreated
 const handleToggleDialog = () => {
     isLoading.value = true
     if (updateTable.value) emits('update:dataTable', true)
+    updateTable.value = false
     props.toggleDialog()
+
 }
 
 </script>

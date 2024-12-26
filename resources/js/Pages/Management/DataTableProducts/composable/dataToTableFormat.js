@@ -3,30 +3,25 @@ import { formatMoney } from "@/util";
 
 const { toFloat } = formatMoney();
 
+const getPrice = (product, orderItem) => ({
+    ...product,
+    preco: [
+        {
+            qtd: product.preco[product.preco.length - 1].qtd,
+            val: toFloat(orderItem.preco),
+        },
+    ],
+});
 const mapProductPrice = (product, orderItem) => {
-    if (product.precoEspecial) {
-        const precoEspecial =
-            product.precoEspecial[product.precoEspecial.length - 1];
+    const price = getPrice(product, orderItem);
+    const specialPrice = product.precoEspecial;
+    if (specialPrice) {
         return {
-            ...product,
-            preco: [
-                {
-                    qtd: product.preco[preco.length - 1].qtd,
-                    val: toFloat(orderItem.preco),
-                },
-            ],
-            precoEspecial: [{ qtd: precoEspecial.qtd, val: precoEspecial.val }],
+            ...price,
+            precoEspecial: [specialPrice[specialPrice.length - 1]],
         };
     }
-    return {
-        ...product,
-        preco: [
-            {
-                qtd: product.preco[preco.length - 1].qtd,
-                val: toFloat(orderItem.preco),
-            },
-        ],
-    };
+    return price;
 };
 
 const mapProductsWithPrices = (products, orderItems) => {

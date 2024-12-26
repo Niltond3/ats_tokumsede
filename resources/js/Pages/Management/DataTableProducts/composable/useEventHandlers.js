@@ -1,4 +1,5 @@
 import { dateToDayMonthYearFormat } from "@/util";
+import { toast } from "vue-sonner";
 
 export const useEventHandlers = (
     orderState,
@@ -46,38 +47,19 @@ export const useEventHandlers = (
         });
     },
     handleDistributor: (value) =>
-        (orderState.payload = { ...orderState.payload, idDistribuidor: value }),
+        (orderState.payload = {
+            ...orderState.payload,
+            idDistribuidor: value.toString(),
+        }),
     handleUpdateOrderNote: (value) => {
         console.log(value);
         orderState.payload = { ...orderState.payload, obs: value };
     },
     handleUpdateStatus: (value) => {
         console.log(value);
-        // if (orderState.status.label == 'Agendado') return toast.info('Pedido Agendado!')
-        // if (orderState.status.label == 'Pendente' && !orderState.status.oldStatus) return toast.info('Pedido Pendente!')
-        // if (orderState.status.label == 'Pendente' && orderState.status.oldStatus) {
-        //     orderState.status = orderState.status.oldStatus
-        //     orderState.payload = { ...orderState.payload, status: orderState.status.statusId }
-        //     return toast.info('Status Restaurado!')
-        // }
-
-        // const pendente = {
-        //     label: 'Pendente',
-        //     classes: {
-        //         bg: 'bg-warning',
-        //         text: 'text-warning',
-        //         icon: 'ri-error-warning-fill'
-        //     }
-
-        // }
-
-        // const oldStatus = {
-        //     ...orderState.status,
-        //     statusId: orderState.payload.status
-        // }
-
-        // orderState.status = { ...pendente, oldStatus }
-        // orderState.payload = { ...orderState.payload, status: 1 }
-        // return toast.info('Status Alterado!')
+        const { info, payload, status } = value;
+        orderState.status = status;
+        orderState.payload = { ...orderState.payload, status: payload };
+        return toast.info(info);
     },
 });

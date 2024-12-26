@@ -93,20 +93,15 @@ const whenDialogOpen = async () => {
     orderState.payload = { ...orderState.payload, taxaEntrega, idDistribuidor, idEndereco, observacao }
 }
 
-watch(() => isOpen.value, () => {
-    whenDialogOpen()
-})
+watch(() => isOpen.value, () => whenDialogOpen())
 
-
-watch(() => readbleOrderData.value.products, (newValue) => {
-    interableProducts.value = newValue
-})
-
+watch(() => readbleOrderData.value.products, (newValue) => interableProducts.value = newValue)
 
 const handleToggleOpenDialog = (op) => {
     !op && emits('update:commandOpen', false)
     toggleDialog()
 }
+
 const updateData = (rowIndex, columnId, value) => {
     const newData = columnId !== 'quantidade' ? [...readbleOrderData.value.products.map((row, index) => {
         if (index == rowIndex) {

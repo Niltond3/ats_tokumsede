@@ -15,6 +15,7 @@ import { DataTableProducts } from '../../DataTableProducts';
 import { dialogState } from '../../../../hooks/useToggleDialog'
 import renderToast from '@/components/renderPromiseToast';
 import { Skeleton } from '@/components/ui/skeleton'
+import Separator from '@/components/ui/separator/Separator.vue';
 
 const props = defineProps({
     orderId: { type: Number, required: true },
@@ -126,7 +127,7 @@ const handleUpdateOrder = (payload) => {
                 <span class="hidden min-[426px]:block">Editar Pedido</span>
             </button>
         </DialogTrigger>
-        <DialogContent class="text-sm max-w-[22rem] sm:max-w-3xl md:max-w-[40rem]">
+        <DialogContent class="text-sm max-w-[22rem] sm:max-w-3xl">
             <DialogHeader>
                 <DialogTitle class=" font-medium text-info leading-none">
                     <div v-if="isLoading" class="flex gap-3 justify-between mr-4">

@@ -106,20 +106,17 @@ watch(() => orderState.payload.itens, (newVal) => {
 })
 
 const updateData = (rowIndex, columnId, value) => {
+
     const oldRow = orderState.tableData[rowIndex]
 
-    const updateTableData = (updateValue) =>
-        orderState.tableData.map((row, index) =>
-            index === rowIndex ? { ...oldRow, [columnId]: updateValue } : row
-        )
+    const updateTableData = (updateValue) => orderState.tableData.map((row, index) =>
+        index === rowIndex ? { ...oldRow, [columnId]: updateValue } : row
+    )
 
     const actions = {
         preco: () => {
-            console.log(oldRow[columnId])
-            console.log(oldRow)
-            console.log(columnId)
             const endRowLength = oldRow[columnId].length - 1
-            updateTableData([{ qtd: oldRow[columnId][endRowLength].qtd, val: toFloat(value) }])
+            return updateTableData([{ qtd: oldRow[columnId][endRowLength].qtd, val: toFloat(value) }])
         },
         quantidade: () => updateTableData(value),
         precoEspecial: () => {
@@ -139,7 +136,6 @@ const updateData = (rowIndex, columnId, value) => {
     const newData = actions[columnId]
         ? actions[columnId]()
         : (toast.error('ação desconhecida'), orderState.tableData)
-
     orderState.tableData = newData
 }
 
@@ -180,7 +176,8 @@ onMounted(() => {
         <DataTableProducts.Header :distributors="props.distributors"
             :id-distribuidor="orderState.payload.idDistribuidor" :table-identifier="tableIdentifier"
             :status="orderState.status" :client-name="props.createOrderData.clientName" :global-filter="globalFilter"
-            @update:global-filter="value => (globalFilter = String(value))" @update:status="handleUpdateStatus" />
+            @update:global-filter="value => (globalFilter = String(value))" @update:status="handleUpdateStatus"
+            @update:distributor="handleDistributor" />
         <DataTableProducts.Table :obs="orderState.payload.obs" :resizeble-columns="resizebleColumns" :table="table"
             @update:order-note="handleUpdateOrderNote" />
         <DataTableProducts.Footer :payload="orderState.payload" :is-update="isUpdate" :disabled-button="disabledButton"

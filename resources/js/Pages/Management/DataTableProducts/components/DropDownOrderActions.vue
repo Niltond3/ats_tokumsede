@@ -5,11 +5,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { MoreVertical } from 'lucide-vue-next'
 import DialogConfirmAction from './DialogConfirAction.vue'
 
-const props = defineProps({
+defineProps({
     payment: {
         id: String
     },
-    offer: { type: String }
+    offer: { type: Object }
 })
 
 const emit = defineEmits(['changed'])

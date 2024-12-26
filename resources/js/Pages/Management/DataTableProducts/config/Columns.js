@@ -50,7 +50,6 @@ export const columns = [
         },
         cell: ({ row }) => {
             const handleRowToClipboard = () => {
-                console.log(row.original);
                 const { nome, preco } = row.original;
                 const precoEspecial = row.original.precoEspecial;
                 const quantidade = row.original.quantidade;
@@ -83,9 +82,8 @@ export const columns = [
     },
     {
         id: "preco",
-        accessorKey: "preco",
-        filterFn: "fuzzy",
         size: 75,
+        filterFn: "fuzzy",
         accessorFn: ({ preco }) => preco,
         header: ({ column }) => {
             return h(
@@ -107,8 +105,9 @@ export const columns = [
         cell: ({ row, getValue, column, table, cell }) => {
             const price = row.original;
             const rowIndex = row.index;
-            const itens = table.options.meta.payload.itens;
-            const { tableData } = table.options.meta;
+            const { meta } = table.options;
+            const { tableData } = meta;
+            const itens = meta.payload.itens;
             const getOffer = () => {
                 if (tableData[rowIndex]?.precoEspecial) return true;
                 return false;
@@ -135,13 +134,8 @@ export const columns = [
                         cellValue,
                         cellkey: cell.id,
                         offer,
-                        onChanged: (val) => {
-                            table.options.meta.updateData(
-                                row.index,
-                                columnId,
-                                val.value
-                            );
-                        },
+                        onChanged: (val) =>
+                            meta.updateData(row.index, columnId, val.value),
                     },
                     () => toCurrency(cellValue)
                 );
@@ -164,7 +158,7 @@ export const columns = [
         size: 90,
         enableHiding: false,
         header: () => h("div", { class: "font-bold text-white" }, "quantidade"),
-        cell: ({ row, getValue, column, table, cell }) => {
+        cell: ({ row, column, table }) => {
             const payment = row.original;
             const itens = table.options.meta.payload.itens;
 

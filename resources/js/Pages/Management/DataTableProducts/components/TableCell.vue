@@ -1,19 +1,18 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { formatMoney } from '@/util'
 
 
 const props = defineProps({
-    cellvalue: { type: String, required: false },
+    cellValue: { type: [Number, String], required: false },
     cellkey: { type: String, required: false },
     offer: { type: Boolean, required: false, default: false }
 });
 
 const { toCurrency, config } = formatMoney()
 const inputElement = ref()
-const initialValue = ref(toCurrency(parseFloat(props.cellvalue).toFixed(2)))
+const initialValue = ref(toCurrency(parseFloat(props.cellValue).toFixed(2)))
 const showInput = ref(false)
-
 
 const emits = defineEmits(['changed']);
 

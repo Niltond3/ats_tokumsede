@@ -13,35 +13,42 @@ const props = defineProps({
 const emits = defineEmits(['update:distributor', 'update:globalFilter', 'update:status'])
 
 const handleStatusChange = () => {
-    if (props.status.label == 'Agendado') return toast.info('Pedido Agendado!')
-    if (props.status.label == 'Pendente' && !props.status.oldStatus) return toast.info('Pedido Pendente!')
-    if (props.status.label == 'Pendente' && props.status.oldStatus) {
-        emits('update:status', {
-            status: props.status.oldStatus,
-            payload: props.status.statusId
-        })
-        return toast.info('Status Restaurado!')
-    }
-
-    const pendente = {
-        label: 'Pendente',
-        classes: {
-            bg: 'bg-warning',
-            text: 'text-warning',
-            icon: 'ri-error-warning-fill'
-        }
-
-    }
-
-    const oldStatus = {
-        ...props.status,
-        statusId: props.payload.status
-    }
-    emits('update:status', {
-        status: { ...pendente, oldStatus },
-        payload: 1
+    const getAction = `${props.status.label}${!props.status.oldStatus}`
+    console.log(props.status)
+    const getCurrentCalback = (info) => emits('update:status', {
+        status: props.status,
+        payload: props.status.statusId,
+        info
     })
-    return toast.info('Status Alterado!')
+    const statusActions = {
+        Agendado: () => getCurrentCalback('Pedido Agendado!'),
+        Pendentetrue: () => getCurrentCalback('Pedido Pendente!'),
+        Pendentefalse: () => emits('update:status', {
+            status: props.status.oldStatus,
+            payload: props.status.statusId,
+            info: 'Status Restaurado!'
+        }),
+        default: () => {
+            const pendente = {
+                label: 'Pendente',
+                classes: {
+                    bg: 'bg-warning',
+                    text: 'text-warning',
+                    icon: 'ri-error-warning-fill'
+                }
+            }
+            const oldStatus = {
+                ...props.status,
+                statusId: props.status
+            }
+            return emits('update:status', {
+                status: { ...pendente, oldStatus },
+                payload: 1,
+                info: 'Status Alterado!'
+            })
+        }
+    }
+    statusActions[getAction] ? statusActions[getAction]() : statusActions.default()
 }
 
 </script>

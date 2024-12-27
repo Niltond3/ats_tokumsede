@@ -16,13 +16,15 @@ import renderToast from '@/components/renderPromiseToast'
 import { utf8Decode } from '@/util'
 import DialogHeader from './components/DialogHeader.vue'
 import DialogBody from './components/DialogBody.vue'
+import DialogFooter from './components/DialogFooter.vue'
 
 const loadingDistributors = ref(true)
 const loadingProducts = ref(true)
-const awaitingDistributor = ref(true)
 
 const distributors = ref([])
 const products = ref([])
+const tableDataProducts = ref([])
+const selectedDistributorId = ref(null)
 
 const { isOpen, toggleDialog } = dialogState()
 
@@ -47,7 +49,7 @@ const getDistributors = () => {
 }
 
 const handleUpdateDistributorSelect = (distributorId) => {
-    console.log(distributorId)
+    selectedDistributorId.value = distributorId
     const url = `produtos/listarPorDistribuidor/${distributorId}`
     const promise = axios.get(url)
     renderToast(promise, 'carregando produtos ...', 'Produtos carregadoss', (response) => {
@@ -64,6 +66,7 @@ const handleUpdateDistributorSelect = (distributorId) => {
     })
 }
 
+const handleUpdateTableData = (tableDataValue) => tableDataProducts.value = tableDataValue
 
 const handleDialogOpen = (op) => {
     op && getDistributors()
@@ -89,7 +92,10 @@ onMounted(() => {
         <DialogContent class="gap-2">
             <DialogHeader :loading-distributors="loadingDistributors" :distributors="distributors"
                 @update:distributor="handleUpdateDistributorSelect" />
-            <DialogBody :loading-products="loadingProducts" :products="products" />
+            <DialogBody :loading-products="loadingProducts" :products="products"
+                @update:table-data="handleUpdateTableData" />
+            <DialogFooter :loading-products="loadingProducts" :products="tableDataProducts"
+                :distributor-id="selectedDistributorId" />
         </DialogContent>
     </Dialog>
 </template>

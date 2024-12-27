@@ -27,7 +27,7 @@ export const useUpdateData = (tableProductsState) => {
         const updateTableData = (updateValue) =>
             tableProductsState.tableData.map((row, index) =>
                 index === rowIndex
-                    ? { ...oldRow, [columnId]: updateValue }
+                    ? { ...oldRow, [columnId]: updateValue, updated: true }
                     : row
             );
 

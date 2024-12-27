@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/table'
 import { FlexRender } from '@tanstack/vue-table'
 import { DialogCreateOrderNote } from '..';
+import { onMounted, watch } from 'vue';
 
 
 const props = defineProps({
@@ -27,7 +28,10 @@ const props = defineProps({
     }
 })
 const emits = defineEmits(['update:order-note'])
-
+onMounted(() => {
+    console.log(props.table.getRowModel().rows)
+})
+watch(props.table, newValue => console.log(newValue.getRowModel().rows))
 </script>
 
 <template>

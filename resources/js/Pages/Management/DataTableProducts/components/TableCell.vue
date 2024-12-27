@@ -1,7 +1,6 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { formatMoney } from '@/util'
-
 
 const props = defineProps({
     cellValue: { type: [Number, String], required: false },
@@ -13,6 +12,8 @@ const { toCurrency, config } = formatMoney()
 const inputElement = ref()
 const initialValue = ref(toCurrency(parseFloat(props.cellValue).toFixed(2)))
 const showInput = ref(false)
+const originalValue = ref(null)
+const valueChange = ref(false)
 
 const emits = defineEmits(['changed']);
 
@@ -23,15 +24,21 @@ function handleClick() {
     }, 200)
 }
 
+const handleValueChange = () => initialValue.value !== toCurrency(originalValue.value) ? valueChange.value = true : valueChange.value = false
+
 function handleBlur() {
     showInput.value = false
+    handleValueChange()
     emits('changed', { key: props.cellkey, value: initialValue.value })
 }
+
+onMounted(() => originalValue.value = props.cellValue)
 
 </script>
 
 <template>
-    <div @click="handleClick" class="relative cursor-pointer">
+    <div @click="handleClick" class="relative cursor-pointer font-semibold"
+        :class="valueChange ? 'text-warning' : 'text-info'">
         <p v-if="!showInput">
             <slot />
         </p>
@@ -49,6 +56,7 @@ function handleBlur() {
 
 <script>
 import { Money3Directive } from 'v-money3'
+import { boolean } from 'zod';
 export default {
     directives: { money3: Money3Directive }
 }

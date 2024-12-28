@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import { qzTrayService } from "@/services/qzTrayService";
+import { qzTrayService } from "@/services/printer/qzTrayService";
 
 export function useQzTray() {
     const isConnected = ref(false);

@@ -316,7 +316,8 @@ class ProdutoController extends Controller
             ->leftJoin('estoque', 'estoque.id', '=', 'preco.idEstoque')
             ->select([
                 'preco.*',
-                'produto.id as idProd',
+                'preco.id as idPreco',
+                'produto.id as id',
                 'produto.nome as nome',
                 'produto.img as img'
             ])
@@ -324,7 +325,6 @@ class ProdutoController extends Controller
                 ['preco.status', '=', 1],
                 ['preco.idDistribuidor', '=', $distribuidorId],
                 ['preco.idCliente', '=', null],
-                ['estoque.quantidade', '>', 0]
             ])
             ->where(function ($query) {
                 $query->whereNull('preco.inicioValidade')

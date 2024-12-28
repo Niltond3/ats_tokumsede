@@ -13,7 +13,7 @@ import { formatOrder, orderToClipboard } from '../utils';
 import renderToast from '@/components/renderPromiseToast';
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 import { useQzTray } from '@/composables/useQzTray'
-import { connectPrinter, printMobileData } from '@/services/MobilePrinterService';
+import { connectPrinter, printMobileData } from '@/services/printer/MobilePrinterService';
 import getPrintData from './config/printOrder'
 import useIsMobile from '@/composables/useIsMobile';
 

@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table'
 import { FlexRender } from '@tanstack/vue-table'
 import { DialogCreateOrderNote } from '..';
-import { onMounted, watch } from 'vue';
+import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 
 
 const props = defineProps({
@@ -28,10 +28,7 @@ const props = defineProps({
     }
 })
 const emits = defineEmits(['update:order-note'])
-onMounted(() => {
-    console.log(props.table.getRowModel().rows)
-})
-watch(props.table, newValue => console.log(newValue.getRowModel().rows))
+
 </script>
 
 <template>
@@ -61,8 +58,8 @@ watch(props.table, newValue => console.log(newValue.getRowModel().rows))
                 </template>
                 <template v-else>
                     <TableRow>
-                        <TableCell :colspan="props.resizebleColumns.length" class="h-24 text-center">
-                            No results.
+                        <TableCell :colspan="props.resizebleColumns.length" class="h-[14.71rem]">
+                            <Skeleton class="w-full h-full" />
                         </TableCell>
                     </TableRow>
                 </template>

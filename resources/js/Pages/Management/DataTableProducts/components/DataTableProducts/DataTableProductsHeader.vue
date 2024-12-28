@@ -1,14 +1,16 @@
 <script setup>
+import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 import { SelectDistributor } from '../'
 import DebouncedInput from '../DebouncedInput.vue'
 
 const props = defineProps({
-    distributors: { type: Array, required: true },
-    idDistribuidor: { type: [String, Number], required: true },
-    tableIdentifier: { type: String, required: true },
+    distributors: { type: Array, required: false },
+    loadingDistributors: { type: Boolean, required: false, default: false },
+    idDistribuidor: { type: [String, Number], required: false },
+    tableIdentifier: { type: String, required: false },
     status: { type: Object, required: false },
     clientName: { type: String, required: false },
-    globalFilter: { type: String, required: true },
+    globalFilter: { type: [String, null], required: true },
 })
 const emits = defineEmits(['update:distributor', 'update:globalFilter', 'update:status'])
 
@@ -55,13 +57,29 @@ const handleStatusChange = () => {
 <template>
     <div class="relative flex flex-wrap items-center pb-1 justify-between gap-3 group">
         <div class="flex flex-col gap-1 w-full md:flex-row">
-            <DebouncedInput :modelValue="globalFilter" @update:modelValue="value => emit('update:globalFilter', value)"
-                placeholder="Todos os produtos..." />
-            <SelectDistributor v-if="distributors" :distributors="distributors"
-                @update:distributor="value => emits('update:distributor', value)" :default="`${idDistribuidor}`" />
-            <span v-else class="font-medium flex items-center justify-center text-info py-1 px-2 w-full">
-                {{ tableIdentifier }}
-            </span>
+            <template v-if="globalFilter">
+                <DebouncedInput :modelValue="globalFilter"
+                    @update:modelValue="value => emit('update:globalFilter', value)"
+                    placeholder="Todos os produtos..." />
+            </template>
+            <template v-else>
+                <Skeleton class="w-full h-10" />
+            </template>
+            <template v-if="distributors">
+                <template v-if="loadingDistributors">
+                    <Skeleton class="w-full h-10" />
+                </template>
+                <template v-else>
+                    <SelectDistributor :distributors="distributors"
+                        @update:distributor="value => emits('update:distributor', value)"
+                        :default="idDistribuidor ? `${idDistribuidor}` : null" />
+                </template>
+            </template>
+            <template v-else>
+                <span class="font-medium flex items-center justify-center text-info py-1 px-2 w-full">
+                    {{ tableIdentifier }}
+                </span>
+            </template>
         </div>
         <div class="flex flex-col gap-1 w-full md:flex-row pb-2">
             <button v-if="status"
@@ -76,10 +94,10 @@ const handleStatusChange = () => {
                     :class="status.classes.text"></i>
                 {{ status.label }}
             </button>
-            <p class="text-sm font-semibold px-2 py-1 rounded-lg text-info ">
+            <p v-if="clientName" class="text-sm font-semibold px-2 py-1 rounded-lg text-info ">
                 Cliente:
                 <span class="font-medium">
-                    {{ clientName ?? '' }}
+                    {{ clientName }}
                 </span>
             </p>
         </div>

@@ -117,7 +117,18 @@ Route::middleware('auth')->group(function () {
     Route::resource('categorias', CategoriaController::class, ['except' => 'create']);
 
     //PRECO
-    Route::resource('preco', PrecoController::class, ['except' => 'create']);
+    Route::group(['prefix' => 'preco'], function () {
+        Route::resource('/', PrecoController::class, ['except' => 'create'])
+            ->names([
+                'index' => 'preco.index',
+                'show' => 'preco.show',
+                'store' => 'preco.store',
+                'edit' => 'preco.edit',
+                'update' => 'preco.update',
+                'destroy' => 'preco.destroy'
+            ]);
+        // Route::get('todosOsDistribuidores', [DistribuidorController::class, 'getAllDistributors']);
+    });
 });
 
 

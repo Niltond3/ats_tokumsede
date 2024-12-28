@@ -4,19 +4,13 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue
-} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import DataTableProducts from '@/Pages/Management/DataTableProducts/components/DataTableProducts';
 
 defineProps({
     loadingDistributors: Boolean,
-    distributors: Array
+    distributors: Array,
+    globalFilter: { type: [String, null], required: true },
 })
 
 const emits = defineEmits(['update:distributor'])
@@ -32,24 +26,14 @@ const handleUpdateDistributorSelect = (distributorId) => {
             <i class="ri-shopping-bag-3-fill"></i>
             <p class="font-semibold">Preços</p>
         </DialogTitle>
-        <div class="flex gap-2">
+        <div class="flex flex-col gap-2">
             <DialogDescription class="py-2 w-min text-nowrap">
-                Cadastro de preços
+                Cadastro dos preços padrões de cada distribuidor
             </DialogDescription>
-            <Skeleton v-if="loadingDistributors" class="w-full h-10" />
-            <Select v-else @update:modelValue="handleUpdateDistributorSelect">
-                <SelectTrigger>
-                    <SelectValue placeholder="Selecione um distribuidor" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectGroup>
-                        <SelectItem v-for="distributor in distributors" :key="distributor.id"
-                            :value="`${distributor.id}`">
-                            {{ distributor.nome }}
-                        </SelectItem>
-                    </SelectGroup>
-                </SelectContent>
-            </Select>
+            <div>
+                <DataTableProducts.Header :distributors="distributors" :loading-distributors="loadingDistributors"
+                    :global-filter="globalFilter" @update:distributor="handleUpdateDistributorSelect" />
+            </div>
         </div>
     </DialogHeader>
 </template>

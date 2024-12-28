@@ -11,6 +11,7 @@ import { utf8Decode } from '@/util';
 import renderToast from '@/components/renderPromiseToast';
 import { Skeleton } from '@/components/ui/skeleton'
 import { watch } from 'vue';
+import Separator from '@/components/ui/separator/Separator.vue';
 
 const props = defineProps({
     open: { type: Boolean, required: false },

@@ -19,9 +19,9 @@ class PrecoController extends Controller
     {
         // Validate request data
         $validated = $request->validate([
-            'idProduto' => 'required|exists:produtos,id',
-            'idDistribuidor' => 'required|exists:distribuidors,id',
-            'idCliente' => 'nullable|exists:clientes,id',
+            'idProduto' => 'required|exists:produto,id',
+            'idDistribuidor' => 'required|exists:distribuidor,id',
+            'idCliente' => 'nullable|exists:cliente,id',
             'valor' => 'required|numeric|min:0',
             'qtdMin' => 'required|integer|min:1'
         ]);
@@ -88,13 +88,17 @@ class PrecoController extends Controller
      */
     public function update(Request $request)
     {
+        Debugbar::info('update');
+        Debugbar::info($request);
+
         $validated = $request->validate([
             'idProduto' => 'required|exists:produto,id',
             'idDistribuidor' => 'required|exists:distribuidor,id',
             'valor' => 'required|numeric|min:0',
-            'qtdMin' => 'required|integer|min:1',
+            'qtdMin' => 'required|integer|min:0',
             'id' => 'nullable|exists:preco,id'
         ]);
+        Debugbar::info($validated);
 
         try {
             if ($request->has('id')) {

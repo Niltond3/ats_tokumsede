@@ -1,6 +1,9 @@
+import { ref } from 'vue'
 import { errorUtils } from "@/util";
 import { defineComponent, h, markRaw } from "vue";
 import { toast } from "vue-sonner";
+
+const data = ref(null)
 
 const CustomDiv = (title, sucessMessage) =>
     defineComponent({
@@ -42,16 +45,18 @@ const renderToast = (
     errorMessage,
     errorCallback
 ) => {
+    let result;
+
     toast.promise(promise, {
         loading: markRaw(LoadingDiv(loading)),
 
         success: (response) => {
-            responseCalback && responseCalback(response);
+            result = responseCalback && responseCalback(response);
             return markRaw(CustomDiv("sucesso", sucessMessage));
         },
         error: (error) => {
             const getError = errorUtils.getError(error);
-            errorCallback && errorCallback(getError);
+            result = errorCallback && errorCallback(getError);
             return markRaw(
                 CustomDiv(
                     "Error",
@@ -60,6 +65,12 @@ const renderToast = (
             );
         },
     });
+    return new Promise((resolve) => {
+        promise.then(() => resolve(result))
+            .catch(() => resolve(result));
+    });
 };
+
+
 
 export default renderToast;

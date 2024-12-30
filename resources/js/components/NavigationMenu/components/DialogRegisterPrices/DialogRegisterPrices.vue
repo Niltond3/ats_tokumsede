@@ -1,176 +1,106 @@
 <script setup>
 // Vue core
-import { ref, watch, computed } from 'vue'
-import { useVueuse } from '@vueuse/core'
+import { ref, watch } from 'vue'
+import { useWindowSize } from '@vueuse/core'
 
 // UI Components
 import {
     Dialog,
-    DialogContent,
-    DialogTrigger,
+    DialogContent
 } from '@/components/ui/dialog'
+import DialogTrigger from '../DialogTrigger.vue'
 import DialogHeader from './components/DialogHeader.vue'
 import DialogBody from './components/DialogBody.vue'
 import DialogFooter from './components/DialogFooter.vue'
 
 // Table related
-import { useVueTable } from "@tanstack/vue-table"
 import { useUpdateData } from "@/Pages/Management/DataTableProducts/composable/useUpdateData"
-import { createTableOptions } from "@/Pages/Management/DataTableProducts/config/tableConfig"
-import { columns } from "@/Pages/Management/DataTableProducts/config/Columns"
 import { useTableProductsState } from "@/composables/tableProductsState"
 
-// Utilities
+// Local utilities and composables
 import { dialogState } from '@/hooks/useToggleDialog'
-import renderToast from '@/components/renderPromiseToast'
-import { utf8Decode } from '@/util'
+import { formatProducts } from './util/productFormatters'
+import { useTableState } from './composables/useTableState'
+import { useDistributorsAndProducts } from './composables/useDistributorsAndProducts'
+import { useResponsiveColumns } from './composables/useResponsiveColumns'
 
 
-const resizebleColumns = ref(
-    columns.filter(
-        (column) => column.id !== "quantidade" && column.id !== "actions"
-    )
-);
-const loadingDistributors = ref(true)
-const loadingProducts = ref(true)
-
-const sorting = ref([]);
-const distributors = ref([])
-const globalFilter = ref(null);
+const { width } = useWindowSize()
 const selectedDistributorId = ref(null)
-
-const { width } = useWindowSize();
-const tableProductsState = useTableProductsState();
-const { updateData } = useUpdateData(tableProductsState);
-
-
+const tableProductsState = useTableProductsState()
+const { updateData } = useUpdateData(tableProductsState)
 const { isOpen, toggleDialog } = dialogState()
 
-const disabledButton = ref(false)
+const {
+    distributors,
+    loadingDistributors,
+    loadingProducts,
+    fetchDistributors,
+    fetchProductsForDistributor
+} = useDistributorsAndProducts()
 
-const emits = defineEmits(["on:create", 'update:dialogOpen']);
+const {
+    globalFilter,
+    resizebleColumns,
+    table
+} = useTableState(tableProductsState, updateData)
 
-const sortProductsByName = (products) => {
-    const PRIORITY_PRODUCT_PREFIX = "Alkalina";
-    return products.sort((a, b) => {
-        const isAAlkalina = a.nome.startsWith(PRIORITY_PRODUCT_PREFIX);
-        const isBAlkalina = b.nome.startsWith(PRIORITY_PRODUCT_PREFIX);
+const emits = defineEmits(["on:create", 'update:dialogOpen'])
 
-        if (isAAlkalina && !isBAlkalina) return -1;
-        if (!isAAlkalina && isBAlkalina) return 1;
-        return a.nome.localeCompare(b.nome);
-    });
-};
-
-const formatProducts = (products) => {
-    if (!Array.isArray(products)) return [];
-
-    const mapProduct = ({ id, idPreco, img, nome, qtdMin, valor }) => ({
-        id,
-        idPreco,
-        img,
-        nome,
-        preco: [{ qtd: qtdMin, val: valor }],
-    });
-
-    return sortProductsByName(products.map(mapProduct));
-};
-
-const getDistributors = () => {
-    const url = 'distribuidores/todosOsDistribuidores'
-    const promise = axios.get(url)
-    renderToast(promise, 'carregando distribuidores ...', 'Distribuidores carregados', (response) => {
-        const distributorsRawArray = response.data.data
-
-        distributors.value = distributorsRawArray.map((distributor) => {
-            return {
-                ...distributor,
-                nome: utf8Decode(distributor.nome)
-            }
-        })
-        loadingDistributors.value = false
-    })
-}
-
-const handleUpdateDistributorSelect = (distributorId) => {
-    console.log(distributorId)
+const loadDistributorProducts = async (distributorId) => {
+    if (!distributorId) return
+    tableProductsState.tableData = []
     selectedDistributorId.value = distributorId
-    loadingProducts.value = true
 
-    tableProductsState.tableData = [];
-
-    const url = `produtos/listarPorDistribuidor/${distributorId}`
-    const promise = axios.get(url)
-    renderToast(promise, 'carregando produtos ...', 'Produtos carregadoss', (response) => {
-        const productsResponseArray = response.data
-
-        const products = productsResponseArray.map((product) => ({
-            ...product,
-            nome: utf8Decode(product.nome)
-        }))
-
-        tableProductsState.tableData = formatProducts(products);
-
-        loadingProducts.value = false
-    })
-}
-
-const handleUpdateTableData = (tableDataValue) => tableDataProducts.value = tableDataValue
-
-const handleDialogOpen = (op) => {
-    op && getDistributors()
-    !op && emits('update:dialogOpen', false)
-    toggleDialog()
-}
-
-const tableOptions = reactive(
-    createTableOptions(
-        tableProductsState,
-        globalFilter,
-        sorting,
-        resizebleColumns,
-        { value: null },
-        updateData
-    )
-);
-
-const table = useVueTable(tableOptions);
-
-watch(
-    () => tableProductsState.tableData,
-    (newTableData) => {
-        console.log(newTableData)
+    const response = await fetchProductsForDistributor(distributorId)
+    if (response) {
+        globalFilter.value = ""
+        tableProductsState.tableData = formatProducts(response)
     }
-)
+}
+
+const getDefaultValues = () => ({
+    selectedDistributorId: null,
+    globalFilter: '',
+    tableData: []
+})
+
+const resetDialogValues = () => {
+    selectedDistributorId.value = getDefaultValues().selectedDistributorId
+    globalFilter.value = getDefaultValues().globalFilter
+    tableProductsState.tableData = getDefaultValues().tableData
+}
 
 watch(
     () => width.value,
-    (newWidth) =>
-    (resizebleColumns.value = useResponsiveColumns(
-        columns,
-        newWidth
-    ).value)
-);
+    (newWidth) => resizebleColumns.value = useResponsiveColumns(resizebleColumns.value, newWidth).value
+)
+
+
+const handleDialogOpen = (op) => {
+    if (!op) {
+        resetDialogValues()
+        emits('update:dialogOpen', false)
+    } else {
+        fetchDistributors()
+    }
+    toggleDialog()
+}
+
 
 </script>
 
 <template>
     <Dialog :open="isOpen" @update:open="handleDialogOpen">
-        <DialogTrigger as-child>
-            <button class="text-info flex items-center justify-center flex-col">
-                <div class="select-none rounded-full bg-info h-6 w-6 flex items-center justify-center">
-                    <span class="font-bold text-white text-sm">R$</span>
-                </div>
-                <span class="hidden min-[426px]:block">Preço</span>
-            </button>
-        </DialogTrigger>
+        <DialogTrigger icon="ri-price-tag-3-fill" title="Preço" />
         <DialogContent class="flex flex-col gap-2">
             <DialogHeader :loading-distributors="loadingDistributors" :distributors="distributors"
-                :global-filter="globalFilter" @update:distributor="handleUpdateDistributorSelect" />
+                :global-filter="globalFilter" @update:distributor="loadDistributorProducts"
+                @update:global-filter="value => (globalFilter = String(value))" />
             <DialogBody :table="table" :resizeble-columns="resizebleColumns"
                 @update:table-data="handleUpdateTableData" />
             <DialogFooter :loading-products="loadingProducts" :products="tableProductsState.tableData"
-                :distributor-id="selectedDistributorId" />
+                :distributor-id="selectedDistributorId" @sucess-update="loadDistributorProducts" />
         </DialogContent>
     </Dialog>
 </template>

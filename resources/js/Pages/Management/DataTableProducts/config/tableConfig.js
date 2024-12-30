@@ -23,6 +23,11 @@ export const createTableOptions = (
     get columns() {
         return resizebleColumns.value;
     },
+    initiealState: {
+        pagination: {
+            pageSize: Number.MAX_SAFE_INTEGER // This will show all rows
+        }
+    },
     state: {
         get globalFilter() {
             return globalFilter.value;

@@ -7,9 +7,9 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog'
 import { dialogState } from '@/hooks/useToggleDialog'
+import DialogTrigger from './DialogTrigger.vue'
 
 const emits = defineEmits(['update:dataTable'])
 
@@ -34,15 +34,11 @@ const handleSucess = () => {
 
 <template>
     <Dialog :open="isOpen" @update:open="(op) => toggleDialog()">
-        <DialogTrigger as-child>
-            <button class="text-info">
-                <i class="ri-user-add-fill text-3xl"></i>
-                <span class="hidden min-[426px]:block">Cliente</span>
-            </button>
-        </DialogTrigger>
+        <DialogTrigger icon="ri-user-add-fill" title="Cliente" />
         <DialogContent class="sm:max-w-[440px]" @interact-outside="handleDialogOutsideInteract">
             <DialogHeader>
-                <DialogTitle class="text-info gap-1 flex items-center"><i class="ri-user-add-fill"></i>Cadastrar Cliente
+                <DialogTitle class="text-info gap-1 flex items-center"><i class="ri-user-add-fill"></i>Cadastrar
+                    Cliente
                 </DialogTitle>
                 <DialogDescription class="text-xs text-start">
                     Após terminar todos os passos, clique em "Cadastrar" para concluir.

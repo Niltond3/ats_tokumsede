@@ -4,16 +4,16 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import { Skeleton } from '@/components/ui/skeleton'
 import DataTableProducts from '@/Pages/Management/DataTableProducts/components/DataTableProducts';
 
-defineProps({
+const props = defineProps({
     loadingDistributors: Boolean,
     distributors: Array,
     globalFilter: { type: [String, null], required: true },
 })
 
-const emits = defineEmits(['update:distributor'])
+
+const emits = defineEmits(['update:distributor', 'update:globalFilter'])
 
 const handleUpdateDistributorSelect = (distributorId) => {
     emits('update:distributor', distributorId)
@@ -32,7 +32,8 @@ const handleUpdateDistributorSelect = (distributorId) => {
             </DialogDescription>
             <div>
                 <DataTableProducts.Header :distributors="distributors" :loading-distributors="loadingDistributors"
-                    :global-filter="globalFilter" @update:distributor="handleUpdateDistributorSelect" />
+                    :global-filter="globalFilter" @update:distributor="handleUpdateDistributorSelect"
+                    @update:global-filter="emits('update:globalFilter', $event)" />
             </div>
         </div>
     </DialogHeader>

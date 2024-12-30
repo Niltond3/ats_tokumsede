@@ -23,9 +23,8 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog'
-import { NavigationMenuLink } from '@/components/ui/navigation-menu'
+import DialogTrigger from '../DialogTrigger.vue'
 import {
     Select,
     SelectContent,
@@ -167,17 +166,12 @@ const handleImageLoad = (setFieldValue) => {
 
 <template>
     <Dialog :open="isOpen" @update:open="handleDialogOpen">
-        <DialogTrigger as-child>
-            <button class="text-info">
-                <i class="ri-shopping-bag-3-fill text-3xl"></i>
-                <span class="hidden min-[426px]:block">Produto</span>
-            </button>
-        </DialogTrigger>
+        <DialogTrigger icon="ri-shopping-bag-3-fill" title="Produto" />
         <DialogContent class="gap-2">
             <DialogHeader>
                 <DialogTitle class="leading-none flex gap-3 mr-4 text-lg text-info">
                     <i class="ri-shopping-bag-3-fill"></i>
-                    <p class="font-semibold">Produto</p>
+                    <span class="hidden min-[426px]:block">Produto</span>
                 </DialogTitle>
                 <DialogDescription class="py-2">
                     Cadastro de produto

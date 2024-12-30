@@ -2,6 +2,7 @@
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 import { SelectDistributor } from '../'
 import DebouncedInput from '../DebouncedInput.vue'
+import { onMounted, watch } from 'vue';
 
 const props = defineProps({
     distributors: { type: Array, required: false },
@@ -13,6 +14,15 @@ const props = defineProps({
     globalFilter: { type: [String, null], required: true },
 })
 const emits = defineEmits(['update:distributor', 'update:globalFilter', 'update:status'])
+
+onMounted(() => console.log(props.globalFilter))
+
+watch(
+    () => props.globalFilter,
+    (newFilter) => {
+        console.log(newFilter)
+    }
+)
 
 const handleStatusChange = () => {
     const getAction = `${props.status.label}${!props.status.oldStatus}`
@@ -57,14 +67,14 @@ const handleStatusChange = () => {
 <template>
     <div class="relative flex flex-wrap items-center pb-1 justify-between gap-3 group">
         <div class="flex flex-col gap-1 w-full md:flex-row">
-            <template v-if="globalFilter">
-                <DebouncedInput :modelValue="globalFilter"
-                    @update:modelValue="value => emit('update:globalFilter', value)"
-                    placeholder="Todos os produtos..." />
-            </template>
-            <template v-else>
+            <template v-if="globalFilter === null">
                 <Skeleton class="w-full h-10" />
             </template>
+            <template v-else>
+                <DebouncedInput :modelValue="globalFilter" @update:modelValue="emits('update:globalFilter', $event)"
+                    placeholder="Todos os produtos..." />
+            </template>
+
             <template v-if="distributors">
                 <template v-if="loadingDistributors">
                     <Skeleton class="w-full h-10" />

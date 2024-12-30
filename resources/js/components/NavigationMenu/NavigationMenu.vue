@@ -159,7 +159,7 @@ function irParaProdutosComFiltro() {
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                     <ul
-                        class="grid w-[90vw] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] max-h-[64vh] overflow-auto">
+                        class="grid w-[90vw] gap-3 p-4 md:w-[500px] md:grid-cols-3 lg:w-[600px] max-h-[64vh] overflow-auto">
                         <li key="product_register">
                             <DialogRegisterProduct />
                         </li>

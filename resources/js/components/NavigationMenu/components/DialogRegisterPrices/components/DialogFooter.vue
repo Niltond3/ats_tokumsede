@@ -9,13 +9,9 @@ const props = defineProps({
     distributorId: String,
     products: Array
 })
-/*
- 'idProduto' => 'required|exists:produto,id',
-            'idDistribuidor' => 'required|exists:distribuidor,id',
-            'valor' => 'required|numeric|min:0',
-            'qtdMin' => 'required|integer|min:1',
-            'id' => 'nullable|exists:preco,id'
-*/
+
+const emits = defineEmits(['sucessUpdate'])
+
 const handleUpdate = async () => {
     try {
         const updatedProducts = props.products.filter(product => product.updated === true)
@@ -30,7 +26,7 @@ const handleUpdate = async () => {
             })
         })
         const promisses = Promise.all(updatePromises)
-        renderToast(promisses, 'Atualizando preços...', 'Preços atualizados com sucesso', (sucss) => console.log(sucss), 'erro: erro ao atualizar os preços', (err) => console.log(err))
+        renderToast(promisses, 'Atualizando preços...', 'Preços atualizados com sucesso', () => emits('sucessUpdate', props.distributorId), 'erro: erro ao atualizar os preços', (err) => console.log(err))
 
         // Handle success (emit event, show notification, etc)
     } catch (error) {

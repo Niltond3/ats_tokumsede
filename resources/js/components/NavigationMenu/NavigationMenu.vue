@@ -13,7 +13,8 @@ import logo from '@/../../public/images/tokumsede-logo.png';
 import { onBeforeRouteUpdate, onBeforeRouteLeave, useRouter, useRoute } from 'vue-router';
 import { DialogRegisterProduct } from './components/DialogRegisterProduct';
 import DialogRegisterClient from './components/DialogRegisterClient.vue';
-import { DialogRegisterPrices } from './components/DialogRegisterPrices';
+import { DialogRegisterPrices } from '@/components/DialogRegisterPrices';
+import DialogTrigger from './components/DialogTrigger.vue';
 
 
 const router = useRouter();
@@ -167,7 +168,11 @@ function irParaProdutosComFiltro() {
                             <DialogRegisterClient />
                         </li>
                         <li key="client_price">
-                            <DialogRegisterPrices />
+                            <DialogRegisterPrices>
+                                <template v-slot:trigger>
+                                    <DialogTrigger icon="ri-price-tag-3-fill" title="Preço" />
+                                </template>
+                            </DialogRegisterPrices>
                         </li>
                     </ul>
                 </NavigationMenuContent>

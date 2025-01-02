@@ -33,6 +33,7 @@ import DialogRegisterClient from './components/DialogRegisterClient.vue';
 import DialogRegisterAddress from './components/DialogRegisterAddress.vue';
 import DialogConfirmAddressDelete from './components/DialogConfirmAddressDelete.vue';
 import observeNewOrders from '../DataTablePedidos/components/observeNewOrders';
+import { DialogRegisterPrices } from '@/components/DialogRegisterPrices';
 
 DataTable.use(DataTablesCore);
 
@@ -185,6 +186,11 @@ const setupAddressHandlers = (dt) => {
     })
 
     $('#datatable-clientes').on("click", '.excluirEndereco', toggleConfirmDialog)
+
+    $('#datatable-clientes').on("click", '.novoPrecoEspecial', function () {
+        console.log(this.id)
+        console.log(idAddress.value)
+    })
 
     $('#datatable-clientes').on("long-press", '.deleteEndereco', function (e) {
         idClient.value = e.target.id
@@ -341,7 +347,7 @@ const handleDeleteAddress = (confirm) => {
 
 <template>
     <div class="[&_.dt-search]:relative [&_.dt-search>label]:ri-search-2-fill">
-
+        <!-- <DialogRegisterPrices :distributor-id="idAddress" /> -->
         <DialogCreateOrder :open="isOpen" :toggleDialog="toggleDialog" :id-cliente-address="idClienteAddress"
             :client-name="clientName" :set-tab="props.setTab" @update:data-table="handleUpdateDataTable" />
         <DialogShowOrder :open="openShowOrderDialog" :toggleDialog="toggleShowOrderDialog" :order-id="idOrder" />

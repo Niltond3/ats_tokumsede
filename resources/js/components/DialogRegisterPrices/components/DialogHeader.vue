@@ -9,6 +9,7 @@ import DataTableProducts from '@/Pages/Management/DataTableProducts/components/D
 const props = defineProps({
     loadingDistributors: Boolean,
     distributors: Array,
+    distributorId: { type: [String, Number], required: false },
     globalFilter: { type: [String, null], required: true },
 })
 
@@ -31,8 +32,9 @@ const handleUpdateDistributorSelect = (distributorId) => {
                 Cadastro dos preços padrões de cada distribuidor
             </DialogDescription>
             <div>
-                <DataTableProducts.Header :distributors="distributors" :loading-distributors="loadingDistributors"
-                    :global-filter="globalFilter" @update:distributor="handleUpdateDistributorSelect"
+                <DataTableProducts.Header :distributors="distributors" :id-distribuidor="distributorId"
+                    :loading-distributors="loadingDistributors" :global-filter="globalFilter"
+                    @update:distributor="handleUpdateDistributorSelect"
                     @update:global-filter="emits('update:globalFilter', $event)" />
             </div>
         </div>

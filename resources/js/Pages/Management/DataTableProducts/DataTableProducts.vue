@@ -51,7 +51,9 @@ const { width } = useWindowSize()
 const emit = defineEmits(['callback:payloadPedido', 'update:specialOfferCreated'])
 
 const tableProductsState = useTableProductsState()
+
 const { handleDistributor, handleCallbackPedido, handleExchange, handlePayForm, handleScheduling, handleUpdateOrderNote, handleUpdateStatus } = useEventHandlers(tableProductsState, emit, addressNote, disabledButton)
+
 const { updateData } = useUpdateData(tableProductsState)
 
 const computedOrderTotals = computed(() => {

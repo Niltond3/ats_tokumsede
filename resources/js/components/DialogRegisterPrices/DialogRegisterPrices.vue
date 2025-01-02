@@ -4,11 +4,11 @@ import { ref, watch } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 
 // UI Components
+import { Slot } from "radix-vue";
 import {
     Dialog,
     DialogContent
 } from '@/components/ui/dialog'
-import DialogTrigger from '../DialogTrigger.vue'
 import DialogHeader from './components/DialogHeader.vue'
 import DialogBody from './components/DialogBody.vue'
 import DialogFooter from './components/DialogFooter.vue'
@@ -24,6 +24,9 @@ import { useTableState } from './composables/useTableState'
 import { useDistributorsAndProducts } from './composables/useDistributorsAndProducts'
 import { useResponsiveColumns } from './composables/useResponsiveColumns'
 
+const props = defineProps({
+    distributorId: { type: [String, Number], required: false, default: null },
+})
 
 const { width } = useWindowSize()
 const selectedDistributorId = ref(null)
@@ -79,12 +82,17 @@ watch(
 
 const handleDialogOpen = (op) => {
     if (!op) {
-        resetDialogValues()
-        emits('update:dialogOpen', false)
-    } else {
-        fetchDistributors()
+        resetDialogValues();
+        emits('update:dialogOpen', false);
+        return toggleDialog();
     }
-    toggleDialog()
+
+    const action = props.distributorId ?
+        () => loadDistributorProducts(props.distributorId) :
+        fetchDistributors;
+
+    action();
+    toggleDialog();
 }
 
 
@@ -92,10 +100,11 @@ const handleDialogOpen = (op) => {
 
 <template>
     <Dialog :open="isOpen" @update:open="handleDialogOpen">
-        <DialogTrigger icon="ri-price-tag-3-fill" title="Preço" />
         <DialogContent class="flex flex-col gap-2">
+            <slot name="trigger"></slot>
             <DialogHeader :loading-distributors="loadingDistributors" :distributors="distributors"
-                :global-filter="globalFilter" @update:distributor="loadDistributorProducts"
+                :distributor-id="distributorId" :global-filter="globalFilter"
+                @update:distributor="loadDistributorProducts"
                 @update:global-filter="value => (globalFilter = String(value))" />
             <DialogBody :table="table" :resizeble-columns="resizebleColumns"
                 @update:table-data="handleUpdateTableData" />

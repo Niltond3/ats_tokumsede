@@ -2,17 +2,22 @@
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 import { SelectDistributor } from '../'
 import DebouncedInput from '../DebouncedInput.vue'
+import { onMounted } from 'vue';
 
 const props = defineProps({
-    distributors: { type: Array, required: false },
+    distributors: { type: Array, required: false, default: [] },
     loadingDistributors: { type: Boolean, required: false, default: false },
     idDistribuidor: { type: [String, Number], required: false },
-    tableIdentifier: { type: String, required: false },
+    tableIdentifier: { type: String, required: false, default: null },
     status: { type: Object, required: false },
     clientName: { type: String, required: false },
     globalFilter: { type: [String, null], required: true },
 })
 const emits = defineEmits(['update:distributor', 'update:globalFilter', 'update:status'])
+
+onMounted(() => {
+    console.log(props)
+})
 
 const handleStatusChange = () => {
     const getAction = `${props.status.label}${!props.status.oldStatus}`
@@ -65,7 +70,7 @@ const handleStatusChange = () => {
                     placeholder="Todos os produtos..." />
             </template>
 
-            <template v-if="!idDistribuidor">
+            <template v-if="distributors && !tableIdentifier">
                 <template v-if="loadingDistributors">
                     <Skeleton class="w-full h-10" />
                 </template>

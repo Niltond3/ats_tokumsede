@@ -3,9 +3,11 @@ export const listAllDistributors = async () => {
 };
 
 export const getDistributorForAddress = async (addressId) => {
-    return await axios.get(`distribuidores/listarPorEndereco/${addressId}`)
-}
+    return await axios.get(`distribuidores/listarPorEndereco/${addressId}`);
+};
 
 export const getDistributorForClientAddress = async (addressId) => {
-    return await axios.get(`distribuidores/listarPorEnderecoCliente/${addressId}`)
-}
+    return await axios.get(
+        `distribuidores/listarPorEnderecoCliente/${addressId}`
+    );
+};

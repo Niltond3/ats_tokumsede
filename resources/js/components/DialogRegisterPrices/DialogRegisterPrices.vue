@@ -1,6 +1,6 @@
 <script setup>
 // Vue core
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 
 // UI Components
@@ -17,7 +17,6 @@ import { useUpdateData } from "@/Pages/Management/DataTableProducts/composable/u
 import { useTableProductsState } from "@/composables/tableProductsState"
 
 // Local utilities and composables
-import { useDialogControls } from './composables/useDialogControlers'
 import { formatProducts } from './util/productFormatters'
 import { useTableState } from './composables/useTableState'
 import { useDistributorsAndProducts } from './composables/useDistributorsAndProducts'
@@ -35,6 +34,7 @@ const tableProductsState = useTableProductsState()
 const { updateData } = useUpdateData(tableProductsState)
 
 const {
+    tableIdentifier,
     distributor,
     distributors,
     loadingDistributors,
@@ -50,17 +50,7 @@ const {
     table
 } = useTableState(tableProductsState, updateData)
 
-// In setup:
-const { dialogControls } = useDialogControls({ isOpen: props.isOpen, toggleDialog: props.toggleDialog })
-
-
-const emits = defineEmits(["on:create", 'update:dialogOpen'])
-
-const loadDistributor = async (addressId) => {
-    if (!addressId) return
-    const response = await fetchDistributor(addressId)
-    if (response) return response
-}
+const emits = defineEmits(["on:create"])
 
 const loadDistributorProducts = async (distributorId) => {
     if (!distributorId) return
@@ -77,13 +67,47 @@ const loadDistributorProducts = async (distributorId) => {
 const getDefaultValues = () => ({
     selectedDistributorId: null,
     globalFilter: null,
-    tableData: []
+    tableData: [],
+    distributor: null,
+    distributors: [],
+    loadingDistributors: true,
+    loadingProducts: true,
+    sorting: [],
+    payload: {
+        formaPagamento: "1",
+        trocoPara: 0,
+        agendado: 0,
+        dataAgendada: "",
+        horaInicio: "",
+        horaFim: "",
+        obs: "",
+        observacao: "",
+        taxaEntrega: 0,
+        totalProdutos: 0,
+        total: 0,
+        idEndereco: 0,
+        idDistribuidor: 0,
+        itens: [{}],
+        origem: null
+    }
 })
 
 const resetDialogValues = () => {
+    // Reset main dialog values
     selectedDistributorId.value = getDefaultValues().selectedDistributorId
     globalFilter.value = getDefaultValues().globalFilter
     tableProductsState.tableData = getDefaultValues().tableData
+
+    // Reset distributors and products state
+    distributor.value = getDefaultValues().distributor
+    distributors.value = getDefaultValues().distributors
+    loadingDistributors.value = getDefaultValues().loadingDistributors
+    loadingProducts.value = getDefaultValues().loadingProducts
+
+    // Reset table products state payload
+    Object.assign(tableProductsState.payload, getDefaultValues().payload)
+    tableProductsState.status = null
+    tableProductsState.editedRows = null
 }
 
 watch(
@@ -91,56 +115,35 @@ watch(
     (newWidth) => resizebleColumns.value = useResponsiveColumns(resizebleColumns.value, newWidth).value
 )
 
-
-const handleDialogOpen = (op) => {
-    console.log(op)
-    if (!op) {
-        resetDialogValues();
-        emits('update:dialogOpen', false);
-        return dialogControls.value.toggleDialog();
-    }
+watch(() => props.isOpen, async (newVal) => {
     resetDialogValues();
+    if (!newVal) return
     const action = props.addressId ?
-        () => {
+        async () => {
             console.log('action = loadDistributorProducts', props.addressId)
-            console.log(loadDistributor(props.addressId))
-            loadDistributorProducts(distributor.id)
+            await fetchDistributor(props.addressId)
+            loadDistributorProducts(distributor.value.id)
         } : () => {
             console.log('action = fetchDistributors')
             fetchDistributors()
         };
-
     action();
-    dialogControls.value.toggleDialog();
+})
+
+const handleDialogOpen = (op) => {
+    resetDialogValues();
+    if (!op) return props.toggleDialog()
+    props.toggleDialog()
 }
-
-onMounted(() => {
-    if (!props.addressId) {
-        resetDialogValues();
-        fetchDistributors()
-    }
-})
-
-watch(() => dialogControls.value.isOpen, async (newVal) => {
-    console.log(newVal)
-})
-
-watch(() => props.addressId, async (newVal) => {
-    if (newVal) {
-        const distribuidor = await loadDistributor(newVal)
-        await loadDistributorProducts(distribuidor.id)
-
-    }
-})
 
 </script>
 
 <template>
-    <Dialog :open="dialogControls.isOpen" @update:open="handleDialogOpen">
+    <Dialog :open="props.isOpen" @update:open="handleDialogOpen">
         <slot name="trigger" />
         <DialogContent class="flex flex-col gap-2">
             <DialogHeader :loading-distributors="loadingDistributors" :distributors="distributors"
-                :distributor-id="selectedDistributorId" :global-filter="globalFilter"
+                :distributor-id="selectedDistributorId" :tableIdentifier="tableIdentifier" :global-filter="globalFilter"
                 @update:distributor="loadDistributorProducts"
                 @update:global-filter="value => (globalFilter = String(value))" />
             <DialogBody :table="table" :resizeble-columns="resizebleColumns"

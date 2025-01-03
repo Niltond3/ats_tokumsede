@@ -122,6 +122,7 @@ onMounted(() => {
     tableProductsState.status = orderStatus
     tableProductsState.tableData = products
     clientId.value = idCliente
+    console.log(distributor)
     tableIdentifier.value = distributorName
     addressNote.value = observacao
     table.setPageSize(pageSizes.value[0])

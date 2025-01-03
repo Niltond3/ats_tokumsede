@@ -188,11 +188,7 @@ const setupAddressHandlers = (dt) => {
 
     $('#datatable-clientes').on("click", '.excluirEndereco', toggleConfirmDialog)
 
-    $('#datatable-clientes').on("click", '.novoPrecoEspecial', function () {
-        console.log(this.id)
-        console.log(idAddress.value)
-        toggleRegisterPrices()
-    })
+    $('#datatable-clientes').on("click", '.novoPrecoEspecial', toggleRegisterPrices)
 
     $('#datatable-clientes').on("long-press", '.deleteEndereco', function (e) {
         idClient.value = e.target.id
@@ -348,7 +344,8 @@ const handleDeleteAddress = (confirm) => {
 
 <template>
     <div class="[&_.dt-search]:relative [&_.dt-search>label]:ri-search-2-fill">
-        <DialogRegisterPrices :addressId="idAddress" :open="openRegisterPrices" :toggleDialog="toggleRegisterPrices" />
+        <DialogRegisterPrices :addressId="idAddress" :isOpen="openRegisterPrices"
+            :toggleDialog="toggleRegisterPrices" />
         <DialogCreateOrder :open="isOpen" :toggleDialog="toggleDialog" :id-cliente-address="idClienteAddress"
             :client-name="clientName" :set-tab="props.setTab" @update:data-table="handleUpdateDataTable" />
         <DialogShowOrder :open="openShowOrderDialog" :toggleDialog="toggleShowOrderDialog" :order-id="idOrder" />

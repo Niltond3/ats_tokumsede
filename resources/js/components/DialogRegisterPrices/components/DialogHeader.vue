@@ -9,6 +9,7 @@ import DataTableProducts from '@/Pages/Management/DataTableProducts/components/D
 const props = defineProps({
     loadingDistributors: Boolean,
     distributors: Array,
+    tableIdentifier: { type: String, required: false },
     distributorId: { type: [String, Number], required: false },
     globalFilter: { type: [String, null], required: true },
 })
@@ -34,7 +35,7 @@ const handleUpdateDistributorSelect = (distributorId) => {
             <div>
                 <DataTableProducts.Header :distributors="distributors" :id-distribuidor="distributorId"
                     :loading-distributors="loadingDistributors" :global-filter="globalFilter"
-                    @update:distributor="handleUpdateDistributorSelect"
+                    :tableIdentifier="tableIdentifier" @update:distributor="handleUpdateDistributorSelect"
                     @update:global-filter="emits('update:globalFilter', $event)" />
             </div>
         </div>

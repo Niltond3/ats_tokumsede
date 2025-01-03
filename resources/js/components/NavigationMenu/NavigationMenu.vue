@@ -15,8 +15,9 @@ import { DialogRegisterProduct } from './components/DialogRegisterProduct';
 import DialogRegisterClient from './components/DialogRegisterClient.vue';
 import { DialogRegisterPrices } from '@/components/DialogRegisterPrices';
 import DialogTrigger from './components/DialogTrigger.vue';
+import { dialogState } from "@/hooks/useToggleDialog.js";
 
-
+const { isOpen: openRegisterPrices, toggleDialog: toggleRegisterPrices } = dialogState()
 const router = useRouter();
 // Obtém os parâmetros da rota
 const route = useRoute()
@@ -168,7 +169,7 @@ function irParaProdutosComFiltro() {
                             <DialogRegisterClient />
                         </li>
                         <li key="client_price">
-                            <DialogRegisterPrices>
+                            <DialogRegisterPrices :isOpen="openRegisterPrices" :toggleDialog="toggleRegisterPrices">
                                 <template #trigger>
                                     <DialogTrigger icon="ri-price-tag-3-fill" title="Preço" />
                                 </template>

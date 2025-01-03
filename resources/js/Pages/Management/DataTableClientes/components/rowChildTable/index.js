@@ -7,7 +7,6 @@ export default (d) => {
 
     const rowChildData = d
     const clientName = utf8Decode(rowChildData.nome)
-    console.log(rowChildData)
     const containerClasses = `p-2 md:flex-1`;
     const containerAddressClasses = twMerge(
         "md:!max-h-[11rem]",

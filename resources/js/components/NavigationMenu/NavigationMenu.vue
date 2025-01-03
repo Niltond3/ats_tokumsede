@@ -169,7 +169,7 @@ function irParaProdutosComFiltro() {
                         </li>
                         <li key="client_price">
                             <DialogRegisterPrices>
-                                <template v-slot:trigger>
+                                <template #trigger>
                                     <DialogTrigger icon="ri-price-tag-3-fill" title="Preço" />
                                 </template>
                             </DialogRegisterPrices>

@@ -1,13 +1,34 @@
 import { ref } from 'vue'
-import { listAllDistributors } from '@/services/api/distributors'
+import { listAllDistributors, getDistributorForClientAddress } from '@/services/api/distributors'
 import { listProductsByDistributor } from '@/services/api/products'
 import { utf8Decode } from '@/util'
 import renderToast from '@/components/renderPromiseToast'
 
 export function useDistributorsAndProducts() {
+    const distributor = ref(null)
     const distributors = ref([])
     const loadingDistributors = ref(true)
     const loadingProducts = ref(true)
+
+    const fetchDistributor = (addressId) => {
+        const promise = getDistributorForClientAddress(addressId)
+        const response = renderToast(
+            promise,
+            'carregando distribuidor ...',
+            'Distribuidor carregado',
+            (response) => {
+                const formatResponse = {
+                    ...response.data.data,
+                    nome: utf8Decode(response.data.data.nome)
+                }
+                console.log(formatResponse)
+                distributor.value = formatResponse
+                loadingDistributors.value = false
+                return formatResponse
+            }, "error sei lá", (err) => { console.log(err) }
+        )
+        return response
+    }
 
     const fetchDistributors = () => {
         const promise = listAllDistributors()
@@ -42,9 +63,11 @@ export function useDistributorsAndProducts() {
     }
 
     return {
+        distributor,
         distributors,
         loadingDistributors,
         loadingProducts,
+        fetchDistributor,
         fetchDistributors,
         fetchProductsForDistributor
     }

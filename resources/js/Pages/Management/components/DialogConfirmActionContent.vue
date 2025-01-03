@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { onMounted } from 'vue';
 
 const props = defineProps({
-    textReson: { type: Boolean, required: true },
+    textReson: { type: Boolean, required: false },
     dialogTitle: { type: String, required: false },
     dialogDescription: { type: String, required: false },
     variant: { type: String, required: true },

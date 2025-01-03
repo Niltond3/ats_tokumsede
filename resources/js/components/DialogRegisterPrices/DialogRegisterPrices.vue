@@ -1,10 +1,9 @@
 <script setup>
 // Vue core
-import { ref, watch } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 
 // UI Components
-import { Slot } from "radix-vue";
 import {
     Dialog,
     DialogContent
@@ -18,26 +17,29 @@ import { useUpdateData } from "@/Pages/Management/DataTableProducts/composable/u
 import { useTableProductsState } from "@/composables/tableProductsState"
 
 // Local utilities and composables
-import { dialogState } from '@/hooks/useToggleDialog'
+import { useDialogControls } from './composables/useDialogControlers'
 import { formatProducts } from './util/productFormatters'
 import { useTableState } from './composables/useTableState'
 import { useDistributorsAndProducts } from './composables/useDistributorsAndProducts'
 import { useResponsiveColumns } from './composables/useResponsiveColumns'
 
 const props = defineProps({
-    distributorId: { type: [String, Number], required: false, default: null },
+    addressId: { type: [String, Number], required: false, default: null },
+    isOpen: { type: Boolean, required: false, default: null },
+    toggleDialog: { type: Function, required: false, default: null }
 })
 
 const { width } = useWindowSize()
 const selectedDistributorId = ref(null)
 const tableProductsState = useTableProductsState()
 const { updateData } = useUpdateData(tableProductsState)
-const { isOpen, toggleDialog } = dialogState()
 
 const {
+    distributor,
     distributors,
     loadingDistributors,
     loadingProducts,
+    fetchDistributor,
     fetchDistributors,
     fetchProductsForDistributor
 } = useDistributorsAndProducts()
@@ -48,7 +50,17 @@ const {
     table
 } = useTableState(tableProductsState, updateData)
 
+// In setup:
+const { dialogControls } = useDialogControls({ isOpen: props.isOpen, toggleDialog: props.toggleDialog })
+
+
 const emits = defineEmits(["on:create", 'update:dialogOpen'])
+
+const loadDistributor = async (addressId) => {
+    if (!addressId) return
+    const response = await fetchDistributor(addressId)
+    if (response) return response
+}
 
 const loadDistributorProducts = async (distributorId) => {
     if (!distributorId) return
@@ -64,7 +76,7 @@ const loadDistributorProducts = async (distributorId) => {
 
 const getDefaultValues = () => ({
     selectedDistributorId: null,
-    globalFilter: '',
+    globalFilter: null,
     tableData: []
 })
 
@@ -81,29 +93,54 @@ watch(
 
 
 const handleDialogOpen = (op) => {
+    console.log(op)
     if (!op) {
         resetDialogValues();
         emits('update:dialogOpen', false);
-        return toggleDialog();
+        return dialogControls.value.toggleDialog();
     }
-
-    const action = props.distributorId ?
-        () => loadDistributorProducts(props.distributorId) :
-        fetchDistributors;
+    resetDialogValues();
+    const action = props.addressId ?
+        () => {
+            console.log('action = loadDistributorProducts', props.addressId)
+            console.log(loadDistributor(props.addressId))
+            loadDistributorProducts(distributor.id)
+        } : () => {
+            console.log('action = fetchDistributors')
+            fetchDistributors()
+        };
 
     action();
-    toggleDialog();
+    dialogControls.value.toggleDialog();
 }
 
+onMounted(() => {
+    if (!props.addressId) {
+        resetDialogValues();
+        fetchDistributors()
+    }
+})
+
+watch(() => dialogControls.value.isOpen, async (newVal) => {
+    console.log(newVal)
+})
+
+watch(() => props.addressId, async (newVal) => {
+    if (newVal) {
+        const distribuidor = await loadDistributor(newVal)
+        await loadDistributorProducts(distribuidor.id)
+
+    }
+})
 
 </script>
 
 <template>
-    <Dialog :open="isOpen" @update:open="handleDialogOpen">
+    <Dialog :open="dialogControls.isOpen" @update:open="handleDialogOpen">
+        <slot name="trigger" />
         <DialogContent class="flex flex-col gap-2">
-            <slot name="trigger"></slot>
             <DialogHeader :loading-distributors="loadingDistributors" :distributors="distributors"
-                :distributor-id="distributorId" :global-filter="globalFilter"
+                :distributor-id="selectedDistributorId" :global-filter="globalFilter"
                 @update:distributor="loadDistributorProducts"
                 @update:global-filter="value => (globalFilter = String(value))" />
             <DialogBody :table="table" :resizeble-columns="resizebleColumns"

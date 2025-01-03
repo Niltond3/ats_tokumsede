@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Distribuidor;
 use App\Models\EnderecoDistribuidor;
+use App\Models\EnderecoCliente;
 use App\Models\HorarioFuncionamento;
 use App\Models\NovoHorarioFuncionamento;
 use App\Models\TaxaEntrega;
 use App\Models\Produto;
 use App\Models\Estoque;
 use Illuminate\Http\Request;
+use \Barryvdh\Debugbar\Facades\Debugbar;
 
 class DistribuidorController extends Controller
 {
@@ -371,4 +373,93 @@ class DistribuidorController extends Controller
             ]
         ]);
     }
+
+    function findDistributorByAddress($addressId)
+    {
+        debugbar::info($addressId);
+
+        $distributor = Distribuidor::with(['enderecoDistribuidor', 'taxaEntrega'])
+            ->where('idEnderecoDistribuidor', $addressId)
+            ->where('status', Distribuidor::ATIVO)
+            ->first();
+
+        if (!$distributor) {
+            return response()->json([
+                'message' => 'No distributor found for this address'
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => [
+                'id' => $distributor->id,
+                'nome' => $distributor->nome,
+                'endereco' => [
+                    'logradouro' => $distributor->enderecoDistribuidor->logradouro,
+                    'bairro' => $distributor->enderecoDistribuidor->bairro,
+                    'cidade' => $distributor->enderecoDistribuidor->cidade,
+                    'estado' => $distributor->enderecoDistribuidor->estado,
+                    'distanciaMaxima' => $distributor->enderecoDistribuidor->distanciaMaxima
+                ],
+                'taxaEntrega' => $distributor->taxaEntrega
+            ]
+        ]);
+    }
+
+    public function findDistributorByClientAddress($clientAddressId)
+{
+    $clientAddress = EnderecoCliente::find($clientAddressId);
+
+    if (!$clientAddress) {
+        return response()->json(['message' => 'Client address not found'], 404);
+    }
+
+    $fator = 0.5; // Search radius factor
+
+    $distribuidor = Distribuidor::with(['enderecoDistribuidor', 'taxaEntrega'])
+        ->whereHas('enderecoDistribuidor', function($query) use ($clientAddress, $fator) {
+            $query->whereRaw("latitude + $fator >= ".$clientAddress->latitude
+                ." AND latitude - $fator <= ".$clientAddress->latitude
+                ." AND longitude + $fator >= ".$clientAddress->longitude
+                ." AND longitude - $fator <= ".$clientAddress->longitude);
+        })
+        ->where('status', Distribuidor::ATIVO)
+        ->get()->map(function($distribuidor) use ($clientAddress) {
+            $d2r = 0.017453292519943295769236;
+            $dlong = ($clientAddress->longitude - $distribuidor->enderecoDistribuidor->longitude) * $d2r;
+            $dlat = ($clientAddress->latitude - $distribuidor->enderecoDistribuidor->latitude) * $d2r;
+
+            $temp_sin = sin($dlat/2.0);
+            $temp_cos = cos($distribuidor->enderecoDistribuidor->latitude * $d2r);
+            $temp_sin2 = sin($dlong/2.0);
+
+            $a = ($temp_sin * $temp_sin) + ($temp_cos * cos($clientAddress->latitude * $d2r) * $temp_sin2 * $temp_sin2);
+            $c = 2.0 * atan2(sqrt($a), sqrt(1.0 - $a));
+
+            $distribuidor->distance = 6368.1 * $c;
+
+            return $distribuidor;
+        })
+        ->sortBy('distance')
+        ->first();
+
+        if (!$distribuidor) {
+            return response()->json(['message' => 'No distributors found in this area'], 404);
+        }
+
+        return response()->json([
+            'data' => [
+                'id' => $distribuidor->id,
+                'nome' => $distribuidor->nome,
+                'endereco' => [
+                    'logradouro' => $distribuidor->enderecoDistribuidor->logradouro,
+                    'bairro' => $distribuidor->enderecoDistribuidor->bairro,
+                    'cidade' => $distribuidor->enderecoDistribuidor->cidade,
+                    'estado' => $distribuidor->enderecoDistribuidor->estado,
+                    'distanciaMaxima' => $distribuidor->enderecoDistribuidor->distanciaMaxima
+                ],
+                'taxaEntrega' => $distribuidor->taxaEntrega,
+                'distancia' => $distribuidor->distance
+            ]
+        ]);
 }
+};

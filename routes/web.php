@@ -110,7 +110,10 @@ Route::middleware('auth')->group(function () {
                 'update' => 'distribuidores.update',
                 'destroy' => 'distribuidores.destroy'
             ]);
-        Route::get('todosOsDistribuidores', [DistribuidorController::class, 'getAllDistributors']);
+        Route::get('todosOsDistribuidores', [DistribuidorController::class, 'getAllDistributors'])->name('distribuidores.listar');
+        Route::get('listarPorEndereco/{idEndereco}', [DistribuidorController::class, 'findDistributorByAddress'])->name('distribuidores.por-endereco');
+        Route::get('listarPorEnderecoCliente/{idEndereco}', [DistribuidorController::class, 'findDistributorByClientAddress'])->name('distribuidores.por-endereco-cliente');
+
     });
 
     //CATEGORIAS

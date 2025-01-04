@@ -24,7 +24,7 @@ import Separator from '@/components/ui/separator/Separator.vue';
 import SelectPayment from '@/components/orderComponents/SelectPayment.vue'
 import ExchangeInput from '@/components/orderComponents/ExchangeInput.vue'
 import DateTimePicker from '@/components/orderComponents/DateTimePicker.vue'
-import DialogCreateOrderNote from '../DialogCreateOrderNote.vue';
+import DialogCreateOrderNote from '../../../../components/orderComponents/DialogCreateOrderNote.vue';
 import { Check } from 'lucide-vue-next'
 import renderToast from '@/components/renderPromiseToast';
 import { useTableProductsState } from '@/composables/tableProductsState'

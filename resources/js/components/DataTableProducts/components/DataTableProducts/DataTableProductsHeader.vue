@@ -1,6 +1,6 @@
 <script setup>
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
-import { SelectDistributor } from '../'
+import { SelectDistributor } from '..'
 import DebouncedInput from '../DebouncedInput.vue'
 import { onMounted } from 'vue';
 

@@ -8,7 +8,6 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { onMounted } from 'vue';
 
 const props = defineProps({
     textReson: { type: Boolean, required: false },

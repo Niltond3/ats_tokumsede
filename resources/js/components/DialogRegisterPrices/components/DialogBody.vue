@@ -1,10 +1,10 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
 import { useWindowSize } from '@vueuse/core'
-import DataTableProducts from '@/Pages/Management/DataTableProducts/components/DataTableProducts';
-import { useUpdateData } from '@/Pages/Management/DataTableProducts/composable/useUpdateData'
-import { createTableOptions } from '@/Pages/Management/DataTableProducts/config/tableConfig';
-import { columns } from '@/Pages/Management/DataTableProducts/config/Columns';
+import DataTableProducts from '@/components/DataTableProducts/components/DataTableProducts';
+import { useUpdateData } from '@/components/DataTableProducts/composable/useUpdateData'
+import { createTableOptions } from '@/components/DataTableProducts/config/tableConfig';
+import { columns } from '@/components/DataTableProducts/config/Columns';
 import { useVueTable } from '@tanstack/vue-table';
 import { useTableProductsState } from '@/composables/tableProductsState'
 

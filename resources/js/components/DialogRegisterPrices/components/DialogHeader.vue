@@ -4,7 +4,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import DataTableProducts from '@/Pages/Management/DataTableProducts/components/DataTableProducts';
+import DataTableProducts from '@/components/DataTableProducts/components/DataTableProducts';
 
 const props = defineProps({
     loadingDistributors: Boolean,

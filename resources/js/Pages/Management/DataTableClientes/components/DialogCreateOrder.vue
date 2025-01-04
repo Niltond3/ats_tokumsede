@@ -6,7 +6,7 @@ import {
     Dialog,
     DialogContent,
 } from '@/components/ui/dialog'
-import { DataTableProducts } from '../../DataTableProducts'
+import { DataTableProducts } from '../../../../components/DataTableProducts'
 import { utf8Decode } from '@/util';
 import renderToast from '@/components/renderPromiseToast';
 import { Skeleton } from '@/components/ui/skeleton'

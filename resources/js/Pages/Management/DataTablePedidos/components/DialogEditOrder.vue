@@ -11,7 +11,7 @@ import {
 import { utf8Decode, formatMoney } from '@/util';
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
 import { formatOrder, orderToClipboard } from '../../utils';
-import { DataTableProducts } from '../../DataTableProducts';
+import { DataTableProducts } from '../../../../components/DataTableProducts';
 import { dialogState } from '../../../../hooks/useToggleDialog'
 import renderToast from '@/components/renderPromiseToast';
 import { Skeleton } from '@/components/ui/skeleton'

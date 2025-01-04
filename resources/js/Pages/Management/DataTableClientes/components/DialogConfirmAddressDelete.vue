@@ -1,7 +1,7 @@
 <script setup>
 import axios from 'axios';
 import { Dialog } from '@/components/ui/dialog'
-import DialogConfirmActionContent from '../../components/DialogConfirmActionContent.vue';
+import DialogConfirmActionContent from '@/components/DialogConfirmActionContent.vue';
 import renderToast from '@/components/renderPromiseToast';
 
 const props = defineProps({

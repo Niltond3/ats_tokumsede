@@ -77,9 +77,14 @@ const handleStatusChange = () => {
                 </template>
             </template>
             <template v-else>
-                <span class="font-medium flex items-center justify-center text-info py-1 px-2 w-full">
-                    {{ tableIdentifier }}
-                </span>
+                <template v-if="loadingDistributors">
+                    <Skeleton class="w-full h-10" />
+                </template>
+                <template v-else>
+                    <span class="font-medium flex items-center justify-center text-info py-1 px-2 w-full">
+                        {{ tableIdentifier }}
+                    </span>
+                </template>
             </template>
         </div>
         <div class="flex flex-col gap-1 w-full md:flex-row pb-2">

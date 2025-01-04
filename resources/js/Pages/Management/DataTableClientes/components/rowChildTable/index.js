@@ -1,23 +1,24 @@
-import { utf8Decode } from '@/util'
-import { twMerge } from 'tailwind-merge'
-import components from './components'
+import { utf8Decode } from "@/util";
+import { twMerge } from "tailwind-merge";
+import components from "./components";
 
 export default (d) => {
-    const { customLiAddress, customLiOrder } = components()
+    const { customLiAddress, customLiOrder } = components();
 
-    const rowChildData = d
-    const clientName = utf8Decode(rowChildData.nome)
+    const rowChildData = d;
+    const clientName = utf8Decode(rowChildData.nome);
     const containerClasses = `p-2 md:flex-1`;
     const containerAddressClasses = twMerge(
         "md:!max-h-[11rem]",
         "hover:bg-info/5  flex flex-col px-3 py-2bg-slate-100 ",
         "max-h-0 !overflow-y-scroll !overflow-x-hidden transition-max-height delay-300 ease-in-out [transition-behavior:allow-discrete]",
-        "scrollbar !scrollbar-w-1.5 !scrollbar-h-1.5 !scrollbar-thumb-slate-200 !scrollbar-track-tr!scrollbar-thumb-rounded scrollbar-track-rounded dark:scrollbar-track:!bg-slate-500/[0.16] dark:scrollbar-thumb:!bg-slate-500/50 lg:supports-scrollbars:pr-2 select");
+        "scrollbar !scrollbar-w-1.5 !scrollbar-h-1.5 !scrollbar-thumb-slate-200 !scrollbar-track-tr!scrollbar-thumb-rounded scrollbar-track-rounded dark:scrollbar-track:!bg-slate-500/[0.16] dark:scrollbar-thumb:!bg-slate-500/50 lg:supports-scrollbars:pr-2 select"
+    );
 
-    const btClasses = 'min-w-[32px] min-h-[32px] w-[32px] h-[32px] text-2xl shadow-md rounded-full ';
+    const btClasses =
+        "min-w-[32px] min-h-[32px] w-[32px] h-[32px] text-2xl shadow-md rounded-full ";
 
-
-    return /*html*/`
+    return /*html*/ `
 <div class="flex flex-col md:flex-row justify-between w-full">
     <div class="${containerClasses} group">
         <div class="flex justify-between text-sm py-2 px-4 border-b border-slate-300 mb-1 items-center h-[50px]">
@@ -56,7 +57,7 @@ export default (d) => {
                         <i class="ri-delete-bin-2-fill text-sm pointer-events-none select-none"></i>
                     </button>
                     <button
-                        class="${btClasses} !hidden novoPrecoEspecial hover:text-white hover:bg-dispatched justify-center items-center text-dispatched/60 transition-all group-hover/line:bg-white group-aria-selected/line:!bg-white hover:shadow-lg"
+                        class="${btClasses} flex novoPrecoEspecial hover:text-white hover:bg-dispatched justify-center items-center text-dispatched/60 transition-all group-hover/line:bg-white group-aria-selected/line:!bg-white hover:shadow-lg"
                         id="${rowChildData.id}">
                         <i class="ri-price-tag-3-fill text-sm pointer-events-none select-none"></i>
                     </button>
@@ -65,7 +66,9 @@ export default (d) => {
         </div>
         <dl>
             <ul class="${containerAddressClasses}" id="enderecos">
-                ${rowChildData.enderecos.map(endereco => customLiAddress(endereco, clientName)).join('')}
+                ${rowChildData.enderecos
+                    .map((endereco) => customLiAddress(endereco, clientName))
+                    .join("")}
             </ul>
         </dl>
     </div>
@@ -78,10 +81,12 @@ export default (d) => {
         </div>
         <dl>
             <ul class="${containerAddressClasses}" id="pedidos">
-                ${rowChildData.pedidos.map(pedido => customLiOrder(pedido)).join('')}
+                ${rowChildData.pedidos
+                    .map((pedido) => customLiOrder(pedido))
+                    .join("")}
             </ul>
         </dl>
     </div>
 </div>
-`
-}
+`;
+};

@@ -188,7 +188,10 @@ const setupAddressHandlers = (dt) => {
 
     $('#datatable-clientes').on("click", '.excluirEndereco', toggleConfirmDialog)
 
-    $('#datatable-clientes').on("click", '.novoPrecoEspecial', toggleRegisterPrices)
+    $('#datatable-clientes').on("click", '.novoPrecoEspecial', (e) => {
+        console.log(e.target.id)
+        toggleRegisterPrices()
+    })
 
     $('#datatable-clientes').on("long-press", '.deleteEndereco', function (e) {
         idClient.value = e.target.id

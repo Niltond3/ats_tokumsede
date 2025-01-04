@@ -124,6 +124,7 @@ watch(() => props.isOpen, async (newVal) => {
     const action = props.addressId ?
         async () => {
             console.log('action = loadDistributorProducts', props.addressId)
+            distributors.value = null
             await fetchDistributor(props.addressId)
             loadDistributorProducts(distributor.value.id)
         } : () => {

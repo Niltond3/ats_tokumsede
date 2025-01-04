@@ -15,10 +15,6 @@ const props = defineProps({
 })
 const emits = defineEmits(['update:distributor', 'update:globalFilter', 'update:status'])
 
-onMounted(() => {
-    console.log(props)
-})
-
 const handleStatusChange = () => {
     const getAction = `${props.status.label}${!props.status.oldStatus}`
     console.log(props.status)
@@ -70,7 +66,7 @@ const handleStatusChange = () => {
                     placeholder="Todos os produtos..." />
             </template>
 
-            <template v-if="distributors && !tableIdentifier">
+            <template v-if="distributors">
                 <template v-if="loadingDistributors">
                     <Skeleton class="w-full h-10" />
                 </template>

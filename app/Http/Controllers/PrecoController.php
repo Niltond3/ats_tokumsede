@@ -23,7 +23,7 @@ class PrecoController extends Controller
             'idDistribuidor' => 'required|exists:distribuidor,id',
             'idCliente' => 'nullable|exists:cliente,id',
             'valor' => 'required|numeric|min:0',
-            'qtdMin' => 'required|integer|min:1'
+            'qtdMin' => 'required|integer|min:0'
         ]);
 
         // Find associated stock record

@@ -3,7 +3,10 @@ import {
     listAllDistributors,
     getDistributorForClientAddress,
 } from "@/services/api/distributors";
-import { listProductsByDistributor } from "@/services/api/products";
+import {
+    listProductsByClient,
+    listProductsByDistributor,
+} from "@/services/api/products";
 import { utf8Decode } from "@/util";
 import renderToast from "@/components/renderPromiseToast";
 
@@ -53,11 +56,7 @@ export function useDistributorsAndProducts() {
             }
         );
     };
-
-    const fetchProductsForDistributor = async (distributorId) => {
-        loadingProducts.value = true;
-        const promise = listProductsByDistributor(distributorId);
-
+    const fetchProducts = (promise) => {
         const response = renderToast(
             promise,
             "Carregando produtos...",
@@ -68,6 +67,11 @@ export function useDistributorsAndProducts() {
         );
         response.finally(() => (loadingProducts.value = false));
         return response;
+    };
+    const fetchProductsForDistributor = async (distributorId, clientId) => {
+        loadingProducts.value = true;
+        const promise = listProductsByDistributor(distributorId, clientId);
+        return fetchProducts(promise);
     };
 
     return {

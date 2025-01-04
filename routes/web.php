@@ -95,7 +95,7 @@ Route::middleware('auth')->group(function () {
                 'destroy' => 'produtos.destroy'
             ]);
         Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class, 'listarProdutos'])->name('produtos.listar');
-        Route::get('listarPorDistribuidor/{idDistribuidor}', [ProdutoController::class, 'showByDistribuidor'])->name('produtos.por-distribuidor');
+        Route::get('listarPorDistribuidor/{idDistribuidor}/{idCliente?}', [ProdutoController::class, 'showByDistribuidor'])->name('produtos.por-distribuidor');
         Route::get('{idEnderecoCliente}', [ProdutoController::class, 'show'])->name('produtos.show-by-endereco');
     });
 
@@ -122,7 +122,7 @@ Route::middleware('auth')->group(function () {
     //PRECO
     Route::resource('preco', PrecoController::class, ['except' => 'create']);
     Route::put('/preco', [PrecoController::class, 'update']);
-    
+
 });
 
 

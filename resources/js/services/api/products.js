@@ -1,12 +1,21 @@
+export const saveProductPrice = async (productData) => {
+    return await axios.post("/preco/", productData);
+};
+
 export const updateProductPrices = async (productData) => {
     return await axios.put("/preco/", productData);
 };
 
-export const listProductsByDistributor = async (distributorId) => {
-    return await axios.get(`produtos/listarPorDistribuidor/${distributorId}`);
+export const listProductsByDistributor = async (distributorId, clientId) => {
+    return await axios.get(
+        `produtos/listarPorDistribuidor/${distributorId}${
+            clientId ? `/${clientId}` : ""
+        }`
+    );
 };
 
-export const listProductsByClientAndDistributor = async (idDistribuidor,
-    idCliente) => {
-    return await axios.get(`produtos/listarProdutos/${idDistribuidor}/${idCliente}`);
+export const listProductsByClient = async (idDistribuidor, idCliente) => {
+    return await axios.get(
+        `produtos/listarProdutos/${idDistribuidor}/${idCliente}`
+    );
 };

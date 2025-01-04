@@ -17,7 +17,6 @@ import { useUpdateData } from "@/Pages/Management/DataTableProducts/composable/u
 import { useTableProductsState } from "@/composables/tableProductsState"
 
 // Local utilities and composables
-import { formatProducts } from './util/productFormatters'
 import { useTableState } from './composables/useTableState'
 import { useDistributorsAndProducts } from './composables/useDistributorsAndProducts'
 import { useResponsiveColumns } from './composables/useResponsiveColumns'
@@ -28,7 +27,7 @@ const props = defineProps({
     isOpen: { type: Boolean, required: false, default: null },
     toggleDialog: { type: Function, required: false, default: null },
     title: { type: String, required: false, default: 'Cadastro de Preços' },
-    description: { type: String, required: false, default: 'Cadastro dos preços padrões de cada distribuidor' },
+    description: { type: String, required: false, default: 'Atualização dos preços padrões de cada distribuidor' },
 })
 
 const { width } = useWindowSize()
@@ -44,7 +43,7 @@ const {
     loadingProducts,
     fetchDistributor,
     fetchDistributors,
-    fetchProductsForDistributor
+    fetchProductsForDistributor,
 } = useDistributorsAndProducts()
 
 const {
@@ -54,18 +53,6 @@ const {
 } = useTableState(tableProductsState, updateData)
 
 const emits = defineEmits(["on:create"])
-
-const loadDistributorProducts = async (distributorId) => {
-    if (!distributorId) return
-    tableProductsState.tableData = []
-    selectedDistributorId.value = distributorId
-
-    const response = await fetchProductsForDistributor(distributorId)
-    if (response) {
-        globalFilter.value = ""
-        tableProductsState.tableData = formatProducts(response)
-    }
-}
 
 const getDefaultValues = () => ({
     selectedDistributorId: null,
@@ -113,6 +100,22 @@ const resetDialogValues = () => {
     tableProductsState.editedRows = null
 }
 
+const loadDistributorProducts = async (distributorId, clientId) => {
+    if (!distributorId) return
+
+    globalFilter.value = getDefaultValues().globalFilter
+    tableProductsState.tableData = getDefaultValues().tableData
+
+    selectedDistributorId.value = distributorId
+
+    const response = await fetchProductsForDistributor(distributorId, clientId)
+    console.log(response)
+    if (response) {
+        globalFilter.value = ""
+        tableProductsState.tableData = response
+    }
+}
+
 watch(
     () => width.value,
     (newWidth) => resizebleColumns.value = useResponsiveColumns(resizebleColumns.value, newWidth).value
@@ -123,14 +126,10 @@ watch(() => props.isOpen, async (newVal) => {
     if (!newVal) return
     const action = props.addressId ?
         async () => {
-            console.log('action = loadDistributorProducts', props.addressId)
             distributors.value = null
             await fetchDistributor(props.addressId)
-            loadDistributorProducts(distributor.value.id)
-        } : () => {
-            console.log('action = fetchDistributors')
-            fetchDistributors()
-        };
+            loadDistributorProducts(distributor.value.id, props.clientId)
+        } : () => fetchDistributors();
     action();
 })
 

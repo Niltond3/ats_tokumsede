@@ -55,6 +55,7 @@ const whenDialogOpen = () => {
             nome: utf8Decode(responseDistributor.nome),
         }
         const products = orderData[0]
+        console.log(products)
         createOrderData.value = {
             clientName: props.clientName,
             products,
@@ -96,54 +97,8 @@ const handleToggleDialog = () => {
 <template>
     <Dialog v-bind="forwarded" :open="handleDialogOpen()" @update:open="handleToggleDialog">
         <DialogContent class="sm:max-w-3xl">
-            <div v-if="isLoading">
-                <div class="border rounded-md border-gray-200 relative">
-                    <div class="flex flex-col gap-1">
-                        <Skeleton class="h-12 w-full rounded-md" />
-                        <Skeleton class="h-[235px] w-full" />
-                    </div>
-                    <div class="flex flex-col gap-1 p-2">
-                        <Separator />
-                        <div class="flex items-center h-11 justify-around ">
-                            <div class="flex gap-8">
-                                <span class="text-sm font-medium relative text-info">
-                                    <span
-                                        class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">
-                                        Produtos
-                                    </span>
-                                    <Skeleton class="w-14 h-5" />
-                                </span>
-                                <span class="text-sm font-medium relative text-info">
-                                    <span
-                                        class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">
-                                        Entrega
-                                    </span>
-                                    <Skeleton class="w-14 h-5" />
-                                </span>
-                                <span class="text-sm font-medium relative text-info">
-                                    <span
-                                        class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">
-                                        Total
-                                    </span>
-                                    <Skeleton class="w-14 h-5" />
-                                </span>
-                            </div>
-                        </div>
-                        <Separator label="Detalhes" class="z-100" />
-                        <div class="flex flex-wrap gap-2 p-2 sm:h-14 justify-center">
-                            <Skeleton class="w-1/4 h-10" />
-                            <Separator orientation="vertical" class="" />
-                            <Skeleton class="w-1/4 h-10" />
-                            <Separator orientation="vertical" class="hidden sm:block" />
-                            <Skeleton class="w-1/4 h-10" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div v-else>
-                <DataTableProducts :create-order-data="createOrderData" @callback:payload-pedido="handleRealizarPedido"
-                    @update:special-offer-created="handleSpecialOfferCreated" />
-            </div>
+            <DataTableProducts :create-order-data="createOrderData" @callback:payload-pedido="handleRealizarPedido"
+                @update:special-offer-created="handleSpecialOfferCreated" />
         </DialogContent>
     </Dialog>
 </template>

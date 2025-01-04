@@ -80,6 +80,7 @@ const handleCancelar = (confirmCancellCalback) => {
     const promise = axios.put(url, { retorno: reason })
     renderToast(promise, 'Cancelado', toggleDialog)
 }
+
 const handleToggleDropdown = (op) => {
     if (op || op == false) dropdownOpen.value = !dropdownOpen.value
 }

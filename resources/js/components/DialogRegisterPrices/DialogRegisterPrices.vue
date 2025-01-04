@@ -23,9 +23,12 @@ import { useDistributorsAndProducts } from './composables/useDistributorsAndProd
 import { useResponsiveColumns } from './composables/useResponsiveColumns'
 
 const props = defineProps({
+    clientId: { type: [String, Number], required: false, default: null },
     addressId: { type: [String, Number], required: false, default: null },
     isOpen: { type: Boolean, required: false, default: null },
-    toggleDialog: { type: Function, required: false, default: null }
+    toggleDialog: { type: Function, required: false, default: null },
+    title: { type: String, required: false, default: 'Cadastro de Preços' },
+    description: { type: String, required: false, default: 'Cadastro dos preços padrões de cada distribuidor' },
 })
 
 const { width } = useWindowSize()
@@ -143,13 +146,14 @@ const handleDialogOpen = (op) => {
         <slot name="trigger" />
         <DialogContent class="flex flex-col gap-2">
             <DialogHeader :loading-distributors="loadingDistributors" :distributors="distributors"
-                :distributor-id="selectedDistributorId" :tableIdentifier="tableIdentifier" :global-filter="globalFilter"
+                :distributor-id="selectedDistributorId" :global-filter="globalFilter" :title="title"
+                :description="description" :tableIdentifier="tableIdentifier"
                 @update:distributor="loadDistributorProducts"
                 @update:global-filter="value => (globalFilter = String(value))" />
             <DialogBody :table="table" :resizeble-columns="resizebleColumns"
                 @update:table-data="handleUpdateTableData" />
             <DialogFooter :loading-products="loadingProducts" :products="tableProductsState.tableData"
-                :distributor-id="selectedDistributorId" @sucess-update="loadDistributorProducts" />
+                :clientId="clientId" :distributor-id="selectedDistributorId" @sucess-update="loadDistributorProducts" />
         </DialogContent>
     </Dialog>
 </template>

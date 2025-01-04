@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { updateProductPrices } from '@/services/api/products';
 
 const props = defineProps({
+    clientId: { type: [String, Number], required: false, default: null },
     loadingProducts: Boolean,
     distributorId: String,
     products: Array
@@ -13,8 +14,10 @@ const props = defineProps({
 const emits = defineEmits(['sucessUpdate'])
 
 const handleUpdate = async () => {
+
     try {
         const updatedProducts = props.products.filter(product => product.updated === true)
+        console.log(updatedProducts)
         // Using Promise.all for parallel requests
         const updatePromises = updatedProducts.map(product => {
             return updateProductPrices({

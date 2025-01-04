@@ -56,7 +56,7 @@ export default (d) => {
                         <i class="ri-delete-bin-2-fill text-sm pointer-events-none select-none"></i>
                     </button>
                     <button
-                        class="${btClasses} novoPrecoEspecial hover:text-white hover:bg-dispatched flex justify-center items-center text-dispatched/60 transition-all group-hover/line:bg-white group-aria-selected/line:!bg-white hover:shadow-lg"
+                        class="${btClasses} !hidden novoPrecoEspecial hover:text-white hover:bg-dispatched justify-center items-center text-dispatched/60 transition-all group-hover/line:bg-white group-aria-selected/line:!bg-white hover:shadow-lg"
                         id="${rowChildData.id}">
                         <i class="ri-price-tag-3-fill text-sm pointer-events-none select-none"></i>
                     </button>

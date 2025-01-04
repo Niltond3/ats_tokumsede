@@ -12,6 +12,8 @@ const props = defineProps({
     tableIdentifier: { type: String, required: false },
     distributorId: { type: [String, Number], required: false },
     globalFilter: { type: [String, null], required: true },
+    title: { type: String, required: false },
+    description: { type: String, required: false },
 })
 
 
@@ -26,11 +28,11 @@ const handleUpdateDistributorSelect = (distributorId) => {
     <DialogHeader>
         <DialogTitle class="leading-none flex gap-3 mr-4 text-lg text-info">
             <i class="ri-shopping-bag-3-fill"></i>
-            <p class="font-semibold">Preços</p>
+            <p class="font-semibold">{{ title }}</p>
         </DialogTitle>
         <div class="flex flex-col gap-2">
             <DialogDescription class="py-2 w-min text-nowrap">
-                Cadastro dos preços padrões de cada distribuidor
+                {{ description }}
             </DialogDescription>
             <div>
                 <DataTableProducts.Header :distributors="distributors" :id-distribuidor="distributorId"

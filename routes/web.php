@@ -122,7 +122,7 @@ Route::middleware('auth')->group(function () {
     //PRECO
     Route::resource('preco', PrecoController::class, ['except' => 'create']);
     Route::put('/preco', [PrecoController::class, 'update']);
-
+    
 });
 
 

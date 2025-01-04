@@ -87,52 +87,53 @@ class PrecoController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request)
-    {
-        Debugbar::info('update');
-        Debugbar::info($request);
+{
+    Debugbar::info('update');
+    Debugbar::info($request);
 
-        $validated = $request->validate([
-            'idProduto' => 'required|exists:produto,id',
-            'idDistribuidor' => 'required|exists:distribuidor,id',
-            'valor' => 'required|numeric|min:0',
-            'qtdMin' => 'required|integer|min:0',
-            'id' => 'nullable|exists:preco,id'
-        ]);
-        Debugbar::info($validated);
+    $validated = $request->validate([
+        'idProduto' => 'required|exists:produto,id',
+        'idDistribuidor' => 'required|exists:distribuidor,id',
+        'valor' => 'required|numeric|min:0',
+        'qtdMin' => 'required|integer|min:0',
+        'id' => 'nullable|exists:preco,id'
+    ]);
+    Debugbar::info($validated);
 
-        try {
-            if ($request->has('id')) {
-                $preco = Preco::findOrFail($validated['id']);
-            } else {
-                $preco = Preco::where([
-                    ['idDistribuidor', $validated['idDistribuidor']],
-                    ['idProduto', $validated['idProduto']],
-                    ['status', '!=', Preco::EXCLUIDO]
-                ])
-                    ->latest('id')
-                    ->firstOrFail();
-            }
-
-            $preco->update([
-                'valor' => $validated['valor'],
-                'qtdMin' => $validated['qtdMin'],
-                'status' => Preco::ATIVO
-            ]);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Preço atualizado com sucesso!',
-                'data' => $preco
-            ], 200);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Erro ao atualizar preço!',
-                'error' => $e->getMessage()
-            ], 500);
+    try {
+        if ($request->has('id')) {
+            $preco = Preco::findOrFail($validated['id']);
+        } else {
+            $preco = Preco::where([
+                ['idDistribuidor', $validated['idDistribuidor']],
+                ['idProduto', $validated['idProduto']],
+                ['status', '!=', Preco::EXCLUIDO]
+            ])
+                ->latest('id')
+                ->firstOrFail();
         }
+
+        $preco->update([
+            'valor' => $validated['valor'],
+            'qtdMin' => $validated['qtdMin'],
+            'status' => Preco::ATIVO
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Preço atualizado com sucesso!',
+            'data' => $preco
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Erro ao atualizar preço!',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
 
     /**
      * Remove the specified resource from storage.

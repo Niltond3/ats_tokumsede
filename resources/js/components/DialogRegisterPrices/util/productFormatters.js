@@ -14,7 +14,7 @@ export const sortProductsByName = (products) => {
 
 export const formatProducts = (products) => {
     if (!Array.isArray(products)) return []
-
+    console.log(products)
     const mapProduct = ({ id, idPreco, img, nome, qtdMin, valor }) => ({
         id,
         idPreco,

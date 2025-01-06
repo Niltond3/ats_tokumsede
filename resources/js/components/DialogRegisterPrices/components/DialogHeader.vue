@@ -14,6 +14,7 @@ const props = defineProps({
     globalFilter: { type: [String, null], required: true },
     title: { type: String, required: false },
     description: { type: String, required: false },
+    clientName: { type: String, required: false },
 })
 
 
@@ -36,7 +37,7 @@ const handleUpdateDistributorSelect = (distributorId) => {
             </DialogDescription>
             <div>
                 <DataTableProducts.Header :distributors="distributors" :id-distribuidor="distributorId"
-                    :loading-distributors="loadingDistributors" :global-filter="globalFilter"
+                    :loading-distributors="loadingDistributors" :global-filter="globalFilter" :client-name="clientName"
                     :tableIdentifier="tableIdentifier" @update:distributor="handleUpdateDistributorSelect"
                     @update:global-filter="emits('update:globalFilter', $event)" />
             </div>

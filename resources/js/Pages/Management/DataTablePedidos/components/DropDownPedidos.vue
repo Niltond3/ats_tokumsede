@@ -75,7 +75,6 @@ const handleEntregar = (id) => {
 
 const handleCancelar = (confirmCancellCalback) => {
     const { reason, toggleDialog } = confirmCancellCalback
-    console.log(confirmCancellCalback)
     var url = `pedidos/recusar/${idPedido}`
     const promise = axios.put(url, { retorno: reason })
     renderToast(promise, 'Cancelado', toggleDialog)

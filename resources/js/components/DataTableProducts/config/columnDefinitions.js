@@ -9,6 +9,7 @@ import {
     DataTableNumberField,
     TableCell,
 } from "../components";
+import { toast } from 'vue-sonner';
 
 const { toCurrency } = formatMoney();
 
@@ -41,12 +42,18 @@ export const nameColumn = {
             "div",
             {
                 class: "flex gap-2 group cursor-pointer",
-                onClick: () =>
+                onClick: () => {
                     navigator.clipboard.writeText(
                         formatProductForClipboard(row.original)
-                    ),
+                    )
+                    toast.info('Produto copiado para a área de transferência')
+                }
+                ,
             },
-            utf8Decode(row.getValue("nome")),
+            h("span", {
+                class: "font-medium hover:text-info transition-colors",
+                innerHTML: utf8Decode(row.getValue("nome")),
+            }),
             h("i", {
                 class: "ri-file-copy-2-fill opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-info",
             })
@@ -133,9 +140,9 @@ export const quantityColumn = {
 
         const minQtd =
             itens.length > 0 &&
-            itens
-                .map((product) => product.quantidade)
-                .reduce((curr, prev) => curr + prev) < 2
+                itens
+                    .map((product) => product.quantidade)
+                    .reduce((curr, prev) => curr + prev) < 2
                 ? 1
                 : 0;
 

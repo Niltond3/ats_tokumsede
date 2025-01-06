@@ -40,6 +40,8 @@ const fetchOrder = () => {
     const urlOrder = `pedidos/editar/${props.orderId}`
     const promise = axios.get(urlOrder)
 
+    isLoading.value = true; // Atualiza o estado de carregamento para true
+
     renderToast(promise, `carregando pedido #${props.orderId}`, 'sucesso ao carregar pedido', (responseOrder) => {
         const { data: orderEditData } = responseOrder
         const orderData = orderEditData[0]
@@ -47,7 +49,7 @@ const fetchOrder = () => {
         const clientName = utf8Decode(orderEditData[0].cliente.nome)
 
         distributors.value = distributorsData.filter(distributor => distributor.status == 1)
-
+        
         const idDistribuidor = orderData.distribuidor.id
         const idCliente = orderData.cliente.id
         const urlProducts = `produtos/listarProdutos/${idDistribuidor}/${idCliente}`
@@ -148,54 +150,9 @@ const handleUpdateOrder = (payload) => {
                     Clique no botão "Salvar" para salvar as alterações
                 </DialogDescription>
             </DialogHeader>
-            <div v-if="isLoading">
-                <div class="border rounded-md border-gray-200 relative">
-                    <div class="flex flex-col gap-1">
-                        <Skeleton class="h-12 w-full rounded-md" />
-                        <Skeleton class="h-[235px] w-full" />
-                    </div>
-                    <div class="flex flex-col gap-1 p-2">
-                        <Separator />
-                        <div class="flex items-center h-11 justify-around ">
-                            <div class="flex gap-8">
-                                <span class="text-sm font-medium relative text-info">
-                                    <span
-                                        class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">
-                                        Produtos
-                                    </span>
-                                    <Skeleton class="w-14 h-5" />
-                                </span>
-                                <span class="text-sm font-medium relative text-info">
-                                    <span
-                                        class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">
-                                        Entrega
-                                    </span>
-                                    <Skeleton class="w-14 h-5" />
-                                </span>
-                                <span class="text-sm font-medium relative text-info">
-                                    <span
-                                        class="absolute -top-7 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">
-                                        Total
-                                    </span>
-                                    <Skeleton class="w-14 h-5" />
-                                </span>
-                            </div>
-                        </div>
-                        <Separator label="Detalhes" class="z-100" />
-                        <div class="flex flex-wrap gap-2 p-2 sm:h-14 justify-center">
-                            <Skeleton class="w-1/4 h-10" />
-                            <Separator orientation="vertical" class="" />
-                            <Skeleton class="w-1/4 h-10" />
-                            <Separator orientation="vertical" class="hidden sm:block" />
-                            <Skeleton class="w-1/4 h-10" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div v-else>
-                <DataTableProducts @callback:payload-pedido="handleUpdateOrder" :create-order-data="createOrderData"
-                    :distributors="distributors"></DataTableProducts>
-            </div>
+
+            <DataTableProducts @callback:payload-pedido="handleUpdateOrder" :create-order-data="createOrderData"
+                :distributors="distributors"></DataTableProducts>
         </DialogContent>
     </Dialog>
 </template>

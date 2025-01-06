@@ -6,12 +6,9 @@ import {
     Dialog,
     DialogContent,
 } from '@/components/ui/dialog'
-import { DataTableProducts } from '../../../../components/DataTableProducts'
+import { DataTableProducts } from '@/components/DataTableProducts'
 import { utf8Decode } from '@/util';
 import renderToast from '@/components/renderPromiseToast';
-import { Skeleton } from '@/components/ui/skeleton'
-import { watch } from 'vue';
-import Separator from '@/components/ui/separator/Separator.vue';
 
 const props = defineProps({
     open: { type: Boolean, required: false },
@@ -20,8 +17,6 @@ const props = defineProps({
     clientName: { type: String, required: false },
     setTab: { type: Function, required: true },
 });
-
-const isLoading = ref(true); // Estado de carregamento
 
 const createOrderData = ref()
 
@@ -55,7 +50,6 @@ const whenDialogOpen = () => {
             nome: utf8Decode(responseDistributor.nome),
         }
         const products = orderData[0]
-        console.log(products)
         createOrderData.value = {
             clientName: props.clientName,
             products,
@@ -72,7 +66,6 @@ const handleDialogOpen = () => {
     return props.open
 }
 
-watch(() => createOrderData.value, () => isLoading.value = false)
 
 const handleRealizarPedido = (payload) => {
     var url = "pedidos";
@@ -86,7 +79,6 @@ const handleRealizarPedido = (payload) => {
 const handleSpecialOfferCreated = (isCreated) => updateTable.value = isCreated
 
 const handleToggleDialog = () => {
-    isLoading.value = true
     if (updateTable.value) emits('update:dataTable', true)
     updateTable.value = false
     props.toggleDialog()

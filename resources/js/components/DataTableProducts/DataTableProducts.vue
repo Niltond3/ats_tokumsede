@@ -23,10 +23,12 @@ import DataTableProducts from './components/DataTableProducts'
 
 const props = defineProps({
     createOrderData: { type: null, required: false },
-    distributors: { type: Array, required: false },
+    distributors: { type: Array, required: false, default: null },
 })
 
 const clientId = ref(null)
+
+const clientName = ref(null)
 
 const isUpdate = ref(false)
 
@@ -36,7 +38,7 @@ const sorting = ref([])
 
 const globalFilter = ref('')
 
-const tableIdentifier = ref('')
+const tableIdentifier = ref(null)
 
 const addressNote = ref('')
 
@@ -108,25 +110,25 @@ const tableOptions = reactive(createTableOptions(
 
 const table = useVueTable(tableOptions)
 
-onMounted(() => {
-    const { products: rawProducts, distributorTaxes, distributor, address } = props.createOrderData
+watch(() => props.createOrderData, (createOrderData) => {
+    const { products: rawProducts, distributorTaxes, distributor, address, clientName: rawClientName } = createOrderData
     const { taxaUnica: taxaEntrega } = distributorTaxes
     const { id: idDistribuidor, nome: distributorName } = distributor
     const { id: idEndereco, observacao, idCliente } = address
-    const order = props.createOrderData.order
-
+    const order = createOrderData.order
     const { updateOrder, orderPayload, orderStatus, products } = useDataToTableFormat(rawProducts, taxaEntrega, idDistribuidor, idEndereco, order)
 
+    clientName.value = rawClientName
     isUpdate.value = updateOrder
     tableProductsState.payload = { ...tableProductsState.payload, ...orderPayload }
     tableProductsState.status = orderStatus
     tableProductsState.tableData = products
     clientId.value = idCliente
-    console.log(distributor)
     tableIdentifier.value = distributorName
     addressNote.value = observacao
     table.setPageSize(pageSizes.value[0])
 })
+
 
 </script>
 
@@ -134,9 +136,9 @@ onMounted(() => {
     <div>
         <DataTableProducts.Header :distributors="props.distributors"
             :id-distribuidor="tableProductsState.payload.idDistribuidor" :table-identifier="tableIdentifier"
-            :status="tableProductsState.status" :client-name="props.createOrderData.clientName"
-            :global-filter="globalFilter" @update:global-filter="value => (globalFilter = String(value))"
-            @update:status="handleUpdateStatus" @update:distributor="handleDistributor" />
+            :status="tableProductsState.status" :client-name="clientName" :global-filter="globalFilter"
+            @update:global-filter="value => (globalFilter = String(value))" @update:status="handleUpdateStatus"
+            @update:distributor="handleDistributor" />
         <DataTableProducts.Table :obs="tableProductsState.payload.obs" :resizeble-columns="resizebleColumns"
             :table="table" @update:order-note="handleUpdateOrderNote" />
         <DataTableProducts.Footer :payload="tableProductsState.payload" :is-update="isUpdate"

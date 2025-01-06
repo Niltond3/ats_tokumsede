@@ -1,6 +1,6 @@
 <script setup>
 // Vue core
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 
 // UI Components
@@ -20,6 +20,7 @@ import { useTableProductsState } from "@/composables/tableProductsState"
 import { useTableState } from './composables/useTableState'
 import { useDistributorsAndProducts } from './composables/useDistributorsAndProducts'
 import { useResponsiveColumns } from './composables/useResponsiveColumns'
+import { getClient } from '@/services/api/client'
 
 const props = defineProps({
     clientId: { type: [String, Number], required: false, default: null },
@@ -32,6 +33,7 @@ const props = defineProps({
 
 const { width } = useWindowSize()
 const selectedDistributorId = ref(null)
+const clientName = ref(null)
 const tableProductsState = useTableProductsState()
 const { updateData } = useUpdateData(tableProductsState)
 
@@ -109,7 +111,6 @@ const loadDistributorProducts = async (distributorId, clientId) => {
     selectedDistributorId.value = distributorId
 
     const response = await fetchProductsForDistributor(distributorId, clientId)
-    console.log(response)
     if (response) {
         globalFilter.value = ""
         tableProductsState.tableData = response
@@ -127,6 +128,8 @@ watch(() => props.isOpen, async (newVal) => {
     const action = props.addressId ?
         async () => {
             distributors.value = null
+            const clientRequest = await getClient(props.clientId)
+            clientName.value = clientRequest.data.nome
             await fetchDistributor(props.addressId)
             loadDistributorProducts(distributor.value.id, props.clientId)
         } : () => fetchDistributors();
@@ -147,7 +150,7 @@ const handleDialogOpen = (op) => {
         <DialogContent class="flex flex-col gap-2">
             <DialogHeader :loading-distributors="loadingDistributors" :distributors="distributors"
                 :distributor-id="selectedDistributorId" :global-filter="globalFilter" :title="title"
-                :description="description" :tableIdentifier="tableIdentifier"
+                :description="description" :tableIdentifier="tableIdentifier" :client-name="clientName"
                 @update:distributor="loadDistributorProducts"
                 @update:global-filter="value => (globalFilter = String(value))" />
             <DialogBody :table="table" :resizeble-columns="resizebleColumns"

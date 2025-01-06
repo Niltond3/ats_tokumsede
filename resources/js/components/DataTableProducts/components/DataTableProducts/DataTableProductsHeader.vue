@@ -2,7 +2,6 @@
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 import { SelectDistributor } from '..'
 import DebouncedInput from '../DebouncedInput.vue'
-import { onMounted } from 'vue';
 
 const props = defineProps({
     distributors: { type: Array, required: false, default: [] },
@@ -17,7 +16,6 @@ const emits = defineEmits(['update:distributor', 'update:globalFilter', 'update:
 
 const handleStatusChange = () => {
     const getAction = `${props.status.label}${!props.status.oldStatus}`
-    console.log(props.status)
     const getCurrentCalback = (info) => emits('update:status', {
         status: props.status,
         payload: props.status.statusId,
@@ -77,7 +75,7 @@ const handleStatusChange = () => {
                 </template>
             </template>
             <template v-else>
-                <template v-if="loadingDistributors">
+                <template v-if="!tableIdentifier">
                     <Skeleton class="w-full h-10" />
                 </template>
                 <template v-else>
@@ -105,6 +103,10 @@ const handleStatusChange = () => {
                 <span class="font-medium">
                     {{ clientName }}
                 </span>
+            </p>
+            <p v-else class="text-sm font-semibold px-2 py-1 rounded-lg text-info flex w-full items-center gap-2">
+                Cliente:
+                <Skeleton class="w-full h-10" />
             </p>
         </div>
     </div>

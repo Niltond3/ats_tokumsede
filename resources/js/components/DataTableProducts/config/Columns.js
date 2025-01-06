@@ -1,5 +1,4 @@
 import {
-    actionsColumn,
     imageColumn,
     nameColumn,
     priceColumn,
@@ -11,5 +10,4 @@ export const columns = [
     nameColumn,
     priceColumn,
     quantityColumn,
-    actionsColumn,
 ];

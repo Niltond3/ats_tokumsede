@@ -13,19 +13,18 @@ export const useEventHandlers = (
             observacao: addressNote.value,
         };
         disabledButton.value = true;
-        console.log(tableProductsState.payload);
         emit("callback:payloadPedido", tableProductsState.payload);
     },
     handlePayForm: (value) =>
-        (tableProductsState.payload = {
-            ...tableProductsState.payload,
-            formaPagamento: value,
-        }),
+    (tableProductsState.payload = {
+        ...tableProductsState.payload,
+        formaPagamento: value,
+    }),
     handleExchange: ({ value }) =>
-        (tableProductsState.payload = {
-            ...tableProductsState.payload,
-            trocoPara: parseFloat(value.split(" ")[1]),
-        }),
+    (tableProductsState.payload = {
+        ...tableProductsState.payload,
+        trocoPara: parseFloat(value.split(" ")[1]),
+    }),
     handleScheduling: (date) => {
         if (date) {
             const { date: formattedDate, time } =
@@ -50,19 +49,17 @@ export const useEventHandlers = (
         });
     },
     handleDistributor: (value) =>
-        (tableProductsState.payload = {
-            ...tableProductsState.payload,
-            idDistribuidor: value.toString(),
-        }),
+    (tableProductsState.payload = {
+        ...tableProductsState.payload,
+        idDistribuidor: value.toString(),
+    }),
     handleUpdateOrderNote: (value) => {
-        console.log(value);
         tableProductsState.payload = {
             ...tableProductsState.payload,
             obs: value,
         };
     },
     handleUpdateStatus: (value) => {
-        console.log(value);
         const { info, payload, status } = value;
         tableProductsState.status = status;
         tableProductsState.payload = {

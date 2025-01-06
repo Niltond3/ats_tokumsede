@@ -9,6 +9,15 @@ use Illuminate\Http\Request;
 
 class PrecoController extends Controller
 {
+        /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        //
+    }
     /**
      * Store a newly created resource in storage.
      *

@@ -8,8 +8,7 @@ export const updateProductPrices = async (productData) => {
 
 export const listProductsByDistributor = async (distributorId, clientId) => {
     return await axios.get(
-        `produtos/listarPorDistribuidor/${distributorId}${
-            clientId ? `/${clientId}` : ""
+        `produtos/listarPorDistribuidor/${distributorId}${clientId ? `/${clientId}` : ""
         }`
     );
 };

@@ -128,8 +128,11 @@ Route::middleware('auth')->group(function () {
 
     //PRECO
     Route::group(['prefix' => 'preco'], function () {
+        Route::get('/', [PrecoController::class, 'index']);
         Route::post('/', [PrecoController::class, 'store']);
+        Route::get('/{idProduto}', [PrecoController::class, 'show']);
         Route::put('/', [PrecoController::class, 'update']);
+        Route::delete('/{preco}', [PrecoController::class, 'destroy']);
     });
 
 });

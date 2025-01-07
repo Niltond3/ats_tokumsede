@@ -1,10 +1,11 @@
 export const saveProductPrice = async (productData) => {
     console.log(productData)
-    return await axios.poccst("preco/save/", productData);
+    return await axios.post("/preco/", productData);
 };
 
 export const updateProductPrices = async (productData) => {
-    return await axios.put("preco/update/", productData);
+    console.log(productData)
+    return await axios.put("/preco/", productData);
 };
 
 export const listProductsByDistributor = async (distributorId, clientId) => {

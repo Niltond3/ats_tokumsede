@@ -11,6 +11,7 @@ class PrecoController extends Controller
 {
     public function index()
 {
+    Debugbar::info('index');
     $distribuidor = auth()->user()->idDistribuidor;
     $precos = Preco::where('status', '!=', Preco::EXCLUIDO)
         ->where('idDistribuidor', $distribuidor)
@@ -100,6 +101,7 @@ class PrecoController extends Controller
      */
     public function update(Request $request)
 {
+    Debugbar::info($request);
     $validated = $request->validate([
         'idProduto' => 'required|exists:produto,id',
         'idDistribuidor' => 'required|exists:distribuidor,id',

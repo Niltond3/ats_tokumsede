@@ -244,7 +244,6 @@ class ProdutoController extends Controller
                 $out[$indexProduto] = [
                     "nome" => $prod->nome,
                     "id" => $prod->idProd,
-                    "idPreco" => $prod->idPreco,
                     "img" => $prod->img,
                     "preco" => [],
                     "precoEspecial" => [],

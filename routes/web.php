@@ -128,8 +128,8 @@ Route::middleware('auth')->group(function () {
             'edit' => 'preco.edit',
             'destroy' => 'preco.destroy'
             ]);
-            Route::post('save/', [PrecoController::class, 'store']);
-            Route::put('update/', [PrecoController::class, 'update']);
+            Route::post('/', [PrecoController::class, 'store']);
+            Route::put('/', [PrecoController::class, 'update']);
     });
 
 });

@@ -36,6 +36,7 @@ export const useUpdateData = (tableProductsState) => {
                 const endRowLength = oldRow[columnId].length - 1;
                 return updateTableData([
                     {
+                        precoId: oldRow[columnId][endRowLength].precoId,
                         qtd: oldRow[columnId][endRowLength].qtd,
                         val: toFloat(value),
                     },
@@ -51,6 +52,7 @@ export const useUpdateData = (tableProductsState) => {
                 const endRowLength = oldRow[columnId].length - 1;
                 return updateTableData([
                     {
+                        precoId: oldRow[columnId][endRowLength].precoId,
                         qtd: oldRow[columnId][endRowLength].qtd,
                         val: toFloat(value),
                     },

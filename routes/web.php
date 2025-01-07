@@ -120,8 +120,17 @@ Route::middleware('auth')->group(function () {
     Route::resource('categorias', CategoriaController::class, ['except' => 'create']);
 
     //PRECO
-    Route::resource('preco', PrecoController::class, ['except' => 'create']);
-    Route::put('/preco', [PrecoController::class, 'update']);
+    Route::group(['prefix' => 'preco'], function () {
+        Route::resource('/', PrecoController::class, ['except' => 'create'])
+        ->names([
+            'index' => 'preco.index',
+            'show' => 'preco.show',
+            'edit' => 'preco.edit',
+            'destroy' => 'preco.destroy'
+            ]);
+            Route::post('/', [PrecoController::class, 'store']);
+            Route::put('/', [PrecoController::class, 'update']);
+    });
 
 });
 

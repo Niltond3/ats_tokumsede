@@ -169,7 +169,8 @@ function irParaProdutosComFiltro() {
                             <DialogRegisterClient />
                         </li>
                         <li key="client_price">
-                            <DialogRegisterPrices :isOpen="openRegisterPrices" :toggleDialog="toggleRegisterPrices">
+                            <DialogRegisterPrices :isOpen="openRegisterPrices" :toggleDialog="toggleRegisterPrices"
+                                :clientId="null">
                                 <template #trigger>
                                     <DialogTrigger icon="ri-price-tag-3-fill" title="Preço" />
                                 </template>

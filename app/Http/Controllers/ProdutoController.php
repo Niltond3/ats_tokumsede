@@ -153,6 +153,7 @@ class ProdutoController extends Controller
             ->leftJoin('estoque', 'estoque.id', '=', 'preco.idEstoque')
             ->select([
                 'preco.*',
+                'preco.id as idPreco',
                 'produto.id as idProd',
                 'produto.nome as nome',
                 'produto.img as img'
@@ -233,6 +234,7 @@ class ProdutoController extends Controller
         $indexProduto = -1;
 
         foreach ($produtos as $prod) {
+            Debugbar::info($prod);
             // Create new product entry if different from current
             if ($currentProduct !== $prod->idProd) {
                 $indexProduto++;
@@ -242,6 +244,7 @@ class ProdutoController extends Controller
                 $out[$indexProduto] = [
                     "nome" => $prod->nome,
                     "id" => $prod->idProd,
+                    "idPreco" => $prod->idPreco,
                     "img" => $prod->img,
                     "preco" => [],
                     "precoEspecial" => [],

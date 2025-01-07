@@ -27,6 +27,7 @@ class PrecoController extends Controller
      */
     public function store(Request $request)
     {
+        Debugbar::info($request);
         // Validate request data
         $validated = $request->validate([
             'idProduto' => 'required|exists:produto,id',

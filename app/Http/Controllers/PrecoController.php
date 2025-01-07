@@ -9,6 +9,16 @@ use Illuminate\Http\Request;
 
 class PrecoController extends Controller
 {
+    public function index()
+{
+    $distribuidor = auth()->user()->idDistribuidor;
+    $precos = Preco::where('status', '!=', Preco::EXCLUIDO)
+        ->where('idDistribuidor', $distribuidor)
+        ->with('distribuidor', 'estoque', 'produto')
+        ->get();
+
+    return response()->json($precos);
+}
     /**
      * Store a newly created resource in storage.
      *

@@ -112,6 +112,7 @@ const loadDistributorProducts = async (distributorId, clientId) => {
 
     const response = await fetchProductsForDistributor(distributorId, clientId)
     if (response) {
+        console.log(response)
         globalFilter.value = ""
         tableProductsState.tableData = response
     }

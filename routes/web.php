@@ -17,8 +17,15 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::fallback(function () {
-    return view('app');
+    return Inertia::render('App', [
+        'page' => [
+            'component' => 'App',
+            'props' => [],
+            'url' => url()->current(),
+        ]
+    ]);
 });
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -120,8 +127,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('categorias', CategoriaController::class, ['except' => 'create']);
 
     //PRECO
-    Route::resource('preco', PrecoController::class, ['except' => 'create']);
-    Route::put('/preco', [PrecoController::class, 'update']);
+    Route::group(['prefix' => 'preco'], function () {
+        Route::get('/', [PrecoController::class, 'index']);
+        Route::post('/', [PrecoController::class, 'store']);
+        Route::get('/{idProduto}', [PrecoController::class, 'show']);
+        Route::put('/', [PrecoController::class, 'update']);
+        Route::delete('/{preco}', [PrecoController::class, 'destroy']);
+    });
 
 });
 

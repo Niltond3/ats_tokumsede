@@ -27,10 +27,17 @@ const handleUpdate = async () => {
                 idDistribuidor: props.distributorId,
                 qtdMin: product.preco[product.preco.length - 1].qtd
             }
+            console.log(requestData)
+            console.log(product)
+            console.log('clientId: ' + props.clientId)
+            console.log('idPreco: ' + product.preco[product.preco.length - 1].precoId)
+            console.log('precoEspecial: ' + product.precoEspecial)
+            console.log('preco: ' + product.preco[product.preco.length - 1].val)
+
             return !props.clientId
                 ? updateProductPrices({
                     ...requestData,
-                    id: product.idPreco,
+                    id: product.preco[product.preco.length - 1].precoId,
                     valor: product.preco[product.preco.length - 1].val
                 })
                 : saveProductPrice({
@@ -42,9 +49,10 @@ const handleUpdate = async () => {
                 })
         })
         const promisses = Promise.all(updatePromises)
-        renderToast(promisses, 'Atualizando preços...', 'Preços atualizados com sucesso', () => {
+        renderToast(promisses, 'Atualizando preços...', 'Preços atualizados com sucesso', (res) => {
             emits('sucessUpdate', props.distributorId, props.clientId)
             disabledButton.value = false
+            console.log(res)
         }, 'erro: erro ao atualizar os preços', (err) => console.log(err))
     } catch (error) {
         console.log(error);

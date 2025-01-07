@@ -30,7 +30,7 @@ const handleUpdate = async () => {
             console.log('clientId: ' + props.clientId)
             console.log(requestData)
             console.log('idPreco: ' + product.idPreco)
-            console.log('precoEspecial: ' + product.precoEspecial[product.precoEspecial.length - 1].val)
+            console.log('precoEspecial: ' + product.precoEspecial ? product.precoEspecial[product.precoEspecial.length - 1].val : null)
             console.log('preco: ' + product.preco[product.preco.length - 1].val)
 
             return !props.clientId

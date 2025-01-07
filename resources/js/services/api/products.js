@@ -1,4 +1,5 @@
 export const saveProductPrice = async (productData) => {
+    console.log(productData)
     return await axios.post("/preco/", productData);
 };
 

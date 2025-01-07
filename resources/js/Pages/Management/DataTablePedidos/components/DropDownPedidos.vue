@@ -1,6 +1,5 @@
 <script setup>
 import { defineComponent, h, markRaw, ref } from 'vue'
-import axios from 'axios'
 import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub,
     DropdownMenuSubContent,
@@ -14,6 +13,7 @@ import DialogEditOrder from './DialogEditOrder.vue'
 import DialogShowOrder from './DialogShowOrder.vue'
 import DialogConfirmAction from './DialogConfirmAction.vue'
 import { usePage, } from '@inertiajs/vue3';
+import { orderAccept, orderDeliver, orderDispatch, orderReject } from '@/services/api/orders'
 
 const page = usePage()
 
@@ -56,27 +56,23 @@ const renderToast = (promise, status, callbackSucess) => {
 }
 
 const handleAceitar = () => {
-    var url = `pedidos/aceitar/${idPedido}`
-    const promise = axios.put(url)
+    const promise = orderAccept(idPedido)
     renderToast(promise, 'aceito')
 }
 
 const handleDespachar = (deliveryMan) => {
-    var url = `pedidos/despachar/${idPedido}`
-    const promise = axios.put(url, { entregador: deliveryMan })
+    const promise = orderDispatch(idPedido, deliveryMan)
     renderToast(promise, 'despachado')
 }
 
 const handleEntregar = (id) => {
-    var url = `pedidos/entregar/${idPedido}`
-    const promise = axios.put(url)
+    const promise = orderDeliver(idPedido)
     renderToast(promise, 'entregue')
 }
 
 const handleCancelar = (confirmCancellCalback) => {
     const { reason, toggleDialog } = confirmCancellCalback
-    var url = `pedidos/recusar/${idPedido}`
-    const promise = axios.put(url, { retorno: reason })
+    const promise = orderReject(idPedido, reason)
     renderToast(promise, 'Cancelado', toggleDialog)
 }
 

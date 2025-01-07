@@ -48,9 +48,10 @@ const handleUpdate = async () => {
                 })
         })
         const promisses = Promise.all(updatePromises)
-        renderToast(promisses, 'Atualizando preços...', 'Preços atualizados com sucesso', () => {
+        renderToast(promisses, 'Atualizando preços...', 'Preços atualizados com sucesso', (res) => {
             emits('sucessUpdate', props.distributorId, props.clientId)
             disabledButton.value = false
+            console.log(res)
         }, 'erro: erro ao atualizar os preços', (err) => console.log(err))
     } catch (error) {
         console.log(error);

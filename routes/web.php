@@ -122,6 +122,7 @@ Route::middleware('auth')->group(function () {
     //PRECO
     Route::group(['prefix' => 'preco'], function () {
         Route::post('/', [PrecoController::class, 'store']);
+        Route::put('/', [PrecoController::class, 'update']);
     });
 
 });

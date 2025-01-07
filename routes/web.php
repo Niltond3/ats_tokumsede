@@ -17,8 +17,15 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::fallback(function () {
-    return view('app', ['page' => 'app']);
+    return Inertia::render('App', [
+        'page' => [
+            'component' => 'App',
+            'props' => [],
+            'url' => url()->current(),
+        ]
+    ]);
 });
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [

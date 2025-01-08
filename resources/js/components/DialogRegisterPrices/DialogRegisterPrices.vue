@@ -21,6 +21,7 @@ import { useTableState } from './composables/useTableState'
 import { useDistributorsAndProducts } from './composables/useDistributorsAndProducts'
 import { useResponsiveColumns } from './composables/useResponsiveColumns'
 import { getClient } from '@/services/api/client'
+import { utf8Decode } from '@/util'
 
 const props = defineProps({
     clientId: { type: [String, Number], required: false, default: null },
@@ -112,7 +113,6 @@ const loadDistributorProducts = async (distributorId, clientId) => {
 
     const response = await fetchProductsForDistributor(distributorId, clientId)
     if (response) {
-        console.log(response)
         globalFilter.value = ""
         tableProductsState.tableData = response
     }
@@ -130,7 +130,7 @@ watch(() => props.isOpen, async (newVal) => {
         async () => {
             distributors.value = null
             const clientRequest = await getClient(props.clientId)
-            clientName.value = clientRequest.data.nome
+            clientName.value = utf8Decode(clientRequest.data.nome)
             await fetchDistributor(props.addressId)
             loadDistributorProducts(distributor.value.id, props.clientId)
         } : () => fetchDistributors();

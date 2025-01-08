@@ -59,8 +59,6 @@ const addressTarget = ref({})
 let dt;
 const table = ref();
 
-// Add these methods outside onMounted but inside the script setup
-
 const initializeDataTable = (dt) => {
     const format = (d) => rowChildtable(d)
 
@@ -155,6 +153,11 @@ const setupEventHandlers = (dt) => {
     setupAddressHandlers(dt)
     setupCopyHandler(dt)
     setupAccordionHandler()
+    // Add this to get all filtered results
+    dt.on('search.dt', function () {
+        const allResults = dt.rows({ search: 'applied', page: 'all' }).data().toArray()
+        console.log('All filtered results:', allResults)
+    })
 }
 
 const setupOrderHandlers = () => {
@@ -291,9 +294,8 @@ const options = {
         topEnd: null,
         bottomStart: 'info',
         bottomEnd: 'paging'
-    }
+    },
 }
-
 const ajax = {
     url: 'clientes', dataFilter: function (data) {
         const obj = JSON.parse(data)

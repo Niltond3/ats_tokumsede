@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import SelectPayment from '@/components/orderComponents/SelectPayment.vue'
 import ExchangeInput from '@/components/orderComponents/ExchangeInput.vue'
+import DateTimePicker from '@/components/orderComponents/DateTimePicker.vue'
 import { dateToISOFormat, formatMoney } from '@/util'
 import { computed } from 'vue'
 

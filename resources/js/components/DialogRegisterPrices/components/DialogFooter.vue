@@ -27,13 +27,6 @@ const handleUpdate = async () => {
                 idDistribuidor: props.distributorId,
                 qtdMin: product.preco[product.preco.length - 1].qtd
             }
-            console.log(requestData)
-            console.log(product)
-            console.log('clientId: ' + props.clientId)
-            console.log('idPreco: ' + product.preco[product.preco.length - 1].precoId)
-            console.log('precoEspecial: ' + product.precoEspecial)
-            console.log('preco: ' + product.preco[product.preco.length - 1].val)
-
             return !props.clientId
                 ? updateProductPrices({
                     ...requestData,

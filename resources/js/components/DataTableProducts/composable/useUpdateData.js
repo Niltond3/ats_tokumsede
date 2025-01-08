@@ -13,9 +13,7 @@ const createSpecialOffer = (payload) => {
             emit("update:specialOfferCreated", true);
         },
         "Erro ao Salvar oferta!",
-        (err) => {
-            console.log(err);
-        }
+        (err) =>  console.error(err);
     );
 };
 export const useUpdateData = (tableProductsState) => {

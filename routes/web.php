@@ -8,6 +8,7 @@ use App\Http\Controllers\DistribuidorController;
 use App\Http\Controllers\EnderecoClienteController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\Estoque;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FileUploadController;
@@ -107,21 +108,23 @@ Route::middleware('auth')->group(function () {
     });
 
     //DISTRIBUIDORES
+//DISTRIBUIDORES
     Route::group(['prefix' => 'distribuidores'], function () {
-        Route::resource('/', DistribuidorController::class, ['except' => 'create'])
+        Route::get('/{id}', [DistribuidorController::class, 'show'])->name('distribuidores.show');
+        Route::resource('/', DistribuidorController::class, ['except' => ['create', 'show']])
             ->names([
                 'index' => 'distribuidores.index',
-                'show' => 'distribuidores.show',
                 'store' => 'distribuidores.store',
-                'edit' => 'distribuidores.edit',
                 'update' => 'distribuidores.update',
-                'destroy' => 'distribuidores.destroy'
+                'destroy' => 'distribuidores.destroy',
+                'edit' => 'distribuidores.edit'
             ]);
-        Route::get('todosOsDistribuidores', [DistribuidorController::class, 'getAllDistributors'])->name('distribuidores.listar');
-        Route::get('listarPorEndereco/{idEndereco}', [DistribuidorController::class, 'findDistributorByAddress'])->name('distribuidores.por-endereco');
-        Route::get('listarPorEnderecoCliente/{idEndereco}', [DistribuidorController::class, 'findDistributorByClientAddress'])->name('distribuidores.por-endereco-cliente');
 
+        Route::get('/all', [DistribuidorController::class, 'getAllDistributors']);
+        Route::get('/by-address/{addressId}', [DistribuidorController::class, 'findDistributorByAddress'])->name('distribuidores.por-endereco');
+        Route::get('/by-client-address/{clientAddressId}', [DistribuidorController::class, 'findDistributorByClientAddress'])->name('distribuidores.por-endereco-cliente');
     });
+
 
     //CATEGORIAS
     Route::resource('categorias', CategoriaController::class, ['except' => 'create']);
@@ -133,6 +136,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/{idProduto}', [PrecoController::class, 'show']);
         Route::put('/', [PrecoController::class, 'update']);
         Route::delete('/{preco}', [PrecoController::class, 'destroy']);
+    });
+
+    //RELATORIOS
+    Route::group(['prefix' => 'relatorio'], function () {
+        Route::post('pedidos', [PedidoController::class, 'relatorioPedidos']);
+        Route::post('vendas', [PedidoController::class, 'relatorioVendas']);
+        Route::post('vendasProduto', [PedidoController::class, 'relatorioVendasProduto']);
+        Route::post('vendasEntregador', [PedidoController::class, 'relatorioVendasEntregador']);
+        Route::post('estoque', [EstoqueController::class, 'relatorioEstoque']);
     });
 
 });

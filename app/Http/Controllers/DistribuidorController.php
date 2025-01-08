@@ -43,9 +43,17 @@ class DistribuidorController extends Controller
      */
     public function show($id)
     {
-        $id = auth()->user()->tipoAdministrador == "Distribuidor" ? auth()->user()->idDistribuidor : $id;
-        $distribuidor = Distribuidor::find($id)->load('taxaEntrega', 'horarioFuncionamento', 'novoHorarioFuncionamento', 'enderecoDistribuidor');
-        $data = array(
+        Debugbar::info($id);
+        $distribuidor = Distribuidor::with([
+            'taxaEntrega',
+            'horarioFuncionamento',
+            'novoHorarioFuncionamento',
+            'enderecoDistribuidor'
+        ])->findOrFail($id);
+        Debugbar::info($distribuidor);
+
+        $data = [
+            // Basic Info
             'id' => $distribuidor->id,
             'nome' => $distribuidor->nome,
             'cnpj' => $distribuidor->cnpj,
@@ -54,60 +62,76 @@ class DistribuidorController extends Controller
             'email' => $distribuidor->email,
             'outrosContatos' => $distribuidor->outrosContatos,
 
-            'logradouro' => $distribuidor->enderecoDistribuidor->logradouro,
-            'numero' => $distribuidor->enderecoDistribuidor->numero,
-            'bairro' => $distribuidor->enderecoDistribuidor->bairro,
-            'complemento' => $distribuidor->enderecoDistribuidor->complemento,
-            'cep' => $distribuidor->enderecoDistribuidor->cep,
-            'cidade' => $distribuidor->enderecoDistribuidor->cidade,
-            'estado' => $distribuidor->enderecoDistribuidor->estado,
-            'referencia' => $distribuidor->enderecoDistribuidor->referencia,
+            // Address Info
+            ...$distribuidor->enderecoDistribuidor->only([
+                'logradouro',
+                'numero',
+                'bairro',
+                'complemento',
+                'cep',
+                'cidade',
+                'estado',
+                'referencia'
+            ]),
 
-            'inicioSemana' => $distribuidor->horarioFuncionamento->inicioSemana,
-            'fimSemana' => $distribuidor->horarioFuncionamento->fimSemana,
-            'inicioSabado' => $distribuidor->horarioFuncionamento->inicioSabado,
-            'fimSabado' => $distribuidor->horarioFuncionamento->fimSabado,
-            'domingo' => $distribuidor->horarioFuncionamento->domingo,
-            'inicioDomingo' => $distribuidor->horarioFuncionamento->inicioDomingo,
-            'fimDomingo' => $distribuidor->horarioFuncionamento->fimDomingo,
+            // Regular Schedule
+            ...$distribuidor->horarioFuncionamento->only([
+                'inicioSemana',
+                'fimSemana',
+                'inicioSabado',
+                'fimSabado',
+                'domingo',
+                'inicioDomingo',
+                'fimDomingo'
+            ]),
 
+            // New Schedule
             'novo_domingo' => $distribuidor->novoHorarioFuncionamento->domingo,
             'novo_inicioDomingo' => $distribuidor->novoHorarioFuncionamento->inicioDomingo,
             'novo_fimDomingo' => $distribuidor->novoHorarioFuncionamento->fimDomingo,
-            'segunda' => $distribuidor->novoHorarioFuncionamento->segunda,
-            'inicioSegunda' => $distribuidor->novoHorarioFuncionamento->inicioSegunda,
-            'fimSegunda' => $distribuidor->novoHorarioFuncionamento->fimSegunda,
-            'terca' => $distribuidor->novoHorarioFuncionamento->terca,
-            'inicioTerca' => $distribuidor->novoHorarioFuncionamento->inicioTerca,
-            'fimTerca' => $distribuidor->novoHorarioFuncionamento->fimTerca,
-            'quarta' => $distribuidor->novoHorarioFuncionamento->quarta,
-            'inicioQuarta' => $distribuidor->novoHorarioFuncionamento->inicioQuarta,
-            'fimQuarta' => $distribuidor->novoHorarioFuncionamento->fimQuarta,
-            'quinta' => $distribuidor->novoHorarioFuncionamento->quinta,
-            'inicioQuinta' => $distribuidor->novoHorarioFuncionamento->inicioQuinta,
-            'fimQuinta' => $distribuidor->novoHorarioFuncionamento->fimQuinta,
-            'sexta' => $distribuidor->novoHorarioFuncionamento->sexta,
-            'inicioSexta' => $distribuidor->novoHorarioFuncionamento->inicioSexta,
-            'fimSexta' => $distribuidor->novoHorarioFuncionamento->fimSexta,
+            ...$distribuidor->novoHorarioFuncionamento->only([
+                'segunda',
+                'inicioSegunda',
+                'fimSegunda',
+                'terca',
+                'inicioTerca',
+                'fimTerca',
+                'quarta',
+                'inicioQuarta',
+                'fimQuarta',
+                'quinta',
+                'inicioQuinta',
+                'fimQuinta',
+                'sexta',
+                'inicioSexta',
+                'fimSexta',
+                'pausaAlmoco',
+                'inicioAlmoco',
+                'fimAlmoco'
+            ]),
             'novo_sabado' => $distribuidor->novoHorarioFuncionamento->sabado,
             'novo_inicioSabado' => $distribuidor->novoHorarioFuncionamento->inicioSabado,
             'novo_fimSabado' => $distribuidor->novoHorarioFuncionamento->fimSabado,
-            'pausaAlmoco' => $distribuidor->novoHorarioFuncionamento->pausaAlmoco,
-            'inicioAlmoco' => $distribuidor->novoHorarioFuncionamento->inicioAlmoco,
-            'fimAlmoco' => $distribuidor->novoHorarioFuncionamento->fimAlmoco,
 
-            'taxaUnica' => $distribuidor->taxaEntrega->taxaUnica,
-            'valorTaxaUnica' => $distribuidor->taxaEntrega->valorTaxaUnica,
-            'taxaDomingo' => $distribuidor->taxaEntrega->taxaDomingo,
-            'valorTaxaDomingo' => $distribuidor->taxaEntrega->valorTaxaDomingo,
-            'taxaCompraMinima' => $distribuidor->taxaEntrega->taxaCompraMinima,
-            'valorCompraMinima' => $distribuidor->taxaEntrega->valorCompraMinima,
-            'taxaEntregaDistante' => $distribuidor->taxaEntrega->taxaEntregaDistante,
-            'distanciaMaxima' => $distribuidor->taxaEntrega->distanciaMaxima,
-            'valorKmAdicional' => $distribuidor->taxaEntrega->valorKmAdicional
-        );
-        return $data;
-        //RETORNA DISTRIBUIDOR
+            // Delivery Fees
+            ...$distribuidor->taxaEntrega->only([
+                'taxaUnica',
+                'valorTaxaUnica',
+                'taxaDomingo',
+                'valorTaxaDomingo',
+                'taxaCompraMinima',
+                'valorCompraMinima',
+                'taxaEntregaDistante',
+                'distanciaMaxima',
+                'valorKmAdicional'
+            ])
+        ];
+        Debugbar::info($data);
+
+        return response()->json([
+            'data' => $data,
+            'meta' => ['total' => count($data)]
+        ]);
     }
     /**
      * Store a newly created resource in storage.
@@ -406,41 +430,41 @@ class DistribuidorController extends Controller
     }
 
     public function findDistributorByClientAddress($clientAddressId)
-{
-    $clientAddress = EnderecoCliente::find($clientAddressId);
+    {
+        $clientAddress = EnderecoCliente::find($clientAddressId);
 
-    if (!$clientAddress) {
-        return response()->json(['message' => 'Client address not found'], 404);
-    }
+        if (!$clientAddress) {
+            return response()->json(['message' => 'Client address not found'], 404);
+        }
 
-    $fator = 0.5; // Search radius factor
+        $fator = 0.5; // Search radius factor
 
-    $distribuidor = Distribuidor::with(['enderecoDistribuidor', 'taxaEntrega'])
-        ->whereHas('enderecoDistribuidor', function($query) use ($clientAddress, $fator) {
-            $query->whereRaw("latitude + $fator >= ".$clientAddress->latitude
-                ." AND latitude - $fator <= ".$clientAddress->latitude
-                ." AND longitude + $fator >= ".$clientAddress->longitude
-                ." AND longitude - $fator <= ".$clientAddress->longitude);
-        })
-        ->where('status', Distribuidor::ATIVO)
-        ->get()->map(function($distribuidor) use ($clientAddress) {
-            $d2r = 0.017453292519943295769236;
-            $dlong = ($clientAddress->longitude - $distribuidor->enderecoDistribuidor->longitude) * $d2r;
-            $dlat = ($clientAddress->latitude - $distribuidor->enderecoDistribuidor->latitude) * $d2r;
+        $distribuidor = Distribuidor::with(['enderecoDistribuidor', 'taxaEntrega'])
+            ->whereHas('enderecoDistribuidor', function ($query) use ($clientAddress, $fator) {
+                $query->whereRaw("latitude + $fator >= " . $clientAddress->latitude
+                    . " AND latitude - $fator <= " . $clientAddress->latitude
+                    . " AND longitude + $fator >= " . $clientAddress->longitude
+                    . " AND longitude - $fator <= " . $clientAddress->longitude);
+            })
+            ->where('status', Distribuidor::ATIVO)
+            ->get()->map(function ($distribuidor) use ($clientAddress) {
+                $d2r = 0.017453292519943295769236;
+                $dlong = ($clientAddress->longitude - $distribuidor->enderecoDistribuidor->longitude) * $d2r;
+                $dlat = ($clientAddress->latitude - $distribuidor->enderecoDistribuidor->latitude) * $d2r;
 
-            $temp_sin = sin($dlat/2.0);
-            $temp_cos = cos($distribuidor->enderecoDistribuidor->latitude * $d2r);
-            $temp_sin2 = sin($dlong/2.0);
+                $temp_sin = sin($dlat / 2.0);
+                $temp_cos = cos($distribuidor->enderecoDistribuidor->latitude * $d2r);
+                $temp_sin2 = sin($dlong / 2.0);
 
-            $a = ($temp_sin * $temp_sin) + ($temp_cos * cos($clientAddress->latitude * $d2r) * $temp_sin2 * $temp_sin2);
-            $c = 2.0 * atan2(sqrt($a), sqrt(1.0 - $a));
+                $a = ($temp_sin * $temp_sin) + ($temp_cos * cos($clientAddress->latitude * $d2r) * $temp_sin2 * $temp_sin2);
+                $c = 2.0 * atan2(sqrt($a), sqrt(1.0 - $a));
 
-            $distribuidor->distance = 6368.1 * $c;
+                $distribuidor->distance = 6368.1 * $c;
 
-            return $distribuidor;
-        })
-        ->sortBy('distance')
-        ->first();
+                return $distribuidor;
+            })
+            ->sortBy('distance')
+            ->first();
 
         if (!$distribuidor) {
             return response()->json(['message' => 'No distributors found in this area'], 404);
@@ -461,5 +485,6 @@ class DistribuidorController extends Controller
                 'distancia' => $distribuidor->distance
             ]
         ]);
+    }
 }
-};
+;

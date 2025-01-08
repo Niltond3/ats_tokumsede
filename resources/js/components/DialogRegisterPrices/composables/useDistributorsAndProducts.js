@@ -2,6 +2,7 @@ import { ref } from "vue";
 import {
     listAllDistributors,
     getDistributorForClientAddress,
+    getDistributor,
 } from "@/services/api/distributors";
 import {
     listProductsByClient,
@@ -17,8 +18,11 @@ export function useDistributorsAndProducts() {
     const loadingDistributors = ref(true);
     const loadingProducts = ref(true);
 
-    const fetchDistributor = (addressId) => {
-        const promise = getDistributorForClientAddress(addressId);
+    const fetchDistributor = (addressId, distributorId) => {
+        const promise = distributorId
+            ? getDistributor(distributorId)
+            : getDistributorForClientAddress(addressId);
+
         const response = renderToast(
             promise,
             "carregando distribuidor ...",
@@ -33,10 +37,8 @@ export function useDistributorsAndProducts() {
                 loadingDistributors.value = false;
                 return formatResponse;
             },
-            "error sei lá",
-            (err) => {
-                console.log(err);
-            }
+            "erro ao carregar distribuidor",
+            (err) => console.error(err)
         );
         return response;
     };

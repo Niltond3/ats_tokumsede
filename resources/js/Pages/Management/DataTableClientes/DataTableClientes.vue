@@ -153,11 +153,6 @@ const setupEventHandlers = (dt) => {
     setupAddressHandlers(dt)
     setupCopyHandler(dt)
     setupAccordionHandler()
-    // Add this to get all filtered results
-    dt.on('search.dt', function () {
-        const allResults = dt.rows({ search: 'applied', page: 'all' }).data().toArray()
-        console.log('All filtered results:', allResults)
-    })
 }
 
 const setupOrderHandlers = () => {
@@ -295,6 +290,51 @@ const options = {
         bottomStart: 'info',
         bottomEnd: 'paging'
     },
+    initComplete: function (settings, json) {
+        const table = this.api();
+
+        table.on('search.dt', async function () {
+            const searchValue = table.search();
+            if (searchValue) {
+                try {
+                    const dtParams = table.ajax.params();
+                    const response = await axios.post('clientes', {
+                        ...dtParams,
+                        length: 999999,
+                        start: 0,
+                        search: {
+                            value: searchValue,
+                            regex: false
+                        }
+                    });
+
+                    const fullData = response.data.data.map((client) => ({
+                        ...client,
+                        nome: utf8Decode(client.nome),
+                        enderecos: client.enderecos.map((address) => ({
+                            ...address,
+                            logradouro: utf8Decode(address.logradouro || ''),
+                            bairro: utf8Decode(address.bairro || ''),
+                            cidade: utf8Decode(address.cidade || ''),
+                            observacao: utf8Decode(address.observacao || ''),
+                            referencia: utf8Decode(address.referencia || ''),
+                            apelido: utf8Decode(address.apelido || ''),
+                        }))
+                    }));
+
+                    console.log('Complete filtered dataset:', fullData);
+                } catch (error) {
+                    console.error('Error fetching complete dataset:', error);
+                }
+            }
+        });
+    },
+    // drawCallback: function (settings) {
+    //     // Get the full filtered data across all pages
+    //     const api = new $.fn.dataTable.Api(settings);
+    //     const filteredData = api.rows({ filter: 'applied' }).data().toArray();
+    //     console.log('Full filtered dataset:', filteredData);
+    // },
 }
 const ajax = {
     url: 'clientes', dataFilter: function (data) {

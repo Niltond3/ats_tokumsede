@@ -22,60 +22,60 @@ class ClienteController extends Controller
     public function index()
     {
         if (auth()->check()) {
-            if(auth()->user()->tipoAdministrador == "Distribuidor"){
+            if (auth()->user()->tipoAdministrador == "Distribuidor") {
                 $distribuidor = Distribuidor::with('enderecoDistribuidor')->selectRaw('idEnderecoDistribuidor')->find(auth()->user()->idDistribuidor);
                 $cidade = $distribuidor->enderecoDistribuidor->cidade;
-                $clientes = Cliente::select(['id','nome','tipoPessoa','cpf','cnpj','dddTelefone','telefone','outrosContatos','status','email','rating'])
+                $clientes = Cliente::select(['id', 'nome', 'tipoPessoa', 'cpf', 'cnpj', 'dddTelefone', 'telefone', 'outrosContatos', 'status', 'email', 'rating'])
                     ->where('status', '!=', Cliente::EXCLUIDO)
-                    ->whereHas("enderecos", function (Builder $query) use ($cidade){
-                            $query->where('cidade', 'like', $cidade);
-                        })
+                    ->whereHas("enderecos", function (Builder $query) use ($cidade) {
+                        $query->where('cidade', 'like', $cidade);
+                    })
                     ->with('enderecos');
-            }else{
-                $clientes = Cliente::select(['id','nome','tipoPessoa','cpf','cnpj','dddTelefone','telefone','outrosContatos','status','email','rating','sexo', 'dataNascimento'])
+            } else {
+                $clientes = Cliente::select(['id', 'nome', 'tipoPessoa', 'cpf', 'cnpj', 'dddTelefone', 'telefone', 'outrosContatos', 'status', 'email', 'rating', 'sexo', 'dataNascimento'])
                     ->where('status', '!=', Cliente::EXCLUIDO)->with('enderecos');
             }
             return Datatables::of($clientes)
-                ->editColumn('tipoPessoa', function(Cliente $cliente) {
-                    if($cliente->tipoPessoa == 1){
+                ->editColumn('tipoPessoa', function (Cliente $cliente) {
+                    if ($cliente->tipoPessoa == 1) {
                         return $cliente->cpf;
-                    }else{
+                    } else {
                         return $cliente->cnpj;
                     }
                 })
                 ->editColumn('telefone', '({{$dddTelefone}}) {{$telefone}}')
-                ->addColumn('rating', function(Cliente $cliente) {
-                    if($cliente->rating > 0){
-                        return '<span class="font-normal inline-block px-2 text-[75%] text-center whitespace-nowrap align-baseline rounded text-white bg-success">'.$cliente->rating.'</span>';
-                    }else if($cliente->rating == 0){
-                        return '<span class="font-normal inline-block px-2 text-[75%] text-center whitespace-nowrap align-baseline rounded text-white bg-inverse">'.$cliente->rating.'</span>';
-                    }else if($cliente->rating < -2){
-                        return '<span class="font-normal inline-block px-2 text-[75%] text-center whitespace-nowrap align-baseline rounded text-white bg-danger">'.$cliente->rating.'</span>';
-                    }else{
-                        return '<span class="font-normal inline-block px-2 text-[75%] text-center whitespace-nowrap align-baseline rounded text-white bg-warning">'.$cliente->rating.'</span>';
+                ->addColumn('rating', function (Cliente $cliente) {
+                    if ($cliente->rating > 0) {
+                        return '<span class="font-normal inline-block px-2 text-[75%] text-center whitespace-nowrap align-baseline rounded text-white bg-success">' . $cliente->rating . '</span>';
+                    } else if ($cliente->rating == 0) {
+                        return '<span class="font-normal inline-block px-2 text-[75%] text-center whitespace-nowrap align-baseline rounded text-white bg-inverse">' . $cliente->rating . '</span>';
+                    } else if ($cliente->rating < -2) {
+                        return '<span class="font-normal inline-block px-2 text-[75%] text-center whitespace-nowrap align-baseline rounded text-white bg-danger">' . $cliente->rating . '</span>';
+                    } else {
+                        return '<span class="font-normal inline-block px-2 text-[75%] text-center whitespace-nowrap align-baseline rounded text-white bg-warning">' . $cliente->rating . '</span>';
                     }
                 })
-                ->addColumn('opcoes', function(Cliente $cliente) {
-                    $botaoEnviar = auth()->user()->tipoAdministrador=='Atendente'?'<button title="EnviarMsg" id='.$cliente->dddTelefone.$cliente->telefone.' type="button" class="enviarMsg btn btn-sm btn-circle btn-primary"><i class="fas fa-send"></i></button>':'';
-                    if($cliente->status == Cliente::ATIVO){
-                        return '<span style="white-space: nowrap;">'.$botaoEnviar.
-                            '<button title="Visualizar" id='.$cliente->id.' type="button" class="visualizar btn btn-sm btn-circle btn-info"><i class="fas fa-eye"></i></button>'.
-                            '<button title="Atualizar" id='.$cliente->id.' type="button" class="atualizar btn btn-sm btn-circle btn-secondary"><i class="fas fa-pencil-alt"></i></button>'.
-                        '</span><span style="white-space: nowrap;">'.
-                            '<button title="Inativar" id='.$cliente->id.' type="button" class="inativar btn btn-sm btn-circle btn-warning"><i class="fas fa-pause"></i></button>'.
-                            '<button title="Excluir" id='.$cliente->id.' type="button" class="excluir btn btn-sm btn-circle btn-danger"><i class="fas fa-trash-alt"></i></button>'.
-                        '</span>';
-                    }else{
-                        return '<span style="white-space: nowrap;">'.$botaoEnviar.
-                            '<button title="Visualizar" id='.$cliente->id.' type="button" class="visualizar btn btn-sm btn-circle btn-info"><i class="fas fa-eye"></i></button>'.
-                            '<button title="Atualizar" id='.$cliente->id.' type="button" class="atualizar btn btn-sm btn-circle btn-secondary"><i class="fas fa-pencil-alt"></i></button>'.
-                        '</span><span style="white-space: nowrap;">'.
-                            '<button title="Ativar" id='.$cliente->id.' type="button" class="ativar btn btn-sm btn-circle btn-success"><i class="fas fa-play"></i></button>'.
-                            '<button title="Excluir" id='.$cliente->id.' type="button" class="excluir btn btn-sm btn-circle btn-danger"><i class="fas fa-trash-alt"></i></button>'.
-                        '</span>';
+                ->addColumn('opcoes', function (Cliente $cliente) {
+                    $botaoEnviar = auth()->user()->tipoAdministrador == 'Atendente' ? '<button title="EnviarMsg" id=' . $cliente->dddTelefone . $cliente->telefone . ' type="button" class="enviarMsg btn btn-sm btn-circle btn-primary"><i class="fas fa-send"></i></button>' : '';
+                    if ($cliente->status == Cliente::ATIVO) {
+                        return '<span style="white-space: nowrap;">' . $botaoEnviar .
+                            '<button title="Visualizar" id=' . $cliente->id . ' type="button" class="visualizar btn btn-sm btn-circle btn-info"><i class="fas fa-eye"></i></button>' .
+                            '<button title="Atualizar" id=' . $cliente->id . ' type="button" class="atualizar btn btn-sm btn-circle btn-secondary"><i class="fas fa-pencil-alt"></i></button>' .
+                            '</span><span style="white-space: nowrap;">' .
+                            '<button title="Inativar" id=' . $cliente->id . ' type="button" class="inativar btn btn-sm btn-circle btn-warning"><i class="fas fa-pause"></i></button>' .
+                            '<button title="Excluir" id=' . $cliente->id . ' type="button" class="excluir btn btn-sm btn-circle btn-danger"><i class="fas fa-trash-alt"></i></button>' .
+                            '</span>';
+                    } else {
+                        return '<span style="white-space: nowrap;">' . $botaoEnviar .
+                            '<button title="Visualizar" id=' . $cliente->id . ' type="button" class="visualizar btn btn-sm btn-circle btn-info"><i class="fas fa-eye"></i></button>' .
+                            '<button title="Atualizar" id=' . $cliente->id . ' type="button" class="atualizar btn btn-sm btn-circle btn-secondary"><i class="fas fa-pencil-alt"></i></button>' .
+                            '</span><span style="white-space: nowrap;">' .
+                            '<button title="Ativar" id=' . $cliente->id . ' type="button" class="ativar btn btn-sm btn-circle btn-success"><i class="fas fa-play"></i></button>' .
+                            '<button title="Excluir" id=' . $cliente->id . ' type="button" class="excluir btn btn-sm btn-circle btn-danger"><i class="fas fa-trash-alt"></i></button>' .
+                            '</span>';
                     }
                 })
-                ->rawColumns(['rating','opcoes'])
+                ->rawColumns(['rating', 'opcoes'])
                 ->make(true);
         } else {
             return response('Sua sessão expirou. Por favor, refaça seu login.', 400);
@@ -103,28 +103,28 @@ class ClienteController extends Controller
         Debugbar::info($cliente);
         //$v = Cliente::get()->where('email', 'like ',$request->email);
         //if ($v->count() == 0 || strcmp($request->email, "") == 0) {
-            if ($cliente->save()) {
-                $enderecoCliente = new Enderecocliente($request->all());
-                $enderecoCliente->referencia = $request->referencia?$request->referencia:"";
-                $enderecoCliente->complemento = $request->complemento?$request->complemento:"";
-                $enderecoCliente->cep = str_replace('-','',$request->cep);
-                $enderecoCliente->idCliente = $cliente->id;
-                $coordenadas = $this->buscarLatitudeLongitude($enderecoCliente->logradouro, $enderecoCliente->numero, $enderecoCliente->cidade, $enderecoCliente->estado, $enderecoCliente->cep);
-                $enderecoCliente->latitude = $coordenadas[0];
-                $enderecoCliente->longitude = $coordenadas[1];
-                $enderecoCliente->status = EnderecoCliente::ATIVO;
-                if ($enderecoCliente->save()) {
-                    return $enderecoCliente->id;
-                    //return response("Cliente cadastrado com sucesso.", 200);
-                } else {
-                    return response("Erro ao cadastrar o cliente. Tente novamente ou contate o cliente.", 400);
-                }
+        if ($cliente->save()) {
+            $enderecoCliente = new Enderecocliente($request->all());
+            $enderecoCliente->referencia = $request->referencia ? $request->referencia : "";
+            $enderecoCliente->complemento = $request->complemento ? $request->complemento : "";
+            $enderecoCliente->cep = str_replace('-', '', $request->cep);
+            $enderecoCliente->idCliente = $cliente->id;
+            $coordenadas = $this->buscarLatitudeLongitude($enderecoCliente->logradouro, $enderecoCliente->numero, $enderecoCliente->cidade, $enderecoCliente->estado, $enderecoCliente->cep);
+            $enderecoCliente->latitude = $coordenadas[0];
+            $enderecoCliente->longitude = $coordenadas[1];
+            $enderecoCliente->status = EnderecoCliente::ATIVO;
+            if ($enderecoCliente->save()) {
+                return $enderecoCliente->id;
+                //return response("Cliente cadastrado com sucesso.", 200);
             } else {
                 return response("Erro ao cadastrar o cliente. Tente novamente ou contate o cliente.", 400);
             }
-       // } else {
-       //     return response('Email já cadastrado.', 200);
-       // }
+        } else {
+            return response("Erro ao cadastrar o cliente. Tente novamente ou contate o cliente.", 400);
+        }
+        // } else {
+        //     return response('Email já cadastrado.', 200);
+        // }
         //CADASTRA CLIENTE
     }
 
@@ -136,8 +136,8 @@ class ClienteController extends Controller
      */
     public function show($id)
     {
-        $cliente = Cliente::find($id)->load('enderecos','pedidos');
-        $cliente->dataNascimento = $cliente->dataNascimento?date("d/m/Y", strtotime($cliente->dataNascimento)):'';
+        $cliente = Cliente::find($id)->load('enderecos', 'pedidos');
+        $cliente->dataNascimento = $cliente->dataNascimento ? date("d/m/Y", strtotime($cliente->dataNascimento)) : '';
 
         // $pedidos = Pedido::create()
         //     ->select("p.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( p.total , 2),'.',';'),',','.'),';',',')) AS total, a.nome as administrador, c.nome as cliente, d.nome as distribuidor, c.rating as rating, date_format(p.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido") // Seleciona os campos
@@ -203,7 +203,7 @@ class ClienteController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if(!$request->status){
+        if (!$request->status) {
             $request['cpf'] = preg_replace("/[^0-9]/", "", $request->cpf);
             $request['cnpj'] = preg_replace("/[^0-9]/", "", $request->cnpj);
             $telefone = explode(" ", str_replace("-", "", $request->telefone));
@@ -215,7 +215,7 @@ class ClienteController extends Controller
 
         $cliente = Cliente::find($id);
         $cliente->update($request->all());
-        return response('Cliente '.$cliente->nome, 200);
+        return response('Cliente ' . $cliente->nome, 200);
         //
     }
 
@@ -230,11 +230,12 @@ class ClienteController extends Controller
         //
     }
 
-    function buscarLatitudeLongitude($logradouro, $numero, $cidade, $estado, $cep) {
+    function buscarLatitudeLongitude($logradouro, $numero, $cidade, $estado, $cep)
+    {
         //$address = {nm_bairro}.", ".{nm_cidade}.", ".{nm_estado}.", ".{nm_brasil};
         $key = "AIzaSyDIt2CSa_K8P64daT3v4Hv8Ml-8IJsFic8";
         $address = $logradouro . ", " . $numero . ", " . $cidade . ", " . $estado . ", " . $cep . "," . "Brasil";
-        $request_url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $address . "&sensor=true&key=".$key; // A URL que vc manda pro google para pegar o XML
+        $request_url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $address . "&sensor=true&key=" . $key; // A URL que vc manda pro google para pegar o XML
         // $context = stream_context_create(array('ssl'=>array(
         //     'verify_peer' => true,
         //     'cafile' => '/var/www/tokumsede/etc/certificados/ca-bundle.crt'

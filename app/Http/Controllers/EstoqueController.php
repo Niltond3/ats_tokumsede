@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class EstoqueController extends Controller
 {
-     /**
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -19,7 +19,7 @@ class EstoqueController extends Controller
         if ($u = auth()->user()->idDistribuidor) {
             $estoque = Estoque::where('idDistribuidor', $u)->with('produto:id,nome,img')->get();
             return $estoque;
-        }else {
+        } else {
             return response('Sua sessão expirou. Por favor, refaça seu login.', 400);
         }
         //
@@ -30,7 +30,7 @@ class EstoqueController extends Controller
         if (auth()->user()) {
             //Adiciona o filtro do Movimento na SQL dinâmica
             //Verifica se o filtro foi enviado
-            if ($request->idDistribuidores!="") {
+            if ($request->idDistribuidores != "") {
                 //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
                 $escolhidos = explode(",", $request->idDistribuidores);
                 //Contador de movimentos escolhidos
@@ -54,13 +54,13 @@ class EstoqueController extends Controller
                         $contDistribuidor++;
                     }
                 }
-                $estoques = Estoque::whereRaw($complementoSql)->with('distribuidor:id,nome','produto:id,nome,img,componente')->get();
-            }else{
-                $estoques = Estoque::with('distribuidor:id,nome','produto:id,nome,img')->get();
+                $estoques = Estoque::whereRaw($complementoSql)->with('distribuidor:id,nome', 'produto:id,nome,img,componente')->get();
+            } else {
+                $estoques = Estoque::with('distribuidor:id,nome', 'produto:id,nome,img')->get();
             }
 
             return $estoques;
-        }else {
+        } else {
             return response('Sua sessão expirou. Por favor, refaça seu login.', 400);
         }
 
@@ -75,26 +75,26 @@ class EstoqueController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if(!auth()->user()){
+        if (!auth()->user()) {
             return response('Sua sessão expirou. Por favor, refaça seu login.', 401);
         }
 
         $estoque = Estoque::find($id);
-		$qtd =  $request->dif;
+        $qtd = $request->dif;
 
-		if($qtd != 0){
-			$this->composicoesArray = array();
-			$produto = Produto::find($estoque->idProduto);
-			if($qtd > 0){
-				$this->atualizaEstoque($estoque->idDistribuidor, $produto, $qtd, true);
-			}else{
-				$this->atualizaEstoque($estoque->idDistribuidor, $produto, ($qtd * -1), false);
-			}
-			$this->atualizaComposicoes($estoque->idDistribuidor);
+        if ($qtd != 0) {
+            $this->composicoesArray = array();
+            $produto = Produto::find($estoque->idProduto);
+            if ($qtd > 0) {
+                $this->atualizaEstoque($estoque->idDistribuidor, $produto, $qtd, true);
+            } else {
+                $this->atualizaEstoque($estoque->idDistribuidor, $produto, ($qtd * -1), false);
+            }
+            $this->atualizaComposicoes($estoque->idDistribuidor);
             return response('Estoque atualizado com sucesso.', 200);
-		}else{
-			return response('Não foi possível alterar o estoque. Valor igual ao estoque anterior.', 400);
-		}
+        } else {
+            return response('Não foi possível alterar o estoque. Valor igual ao estoque anterior.', 400);
+        }
     }
 
 }

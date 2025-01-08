@@ -2,6 +2,7 @@
 // Vue core
 import { ref, watch } from 'vue'
 import { useWindowSize } from '@vueuse/core'
+import { usePage } from '@inertiajs/vue3';
 
 // UI Components
 import {
@@ -32,6 +33,7 @@ const props = defineProps({
     description: { type: String, required: false, default: 'Atualização dos preços padrões de cada distribuidor' },
 })
 
+const page = usePage()
 const { width } = useWindowSize()
 const selectedDistributorId = ref(null)
 const clientName = ref(null)
@@ -123,17 +125,30 @@ watch(
     (newWidth) => resizebleColumns.value = useResponsiveColumns(resizebleColumns.value, newWidth).value
 )
 
+const fetchClientName = async () => {
+    const clientRequest = await getClient(props.clientId)
+    clientName.value = utf8Decode(clientRequest.data.nome)
+}
+
+const fetchDistributorProductsList = async (addressId, userId) => {
+    distributors.value = null
+    await fetchDistributor(addressId, userId)
+    loadDistributorProducts(distributor.value.id, props.clientId)
+}
+
 watch(() => props.isOpen, async (newVal) => {
+    const { user } = page.props.auth
+    const { tipoAdministrador } = user
     resetDialogValues();
     if (!newVal) return
-    const action = props.addressId ?
-        async () => {
-            distributors.value = null
-            const clientRequest = await getClient(props.clientId)
-            clientName.value = utf8Decode(clientRequest.data.nome)
-            await fetchDistributor(props.addressId)
-            loadDistributorProducts(distributor.value.id, props.clientId)
-        } : () => fetchDistributors();
+    const action = props.addressId
+        ? async () => {
+            await fetchClientName()
+            await fetchDistributorProductsList(props.addressId, null)
+        }
+        : tipoAdministrador === 'Distribuidor'
+            ? () => fetchDistributorProductsList(null, user.idDistribuidor)
+            : () => fetchDistributors()
     action();
 })
 

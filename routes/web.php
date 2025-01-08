@@ -8,7 +8,7 @@ use App\Http\Controllers\DistribuidorController;
 use App\Http\Controllers\EnderecoClienteController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PedidoController;
-use App\Http\Controllers\Estoque;
+use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FileUploadController;

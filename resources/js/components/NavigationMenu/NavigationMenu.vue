@@ -15,6 +15,9 @@ import { DialogRegisterProduct } from './components/DialogRegisterProduct';
 import DialogRegisterClient from './components/DialogRegisterClient.vue';
 import { DialogRegisterPrices } from '@/components/DialogRegisterPrices';
 import DialogTrigger from './components/DialogTrigger.vue';
+import DialogReportOrders from './components/reports/DialogReportOrders.vue'
+import DialogReportSales from './components/reports/DialogReportSales.vue'
+import DialogReportStock from './components/reports/DialogReportStock.vue'
 import { dialogState } from "@/hooks/useToggleDialog.js";
 
 const { isOpen: openRegisterPrices, toggleDialog: toggleRegisterPrices } = dialogState()
@@ -179,6 +182,58 @@ function irParaProdutosComFiltro() {
                     </ul>
                 </NavigationMenuContent>
             </NavigationMenuItem>
+            <NavigationMenuItem>
+                <NavigationMenuTrigger
+                    class="text-info/80 hover:text-info transition-colors font-semibold focus:text-accepted">
+                    Relatórios
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                    <ul
+                        class="grid w-[90vw] gap-3 p-4 md:w-[500px] md:grid-cols-3 lg:w-[600px] max-h-[64vh] overflow-auto">
+                        <li key="orders_report">
+                            <DialogReportOrders>
+                                <template #trigger>
+                                    <DialogTrigger icon="ri-file-list-3-line" title="Relatório de Pedidos"
+                                        description="Visualize todos os pedidos por período e status" />
+                                </template>
+                            </DialogReportOrders>
+                        </li>
+                        <li key="sales_report">
+                            <DialogReportSales>
+                                <template #trigger>
+                                    <DialogTrigger icon="ri-money-dollar-circle-line" title="Relatório de Vendas"
+                                        description="Análise de vendas por distribuidor e período" />
+                                </template>
+                            </DialogReportSales>
+                        </li>
+                        <li key="product_sales_report">
+                            <DialogReportProductSales>
+                                <template #trigger>
+                                    <DialogTrigger icon="ri-shopping-bag-line" title="Vendas por Produto"
+                                        description="Relatório de vendas detalhado por produto" />
+                                </template>
+                            </DialogReportProductSales>
+                        </li>
+                        <li key="delivery_report">
+                            <DialogReportDelivery>
+                                <template #trigger>
+                                    <DialogTrigger icon="ri-bike-line" title="Relatório de Entregadores"
+                                        description="Desempenho e entregas por entregador" />
+                                </template>
+                            </DialogReportDelivery>
+                        </li>
+                        <li key="stock_report">
+                            <DialogReportStock>
+                                <template #trigger>
+                                    <DialogTrigger icon="ri-store-line" title="Relatório de Estoque"
+                                        description="Controle de estoque por distribuidor" />
+                                </template>
+                            </DialogReportStock>
+                        </li>
+                    </ul>
+                </NavigationMenuContent>
+            </NavigationMenuItem>
+
         </NavigationMenuList>
     </NavigationMenu>
 </template>

@@ -234,7 +234,6 @@ class ProdutoController extends Controller
         $indexProduto = -1;
 
         foreach ($produtos as $prod) {
-            Debugbar::info($prod);
             // Create new product entry if different from current
             if ($currentProduct !== $prod->idProd) {
                 $indexProduto++;
@@ -289,7 +288,6 @@ class ProdutoController extends Controller
      */
     public function show($idEnderecoCliente)
     {
-        debugbar::info($idEnderecoCliente);
         $enderecoCliente = EnderecoCliente::findOrFail($idEnderecoCliente);
         $distribuidores = $this->getNearbyDistributors($enderecoCliente);
 

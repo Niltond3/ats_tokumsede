@@ -99,8 +99,6 @@ class ClienteController extends Controller
         $cliente->telefone = $telefone[1];
         $cliente->dataNascimento = $request->dataNascimento == "" ? null : implode("-", array_reverse(explode("/", $request->dataNascimento)));
 
-        Debugbar::info($request);
-        Debugbar::info($cliente);
         //$v = Cliente::get()->where('email', 'like ',$request->email);
         //if ($v->count() == 0 || strcmp($request->email, "") == 0) {
         if ($cliente->save()) {

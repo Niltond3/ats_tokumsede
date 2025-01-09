@@ -42,8 +42,6 @@ class LoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
-                Debugbar::info('authenticate');
-
                 $this->ensureIsNotRateLimited();
 
                 $user = Administrador::where('status','Ativo')

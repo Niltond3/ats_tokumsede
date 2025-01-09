@@ -11,7 +11,6 @@ class PrecoController extends Controller
 {
     public function index()
 {
-    Debugbar::info('index');
     $distribuidor = auth()->user()->idDistribuidor;
     $precos = Preco::where('status', '!=', Preco::EXCLUIDO)
         ->where('idDistribuidor', $distribuidor)
@@ -28,7 +27,6 @@ class PrecoController extends Controller
      */
     public function store(Request $request)
     {
-        Debugbar::info($request);
         // Validate request data
         $validated = $request->validate([
             'idProduto' => 'required|exists:produto,id',
@@ -37,7 +35,6 @@ class PrecoController extends Controller
             'valor' => 'required|numeric|min:0',
             'qtdMin' => 'required|integer|min:0'
         ]);
-        Debugbar::info($validated);
         // Find associated stock record
         $estoque = Estoque::where([
             ['idDistribuidor', $validated['idDistribuidor']],
@@ -57,7 +54,6 @@ class PrecoController extends Controller
 
         try {
             $preco = Preco::create($precoData);
-            Debugbar::info($preco);
 
             return response()->json([
                 'status' => 'success',
@@ -101,7 +97,6 @@ class PrecoController extends Controller
      */
     public function update(Request $request)
 {
-    Debugbar::info($request);
     $validated = $request->validate([
         'idProduto' => 'required|exists:produto,id',
         'idDistribuidor' => 'required|exists:distribuidor,id',

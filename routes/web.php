@@ -108,8 +108,8 @@ Route::middleware('auth')->group(function () {
     });
 
     //DISTRIBUIDORES
-//DISTRIBUIDORES
     Route::group(['prefix' => 'distribuidores'], function () {
+        Route::get('/all', [DistribuidorController::class, 'getAllDistributors'])->name('distribuidores.todos');
         Route::get('/{id}', [DistribuidorController::class, 'show'])->name('distribuidores.show');
         Route::resource('/', DistribuidorController::class, ['except' => ['create', 'show']])
             ->names([
@@ -119,8 +119,6 @@ Route::middleware('auth')->group(function () {
                 'destroy' => 'distribuidores.destroy',
                 'edit' => 'distribuidores.edit'
             ]);
-
-        Route::get('/all', [DistribuidorController::class, 'getAllDistributors']);
         Route::get('/by-address/{addressId}', [DistribuidorController::class, 'findDistributorByAddress'])->name('distribuidores.por-endereco');
         Route::get('/by-client-address/{clientAddressId}', [DistribuidorController::class, 'findDistributorByClientAddress'])->name('distribuidores.por-endereco-cliente');
     });

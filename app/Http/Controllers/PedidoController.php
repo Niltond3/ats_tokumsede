@@ -22,12 +22,13 @@ date_default_timezone_set('America/Sao_Paulo');
 
 class PedidoController extends Controller
 {
-    function relatorioVendasEntregador(Request $request) {
+    function relatorioVendasEntregador(Request $request)
+    {
         $u = auth()->user();
         $request['dataInicial'] = implode("-", array_reverse(explode("/", $request->dataInicial)));
         $request['dataFinal'] = implode("-", array_reverse(explode("/", $request->dataFinal)));
 
-		$filtroData = "";
+        $filtroData = "";
         if ($request->dataInicial != null && $request->dataInicial != "") {
             $filtroData .= "and pedido.horarioEntrega >= '$request->dataInicial 00:00:00'";
         }
@@ -40,7 +41,7 @@ class PedidoController extends Controller
 
         //Adiciona o filtro do Movimento na SQL dinâmica
         //Verifica se o filtro foi enviado
-        if ($request->idEntregadores!="" && $request->idEntregadores!=null) {
+        if ($request->idEntregadores != "" && $request->idEntregadores != null) {
             //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
             $escolhidos = explode(",", $request->idEntregadores);
             //Contador de movimentos escolhidos
@@ -97,18 +98,18 @@ class PedidoController extends Controller
         }
         if (strcmp($u->tipoAdministrador, "Distribuidor") == 0) {
             $pedidos = DB::table('pedido')
-                        ->from(DB::raw("(((itemPedido itemPedido left join pedido pedido on itemPedido.idPedido = pedido.id)left join distribuidor distribuidor on pedido.idDistribuidor = distribuidor.id)left join entregador entregador on pedido.idEntregador = entregador.id)left join produto produto on itemPedido.idProduto = produto.id"))
-                        ->select(DB::raw("itemPedido.idProduto as idProd, itemPedido.precoAcertado as precoAcertado, produto.nome as produto, distribuidor.nome as distribuidor, entregador.nome as entregador, sum(itemPedido.subtotal) as valorTotal, sum(itemPedido.qtd) as quantidadeTotal"))
-                        ->whereRaw("pedido.status = 7 $filtroData $complementoSql and pedido.idDistribuidor = " . $u->idDistribuidor . " ")
-                        ->groupBy('idProd', 'distribuidor', 'entregador', 'produto', 'precoAcertado')
-                        ->get();
-        }else{
+                ->from(DB::raw("(((itemPedido itemPedido left join pedido pedido on itemPedido.idPedido = pedido.id)left join distribuidor distribuidor on pedido.idDistribuidor = distribuidor.id)left join entregador entregador on pedido.idEntregador = entregador.id)left join produto produto on itemPedido.idProduto = produto.id"))
+                ->select(DB::raw("itemPedido.idProduto as idProd, itemPedido.precoAcertado as precoAcertado, produto.nome as produto, distribuidor.nome as distribuidor, entregador.nome as entregador, sum(itemPedido.subtotal) as valorTotal, sum(itemPedido.qtd) as quantidadeTotal"))
+                ->whereRaw("pedido.status = 7 $filtroData $complementoSql and pedido.idDistribuidor = " . $u->idDistribuidor . " ")
+                ->groupBy('idProd', 'distribuidor', 'entregador', 'produto', 'precoAcertado')
+                ->get();
+        } else {
             $pedidos = DB::table('pedido')
-                        ->from(DB::raw("(((itemPedido itemPedido left join pedido pedido on itemPedido.idPedido = pedido.id)left join distribuidor distribuidor on pedido.idDistribuidor = distribuidor.id)left join entregador entregador on pedido.idEntregador = entregador.id)left join produto produto on itemPedido.idProduto = produto.id"))
-                        ->select(DB::raw("itemPedido.idProduto as idProd, itemPedido.precoAcertado as precoAcertado, produto.nome as produto, distribuidor.nome as distribuidor, entregador.nome as entregador, sum(itemPedido.subtotal) as valorTotal, sum(itemPedido.qtd) as quantidadeTotal"))
-                        ->whereRaw("pedido.status = 7 $filtroData $complementoSql")
-                        ->groupBy('idProd', 'distribuidor', 'entregador', 'produto', 'precoAcertado')
-                        ->get();
+                ->from(DB::raw("(((itemPedido itemPedido left join pedido pedido on itemPedido.idPedido = pedido.id)left join distribuidor distribuidor on pedido.idDistribuidor = distribuidor.id)left join entregador entregador on pedido.idEntregador = entregador.id)left join produto produto on itemPedido.idProduto = produto.id"))
+                ->select(DB::raw("itemPedido.idProduto as idProd, itemPedido.precoAcertado as precoAcertado, produto.nome as produto, distribuidor.nome as distribuidor, entregador.nome as entregador, sum(itemPedido.subtotal) as valorTotal, sum(itemPedido.qtd) as quantidadeTotal"))
+                ->whereRaw("pedido.status = 7 $filtroData $complementoSql")
+                ->groupBy('idProd', 'distribuidor', 'entregador', 'produto', 'precoAcertado')
+                ->get();
         }
         $valorTotal = 0;
 
@@ -122,12 +123,13 @@ class PedidoController extends Controller
 
         return [$pedidos, $valorTotalGeral];
     }
-    function relatorioVendasProduto(Request $request) {
+    function relatorioVendasProduto(Request $request)
+    {
         $u = auth()->user();
         $request['dataInicial'] = implode("-", array_reverse(explode("/", $request->dataInicial)));
         $request['dataFinal'] = implode("-", array_reverse(explode("/", $request->dataFinal)));
 
-		$filtroData = "";
+        $filtroData = "";
         if ($request->dataInicial != null && $request->dataInicial != "") {
             $filtroData .= "and pedido.horarioEntrega >= '$request->dataInicial 00:00:00'";
         }
@@ -140,7 +142,7 @@ class PedidoController extends Controller
 
         //Adiciona o filtro do Movimento na SQL dinâmica
         //Verifica se o filtro foi enviado
-        if ($request->idDistribuidores!="" && $request->idDistribuidores!=null) {
+        if ($request->idDistribuidores != "" && $request->idDistribuidores != null) {
             //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
             $escolhidos = explode(",", $request->idDistribuidores);
             //Contador de movimentos escolhidos
@@ -197,18 +199,18 @@ class PedidoController extends Controller
         }
         if (strcmp($u->tipoAdministrador, "Distribuidor") == 0) {
             $pedidos = DB::table('pedido')
-                        ->from(DB::raw("((itemPedido itemPedido left join pedido pedido on itemPedido.idPedido = pedido.id)left join distribuidor distribuidor on pedido.idDistribuidor = distribuidor.id)left join produto produto on itemPedido.idProduto = produto.id"))
-                        ->select(DB::raw("itemPedido.idProduto as idProd, produto.nome as produto, distribuidor.nome as distribuidor, date_format(pedido.horarioEntrega, '%d/%m/%Y') as dataEntrega, sum(itemPedido.subtotal) as valorTotal, sum(itemPedido.qtd) as quantidadeTotal"))
-                        ->whereRaw("pedido.status = 7 $filtroData $complementoSql and pedido.idDistribuidor = " . $u->idDistribuidor . " ")
-                        ->groupBy('idProd','dataEntrega', 'distribuidor', 'produto')
-                        ->get();
-        }else{
+                ->from(DB::raw("((itemPedido itemPedido left join pedido pedido on itemPedido.idPedido = pedido.id)left join distribuidor distribuidor on pedido.idDistribuidor = distribuidor.id)left join produto produto on itemPedido.idProduto = produto.id"))
+                ->select(DB::raw("itemPedido.idProduto as idProd, produto.nome as produto, distribuidor.nome as distribuidor, date_format(pedido.horarioEntrega, '%d/%m/%Y') as dataEntrega, sum(itemPedido.subtotal) as valorTotal, sum(itemPedido.qtd) as quantidadeTotal"))
+                ->whereRaw("pedido.status = 7 $filtroData $complementoSql and pedido.idDistribuidor = " . $u->idDistribuidor . " ")
+                ->groupBy('idProd', 'dataEntrega', 'distribuidor', 'produto')
+                ->get();
+        } else {
             $pedidos = DB::table('pedido')
-                        ->from(DB::raw("((itemPedido itemPedido left join pedido pedido on itemPedido.idPedido = pedido.id)left join distribuidor distribuidor on pedido.idDistribuidor = distribuidor.id)left join produto produto on itemPedido.idProduto = produto.id"))
-                        ->select(DB::raw("itemPedido.idProduto as idProd, produto.nome as produto, distribuidor.nome as distribuidor, date_format(pedido.horarioEntrega, '%d/%m/%Y') as dataEntrega, sum(itemPedido.subtotal) as valorTotal, sum(itemPedido.qtd) as quantidadeTotal"))
-                        ->whereRaw("pedido.status = 7 $filtroData $complementoSql")
-                        ->groupBy('idProd','dataEntrega', 'distribuidor', 'produto')
-                        ->get();
+                ->from(DB::raw("((itemPedido itemPedido left join pedido pedido on itemPedido.idPedido = pedido.id)left join distribuidor distribuidor on pedido.idDistribuidor = distribuidor.id)left join produto produto on itemPedido.idProduto = produto.id"))
+                ->select(DB::raw("itemPedido.idProduto as idProd, produto.nome as produto, distribuidor.nome as distribuidor, date_format(pedido.horarioEntrega, '%d/%m/%Y') as dataEntrega, sum(itemPedido.subtotal) as valorTotal, sum(itemPedido.qtd) as quantidadeTotal"))
+                ->whereRaw("pedido.status = 7 $filtroData $complementoSql")
+                ->groupBy('idProd', 'dataEntrega', 'distribuidor', 'produto')
+                ->get();
         }
         $valorTotal = 0;
 
@@ -222,12 +224,13 @@ class PedidoController extends Controller
 
         return [$pedidos, $valorTotalGeral];
     }
-    function relatorioVendas(Request $request) {
+    function relatorioVendas(Request $request)
+    {
         $u = auth()->user();//Administrador::find($idUsuario);
         $request['dataInicial'] = implode("-", array_reverse(explode("/", $request->dataInicial)));
         $request['dataFinal'] = implode("-", array_reverse(explode("/", $request->dataFinal)));
 
-		$filtroData = "";
+        $filtroData = "";
         if ($request->dataInicial != null && $request->dataInicial != "") {
             $filtroData .= "and pedido.horarioEntrega >= '$request->dataInicial 00:00:00'";
         }
@@ -240,7 +243,7 @@ class PedidoController extends Controller
 
         //Adiciona o filtro do Movimento na SQL dinâmica
         //Verifica se o filtro foi enviado
-        if ($request->idDistribuidores!="" && $request->idDistribuidores!=null) {
+        if ($request->idDistribuidores != "" && $request->idDistribuidores != null) {
             //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
             $escolhidos = explode(",", $request->idDistribuidores);
             //Contador de movimentos escolhidos
@@ -270,16 +273,16 @@ class PedidoController extends Controller
 
         if (strcmp($u->tipoAdministrador, "Distribuidor") == 0) {
             $pedidos = DB::table('pedido')->join('distribuidor', 'pedido.idDistribuidor', '=', 'distribuidor.id')
-            ->select(DB::raw("pedido.idDistribuidor as idDist, distribuidor.nome as distribuidor, date_format(pedido.horarioEntrega, '%d/%m/%Y') as dataEntrega, sum(pedido.total) as valorTotal"))
-            ->whereRaw("pedido.status = 7 $filtroData $complementoSql and pedido.idDistribuidor = " . $u->idDistribuidor . " ")
-            ->groupBy('idDist','dataEntrega', 'distribuidor')
-            ->get();
-        }else{
+                ->select(DB::raw("pedido.idDistribuidor as idDist, distribuidor.nome as distribuidor, date_format(pedido.horarioEntrega, '%d/%m/%Y') as dataEntrega, sum(pedido.total) as valorTotal"))
+                ->whereRaw("pedido.status = 7 $filtroData $complementoSql and pedido.idDistribuidor = " . $u->idDistribuidor . " ")
+                ->groupBy('idDist', 'dataEntrega', 'distribuidor')
+                ->get();
+        } else {
             $pedidos = DB::table('pedido')->join('distribuidor', 'pedido.idDistribuidor', '=', 'distribuidor.id')
-            ->select(DB::raw("pedido.idDistribuidor as idDist, distribuidor.nome as distribuidor, date_format(pedido.horarioEntrega, '%d/%m/%Y') as dataEntrega, sum(pedido.total) as valorTotal"))
-            ->whereRaw("pedido.status = 7 $filtroData $complementoSql")
-            ->groupBy('idDist','dataEntrega', 'distribuidor')
-            ->get();
+                ->select(DB::raw("pedido.idDistribuidor as idDist, distribuidor.nome as distribuidor, date_format(pedido.horarioEntrega, '%d/%m/%Y') as dataEntrega, sum(pedido.total) as valorTotal"))
+                ->whereRaw("pedido.status = 7 $filtroData $complementoSql")
+                ->groupBy('idDist', 'dataEntrega', 'distribuidor')
+                ->get();
         }
 
         $valorTotal = 0;
@@ -299,10 +302,40 @@ class PedidoController extends Controller
 
         return [$pedidos, $valorTotalGeral];
     }
-    function relatorioPedidos(Request $request){
+
+    public function getPedidosByDateAndDistribuidor(Request $request)
+    {
+        $query = Pedido::with([
+            'endereco.cliente',
+            'entregador:id,nome',
+            'itens.produto',
+            'distribuidor:id,nome'
+        ]);
+
+        if ($request->dataInicial) {
+            $dataInicial = implode("-", array_reverse(explode("/", $request->dataInicial)));
+            $query->where('horarioPedido', '>=', $dataInicial . ' 00:00:00');
+        }
+
+        if ($request->dataFinal) {
+            $dataFinal = implode("-", array_reverse(explode("/", $request->dataFinal)));
+            $query->where('horarioPedido', '<=', $dataFinal . ' 23:59:59');
+        }
+
+        if ($request->idDistribuidores) {
+            $distribuidores = explode(',', $request->idDistribuidores);
+            $query->whereIn('idDistribuidor', $distribuidores);
+        }
+
+        $pedidos = $query->orderBy('horarioPedido', 'desc')->get();
+
+        return $pedidos;
+    }
+    function relatorioPedidos(Request $request)
+    {
         $u = auth()->user();//Administrador::find($idUsuario);
-        $request['dataInicial'] = $request->dataInicial?implode("-", array_reverse(explode("/", $request->dataInicial))):"";
-        $request['dataFinal'] = $request->dataInicial?implode("-", array_reverse(explode("/", $request->dataFinal))):"";
+        $request['dataInicial'] = $request->dataInicial ? implode("-", array_reverse(explode("/", $request->dataInicial))) : "";
+        $request['dataFinal'] = $request->dataInicial ? implode("-", array_reverse(explode("/", $request->dataFinal))) : "";
 
         $filtroData = "";
         if ($request->dataInicial != null && $request->dataInicial != "") {
@@ -317,7 +350,7 @@ class PedidoController extends Controller
 
         //Adiciona o filtro do Movimento na SQL dinâmica
         //Verifica se o filtro foi enviado
-        if ($request->idDistribuidores!="" && $request->idDistribuidores!=null) {
+        if ($request->idDistribuidores != "" && $request->idDistribuidores != null) {
             //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
             $escolhidos = explode(",", $request->idDistribuidores);
             //Contador de movimentos escolhidos
@@ -345,7 +378,7 @@ class PedidoController extends Controller
             $complementoSql = $complementoSql . ") ";
         }
 
-        if ($request->status!="" && $request->status!=null) {
+        if ($request->status != "" && $request->status != null) {
             //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
             $escolhidos = explode(",", $request->status);
             //Contador de movimentos escolhidos
@@ -385,8 +418,8 @@ class PedidoController extends Controller
             //         ->orderBy('id', 'DESC')->get();
             // }else
             if (strcmp($u->tipoAdministrador, "Distribuidor") == 0) {
-                $pedidos = Pedido::with('distribuidor','endereco')
-                ->selectRaw("pedido.*, "
+                $pedidos = Pedido::with('distribuidor', 'endereco')
+                    ->selectRaw("pedido.*, "
                         . "date_format(pedido.horarioPedido, '%d/%m/%Y - %h:%i hrs') as horarioPedido, "
                         . "date_format(pedido.horarioEntrega, '%d/%m/%Y - %h:%i hrs') as horarioEntrega, "
                         . "pedido.id, "
@@ -395,11 +428,11 @@ class PedidoController extends Controller
                         . "pedido.origem, "
                         . "pedido.agendado,"
                         . "pedido.status")
-                ->whereRaw("1 $filtroData $complementoSql and pedido.idDistribuidor = " . $u->idDistribuidor)
-                ->get();
-            }else{
-                $pedidos = Pedido::with('distribuidor','endereco')
-                ->selectRaw("pedido.*, "
+                    ->whereRaw("1 $filtroData $complementoSql and pedido.idDistribuidor = " . $u->idDistribuidor)
+                    ->get();
+            } else {
+                $pedidos = Pedido::with('distribuidor', 'endereco')
+                    ->selectRaw("pedido.*, "
                         . "date_format(pedido.horarioPedido, '%d/%m/%Y - %h:%i hrs') as horarioPedido, "
                         . "date_format(pedido.horarioEntrega, '%d/%m/%Y - %h:%i hrs') as horarioEntrega, "
                         . "pedido.id, "
@@ -408,8 +441,8 @@ class PedidoController extends Controller
                         . "pedido.origem, "
                         . "pedido.agendado,"
                         . "pedido.status")
-                ->whereRaw("1 $filtroData $complementoSql")
-                ->get();
+                    ->whereRaw("1 $filtroData $complementoSql")
+                    ->get();
             }
         }
         return $pedidos;
@@ -421,51 +454,46 @@ class PedidoController extends Controller
      */
     public function index()
     {
-		//*$aba = $this->getArg(0);
+        //*$aba = $this->getArg(0);
         // //Recupera o id do usuário logado
         // $idUsuario = auth()->user()->id; //$this->escape("user");
         // //Recuperando dados do usuário
         $u = auth()->user();//Administrador::find($idUsuario);
 
-        Debugbar::info(auth());
-        Debugbar::info($u);
-        Debugbar::info($u->tipoAdministrador);
-
         if (auth()->check()) {
-            if($u->tipoAdministrador == null){
-                Debugbar::info('aqui');
-                $pedidosPendentes = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id' )->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
-                        ->selectRaw("pedido.*, CONCAT('R$', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                        ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and ((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
-                        ->orderBy('id', 'DESC')->get();
-                    $pedidosAceitos = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id' )->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
-                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                        ->whereRaw("pedido.status = " . Pedido::ACEITO)
-                        ->orderBy('id', 'DESC')->get();
-                    $pedidosDespachados = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id' )->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
-                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                        ->whereRaw("pedido.status = " . Pedido::DESPACHADO)
-                        ->orderBy('id', 'DESC')->get();
-                    $pedidosEntregues = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id' )->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
-                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioEntrega, '%d/%m/%Y %H:%i') as dataEntrega, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                        ->whereRaw("pedido.status = " . Pedido::ENTREGUE . " and DATE(pedido.horarioEntrega) = CURDATE()")
-                        ->orderBy('id', 'DESC')->get();
-                    $pedidosCancelados = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id' )->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
-                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                        ->whereRaw("(pedido.status = " . Pedido::CANCELADO_USUARIO . " OR "
-                                . "pedido.status = " . Pedido::CANCELADO_NAO_LOCALIZADO . " OR "
-                                . "pedido.status = " . Pedido::CANCELADO_TROTE . " OR "
-                                . "pedido.status = " . Pedido::RECUSADO . ") and DATE(pedido.horarioPedido) = CURDATE()")
-                        ->orderBy('id', 'DESC')->get();
-                    $pedidosAgendados = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id' )->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
-                        ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-                        ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and pedido.agendado = 1")
-                        ->orderBy('id', 'DESC')->get();
-                    $ultimoPedido = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id' )->where('enderecoCliente.idCliente', $u->id)->orderBy("pedido.id", "DESC")
-                        ->limit(1)
-                        ->get();
-                    $entregadores = Entregador::where("status", Entregador::ATIVO)->select('id','nome')->get();
-            }else{
+            if ($u->tipoAdministrador == null) {
+                $pedidosPendentes = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id')->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
+                    ->selectRaw("pedido.*, CONCAT('R$', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                    ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and ((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
+                    ->orderBy('id', 'DESC')->get();
+                $pedidosAceitos = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id')->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
+                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                    ->whereRaw("pedido.status = " . Pedido::ACEITO)
+                    ->orderBy('id', 'DESC')->get();
+                $pedidosDespachados = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id')->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
+                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                    ->whereRaw("pedido.status = " . Pedido::DESPACHADO)
+                    ->orderBy('id', 'DESC')->get();
+                $pedidosEntregues = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id')->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
+                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioEntrega, '%d/%m/%Y %H:%i') as dataEntrega, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                    ->whereRaw("pedido.status = " . Pedido::ENTREGUE . " and DATE(pedido.horarioEntrega) = CURDATE()")
+                    ->orderBy('id', 'DESC')->get();
+                $pedidosCancelados = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id')->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
+                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                    ->whereRaw("(pedido.status = " . Pedido::CANCELADO_USUARIO . " OR "
+                        . "pedido.status = " . Pedido::CANCELADO_NAO_LOCALIZADO . " OR "
+                        . "pedido.status = " . Pedido::CANCELADO_TROTE . " OR "
+                        . "pedido.status = " . Pedido::RECUSADO . ") and DATE(pedido.horarioPedido) = CURDATE()")
+                    ->orderBy('id', 'DESC')->get();
+                $pedidosAgendados = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id')->where('enderecoCliente.idCliente', $u->id)->with('distribuidor', 'endereco', 'entregador')
+                    ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+                    ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and pedido.agendado = 1")
+                    ->orderBy('id', 'DESC')->get();
+                $ultimoPedido = Pedido::join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id')->where('enderecoCliente.idCliente', $u->id)->orderBy("pedido.id", "DESC")
+                    ->limit(1)
+                    ->get();
+                $entregadores = Entregador::where("status", Entregador::ATIVO)->select('id', 'nome')->get();
+            } else {
                 if (strcmp($u->tipoAdministrador, "Administrador") == 0 || strcmp($u->tipoAdministrador, "Atendente") == 0) {
                     $pedidosPendentes = Pedido::with('distribuidor', 'endereco', 'entregador')
                         ->selectRaw("pedido.*, CONCAT('R$', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
@@ -486,9 +514,9 @@ class PedidoController extends Controller
                     $pedidosCancelados = Pedido::with('distribuidor', 'endereco', 'entregador')
                         ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
                         ->whereRaw("(pedido.status = " . Pedido::CANCELADO_USUARIO . " OR "
-                                . "pedido.status = " . Pedido::CANCELADO_NAO_LOCALIZADO . " OR "
-                                . "pedido.status = " . Pedido::CANCELADO_TROTE . " OR "
-                                . "pedido.status = " . Pedido::RECUSADO . ") and DATE(pedido.horarioPedido) = CURDATE()")
+                            . "pedido.status = " . Pedido::CANCELADO_NAO_LOCALIZADO . " OR "
+                            . "pedido.status = " . Pedido::CANCELADO_TROTE . " OR "
+                            . "pedido.status = " . Pedido::RECUSADO . ") and DATE(pedido.horarioPedido) = CURDATE()")
                         ->orderBy('id', 'DESC')->get();
                     $pedidosAgendados = Pedido::with('distribuidor', 'endereco', 'entregador')
                         ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
@@ -497,19 +525,19 @@ class PedidoController extends Controller
                     $ultimoPedido = Pedido::orderBy("pedido.id", "DESC")
                         ->limit(1)
                         ->get();
-                    $entregadores = Entregador::where("status", Entregador::ATIVO)->select('id','nome')->get();
+                    $entregadores = Entregador::where("status", Entregador::ATIVO)->select('id', 'nome')->get();
 
                 } else {
                     if (strcmp($u->tipoAdministrador, "Entregador") == 0) {
                         $entregadores = Entregador::where([
                             ["status", Entregador::ATIVO],
                             ['nome', $u->nome]
-                        ])->select('id','nome')->get();
-                    }else{
+                        ])->select('id', 'nome')->get();
+                    } else {
                         $entregadores = Entregador::where([
-                                ["status", Entregador::ATIVO],
-                                ['idDistribuidor', $u->idDistribuidor]
-                            ])->select('id','nome')->get();
+                            ["status", Entregador::ATIVO],
+                            ['idDistribuidor', $u->idDistribuidor]
+                        ])->select('id', 'nome')->get();
                     }
                     $pedidosPendentes = Pedido::where('idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
                         ->selectRaw("pedido.*, CONCAT('R$', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
@@ -519,20 +547,20 @@ class PedidoController extends Controller
                         ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
                         ->whereRaw("pedido.status = " . Pedido::ACEITO)
                         ->orderBy('id', 'DESC')->get();
-                    $pedidosDespachados = Pedido::where($u->tipoAdministrador=="Entregador"?[['idDistribuidor', $u->idDistribuidor],['idEntregador', $entregadores[0]->id]]:'idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
+                    $pedidosDespachados = Pedido::where($u->tipoAdministrador == "Entregador" ? [['idDistribuidor', $u->idDistribuidor], ['idEntregador', $entregadores[0]->id]] : 'idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
                         ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido,  date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
                         ->whereRaw("pedido.status = " . Pedido::DESPACHADO)
                         ->orderBy('id', 'DESC')->get();
-                    $pedidosEntregues = Pedido::where(strcmp($u->tipoAdministrador, "Entregador") == 0?[['idDistribuidor', $u->idDistribuidor],['idEntregador', $entregadores[0]->id]]:'idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
+                    $pedidosEntregues = Pedido::where(strcmp($u->tipoAdministrador, "Entregador") == 0 ? [['idDistribuidor', $u->idDistribuidor], ['idEntregador', $entregadores[0]->id]] : 'idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
                         ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioEntrega, '%d/%m/%Y %H:%i') as dataEntrega, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
                         ->whereRaw("pedido.status = " . Pedido::ENTREGUE . " and DATE(pedido.horarioEntrega) = CURDATE()")
                         ->orderBy('id', 'DESC')->get();
                     $pedidosCancelados = Pedido::where('idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
                         ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
                         ->whereRaw("(pedido.status = " . Pedido::CANCELADO_USUARIO . " OR "
-                                . "pedido.status = " . Pedido::CANCELADO_NAO_LOCALIZADO . " OR "
-                                . "pedido.status = " . Pedido::CANCELADO_TROTE . " OR "
-                                . "pedido.status = " . Pedido::RECUSADO . ") and DATE(pedido.horarioPedido) = CURDATE()")
+                            . "pedido.status = " . Pedido::CANCELADO_NAO_LOCALIZADO . " OR "
+                            . "pedido.status = " . Pedido::CANCELADO_TROTE . " OR "
+                            . "pedido.status = " . Pedido::RECUSADO . ") and DATE(pedido.horarioPedido) = CURDATE()")
                         ->orderBy('id', 'DESC')->get();
                     $pedidosAgendados = Pedido::where('idDistribuidor', $u->idDistribuidor)->with('distribuidor', 'endereco', 'entregador')
                         ->selectRaw("pedido.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
@@ -551,14 +579,6 @@ class PedidoController extends Controller
                 $pedidoAceito["horaEsgotando"] = $this->maior30Minutos($pedidoAceito->dataAgendada . " " . $pedidoAceito->horaInicio);
             }
             // return [$pedidosPendentes, $pedidosAceitos, $pedidosEntregues, $pedidosCancelados, $pedidosAgendados, $ultimoPedido[0]->id, $entregadores];
-            Debugbar::info($pedidosPendentes);
-            Debugbar::info($pedidosAceitos);
-            Debugbar::info($pedidosDespachados);
-            Debugbar::info($pedidosEntregues);
-            Debugbar::info($pedidosCancelados);
-            Debugbar::info($pedidosAgendados);
-            Debugbar::info($ultimoPedido);
-            Debugbar::info($entregadores);
             return [$pedidosPendentes, $pedidosAceitos, $pedidosDespachados, $pedidosEntregues, $pedidosCancelados, $pedidosAgendados, $ultimoPedido[0]->id, $entregadores];
         } else {
             return response('Sua sessão expirou. Por favor, refaça seu login.', 400);
@@ -582,37 +602,34 @@ class PedidoController extends Controller
 
         //*Faz o cadastro
         $pedido = new Pedido($request->all());
-        $pedido->trocoPara = $request->trocoPara?$request->trocoPara:0;
-        $pedido->obs = $request->obs?$request->obs:"";
-        $pedido->horarioPedido   = date('Y-m-d H:i:s');
-        $pedido->status          = Pedido::PENDENTE;
-        $pedido->origem          = $request->origem?$request->origem:Pedido::PLATAFORMA;
-        $pedido->dataAgendada    = $dataAgendada;
-        $pedido->idAdministrador = $request->origem?null:$idAdministrador;
-        $administradores = Administrador::where([['idDistribuidor', $request->idDistribuidor],['status','Ativo'],['id','!=',$idAdministrador]])->orwhere([['tipoAdministrador', 'Administrador'],['status', 'Ativo'],['id','!=',$idAdministrador]])->orwhere([['tipoAdministrador', 'Atendente'],['status', 'Ativo'],['id','!=',$idAdministrador]])->get();
+        $pedido->trocoPara = $request->trocoPara ? $request->trocoPara : 0;
+        $pedido->obs = $request->obs ? $request->obs : "";
+        $pedido->horarioPedido = date('Y-m-d H:i:s');
+        $pedido->status = Pedido::PENDENTE;
+        $pedido->origem = $request->origem ? $request->origem : Pedido::PLATAFORMA;
+        $pedido->dataAgendada = $dataAgendada;
+        $pedido->idAdministrador = $request->origem ? null : $idAdministrador;
+        $administradores = Administrador::where([['idDistribuidor', $request->idDistribuidor], ['status', 'Ativo'], ['id', '!=', $idAdministrador]])->orwhere([['tipoAdministrador', 'Administrador'], ['status', 'Ativo'], ['id', '!=', $idAdministrador]])->orwhere([['tipoAdministrador', 'Atendente'], ['status', 'Ativo'], ['id', '!=', $idAdministrador]])->get();
         $endereco = EnderecoCliente::find($request->idEndereco);
         $endereco->update($request->all());
         $cliente = Cliente::find($endereco->idCliente);
-        $valorAgua=null;
+        $valorAgua = null;
 
         //$request->idDistribuidor==23?$pedido->idDistribuidor=14:'';//PASSAR PEDIDOS DA TKS PRAIA PARA O TREZE DE MAIO
-        Debugbar::info($pedido);
         if ($pedido->save()) {
-            Debugbar::info('Pedido salvo com sucesso');
 
             foreach ($request->itens as $item) {
-                Debugbar::info($item);
 
                 //Cria novo objeto referente ao Item
                 $itemPedido = new Itempedido();
 
                 //Atribui os valores do formulário ao objeto
-                $itemPedido->idPedido  = $pedido->id;
+                $itemPedido->idPedido = $pedido->id;
                 $itemPedido->idProduto = $item['idProduto'];
-                $itemPedido->qtd       = $item['quantidade'];
-                $itemPedido->preco     = $item['preco'];
-                $itemPedido->subtotal  = $item['subtotal'];
-                $cliente->precoAcertado ? $itemPedido->precoAcertado = $item['precoAcertado']:null;
+                $itemPedido->qtd = $item['quantidade'];
+                $itemPedido->preco = $item['preco'];
+                $itemPedido->subtotal = $item['subtotal'];
+                $cliente->precoAcertado ? $itemPedido->precoAcertado = $item['precoAcertado'] : null;
 
                 //PREMIAÇÕES PONTUAÇÃO DO PEDIDO
                 // if($premiacoes && $cliente->tipoPessoa==1){
@@ -633,10 +650,8 @@ class PedidoController extends Controller
                 // }
                 //**************************** */
                 //Salva o Item
-                Debugbar::info($itemPedido->idPedido);
                 $itemPedido->save();
             }
-            Debugbar::info('Itens salvos com sucesso');
             //PREMIAÇÕES DESCONTO NO PEDIDO
             // if($premiacoes && $cliente->tipoPessoa==1){
             //     $pedido->pontuacaoAcumulada=$cliente->pontuacao+$pedido->pontuacao;
@@ -656,7 +671,7 @@ class PedidoController extends Controller
             //****************************** */
             $fcmService = new FCMNotificationService();
 
-            $msg =  [
+            $msg = [
                 'title' => "Pedido {$pedido->id} - {$cliente->nome}",
                 'body' => $endereco ? "{$endereco->logradouro} {$endereco->numero}, {$endereco->bairro} - {$endereco->cidade}/{$endereco->estado}" : "Novo pedido recebido",
                 'tag' => $pedido->id,
@@ -696,88 +711,90 @@ class PedidoController extends Controller
      * @param  \App\Models\pedido  $pedido
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request,$id)
+    public function update(Request $request, $id)
     {
         $pedido = Pedido::find($id);
         $pedido->status = $request->status;
         $date = new \DateTime();//**APENAS PARA O ENTREGAR*/
-        if($pedido->horarioEntrega == null){
+        if ($pedido->horarioEntrega == null) {
             $pedido->horarioEntrega = $date->format('Y-m-d H:i:s');
-		}
+        }
         $pedido->save();
-        return  response($pedido->id, 200);
+        return response($pedido->id, 200);
     }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-    function notification($msg, $administradores){
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    function notification($msg, $administradores)
+    {
         $fcmService = new FCMNotificationService();
         $fcmService->sendOrderNotification($administradores, $msg);
     }
-    public function atualizar(Request $request, $idPedido){
+    public function atualizar(Request $request, $idPedido)
+    {
         $request['dataAgendada'] = $request->dataAgendada == "" ? null : implode("-", array_reverse(explode("/", $request->dataAgendada)));
-        $request['trocoPara'] = $request->trocoPara?$request->trocoPara:0;
+        $request['trocoPara'] = $request->trocoPara ? $request->trocoPara : 0;
         $pedido = Pedido::find($idPedido);
         $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
         $cliente = Cliente::find($enderecoCliente->idCliente);
         $distribuidor = Distribuidor::find($pedido->idDistribuidor);
         $itensPedido = ItemPedido::with('produto')->where("idPedido", $idPedido)->get();
-        if($pedido->status==Pedido::ENTREGUE){
+        if ($pedido->status == Pedido::ENTREGUE) {
             //somar quantidades ao estoque do distribuidor pra depois subtrair novamente caso pedido continue em entregue
             //VERIFICA SE OS PRODUTOS SAO COMPOSICOES OU COMPONENTES ANTES DE ATUALIZAR
             $this->composicoesArray = array();// Zera array
-            if($distribuidor->tipoDistribuidor == "revendedor"){
+            if ($distribuidor->tipoDistribuidor == "revendedor") {
                 foreach ($itensPedido as $itemPedido) {
                     $this->atualizaEstoque($distribuidor->idDistribuidor, $itemPedido->Produto, $itemPedido->qtd, true);
                 }
                 $this->atualizaComposicoes($distribuidor->idDistribuidor);
-            }else{
+            } else {
                 foreach ($itensPedido as $itemPedido) {
                     $this->atualizaEstoque($pedido->idDistribuidor, $itemPedido->Produto, $itemPedido->qtd, true);
                 }
                 $this->atualizaComposicoes($pedido->idDistribuidor);
             }
         }
-        if($request->idDistribuidor!=$pedido->idDistribuidor){
-            if($pedido->status==Pedido::ENTREGUE){
+        if ($request->idDistribuidor != $pedido->idDistribuidor) {
+            if ($pedido->status == Pedido::ENTREGUE) {
                 $cliente->rating--;
                 $cliente->save();
-            }else if($pedido->status==Pedido::CANCELADO_NAO_LOCALIZADO){
+            } else if ($pedido->status == Pedido::CANCELADO_NAO_LOCALIZADO) {
                 $cliente->rating++;
                 $cliente->save();
-            }else if($pedido->status==Pedido::CANCELADO_TROTE){
-                $cliente->rating+=3;
+            } else if ($pedido->status == Pedido::CANCELADO_TROTE) {
+                $cliente->rating += 3;
                 $cliente->save();
             }
-            $pedido->status=Pedido::PENDENTE;
+            $pedido->status = Pedido::PENDENTE;
             $administradores = Administrador::where('idDistribuidor', $pedido->idDistribuidor)->orwhere('idDistribuidor', $request->idDistribuidor)->orwhere('tipoAdministrador', 'Administrador');
             $msg = array(
-                'title' => 'Distribuidor Alterado: '.$pedido->id.' - '.$cliente->nome,
-                'body' => '[Distribuição '.$pedido->idDistribuidor.' para '.$request->idDistribuidor.'] '.$enderecoCliente->logradouro.' '.$enderecoCliente->numero.', '.$enderecoCliente->bairro.' - '.$enderecoCliente->cidade.'/'.$enderecoCliente->estado,
+                'title' => 'Distribuidor Alterado: ' . $pedido->id . ' - ' . $cliente->nome,
+                'body' => '[Distribuição ' . $pedido->idDistribuidor . ' para ' . $request->idDistribuidor . '] ' . $enderecoCliente->logradouro . ' ' . $enderecoCliente->numero . ', ' . $enderecoCliente->bairro . ' - ' . $enderecoCliente->cidade . '/' . $enderecoCliente->estado,
                 // 'tag' => $pedido->id,
                 'icon' => '/images/logo-icon.png',
                 'click_action' => 'https://adm.tokumsede.com'
             );
-        }else if($request->status!=$pedido->status){
+        } else if ($request->status != $pedido->status) {
             $administradores = Administrador::where('idDistribuidor', $pedido->idDistribuidor)->orwhere('tipoAdministrador', 'Administrador');
             $msg = array(
-                'title' => 'Status Alterado: '.$pedido->id.' - '.$cliente->nome,
-                'body' => $enderecoCliente->logradouro.' '.$enderecoCliente->numero.', '.$enderecoCliente->bairro.' - '.$enderecoCliente->cidade.'/'.$enderecoCliente->estado,
+                'title' => 'Status Alterado: ' . $pedido->id . ' - ' . $cliente->nome,
+                'body' => $enderecoCliente->logradouro . ' ' . $enderecoCliente->numero . ', ' . $enderecoCliente->bairro . ' - ' . $enderecoCliente->cidade . '/' . $enderecoCliente->estado,
                 // 'tag' => $pedido->id,
                 'icon' => '/images/logo-icon.png',
                 'click_action' => 'https://adm.tokumsede.com'
             );
-        }else{
-                    //*Recupera o id do usuário logado
+        } else {
+            //*Recupera o id do usuário logado
 
         }
         $idAdministrador = auth()->user()->id;//$this->escape("user");
-        $administradores = Administrador::where([['idDistribuidor', $request->idDistribuidor],['status','Ativo'],['id','!=',$idAdministrador]])->orwhere([['tipoAdministrador', 'Administrador'],['status', 'Ativo'],['id','!=',$idAdministrador]])->orwhere([['tipoAdministrador', 'Atendente'],['status', 'Ativo'],['id','!=',$idAdministrador]])->get();
+        $administradores = Administrador::where([['idDistribuidor', $request->idDistribuidor], ['status', 'Ativo'], ['id', '!=', $idAdministrador]])->orwhere([['tipoAdministrador', 'Administrador'], ['status', 'Ativo'], ['id', '!=', $idAdministrador]])->orwhere([['tipoAdministrador', 'Atendente'], ['status', 'Ativo'], ['id', '!=', $idAdministrador]])->get();
 
         // $administradores = Administrador::where('idDistribuidor', $pedido->idDistribuidor)->orwhere('tipoAdministrador', 'Administrador');
         $msg = array(
-            'title' => 'Pedido Alterado: '.$pedido->id.' - '.$cliente->nome,
-            'body' => $enderecoCliente->logradouro.' '.$enderecoCliente->numero.', '.$enderecoCliente->bairro.' - '.$enderecoCliente->cidade.'/'.$enderecoCliente->estado,
+            'title' => 'Pedido Alterado: ' . $pedido->id . ' - ' . $cliente->nome,
+            'body' => $enderecoCliente->logradouro . ' ' . $enderecoCliente->numero . ', ' . $enderecoCliente->bairro . ' - ' . $enderecoCliente->cidade . '/' . $enderecoCliente->estado,
             // 'tag' => $pedido->id,
             'icon' => '/images/logo-icon.png',
             'click_action' => 'https://adm.tokumsede.com'
@@ -791,49 +808,49 @@ class PedidoController extends Controller
             //Zerar todos os itens do pedido
             $itensPedido = Itempedido::where('idPedido', $idPedido)->get();
             foreach ($itensPedido as $item) {
-                $item->qtd       = 0;
-                $item->preco     = 0;
-                $item->subtotal  = 0;
+                $item->qtd = 0;
+                $item->preco = 0;
+                $item->subtotal = 0;
                 //Salva o Item
                 $item->save();
             }
 
             //update cada
             foreach ($request->itens as $item) {
-                $itemPedido = Itempedido::where([['idPedido', $idPedido],['idProduto', $item['idProduto']]])->first();
-                if($itemPedido){
+                $itemPedido = Itempedido::where([['idPedido', $idPedido], ['idProduto', $item['idProduto']]])->first();
+                if ($itemPedido) {
                     //Atribui os valores do formulário ao objeto
-                    $itemPedido->qtd       = $item['quantidade'];
-                    $itemPedido->preco     = $item['preco'];
-                    $itemPedido->subtotal  = $item['subtotal'];
+                    $itemPedido->qtd = $item['quantidade'];
+                    $itemPedido->preco = $item['preco'];
+                    $itemPedido->subtotal = $item['subtotal'];
 
                     //Salva o Item
                     $itemPedido->save();
-                }else{//add os que não forem encontrados
+                } else {//add os que não forem encontrados
                     //Cria novo objeto referente ao Item
                     $itemPedido = new Itempedido();
                     //Atribui os valores do formulário ao objeto
-                    $itemPedido->idPedido  = $idPedido;
+                    $itemPedido->idPedido = $idPedido;
                     $itemPedido->idProduto = $item['idProduto'];
-                    $itemPedido->qtd       = $item['quantidade'];
-                    $itemPedido->preco     = $item['preco'];
-                    $itemPedido->subtotal  = $item['subtotal'];
+                    $itemPedido->qtd = $item['quantidade'];
+                    $itemPedido->preco = $item['preco'];
+                    $itemPedido->subtotal = $item['subtotal'];
 
                     //Salva o Item
                     $itemPedido->save();
                 }
             }
             $itensPedido = ItemPedido::with('produto')->where("idPedido", $idPedido)->get();
-            if($pedido->status==Pedido::ENTREGUE){
+            if ($pedido->status == Pedido::ENTREGUE) {
                 //subtrair quantidades ao estoque do distribuidor caso depido ainda esteja como entregue
                 //VERIFICA SE OS PRODUTOS SAO COMPOSICOES OU COMPONENTES ANTES DE ATUALIZAR
                 $this->composicoesArray = array();// Zera array
-                if($distribuidor->tipoDistribuidor == "revendedor"){
+                if ($distribuidor->tipoDistribuidor == "revendedor") {
                     foreach ($itensPedido as $itemPedido) {
                         $this->atualizaEstoque($distribuidor->idDistribuidor, $itemPedido->Produto, $itemPedido->qtd, false);
                     }
                     $this->atualizaComposicoes($distribuidor->idDistribuidor);
-                }else{
+                } else {
                     foreach ($itensPedido as $itemPedido) {
                         $this->atualizaEstoque($pedido->idDistribuidor, $itemPedido->Produto, $itemPedido->qtd, false);
                     }
@@ -842,8 +859,8 @@ class PedidoController extends Controller
             }
             //Notificações Firebase
             $this->notification($msg, $administradores);
-            if($cliente->regId != null && $request->status!=$pedido->status){
-				$this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
+            if ($cliente->regId != null && $request->status != $pedido->status) {
+                $this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
             }
             return $pedido->id;//return response('Pedido '.$pedido.' cadastrado com sucesso.', 200);
         } else {
@@ -854,14 +871,14 @@ class PedidoController extends Controller
     {
         $pedido = Pedido::selectRaw("pedido.*, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioEntrega, '%d/%m/%Y %H:%i') as horarioEntrega, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada")->find($id);
         $u = auth()->user();
-        if($u->tipoAdministrador=='Distribuidor' && $u->idDistribuidor!=$pedido->idDistribuidor){
+        if ($u->tipoAdministrador == 'Distribuidor' && $u->idDistribuidor != $pedido->idDistribuidor) {
             return false;
         }
         $pedido->itensPedido = ItemPedido::where('idPedido', $id)->where('qtd', "!=", 0)->with('produto')->get();
         $pedido->clientePedido = Cliente::find($pedido->endereco->idCliente);
         $pedido->distribuidor = Distribuidor::select('distribuidor.nome', 'distribuidor.dddTelefone', 'distribuidor.telefonePrincipal')->find($pedido->idDistribuidor);
-        $pedido->entregador = Entregador::select('nome','telefone')->find($pedido->idEntregador);
-        if($pedido->idAdministrador!=null){
+        $pedido->entregador = Entregador::select('nome', 'telefone')->find($pedido->idEntregador);
+        if ($pedido->idAdministrador != null) {
             $administrador = Administrador::select('nome')->find($pedido->idAdministrador);
             $pedido->administrador = $administrador->nome;
         }
@@ -872,15 +889,15 @@ class PedidoController extends Controller
     {
         $pedido = Pedido::selectRaw("pedido.*, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioEntrega, '%d/%m/%Y %H:%i') as horarioEntrega, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada")->find($id);
         $u = auth()->user();
-        if($u->tipoAdministrador!='Administrador' && $u->id!=$pedido->idAdministrador && $u->id!=50 && $u->id!=51 && $u->id!=61 && $u->id!=48 && $u->id!=96){
+        if ($u->tipoAdministrador != 'Administrador' && $u->id != $pedido->idAdministrador && $u->id != 50 && $u->id != 51 && $u->id != 61 && $u->id != 48 && $u->id != 96) {
             return false;
         }
         $pedido->itensPedido = ItemPedido::where('idPedido', $id)->where('qtd', "!=", 0)->with('produto')->get();
         $pedido->clientePedido = Cliente::find($pedido->endereco->idCliente);
         $pedido->distribuidor = Distribuidor::select('distribuidor.id', 'distribuidor.nome', 'distribuidor.dddTelefone', 'distribuidor.telefonePrincipal')->find($pedido->idDistribuidor);
-        $pedido->entregador = Entregador::select('nome','telefone')->find($pedido->idEntregador);
+        $pedido->entregador = Entregador::select('nome', 'telefone')->find($pedido->idEntregador);
         $distribuidores = Distribuidor::where('status', '!=', 3)->get();
-        if($pedido->idAdministrador!=null){
+        if ($pedido->idAdministrador != null) {
             $administrador = Administrador::select('nome')->find($pedido->idAdministrador);
             $pedido->administrador = $administrador->nome;
         }
@@ -888,75 +905,78 @@ class PedidoController extends Controller
         //
     }
 
-    function aceitar(Request $request, $idPedido) {
+    function aceitar(Request $request, $idPedido)
+    {
         $date = new \DateTime();
         $pedido = Pedido::find($idPedido);
-        if($pedido->status == Pedido::PENDENTE){
+        if ($pedido->status == Pedido::PENDENTE) {
             $pedido->statusChange = 1;
             // if($request->entregador){
             //     $pedido->idEntregador = $request->entregador;
             // }else{
             //     $pedido->idEntregador = Entregador::where("nome", auth()->user()->nome)->select('id')->first()->id;
             // }
-			$enderecoCliente = Enderecocliente::find($pedido->idEndereco);
-	        $cliente = Cliente::find($enderecoCliente->idCliente);
-	        $pedido->status = Pedido::ACEITO;
+            $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
+            $cliente = Cliente::find($enderecoCliente->idCliente);
+            $pedido->status = Pedido::ACEITO;
             $pedido->aceitoPor = auth()->user()->nome;
             $pedido->horarioAceito = $date->format('Y-m-d H:i:s');
-	        if ($pedido->save()) {
+            if ($pedido->save()) {
 
-				if($cliente->regId != null){
-					$this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
-				}
+                if ($cliente->regId != null) {
+                    $this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
+                }
 
-	            return  response($pedido->id, 200);//$this->success("Pedido aceito com sucesso.");
-	        } else {
-	            return  response("Erro ao aceitar o pedido. Tente novamente ou contate o suporte.", 400);//$this->error();
-	        }
-		}else{
-			return  response("Esse pedido foi cancelado pelo usuário ou já foi aceito por outro administrador!", 400);//$this->error("Esse pedido foi cancelado pelo usuário ou não estava pendente!");
+                return response($pedido->id, 200);//$this->success("Pedido aceito com sucesso.");
+            } else {
+                return response("Erro ao aceitar o pedido. Tente novamente ou contate o suporte.", 400);//$this->error();
+            }
+        } else {
+            return response("Esse pedido foi cancelado pelo usuário ou já foi aceito por outro administrador!", 400);//$this->error("Esse pedido foi cancelado pelo usuário ou não estava pendente!");
         }
 
     }
 
-    function despachar(Request $request, $idPedido) {
+    function despachar(Request $request, $idPedido)
+    {
         $date = new \DateTime();
         $pedido = Pedido::find($idPedido);
-        if($pedido->status == Pedido::ACEITO){
+        if ($pedido->status == Pedido::ACEITO) {
             $pedido->statusChange = 1;
-            if($request->entregador){
+            if ($request->entregador) {
                 $pedido->idEntregador = $request->entregador;
-            }else{
+            } else {
                 $pedido->idEntregador = Entregador::where("nome", auth()->user()->nome)->select('id')->first()->id;
             }
-			$pedido->save();
-			$enderecoCliente = Enderecocliente::find($pedido->idEndereco);
-	        $cliente = Cliente::find($enderecoCliente->idCliente);
-	        $pedido->status = Pedido::DESPACHADO;
+            $pedido->save();
+            $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
+            $cliente = Cliente::find($enderecoCliente->idCliente);
+            $pedido->status = Pedido::DESPACHADO;
             $pedido->despachadoPor = auth()->user()->nome;
             $pedido->horarioDespache = $date->format('Y-m-d H:i:s');
-	        if ($pedido->save()) {
+            if ($pedido->save()) {
 
-				if($cliente->regId != null){
-					$this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
-				}
+                if ($cliente->regId != null) {
+                    $this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
+                }
 
-	            return  response($pedido->id, 200);//$this->success("Pedido aceito com sucesso.");
-	        } else {
-	            return  response("Erro ao despachar o pedido. Tente novamente ou contate o administrador.", 400);//$this->error();
-	        }
-		}else{
-			return  response("Esse pedido foi cancelado pelo usuário ou não estava mais como aceito!", 400);//$this->error("Esse pedido foi cancelado pelo usuário ou não estava pendente!");
+                return response($pedido->id, 200);//$this->success("Pedido aceito com sucesso.");
+            } else {
+                return response("Erro ao despachar o pedido. Tente novamente ou contate o administrador.", 400);//$this->error();
+            }
+        } else {
+            return response("Esse pedido foi cancelado pelo usuário ou não estava mais como aceito!", 400);//$this->error("Esse pedido foi cancelado pelo usuário ou não estava pendente!");
         }
 
     }
 
-    function recusar(Request $request, $idPedido) {
+    function recusar(Request $request, $idPedido)
+    {
         $date = new \DateTime();
         $pedido = Pedido::find($idPedido);
-		$pedido->statusChange = 1;
-		$pedido->save();
-		$enderecoCliente = Enderecocliente::find($pedido->idEndereco);
+        $pedido->statusChange = 1;
+        $pedido->save();
+        $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
         $cliente = Cliente::find($enderecoCliente->idCliente);
         $pedido->status = Pedido::RECUSADO;
         $pedido->retorno = $request->retorno;
@@ -964,41 +984,42 @@ class PedidoController extends Controller
         $pedido->horarioCancelado = $date->format('Y-m-d H:i:s');
         if ($pedido->save()) {
 
-			if($cliente->regId != null){
-				$this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
-			}
+            if ($cliente->regId != null) {
+                $this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
+            }
 
-            return  response($pedido->id, 200);//$this->success("Pedido recusado com sucesso.");
+            return response($pedido->id, 200);//$this->success("Pedido recusado com sucesso.");
         } else {
-            return  response("Erro ao recusar o pedido. Tente novamente ou contate o administrador.", 400);//$this->error();
+            return response("Erro ao recusar o pedido. Tente novamente ou contate o administrador.", 400);//$this->error();
         }
     }
 
-    function entregar($idPedido) {
-		$date = new \DateTime();
+    function entregar($idPedido)
+    {
+        $date = new \DateTime();
         $pedido = Pedido::find($idPedido);
         $pedido->statusChange = 1;
-		$pedido->save();
+        $pedido->save();
         $distribuidor = Distribuidor::find($pedido->idDistribuidor);
         $itensPedido = ItemPedido::with('produto')->where("idPedido", $idPedido)->get();
-		//ALTERA OS ESTOQUES
-        if($pedido->status == Pedido::DESPACHADO){
-			//$itensPedido = ItemPedido::with('produto')->where("idPedido", $idPedido)->get();
-			//VERIFICA SE OS PRODUTOS SAO COMPOSICOES OU COMPONENTES ANTES DE ATUALIZAR
+        //ALTERA OS ESTOQUES
+        if ($pedido->status == Pedido::DESPACHADO) {
+            //$itensPedido = ItemPedido::with('produto')->where("idPedido", $idPedido)->get();
+            //VERIFICA SE OS PRODUTOS SAO COMPOSICOES OU COMPONENTES ANTES DE ATUALIZAR
             $this->composicoesArray = array();// Zera array
-            if($distribuidor->tipoDistribuidor == "revendedor"){
+            if ($distribuidor->tipoDistribuidor == "revendedor") {
                 foreach ($itensPedido as $itemPedido) {
                     $this->atualizaEstoque($distribuidor->idDistribuidor, $itemPedido->Produto, $itemPedido->qtd, false);
                 }
                 $this->atualizaComposicoes($distribuidor->idDistribuidor);
-            }else{
+            } else {
                 foreach ($itensPedido as $itemPedido) {
                     $this->atualizaEstoque($pedido->idDistribuidor, $itemPedido->Produto, $itemPedido->qtd, false);
                 }
                 $this->atualizaComposicoes($pedido->idDistribuidor);
             }
 
-		}
+        }
 
         $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
         $cliente = Cliente::find($enderecoCliente->idCliente);
@@ -1007,7 +1028,7 @@ class PedidoController extends Controller
 
         $pedido->status = Pedido::ENTREGUE;
         $pedido->entreguePor = auth()->user()->nome;
-    	$pedido->horarioEntrega = $date->format('Y-m-d H:i:s');
+        $pedido->horarioEntrega = $date->format('Y-m-d H:i:s');
 
         if ($pedido->save()) {
             //PREMIAÇÕES
@@ -1023,20 +1044,21 @@ class PedidoController extends Controller
             // }
             //*****
             $cliente->save();
-            if($cliente->regId != null){
-				$this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
-			}
-			response($pedido->id, 200);//$this->success("Pedido entregue com sucesso.");
+            if ($cliente->regId != null) {
+                $this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
+            }
+            response($pedido->id, 200);//$this->success("Pedido entregue com sucesso.");
         } else {
             response("Erro ao entregar o pedido. Tente novamente ou contate o administrador.", 200);//$this->error();
         }
     }
 
-    function cancelar(Request $request, $idPedido) {
+    function cancelar(Request $request, $idPedido)
+    {
         $date = new \DateTime();
         $pedido = Pedido::find($idPedido);
-		$pedido->statusChange = 1;
-		$pedido->save();
+        $pedido->statusChange = 1;
+        $pedido->save();
         $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
         $cliente = Cliente::find($enderecoCliente->idCliente);
 
@@ -1052,63 +1074,66 @@ class PedidoController extends Controller
         if ($pedido->save()) {
             $cliente->save();
 
-			if($cliente->regId != null){
-				$this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
-			}
+            if ($cliente->regId != null) {
+                $this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
+            }
 
-            return  response($pedido->id, 200);//$this->success("Pedido cancelado com sucesso.");
+            return response($pedido->id, 200);//$this->success("Pedido cancelado com sucesso.");
         } else {
-            return  response("Erro ao cancelar o pedido. Tente novamente ou contate o administrador.", 400);//$this->error();
+            return response("Erro ao cancelar o pedido. Tente novamente ou contate o administrador.", 400);//$this->error();
         }
     }
-    function ajustarCoordenadas(Request $request, $idEndereco){
-		$enderecoCliente = EnderecoCliente::find($idEndereco);
-		$u = Administrador::find(auth()->user()->id);
-		if($u->tipoAdministrador!="Entregador"){
-			$distribuidor  = Distribuidor::with("enderecoDistribuidor")
-                	->where("id", $request->idDistribuidor?$request->idDistribuidor:$u->idDistribuidor)
-					->get();
+    function ajustarCoordenadas(Request $request, $idEndereco)
+    {
+        $enderecoCliente = EnderecoCliente::find($idEndereco);
+        $u = Administrador::find(auth()->user()->id);
+        if ($u->tipoAdministrador != "Entregador") {
+            $distribuidor = Distribuidor::with("enderecoDistribuidor")
+                ->where("id", $request->idDistribuidor ? $request->idDistribuidor : $u->idDistribuidor)
+                ->get();
 
-			$enderecoCliente->latitude = $distribuidor[0]->enderecoDistribuidor->latitude;
-			$enderecoCliente->longitude = $distribuidor[0]->enderecoDistribuidor->longitude;
+            $enderecoCliente->latitude = $distribuidor[0]->enderecoDistribuidor->latitude;
+            $enderecoCliente->longitude = $distribuidor[0]->enderecoDistribuidor->longitude;
 
-			if($enderecoCliente->save()){
-				return "Coordenadas ajustadas com sucesso.";
-			}else{
-				return "Erro ao processar coordenadas.";
-			}
+            if ($enderecoCliente->save()) {
+                return "Coordenadas ajustadas com sucesso.";
+            } else {
+                return "Erro ao processar coordenadas.";
+            }
 
-		}else{
-			return "Erro ao processar coordenadas.";
-		}
+        } else {
+            return "Erro ao processar coordenadas.";
+        }
     }
-    function buscarNovosPedidos($ultimoPedido) {
+    function buscarNovosPedidos($ultimoPedido)
+    {
         $novosPedidos = '';
         $u = auth()->user();//Administrador::find($idUsuario);
         if (auth()->check()) {
             if (strcmp($u->tipoAdministrador, "Administrador") == 0) {
                 $novosPedidos = Pedido::select("pedido.*") // Seleciona os campos
-                        ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and pedido.id > " . $ultimoPedido . " and ((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
-                        ->get();
+                    ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and pedido.id > " . $ultimoPedido . " and ((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
+                    ->get();
             } else {
                 $novosPedidos = Pedido::select("pedido.*") // Seleciona os campos
-                        ->leftJoin('distribuidor', 'distribuidor.id', '=', 'pedido.idDistribuidor')
-                        ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and pedido.id > " . $ultimoPedido . " and pedido.idDistribuidor = " . $u->idDistribuidor .
+                    ->leftJoin('distribuidor', 'distribuidor.id', '=', 'pedido.idDistribuidor')
+                    ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and pedido.id > " . $ultimoPedido . " and pedido.idDistribuidor = " . $u->idDistribuidor .
                         " and ((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
-                        ->get();
+                    ->get();
             }
         }
-        if($novosPedidos!=''){
+        if ($novosPedidos != '') {
             return $novosPedidos;
         }
     }
-    function ultimoPedido(){
+    function ultimoPedido()
+    {
         $u = auth()->user();
-        if(strcmp($u->tipoAdministrador, "Administrador") == 0 || strcmp($u->tipoAdministrador, "Atendente") == 0) {
+        if (strcmp($u->tipoAdministrador, "Administrador") == 0 || strcmp($u->tipoAdministrador, "Atendente") == 0) {
             $ultimoPedido = Pedido::orderBy("pedido.id", "DESC")
                 ->limit(1)
                 ->get();
-        }else{
+        } else {
             $ultimoPedido = Pedido::where('idDistribuidor', $u->idDistribuidor)
                 ->orderBy("pedido.id", "DESC")
                 ->limit(1)
@@ -1117,61 +1142,60 @@ class PedidoController extends Controller
         return $ultimoPedido[0]->id;
     }
 
-    function listaClientes(){
-        Debugbar::info('listaClientes');
+    function listaClientes()
+    {
         if (auth()->check()) {
-        Debugbar::info('auth()->check()');
 
-        // $enderecos = DB::table('enderecoCliente')
-        // ->select('id as idEndereco', 'logradouro', 'numero', 'bairro', 'complemento', 'cep', 'cidade', 'estado', 'referencia', 'apelido', 'atual', 'idCliente', 'latitude', 'longitude');
+            // $enderecos = DB::table('enderecoCliente')
+            // ->select('id as idEndereco', 'logradouro', 'numero', 'bairro', 'complemento', 'cep', 'cidade', 'estado', 'referencia', 'apelido', 'atual', 'idCliente', 'latitude', 'longitude');
 
-// $users = DB::table('users')
+            // $users = DB::table('users')
 //         ->joinSub($latestPosts, 'latest_posts', function (JoinClause $join) {
 //             $join->on('users.id', '=', 'latest_posts.user_id');
 //         })->get();
 
-        // $enderecos = DB::table('enderecoCliente')
-        // ->select('id as idEndereco', 'logradouro', 'numero', 'bairro', 'complemento', 'cep', 'cidade', 'estado', 'referencia', 'apelido', 'atual', 'idCliente','idCliente', 'latitude', 'latitude')
-        // ->whereColumn('idCliente', 'cliente.id');
+            // $enderecos = DB::table('enderecoCliente')
+            // ->select('id as idEndereco', 'logradouro', 'numero', 'bairro', 'complemento', 'cep', 'cidade', 'estado', 'referencia', 'apelido', 'atual', 'idCliente','idCliente', 'latitude', 'latitude')
+            // ->whereColumn('idCliente', 'cliente.id');
 
-        // ->select('id','nome','tipoPessoa','cpf','cnpj','precoAcertado','dddTelefone','telefone','outrosContatos','status','email','rating')
+            // ->select('id','nome','tipoPessoa','cpf','cnpj','precoAcertado','dddTelefone','telefone','outrosContatos','status','email','rating')
 
-        $clientes = Cliente::with('enderecos')
-               ->where('status',1)
-               ->select(['id','nome','tipoPessoa','cpf','cnpj','precoAcertado','dddTelefone','telefone','outrosContatos','status','email','rating'])
-               ->get();
-        return $clientes;
+            $clientes = Cliente::with('enderecos')
+                ->where('status', 1)
+                ->select(['id', 'nome', 'tipoPessoa', 'cpf', 'cnpj', 'precoAcertado', 'dddTelefone', 'telefone', 'outrosContatos', 'status', 'email', 'rating'])
+                ->get();
+            return $clientes;
 
-       //$clientes = DB::table('cliente')
-       //->where('status',1)
-       //->get()->toArray();
-       //$enderecoCliente = DB::table('enderecoCliente')
-       //->where('status',1)
-       //->get()->toArray();
-       //foreach ($enderecoCliente as $endereco) {
-       //    foreach ($clientes as $cliente) {
-       //        if ($cliente->id == $endereco->idCliente ) {
-       //            if (!property_exists($cliente, 'enderecos')){
-       //                $cliente->enderecos = array();
-       //            }
-       //            array_push($cliente->enderecos, $endereco);
-       //            break;
-       //        }
-       //    }
-       //}
-       //return $clientes;
+            //$clientes = DB::table('cliente')
+            //->where('status',1)
+            //->get()->toArray();
+            //$enderecoCliente = DB::table('enderecoCliente')
+            //->where('status',1)
+            //->get()->toArray();
+            //foreach ($enderecoCliente as $endereco) {
+            //    foreach ($clientes as $cliente) {
+            //        if ($cliente->id == $endereco->idCliente ) {
+            //            if (!property_exists($cliente, 'enderecos')){
+            //                $cliente->enderecos = array();
+            //            }
+            //            array_push($cliente->enderecos, $endereco);
+            //            break;
+            //        }
+            //    }
+            //}
+            //return $clientes;
 
-        // ->join('enderecoCliente', 'pedido.idEndereco', '=','endereco.id''cliente.id', '=', 'enderecoCliente.idCliente')
-        // ->select('cliente.*','enderecoCliente.id as idEndereco', 'logradouro', 'numero', 'bairro', 'complemento', 'cep', 'cidade', 'estado', 'referencia', 'apelido', 'atual', 'idCliente', 'latitude', 'longitude')
-        // ->get();
+            // ->join('enderecoCliente', 'pedido.idEndereco', '=','endereco.id''cliente.id', '=', 'enderecoCliente.idCliente')
+            // ->select('cliente.*','enderecoCliente.id as idEndereco', 'logradouro', 'numero', 'bairro', 'complemento', 'cep', 'cidade', 'estado', 'referencia', 'apelido', 'atual', 'idCliente', 'latitude', 'longitude')
+            // ->get();
 
-        // ->joinSub($enderecos, 'enderecos',function (JoinClause $join) {
-        //     $join->on('cliente.id', '=', 'enderecos.idCliente')
-        //     ->where('cliente.status',1);
-        // })->get();
+            // ->joinSub($enderecos, 'enderecos',function (JoinClause $join) {
+            //     $join->on('cliente.id', '=', 'enderecos.idCliente')
+            //     ->where('cliente.status',1);
+            // })->get();
 
-        //->where('cliente.status',1);
-        //'cliente.id', '=', 'enderecoCliente.idCliente'
+            //->where('cliente.status',1);
+            //'cliente.id', '=', 'enderecoCliente.idCliente'
 
             // return Datatables::of($clientes)
             //     ->editColumn('nome', function(Cliente $cliente) {

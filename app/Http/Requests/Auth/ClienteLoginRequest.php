@@ -44,8 +44,6 @@ class ClienteLoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
-                Debugbar::info('authenticate');
-
                 $this->ensureIsNotRateLimited();
 
                 $user = Cliente::where('status','1')

@@ -43,15 +43,12 @@ class DistribuidorController extends Controller
      */
     public function show($id)
     {
-        Debugbar::info($id);
         $distribuidor = Distribuidor::with([
             'taxaEntrega',
             'horarioFuncionamento',
             'novoHorarioFuncionamento',
             'enderecoDistribuidor'
         ])->findOrFail($id);
-        Debugbar::info($distribuidor);
-
         $data = [
             // Basic Info
             'id' => $distribuidor->id,
@@ -126,8 +123,6 @@ class DistribuidorController extends Controller
                 'valorKmAdicional'
             ])
         ];
-        Debugbar::info($data);
-
         return response()->json([
             'data' => $data,
             'meta' => ['total' => count($data)]
@@ -400,8 +395,6 @@ class DistribuidorController extends Controller
 
     function findDistributorByAddress($addressId)
     {
-        debugbar::info($addressId);
-
         $distributor = Distribuidor::with(['enderecoDistribuidor', 'taxaEntrega'])
             ->where('idEnderecoDistribuidor', $addressId)
             ->where('status', Distribuidor::ATIVO)

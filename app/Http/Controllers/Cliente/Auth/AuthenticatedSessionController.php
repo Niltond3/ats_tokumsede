@@ -20,8 +20,6 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): Response
     {
-        Debugbar::info('create');
-        Debugbar::info('AuthenticatedSessionController');
         return Inertia::render('Cliente/Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
@@ -33,9 +31,6 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(ClientLoginRequest $request): RedirectResponse
     {
-        Debugbar::info('store');
-        Debugbar::info($request);
-
         $request->authenticate();
 
         $request->session()->regenerate();

@@ -44,18 +44,12 @@ class ClientLoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
-                Debugbar::info('authenticate');
-
                 $this->ensureIsNotRateLimited();
 
                 $user = Cliente::where('status','1')
                     ->where("senha", $this->string("senha"))
                     ->where("telefone", $this->string("telefone"))
                     ->first();
-
-
-                Debugbar::info($user);
-
 
         if (!$user) {
             RateLimiter::hit($this->throttleKey());

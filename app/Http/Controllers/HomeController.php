@@ -67,8 +67,6 @@ class HomeController extends Controller
             $authCheck = $auth->check();
         };
 
-        Debugbar::info($authCheck);
-
         if(!$authCheck) return response('Sua sessão expirou. Por favor, refaça seu login.', 400);
 
             $user = $auth->user();

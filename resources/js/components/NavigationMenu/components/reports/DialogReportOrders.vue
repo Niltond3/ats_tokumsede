@@ -17,7 +17,7 @@ import {
 } from 'radix-vue'
 import { listAllDistributors } from '@/services/api/distributors'
 import renderToast from '@/components/renderPromiseToast'
-import { utf8Decode } from '@/util'
+import { cn, utf8Decode } from '@/util'
 
 const isOpen = ref(false)
 const dateRange = ref(undefined)
@@ -32,27 +32,33 @@ watch(selectedDistributors, () => {
     searchTerm.value = ''
 }, { deep: true })
 
-const presets = computed(() => {
-    const today = new Date()
-    return [
-        {
-            label: 'Último dia',
-            range: [new Date(today.setDate(today.getDate() - 1)), new Date()]
-        },
-        {
-            label: 'Última semana',
-            range: [new Date(today.setDate(today.getDate() - 7)), new Date()]
-        },
-        {
-            label: 'Último mês',
-            range: [new Date(today.setMonth(today.getMonth() - 1)), new Date()]
-        },
-        {
-            label: 'Último ano',
-            range: [new Date(today.setFullYear(today.getFullYear() - 1)), new Date()]
-        }
-    ]
-})
+const createDateRange = (daysBack) => {
+    const end = new Date()
+    const start = new Date()
+    start.setDate(start.getDate() - daysBack)
+    start.setHours(0, 0, 0, 0)
+    end.setHours(23, 59, 59, 999)
+    return [start, end]
+}
+
+const presets = computed(() => [
+    {
+        label: 'Último dia',
+        value: createDateRange(1)
+    },
+    {
+        label: 'Última semana',
+        value: createDateRange(7)
+    },
+    {
+        label: 'Último mês',
+        value: createDateRange(30)
+    },
+    {
+        label: 'Último ano',
+        value: createDateRange(365)
+    }
+])
 
 async function getDistributors() {
     isLoading.value = true
@@ -104,15 +110,32 @@ getDistributors()
 <template>
     <Dialog v-model:open="isOpen" :modal="false">
         <slot name="trigger" @click="isOpen = true" />
-        <DialogContent class="max-w-[90vw]" @pointerdownOutside="(e) => e.preventDefault()">
-            <DialogHeader>
-                <DialogTitle>Relatório de Pedidos</DialogTitle>
+        <DialogContent class="max-w-[90vw] overflow-visible" @pointerdownOutside="(e) => e.preventDefault()">
+            <DialogHeader class="flex justify-between items-center">
+                <DialogTitle class="text-info">Relatório de Pedidos</DialogTitle>
+                <Button v-if="orderResponse" @click="orderResponse = null" variant="ghost" size="sm" :class='cn(
+                    [
+                        "group h-4 p-0 flex justify-start rounded-sm absolute top-4 font-thin opacity-70 transition-all",
+                        "max-[640px]:left-4",
+                        "sm:w-6 sm:right-6",
+                        "sm:hover:w-[5.5rem] sm:hover:px-2 sm:hover:right-8 hover:text-info hover:opacity-100"
+                    ])'>
+                    <i class="ri-arrow-left-line" />
+                    <span :class='cn([
+                        "max-[640px]:sr-only",
+                        "sm:pointer-events-none sm:opacity-0 sm:select-none sm:transition-opacity",
+                        "sm:group-hover:opacity-100"
+                    ])'>Voltar</span>
+                </Button>
             </DialogHeader>
             <div v-if="!orderResponse" class="mb-4">
                 <Form @submit="fetchOrdersReport">
                     <VueDatePicker v-model="dateRange" range locale="pt-BR" format="dd/MM/yyyy"
-                        :enable-time-picker="false" :presets="presets" clearable auto-apply
-                        :class="{ 'border-red-500 ring-red-500': hasDateError }" />
+                        :enable-time-picker="false" :preset-dates="presets" :flow="['calendar']" clearable auto-apply
+                        :class="[
+                            { 'border-red-500 ring-red-500': hasDateError },
+                            '[&_.dp__outer_menu_wrap]:z-[100]'
+                        ]" />
 
                     <ComboboxRoot v-model="selectedDistributors" v-model:search-term="searchTerm" multiple
                         class="my-4 relative">
@@ -143,7 +166,7 @@ getDistributors()
                         </ComboboxAnchor>
 
                         <ComboboxContent class="absolute z-10 w-full mt-2 bg-white rounded-md shadow-lg">
-                            <ComboboxViewport class="p-1">
+                            <ComboboxViewport class="p-1 max-h-[200px] overflow-y-auto">
                                 <ComboboxEmpty class="text-gray-400 text-sm p-2" />
                                 <ComboboxGroup>
                                     <ComboboxLabel class="px-2 text-xs text-gray-500">
@@ -166,13 +189,10 @@ getDistributors()
                 </Form>
             </div>
             <!-- Add DataTable section -->
-            <div v-else>
-                <Button @click="orderResponse = null" class="mb-4">
-                    <i class="ri-arrow-left-line mr-2" />
-                    Voltar
-                </Button>
-
-                <DataTablePedidos :orderResponse="orderResponse" ajustClass="max-h-[70vh] overflow-auto" />
+            <div v-else class="flex flex-col h-[80vh]">
+                <div class="flex-1 overflow-auto">
+                    <DataTablePedidos :orderResponse="orderResponse" ajust-class="top-3" />
+                </div>
             </div>
         </DialogContent>
     </Dialog>

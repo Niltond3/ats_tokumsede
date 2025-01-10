@@ -95,7 +95,7 @@ const loadTableData = (response) => {
 
 const fetchOrders = async () => {
     try {
-        renderToast(getOrder, 'Atualizando Tabela, aguarde...', 'tabela de pedidos atualizada', (response) => loadTableData(response))
+        renderToast(getOrder(), 'Atualizando Tabela, aguarde...', 'tabela de pedidos atualizada', (response) => loadTableData(response))
     } catch (error) {
         toast.error('Erro ao carregar tabela de pedidos')
     }

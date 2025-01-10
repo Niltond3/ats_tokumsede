@@ -303,150 +303,213 @@ class PedidoController extends Controller
         return [$pedidos, $valorTotalGeral];
     }
 
-    public function getPedidosByDateAndDistribuidor(Request $request)
+    public function relatorioPedidos(Request $request)
     {
-        $query = Pedido::with([
-            'endereco.cliente',
-            'entregador:id,nome',
-            'itens.produto',
-            'distribuidor:id,nome'
-        ]);
-
-        if ($request->dataInicial) {
-            $dataInicial = implode("-", array_reverse(explode("/", $request->dataInicial)));
-            $query->where('horarioPedido', '>=', $dataInicial . ' 00:00:00');
-        }
-
-        if ($request->dataFinal) {
-            $dataFinal = implode("-", array_reverse(explode("/", $request->dataFinal)));
-            $query->where('horarioPedido', '<=', $dataFinal . ' 23:59:59');
-        }
-
-        if ($request->idDistribuidores) {
-            $distribuidores = explode(',', $request->idDistribuidores);
-            $query->whereIn('idDistribuidor', $distribuidores);
-        }
-
-        $pedidos = $query->orderBy('horarioPedido', 'desc')->get();
-
-        return $pedidos;
-    }
-    function relatorioPedidos(Request $request)
-    {
-        $u = auth()->user();//Administrador::find($idUsuario);
-        $request['dataInicial'] = $request->dataInicial ? implode("-", array_reverse(explode("/", $request->dataInicial))) : "";
-        $request['dataFinal'] = $request->dataInicial ? implode("-", array_reverse(explode("/", $request->dataFinal))) : "";
-
-        $filtroData = "";
-        if ($request->dataInicial != null && $request->dataInicial != "") {
-            $filtroData .= "and pedido.horarioPedido >= '$request->dataInicial 00:00:00'";
-        }
-        if ($request->dataFinal != null && $request->dataFinal != "") {
-            $filtroData .= "and pedido.horarioPedido <= '$request->dataFinal 23:59:59'";
-        }
-
-        //Variável que irá armazenar o conteúdo dinâmico da SQL
-        $complementoSql = "";
-
-        //Adiciona o filtro do Movimento na SQL dinâmica
-        //Verifica se o filtro foi enviado
-        if ($request->idDistribuidores != "" && $request->idDistribuidores != null) {
-            //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
-            $escolhidos = explode(",", $request->idDistribuidores);
-            //Contador de movimentos escolhidos
-            $contDistribuidor = 0;
-
-            $complementoSql = $complementoSql . " and (";
-
-            //Adiciona todos os movimentos escolhidos à SQL
-            for ($i = 0; $i < sizeof($escolhidos); $i++) {
-
-                //Verifica se já foi adicionado algum movimento à SQL, se sim, adiciona um OR
-                if ($contDistribuidor > 0) {
-                    //Adiciona o filtro à SQL
-                    $complementoSql = $complementoSql . " or pedido.idDistribuidor = " . $escolhidos[$i] . "";
-                    //Incrementa o contador de movimentos
-                    $contDistribuidor++;
-                } else {
-                    //Adiciona o filtro à SQL
-                    $complementoSql = $complementoSql . "pedido.idDistribuidor = " . $escolhidos[$i] . "";
-                    //Incrementa o contador de movimentos
-                    $contDistribuidor++;
-                }
-            }
-
-            $complementoSql = $complementoSql . ") ";
-        }
-
-        if ($request->status != "" && $request->status != null) {
-            //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
-            $escolhidos = explode(",", $request->status);
-            //Contador de movimentos escolhidos
-            $contStatusPedido = 0;
-
-            $complementoSql = $complementoSql . " and (";
-
-            //Adiciona todos os movimentos escolhidos à SQL
-            for ($i = 0; $i < sizeof($escolhidos); $i++) {
-
-                //Verifica se já foi adicionado algum movimento à SQL, se sim, adiciona um OR
-                if ($contStatusPedido > 0) {
-                    //Adiciona o filtro à SQL
-                    $complementoSql = $complementoSql . " or pedido.status = " . $escolhidos[$i] . "";
-                    //Incrementa o contador de movimentos
-                    $contStatusPedido++;
-                } else {
-                    //Adiciona o filtro à SQL
-                    $complementoSql = $complementoSql . "pedido.status = " . $escolhidos[$i] . "";
-                    //Incrementa o contador de movimentos
-                    $contStatusPedido++;
-                }
-            }
-
-            $complementoSql = $complementoSql . ") ";
-        }
-
-        if ($request->numeroPedido != "") {
-            $complementoSql = $complementoSql . " and pedido.id = " . $request->numeroPedido;
-        }
+        $u = auth()->user();
 
         if (auth()->check()) {
-            // if (strcmp($u->tipoAdministrador, "Administrador") == 0) {
-            //     $pedidos = Pedido::with('distribuidor')
-            //         ->selectRaw("pedido.*, CONCAT('R$', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-            //         ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and ((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
-            //         ->orderBy('id', 'DESC')->get();
-            // }else
-            if (strcmp($u->tipoAdministrador, "Distribuidor") == 0) {
-                $pedidos = Pedido::with('distribuidor', 'endereco')
-                    ->selectRaw("pedido.*, "
-                        . "date_format(pedido.horarioPedido, '%d/%m/%Y - %h:%i hrs') as horarioPedido, "
-                        . "date_format(pedido.horarioEntrega, '%d/%m/%Y - %h:%i hrs') as horarioEntrega, "
-                        . "pedido.id, "
-                        . "pedido.total, "
-                        . "pedido.formaPagamento, "
-                        . "pedido.origem, "
-                        . "pedido.agendado,"
-                        . "pedido.status")
-                    ->whereRaw("1 $filtroData $complementoSql and pedido.idDistribuidor = " . $u->idDistribuidor)
-                    ->get();
-            } else {
-                $pedidos = Pedido::with('distribuidor', 'endereco')
-                    ->selectRaw("pedido.*, "
-                        . "date_format(pedido.horarioPedido, '%d/%m/%Y - %h:%i hrs') as horarioPedido, "
-                        . "date_format(pedido.horarioEntrega, '%d/%m/%Y - %h:%i hrs') as horarioEntrega, "
-                        . "pedido.id, "
-                        . "pedido.total, "
-                        . "pedido.formaPagamento, "
-                        . "pedido.origem, "
-                        . "pedido.agendado,"
-                        . "pedido.status")
-                    ->whereRaw("1 $filtroData $complementoSql")
-                    ->get();
+            $pedidosPendentes = Pedido::with(['distribuidor', 'endereco', 'entregador'])
+                ->selectRaw("pedido.*, date_format(pedido.horarioPedido, '%d/%m/%Y - %h:%i hrs') as horarioPedido,
+                    date_format(pedido.horarioEntrega, '%d/%m/%Y - %h:%i hrs') as horarioEntrega,
+                    pedido.id, pedido.total, pedido.formaPagamento, pedido.origem, pedido.agendado, pedido.status")
+                ->where('status', Pedido::PENDENTE);
+
+            $pedidosAceitos = Pedido::with(['distribuidor', 'endereco', 'entregador'])
+                ->selectRaw("pedido.*, date_format(pedido.horarioPedido, '%d/%m/%Y - %h:%i hrs') as horarioPedido,
+                    date_format(pedido.horarioEntrega, '%d/%m/%Y - %h:%i hrs') as horarioEntrega,
+                    pedido.id, pedido.total, pedido.formaPagamento, pedido.origem, pedido.agendado, pedido.status")
+                ->where('status', Pedido::ACEITO);
+
+            $pedidosDespachados = Pedido::with(['distribuidor', 'endereco', 'entregador'])
+                ->selectRaw("pedido.*, date_format(pedido.horarioPedido, '%d/%m/%Y - %h:%i hrs') as horarioPedido,
+                    date_format(pedido.horarioEntrega, '%d/%m/%Y - %h:%i hrs') as horarioEntrega,
+                    pedido.id, pedido.total, pedido.formaPagamento, pedido.origem, pedido.agendado, pedido.status")
+                ->where('status', Pedido::DESPACHADO);
+
+            $pedidosEntregues = Pedido::with(['distribuidor', 'endereco', 'entregador'])
+                ->selectRaw("pedido.*, date_format(pedido.horarioPedido, '%d/%m/%Y - %h:%i hrs') as horarioPedido,
+                    date_format(pedido.horarioEntrega, '%d/%m/%Y - %h:%i hrs') as horarioEntrega,
+                    pedido.id, pedido.total, pedido.formaPagamento, pedido.origem, pedido.agendado, pedido.status")
+                ->where('status', Pedido::ENTREGUE);
+
+            $pedidosCancelados = Pedido::with(['distribuidor', 'endereco', 'entregador'])
+                ->selectRaw("pedido.*, date_format(pedido.horarioPedido, '%d/%m/%Y - %h:%i hrs') as horarioPedido,
+                    date_format(pedido.horarioEntrega, '%d/%m/%Y - %h:%i hrs') as horarioEntrega,
+                    pedido.id, pedido.total, pedido.formaPagamento, pedido.origem, pedido.agendado, pedido.status")
+                ->whereIn('status', [Pedido::CANCELADO_USUARIO, Pedido::CANCELADO_NAO_LOCALIZADO, Pedido::CANCELADO_TROTE, Pedido::RECUSADO]);
+
+            $pedidosAgendados = Pedido::with(['distribuidor', 'endereco', 'entregador'])
+                ->selectRaw("pedido.*, date_format(pedido.horarioPedido, '%d/%m/%Y - %h:%i hrs') as horarioPedido,
+                    date_format(pedido.horarioEntrega, '%d/%m/%Y - %h:%i hrs') as horarioEntrega,
+                    pedido.id, pedido.total, pedido.formaPagamento, pedido.origem, pedido.agendado, pedido.status")
+                ->where([['status', Pedido::PENDENTE], ['agendado', 1]]);
+
+            if ($request->dataInicial) {
+                $dataInicial = implode("-", array_reverse(explode("/", $request->dataInicial)));
+                $whereClause = "horarioPedido >= '$dataInicial 00:00:00'";
+                $pedidosPendentes->whereRaw($whereClause);
+                $pedidosAceitos->whereRaw($whereClause);
+                $pedidosDespachados->whereRaw($whereClause);
+                $pedidosEntregues->whereRaw($whereClause);
+                $pedidosCancelados->whereRaw($whereClause);
+                $pedidosAgendados->whereRaw($whereClause);
             }
+
+            if ($request->dataFinal) {
+                $dataFinal = implode("-", array_reverse(explode("/", $request->dataFinal)));
+                $whereClause = "horarioPedido <= '$dataFinal 23:59:59'";
+                $pedidosPendentes->whereRaw($whereClause);
+                $pedidosAceitos->whereRaw($whereClause);
+                $pedidosDespachados->whereRaw($whereClause);
+                $pedidosEntregues->whereRaw($whereClause);
+                $pedidosCancelados->whereRaw($whereClause);
+                $pedidosAgendados->whereRaw($whereClause);
+            }
+
+            if ($request->idDistribuidores) {
+                $distribuidores = explode(',', $request->idDistribuidores);
+                $pedidosPendentes->whereIn('idDistribuidor', $distribuidores);
+                $pedidosAceitos->whereIn('idDistribuidor', $distribuidores);
+                $pedidosDespachados->whereIn('idDistribuidor', $distribuidores);
+                $pedidosEntregues->whereIn('idDistribuidor', $distribuidores);
+                $pedidosCancelados->whereIn('idDistribuidor', $distribuidores);
+                $pedidosAgendados->whereIn('idDistribuidor', $distribuidores);
+            }
+
+            $ultimoPedido = Pedido::orderBy('id', 'DESC')->first();
+            $entregadores = Entregador::where("status", Entregador::ATIVO)->select('id', 'nome')->get();
+
+            return [
+                $pedidosPendentes->orderBy('horarioPedido', 'desc')->get(),
+                $pedidosAceitos->orderBy('horarioPedido', 'desc')->get(),
+                $pedidosDespachados->orderBy('horarioPedido', 'desc')->get(),
+                $pedidosEntregues->orderBy('horarioPedido', 'desc')->get(),
+                $pedidosCancelados->orderBy('horarioPedido', 'desc')->get(),
+                $pedidosAgendados->orderBy('horarioPedido', 'desc')->get(),
+                $ultimoPedido->id,
+                $entregadores
+            ];
         }
-        return $pedidos;
+
+        return response('Sua sessão expirou. Por favor, refaça seu login.', 400);
     }
+
+    // function relatorioPedidos(Request $request)
+    // {
+    //     $u = auth()->user();//Administrador::find($idUsuario);
+    //     $request['dataInicial'] = $request->dataInicial ? implode("-", array_reverse(explode("/", $request->dataInicial))) : "";
+    //     $request['dataFinal'] = $request->dataInicial ? implode("-", array_reverse(explode("/", $request->dataFinal))) : "";
+
+    //     $filtroData = "";
+    //     if ($request->dataInicial != null && $request->dataInicial != "") {
+    //         $filtroData .= "and pedido.horarioPedido >= '$request->dataInicial 00:00:00'";
+    //     }
+    //     if ($request->dataFinal != null && $request->dataFinal != "") {
+    //         $filtroData .= "and pedido.horarioPedido <= '$request->dataFinal 23:59:59'";
+    //     }
+
+    //     //Variável que irá armazenar o conteúdo dinâmico da SQL
+    //     $complementoSql = "";
+
+    //     //Adiciona o filtro do Movimento na SQL dinâmica
+    //     //Verifica se o filtro foi enviado
+    //     if ($request->idDistribuidores != "" && $request->idDistribuidores != null) {
+    //         //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
+    //         $escolhidos = explode(",", $request->idDistribuidores);
+    //         //Contador de movimentos escolhidos
+    //         $contDistribuidor = 0;
+
+    //         $complementoSql = $complementoSql . " and (";
+
+    //         //Adiciona todos os movimentos escolhidos à SQL
+    //         for ($i = 0; $i < sizeof($escolhidos); $i++) {
+
+    //             //Verifica se já foi adicionado algum movimento à SQL, se sim, adiciona um OR
+    //             if ($contDistribuidor > 0) {
+    //                 //Adiciona o filtro à SQL
+    //                 $complementoSql = $complementoSql . " or pedido.idDistribuidor = " . $escolhidos[$i] . "";
+    //                 //Incrementa o contador de movimentos
+    //                 $contDistribuidor++;
+    //             } else {
+    //                 //Adiciona o filtro à SQL
+    //                 $complementoSql = $complementoSql . "pedido.idDistribuidor = " . $escolhidos[$i] . "";
+    //                 //Incrementa o contador de movimentos
+    //                 $contDistribuidor++;
+    //             }
+    //         }
+
+    //         $complementoSql = $complementoSql . ") ";
+    //     }
+
+    //     if ($request->status != "" && $request->status != null) {
+    //         //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
+    //         $escolhidos = explode(",", $request->status);
+    //         //Contador de movimentos escolhidos
+    //         $contStatusPedido = 0;
+
+    //         $complementoSql = $complementoSql . " and (";
+
+    //         //Adiciona todos os movimentos escolhidos à SQL
+    //         for ($i = 0; $i < sizeof($escolhidos); $i++) {
+
+    //             //Verifica se já foi adicionado algum movimento à SQL, se sim, adiciona um OR
+    //             if ($contStatusPedido > 0) {
+    //                 //Adiciona o filtro à SQL
+    //                 $complementoSql = $complementoSql . " or pedido.status = " . $escolhidos[$i] . "";
+    //                 //Incrementa o contador de movimentos
+    //                 $contStatusPedido++;
+    //             } else {
+    //                 //Adiciona o filtro à SQL
+    //                 $complementoSql = $complementoSql . "pedido.status = " . $escolhidos[$i] . "";
+    //                 //Incrementa o contador de movimentos
+    //                 $contStatusPedido++;
+    //             }
+    //         }
+
+    //         $complementoSql = $complementoSql . ") ";
+    //     }
+
+    //     if ($request->numeroPedido != "") {
+    //         $complementoSql = $complementoSql . " and pedido.id = " . $request->numeroPedido;
+    //     }
+
+    //     if (auth()->check()) {
+    //         // if (strcmp($u->tipoAdministrador, "Administrador") == 0) {
+    //         //     $pedidos = Pedido::with('distribuidor')
+    //         //         ->selectRaw("pedido.*, CONCAT('R$', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
+    //         //         ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and ((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
+    //         //         ->orderBy('id', 'DESC')->get();
+    //         // }else
+    //         if (strcmp($u->tipoAdministrador, "Distribuidor") == 0) {
+    //             $pedidos = Pedido::with('distribuidor', 'endereco')
+    //                 ->selectRaw("pedido.*, "
+    //                     . "date_format(pedido.horarioPedido, '%d/%m/%Y - %h:%i hrs') as horarioPedido, "
+    //                     . "date_format(pedido.horarioEntrega, '%d/%m/%Y - %h:%i hrs') as horarioEntrega, "
+    //                     . "pedido.id, "
+    //                     . "pedido.total, "
+    //                     . "pedido.formaPagamento, "
+    //                     . "pedido.origem, "
+    //                     . "pedido.agendado,"
+    //                     . "pedido.status")
+    //                 ->whereRaw("1 $filtroData $complementoSql and pedido.idDistribuidor = " . $u->idDistribuidor)
+    //                 ->get();
+    //         } else {
+    //             $pedidos = Pedido::with('distribuidor', 'endereco')
+    //                 ->selectRaw("pedido.*, "
+    //                     . "date_format(pedido.horarioPedido, '%d/%m/%Y - %h:%i hrs') as horarioPedido, "
+    //                     . "date_format(pedido.horarioEntrega, '%d/%m/%Y - %h:%i hrs') as horarioEntrega, "
+    //                     . "pedido.id, "
+    //                     . "pedido.total, "
+    //                     . "pedido.formaPagamento, "
+    //                     . "pedido.origem, "
+    //                     . "pedido.agendado,"
+    //                     . "pedido.status")
+    //                 ->whereRaw("1 $filtroData $complementoSql")
+    //                 ->get();
+    //         }
+    //     }
+    //     return $pedidos;
+    // }
     /**
      * Display a listing of the resource.
      *
@@ -579,7 +642,16 @@ class PedidoController extends Controller
                 $pedidoAceito["horaEsgotando"] = $this->maior30Minutos($pedidoAceito->dataAgendada . " " . $pedidoAceito->horaInicio);
             }
             // return [$pedidosPendentes, $pedidosAceitos, $pedidosEntregues, $pedidosCancelados, $pedidosAgendados, $ultimoPedido[0]->id, $entregadores];
-            return [$pedidosPendentes, $pedidosAceitos, $pedidosDespachados, $pedidosEntregues, $pedidosCancelados, $pedidosAgendados, $ultimoPedido[0]->id, $entregadores];
+            return [
+                $pedidosPendentes,
+                $pedidosAceitos,
+                $pedidosDespachados,
+                $pedidosEntregues,
+                $pedidosCancelados,
+                $pedidosAgendados,
+                $ultimoPedido[0]->id,
+                $entregadores
+            ];
         } else {
             return response('Sua sessão expirou. Por favor, refaça seu login.', 400);
         }

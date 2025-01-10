@@ -1,5 +1,4 @@
 <script setup>
-import axios from 'axios';
 import { ref, onMounted, computed } from 'vue';
 import DataTable from 'datatables.net-vue3';
 import DataTablesLib from 'datatables.net';
@@ -17,10 +16,13 @@ import { tableConfig } from './config/tableConfig'
 import { toast } from 'vue-sonner';
 import { shallowRef } from 'vue';
 import { useMemoize } from '@vueuse/core';
+import { getOrder } from '@/services/api/orders';
+import { POLLING_INTERVAL } from './config/constants';
 
 DataTable.use(DataTablesLib);
 
 const props = defineProps({
+    orderResponse: { type: Function, required: false },
     setTab: { type: Function, required: false },
     ajustClass: { type: String, required: false },
 })
@@ -66,44 +68,45 @@ const transformOrder = (pedido) => {
     }
 }
 
-const transformedOrders = computed(() => {
-    return orders.value.map(pedido => transformOrder(pedido))
-})
+const transformedOrders = computed(() => orders.value.map(pedido => transformOrder(pedido)))
 
-const loadTableData = () => {
+const loadTableData = (response) => {
+    console.log(response)
+    entregadores.value = response.data[7];
+
+    const concatArray = [].concat(
+        response.data[0],
+        response.data[1],
+        response.data[2],
+        response.data[3],
+        response.data[4]
+    );
+    const today = new Date();
+
+    const orderMap = new Map(concatArray.map(p => [p.id, p]));
+    const scheduledOrders = response.data[5].filter(pedido => {
+        if (orderMap.has(pedido.id)) return false;
+        const scheduleDate = dateToISOFormat(`${pedido.dataAgendada} ${pedido.horaInicio}`);
+        return scheduleDate >= today;
+    })
+    orders.value = [].concat(concatArray, scheduledOrders);
+    data.value = transformedOrders.value;
+}
+
+const fetchOrders = async () => {
     try {
-        var urlPedidos = 'pedidos';
-
-        const promise = axios.get(urlPedidos);
-
-        renderToast(promise, 'Atualizando Tabela, aguarde...', 'tabela de pedidos atualizada', (response) => {
-            entregadores.value = response.data[7];
-
-            const concatArray = [].concat(
-                response.data[0],
-                response.data[1],
-                response.data[2],
-                response.data[3],
-                response.data[4]
-            );
-            const today = new Date();
-
-            const orderMap = new Map(concatArray.map(p => [p.id, p]));
-            const scheduledOrders = response.data[5].filter(pedido => {
-                if (orderMap.has(pedido.id)) return false;
-                const scheduleDate = dateToISOFormat(`${pedido.dataAgendada} ${pedido.horaInicio}`);
-                return scheduleDate >= today;
-            })
-            orders.value = [].concat(concatArray, scheduledOrders);
-            data.value = transformedOrders.value;
-        })
+        renderToast(getOrder, 'Atualizando Tabela, aguarde...', 'tabela de pedidos atualizada', (response) => loadTableData(response))
     } catch (error) {
         toast.error('Erro ao carregar tabela de pedidos')
     }
 }
 
+
+
 const handleLoadTableData = () => {
-    loadTableData()
+    props.orderResponse
+        ? loadTableData(props.orderResponse)
+        : fetchOrders()
 }
 
 onMounted(() => {
@@ -119,8 +122,8 @@ onMounted(() => {
 
     $('.dt-search > input').addClass(inputClasses)
 
-    loadTableData();
-    window.setInterval(observeNewOrders(loadTableData), 10000);
+    handleLoadTableData();
+    window.setInterval(observeNewOrders(handleLoadTableData), POLLING_INTERVAL);
 })
 
 const badgeClasses = 'font-normal inline-block px-2 text-[75%] text-center whitespace-nowrap align-baseline rounded text-white'
@@ -135,7 +138,8 @@ const badgeClasses = 'font-normal inline-block px-2 text-[75%] text-center white
             <div>
                 <DropDownPedidos :payloadData="data.rowData" :entregadores="entregadores"
                     @callback:edited-order="handleLoadTableData" />
-                <ActionOrders :payloadData="data.rowData" :entregadores="entregadores" :loadTable="loadTableData" />
+                <ActionOrders :payloadData="data.rowData" :entregadores="entregadores"
+                    :loadTable="handleLoadTableData" />
             </div>
         </template>
         <template #rating="data">

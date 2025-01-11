@@ -71,7 +71,6 @@ const transformOrder = (pedido) => {
 const transformedOrders = computed(() => orders.value.map(pedido => transformOrder(pedido)))
 
 const loadTableData = (response) => {
-    console.log(response)
     entregadores.value = response.data[7];
 
     const concatArray = [].concat(

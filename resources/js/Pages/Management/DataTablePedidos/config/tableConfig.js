@@ -86,9 +86,9 @@ export const tableConfig = (ajustClass) => {
 
                     const statusKey =
                         data == "Cancelado pelo Usuário" ||
-                        data == "Não Localizado" ||
-                        data == "Trote" ||
-                        data == "Recusado"
+                            data == "Não Localizado" ||
+                            data == "Trote" ||
+                            data == "Recusado"
                             ? "Cancelado"
                             : data;
 

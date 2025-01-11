@@ -104,8 +104,9 @@ getDistributors()
 <template>
     <Dialog v-model:open="isOpen" :modal="false">
         <slot name="trigger" @click="isOpen = true" />
-        <DialogContent class="max-w-[90vw] overflow-visible" @pointerdownOutside="(e) => e.preventDefault()">
-            <DialogHeader class="flex justify-between items-center">
+        <DialogContent class="max-w-[90vw] sm:max-w-3xl overflow-visible"
+            @pointerdownOutside="(e) => e.preventDefault()">
+            <DialogHeader class="flex justify-between items-center mb-3">
                 <DialogTitle class="text-info">Relatório de Pedidos</DialogTitle>
                 <Button v-if="orderResponse" @click="orderResponse = null" variant="ghost" size="sm" :class='cn(
                     [
@@ -127,12 +128,14 @@ getDistributors()
                     <div class="flex gap-2">
                         <div class="w-1/2">
                             <VueDatePicker v-model="dateRange" range locale="pt-BR" format="dd/MM/yyyy"
-                                :enable-time-picker="false" :presets="presets" clearable auto-apply
-                                :class="{ 'border-red-500 ring-red-500': hasDateError }" />
+                                :enable-time-picker="false" :preset-dates="presets" clearable auto-apply :class="[
+                                    { 'border-red-500 ring-red-500': hasDateError },
+                                    '[&_input]:h-14' // Match height with DistributorCombobox
+                                ]" />
                         </div>
                         <div class="w-1/2">
                             <DistributorCombobox v-model="selectedDistributors" v-model:search-term="searchTerm"
-                                :distributors="distributors" :is-loading="isLoading" />
+                                :distributors="distributors" :is-loading="isLoading" class="" />
                         </div>
                     </div>
 

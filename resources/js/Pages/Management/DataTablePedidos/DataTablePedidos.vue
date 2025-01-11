@@ -122,6 +122,18 @@ onMounted(() => {
     $('.dt-search > input').addClass(inputClasses)
 
     handleLoadTableData();
+
+    // dt.on('draw', () => {
+    //     const pendentePaneButton = $('tr').filter(function () {
+    //         return $(this).find('td:contains("Pendente")').length > 0;
+    //     }).first();
+
+    //     if (pendentePaneButton.length) {
+    //         pendentePaneButton.trigger('click'); // Trigger click event
+    //         console.log("Clicked row with 'Pendente'.");
+    //     }
+    // });
+
     window.setInterval(observeNewOrders(handleLoadTableData), POLLING_INTERVAL);
 })
 

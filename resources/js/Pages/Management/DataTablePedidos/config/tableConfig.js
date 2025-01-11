@@ -42,13 +42,14 @@ export const tableConfig = (ajustClass) => {
         { data: "endereco.estado", title: "endereco.estado", visible: false },
         { data: "endereco.cidade", title: "endereco.cidade", visible: false },
     ];
+    console.log('ajustClass')
+    console.log(ajustClass)
 
     const options = {
         language: languagePtBR,
         processing: true,
         deferRender: true,
         orderClasses: false,
-        deferRender: true,
         responsive: {
             details: false,
             breakpoints: [
@@ -62,6 +63,9 @@ export const tableConfig = (ajustClass) => {
                 { name: "mobilel", width: 480 },
                 { name: "mobilep", width: 320 },
             ],
+        },
+        searchPanes: {
+            cascadePanes: true,
         },
         columnDefs: [
             {
@@ -137,6 +141,35 @@ export const tableConfig = (ajustClass) => {
             },
             topEnd: null,
         },
+        initComplete: function () {
+            const api = this.api();
+            const targetValue = 'Pendente';
+            const tdQuerySelector = '.dtsp-searchPane.right-0 .dt-container .dt-layout-row .dt-layout-cell .dt-scroll .dt-scroll-body .dataTable tbody tr td'
+            const rowNameQuerySelector = 'div span div .hidden'
+            // Wait for the SearchPanes to be fully initialized
+            const interval = setInterval(() => {
+                const statusPaneItems = document.querySelectorAll(tdQuerySelector);
+
+                if (statusPaneItems) {
+                    // Find the target value to select
+                    statusPaneItems.forEach(row => {
+                        const rowName = row.querySelector(rowNameQuerySelector)
+                        if (rowName) {
+                            if (rowName.textContent.includes(targetValue)) {
+                                row.click()
+                                console.log("Preselected " + targetValue + " in the Status SearchPane.");
+                            }
+                            clearInterval(interval); // Stop checking once panes are ready
+                            return
+                        }
+                    })
+                    api.draw();
+                } else {
+                    console.error("Status SearchPane not found.");
+                }
+            }, 100); // Check every 100ms
+
+        }
     };
 
     return { columns, options };

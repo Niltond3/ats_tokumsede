@@ -104,7 +104,8 @@ getDistributors()
 <template>
     <Dialog v-model:open="isOpen" :modal="false">
         <slot name="trigger" @click="isOpen = true" />
-        <DialogContent class="max-w-[90vw] sm:max-w-3xl overflow-visible"
+        <DialogContent class="max-w-[90vw] sm:max-w-3xl"
+            :class="{ 'overflow-auto px-2 overflow-x-hidden': orderResponse, 'overflow-visible': !orderResponse }"
             @pointerdownOutside="(e) => e.preventDefault()">
             <DialogHeader class="flex justify-between items-center mb-3">
                 <DialogTitle class="text-info">Relatório de Pedidos</DialogTitle>
@@ -125,15 +126,15 @@ getDistributors()
             </DialogHeader>
             <div v-if="!orderResponse" class="mb-4">
                 <Form @submit="fetchOrdersReport">
-                    <div class="flex gap-2">
-                        <div class="w-1/2">
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <div class="sm:w-1/2">
                             <VueDatePicker v-model="dateRange" range locale="pt-BR" format="dd/MM/yyyy"
                                 :enable-time-picker="false" :preset-dates="presets" clearable auto-apply :class="[
                                     { 'border-red-500 ring-red-500': hasDateError },
                                     '[&_input]:h-14' // Match height with DistributorCombobox
                                 ]" />
                         </div>
-                        <div class="w-1/2">
+                        <div class="sm:w-1/2">
                             <DistributorCombobox v-model="selectedDistributors" v-model:search-term="searchTerm"
                                 :distributors="distributors" :is-loading="isLoading" class="" />
                         </div>
@@ -144,9 +145,7 @@ getDistributors()
             </div>
             <!-- Add DataTable section -->
             <div v-else class="flex flex-col h-[80vh]">
-                <div class="flex-1 overflow-auto">
-                    <DataTablePedidos :orderResponse="orderResponse" ajust-class="top-3" />
-                </div>
+                <DataTablePedidos :orderResponse="orderResponse" ajustClass="!top-[100px] md:!top-[90px]" />
             </div>
         </DialogContent>
     </Dialog>

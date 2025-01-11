@@ -85,7 +85,6 @@ async function fetchOrdersReport() {
             dataFinal: endDate?.toLocaleDateString('pt-BR'),
             idDistribuidores: distributorIds || null // Send null if no distributors selected
         })
-        console.log(response.data)
         orderResponse.value = response
     } catch (error) {
         toast.error('Erro ao gerar relatório')

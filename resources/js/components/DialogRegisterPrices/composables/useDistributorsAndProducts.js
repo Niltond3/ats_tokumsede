@@ -44,7 +44,6 @@ export function useDistributorsAndProducts() {
     };
 
     const fetchDistributors = () => {
-        console.log("fetchDistributors");
         const promise = listAllDistributors();
         renderToast(
             promise,

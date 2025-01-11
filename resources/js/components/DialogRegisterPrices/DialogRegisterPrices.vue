@@ -131,7 +131,6 @@ const fetchClientName = async () => {
 }
 
 const fetchDistributorProductsList = async (addressId, userId) => {
-    console.log('fetchDistributorProductsList')
     distributors.value = null
     await fetchDistributor(addressId, userId)
     loadDistributorProducts(distributor.value.id, props.clientId)

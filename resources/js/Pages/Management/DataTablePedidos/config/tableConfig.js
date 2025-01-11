@@ -42,8 +42,6 @@ export const tableConfig = (ajustClass) => {
         { data: "endereco.estado", title: "endereco.estado", visible: false },
         { data: "endereco.cidade", title: "endereco.cidade", visible: false },
     ];
-    console.log('ajustClass')
-    console.log(ajustClass)
 
     const options = {
         language: languagePtBR,
@@ -157,7 +155,6 @@ export const tableConfig = (ajustClass) => {
                         if (rowName) {
                             if (rowName.textContent.includes(targetValue)) {
                                 row.click()
-                                console.log("Preselected " + targetValue + " in the Status SearchPane.");
                             }
                             clearInterval(interval); // Stop checking once panes are ready
                             return

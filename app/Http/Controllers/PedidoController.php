@@ -303,7 +303,7 @@ class PedidoController extends Controller
         return [$pedidos, $valorTotalGeral];
     }
 
-    public function relatorioPedidos(Request $request)
+    public function allOldrelatorioPedidos(Request $request)
     {
         $u = auth()->user();
 
@@ -392,6 +392,78 @@ class PedidoController extends Controller
         }
 
         return response('Sua sessão expirou. Por favor, refaça seu login.', 400);
+    }
+    public function relatorioPedidos(Request $request)
+    {
+        $u = auth()->user();
+
+        if (!auth()->check()) {
+            return response('Sua sessão expirou. Por favor, refaça seu login.', 400);
+        }
+
+        $queries = [
+            'pendentes' => Pedido::withBasicRelations()->withFormattedDates()->where('status', Pedido::PENDENTE),
+            'aceitos' => Pedido::withBasicRelations()->withFormattedDates()->where('status', Pedido::ACEITO),
+            'despachados' => Pedido::withBasicRelations()->withFormattedDates()->where('status', Pedido::DESPACHADO),
+            'entregues' => Pedido::withBasicRelations()->withFormattedDates()->where('status', Pedido::ENTREGUE),
+            'cancelados' => Pedido::withBasicRelations()->withFormattedDates()->whereIn('status', [
+                Pedido::CANCELADO_USUARIO,
+                Pedido::CANCELADO_NAO_LOCALIZADO,
+                Pedido::CANCELADO_TROTE,
+                Pedido::RECUSADO
+            ]),
+            'agendados' => Pedido::withBasicRelations()->withFormattedDates()->where([
+                ['status', Pedido::PENDENTE],
+                ['agendado', 1]
+            ])
+        ];
+        $this->applyDateFilters($queries, $request);
+        $this->applyDistribuidorFilter($queries, $request);
+
+        $ultimoPedido = Pedido::orderBy('id', 'DESC')->first();
+        $entregadores = Entregador::where("status", Entregador::ATIVO)
+            ->select('id', 'nome')
+            ->get();
+
+        return [
+            $queries['pendentes']->orderBy('horarioPedido', 'desc')->get(),
+            $queries['aceitos']->orderBy('horarioPedido', 'desc')->get(),
+            $queries['despachados']->orderBy('horarioPedido', 'desc')->get(),
+            $queries['entregues']->orderBy('horarioPedido', 'desc')->get(),
+            $queries['cancelados']->orderBy('horarioPedido', 'desc')->get(),
+            $queries['agendados']->orderBy('horarioPedido', 'desc')->get(),
+            $ultimoPedido->id,
+            $entregadores
+        ];
+    }
+
+    private function applyDateFilters(&$queries, $request)
+    {
+        if ($request->dataInicial) {
+            $dataInicial = implode("-", array_reverse(explode("/", $request->dataInicial)));
+            $whereClause = "horarioPedido >= '$dataInicial 00:00:00'";
+            foreach ($queries as $query) {
+                $query->whereRaw($whereClause);
+            }
+        }
+
+        if ($request->dataFinal) {
+            $dataFinal = implode("-", array_reverse(explode("/", $request->dataFinal)));
+            $whereClause = "horarioPedido <= '$dataFinal 23:59:59'";
+            foreach ($queries as $query) {
+                $query->whereRaw($whereClause);
+            }
+        }
+    }
+
+    private function applyDistribuidorFilter(&$queries, $request)
+    {
+        if ($request->idDistribuidores) {
+            $distribuidores = explode(',', $request->idDistribuidores);
+            foreach ($queries as $query) {
+                $query->whereIn('idDistribuidor', $distribuidores);
+            }
+        }
     }
 
     // function relatorioPedidos(Request $request)

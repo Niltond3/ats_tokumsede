@@ -189,7 +189,7 @@ function irParaProdutosComFiltro() {
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                     <ul
-                        class="grid w-[90vw] gap-3 p-4 md:w-[500px] md:grid-cols-3 lg:w-[600px] max-h-[64vh] overflow-auto">
+                        class="grid w-[90vw] gap-5 p-4 md:w-[500px] md:grid-cols-3 lg:w-[600px] max-h-[64vh] overflow-auto">
                         <li key="orders_report">
                             <DialogReportOrders>
                                 <template #trigger>
@@ -198,30 +198,30 @@ function irParaProdutosComFiltro() {
                                 </template>
                             </DialogReportOrders>
                         </li>
-                        <li key="sales_report">
+                        <!-- <li key="sales_report">
                             <DialogReportSales>
                                 <template #trigger>
                                     <DialogTrigger icon="ri-money-dollar-circle-line" title="Relatório de Vendas"
                                         description="Análise de vendas por distribuidor e período" />
                                 </template>
                             </DialogReportSales>
-                        </li>
-                        <li key="product_sales_report">
+                        </li> -->
+                        <!-- <li key="product_sales_report">
                             <DialogReportProductSales>
                                 <template #trigger>
                                     <DialogTrigger icon="ri-shopping-bag-line" title="Vendas por Produto"
                                         description="Relatório de vendas detalhado por produto" />
                                 </template>
                             </DialogReportProductSales>
-                        </li>
-                        <li key="delivery_report">
+                        </li> -->
+                        <!-- <li key="delivery_report">
                             <DialogReportDelivery>
                                 <template #trigger>
                                     <DialogTrigger icon="ri-bike-line" title="Relatório de Entregadores"
                                         description="Desempenho e entregas por entregador" />
                                 </template>
                             </DialogReportDelivery>
-                        </li>
+                        </li> -->
                         <li key="stock_report">
                             <DialogReportStock>
                                 <template #trigger>

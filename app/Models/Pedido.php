@@ -17,6 +17,22 @@ class Pedido extends Model
 
     use \Znck\Eloquent\Traits\BelongsToThrough;
     protected $table = 'pedido';
+
+    public function scopeWithBasicRelations($query)
+    {
+        return $query->with(['distribuidor', 'endereco', 'entregador']);
+    }
+
+    public function scopeWithFormattedDates($query)
+    {
+        return $query->selectRaw("
+        pedido.*,
+        date_format(pedido.horarioPedido, '%d/%m/%Y - %h:%i hrs') as horarioPedido,
+        date_format(pedido.horarioEntrega, '%d/%m/%Y - %h:%i hrs') as horarioEntrega,
+        pedido.id, pedido.total, pedido.formaPagamento, pedido.origem,
+        pedido.agendado, pedido.status
+    ");
+    }
     protected $appends = ['cliente'];
     protected $fillable = [
         'idDistribuidor',//chave estrangeira
@@ -89,10 +105,12 @@ class Pedido extends Model
         return $this->hasMany(ItemPedido::class, 'idPedido');
     }
 
-    public function getClienteAttribute(): mixed {
+    public function getClienteAttribute(): mixed
+    {
         return $this->endereco->cliente;
     }
-    public function getRatingAttribute() {
+    public function getRatingAttribute()
+    {
         return $this->endereco->rating;
     }
 }

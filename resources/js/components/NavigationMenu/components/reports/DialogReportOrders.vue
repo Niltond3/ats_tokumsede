@@ -4,7 +4,6 @@ import { toast } from 'vue-sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import DataTablePedidos from '@/Pages/Management/DataTablePedidos/DataTablePedidos.vue'
 import { Form } from '@/components/ui/form'
-import { Skeleton } from '@/components/ui/skeleton'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import { Button } from '@/components/ui/button'
@@ -101,11 +100,10 @@ getDistributors()
 </script>
 
 <template>
-    <Dialog v-model:open="isOpen" :modal="false">
+    <Dialog v-model:open="isOpen" :modal="true">
         <slot name="trigger" @click="isOpen = true" />
-        <DialogContent class="max-w-[90vw] sm:max-w-3xl"
-            :class="{ 'overflow-auto px-2 overflow-x-hidden': orderResponse, 'overflow-visible': !orderResponse }"
-            @pointerdownOutside="(e) => e.preventDefault()">
+        <DialogContent class="max-w-[90vw] sm:max-w-3xl" @pointerdownOutside.prevent
+            :class="{ 'overflow-auto px-2 overflow-x-hidden': orderResponse, 'overflow-visible': !orderResponse }">
             <DialogHeader class="flex justify-between items-center mb-3">
                 <DialogTitle class="text-info">Relatório de Pedidos</DialogTitle>
                 <Button v-if="orderResponse" @click="orderResponse = null" variant="ghost" size="sm" :class='cn(

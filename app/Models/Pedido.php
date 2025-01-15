@@ -20,7 +20,14 @@ class Pedido extends Model
 
     public function scopeWithBasicRelations($query)
     {
-        return $query->with(['distribuidor', 'endereco', 'entregador']);
+        return $query->with([
+            'distribuidor',
+            'endereco',
+            'entregador',
+            'itens' => function ($q) {
+                $q->where('qtd', '>', 0)->with('produto');
+            }
+        ]);
     }
 
     public function scopeWithFormattedDates($query)

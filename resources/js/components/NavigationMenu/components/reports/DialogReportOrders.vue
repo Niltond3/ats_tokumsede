@@ -22,6 +22,7 @@ const searchTerm = ref('')
 const selectedDistributors = ref([])
 const distributors = ref([])
 const isLoading = ref(true)
+const isLoadingReport = ref(false)
 const filteredData = ref([])
 const showReportButton = computed(() => filteredData.value.length > 0)
 
@@ -182,6 +183,7 @@ async function fetchOrdersReport() {
         toast.warning('Selecione um período para gerar o relatório')
         return
     }
+    isLoadingReport.value = true
     hasDateError.value = false
     const [startDate, endDate] = dateRange.value
     const distributorIds = selectedDistributors.value
@@ -200,7 +202,10 @@ async function fetchOrdersReport() {
         'Carregando relatório...',
         'Relatório gerado com sucesso!',
         'Erro ao gerar relatório',
-        (response) => orderResponse.value = response,
+        (response) => {
+            orderResponse.value = response
+            isLoadingReport.value = false
+        },
     )
 }
 
@@ -212,25 +217,6 @@ watch(dateRange, () => {
 
 getDistributors()
 
-/*
-@pointerDownOutside="(e) => {
-                const nestedDialog = e.target.closest(`[role='dialog']`)
-                const dataTable = e.target.closest('.display')
-                // @pointerdownOutside.prevent
-                if (!e.target.closest('.display')) {
-                    isOpen = false
-                }
-                if (!isTopDialog(dialogId) || nestedDialog) {
-                    console.log('preventing close')
-                    e.stopPropagation()
-                    e.preventDefault()
-                    return
-                } if (!dataTable) {
-                    console.log('closing')
-                    isOpen = false
-                }
-            }"
-*/
 </script>
 
 <template>
@@ -242,17 +228,24 @@ getDistributors()
                 <div class="flex items-center gap-4">
                     <DialogTitle class="text-info">Relatório de Pedidos</DialogTitle>
                     <Button v-if="showReportButton" @click="generateReport" variant="outline" size="sm"
-                        class="text-info">
+                        class="text-info/40 hover:text-info transition-colors">
                         <i class="ri-file-list-3-line mr-2" />
                         Baixar Relatório
                     </Button>
                 </div>
-                <Button v-if="orderResponse" @click="orderResponse = null" variant="ghost" size="sm" :class='cn(
+                <Button v-if="orderResponse" @click="() => {
+                    orderResponse = null
+                    dateRange.value = undefined
+                    selectedDistributors.value = []
+                    searchTerm.value = ''
+                    hasDateError.value = false
+                    filteredData.value = []
+                }" variant="ghost" size="sm" :class='cn(
                     [
                         "group h-4 p-0 flex justify-start rounded-sm absolute top-4 font-thin opacity-70 transition-all",
                         "max-[640px]:left-4",
                         "sm:w-6 sm:right-6",
-                        "sm:hover:w-[5.5rem] sm:hover:px-2 sm:hover:right-8 hover:text-info hover:opacity-100"
+                        "sm:hover:w-24 sm:hover:h-8 sm:hover:top-2 sm:hover:bg-info sm:hover:text-white sm:hover:font-bold sm:hover:px-2 sm:hover:right-8 hover:text-info hover:opacity-100"
                     ])'>
                     <i class="ri-arrow-left-line" />
                     <span :class='cn([
@@ -274,11 +267,12 @@ getDistributors()
                         </div>
                         <div class="sm:w-1/2">
                             <DistributorCombobox v-model="selectedDistributors" v-model:search-term="searchTerm"
-                                :distributors="distributors" :is-loading="isLoading" class="" />
+                                :distributors="distributors" :is-loading="isLoading" :disabled="isLoadingReport" />
                         </div>
                     </div>
 
-                    <Button type="submit" class="mt-4">Gerar Relatório</Button>
+                    <Button type="submit" class="mt-4 disabled:cursor-not-allowed" :disabled="isLoadingReport">Gerar
+                        Relatório</Button>
                 </Form>
             </div>
             <!-- Add DataTable section -->

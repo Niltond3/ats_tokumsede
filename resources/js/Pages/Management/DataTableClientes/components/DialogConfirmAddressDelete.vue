@@ -22,7 +22,13 @@ const handleDeleteAddress = (confirm) => {
 
     var url = `enderecos/${props.idAddress}`
     const promise = axios.put(url, { status: 3 })
-    renderToast(promise, 'deletando endereço', 'Endereço deletado', () => emits('delete:confirm', true))
+    renderToast(
+        promise,
+        'deletando endereço',
+        'Endereço deletado',
+        'Erro ao deletar endereço',
+        () => emits('delete:confirm', true)
+    )
 }
 
 </script>

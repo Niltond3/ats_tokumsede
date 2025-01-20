@@ -2,13 +2,14 @@
 import { twMerge } from "tailwind-merge";
 import languagePtBR from "./dataTablePtBR.mjs";
 
-export const tableConfig = (ajustClass) => {
+export const tableConfig = (ajustClass, isNestedTable = false) => {
     const columns = [
         { data: "id", title: "#", responsivePriority: 7 },
         {
             data: "distribuidor.nome",
             title: "Distribuidor",
             responsivePriority: 3,
+            visible: !isNestedTable
         },
         { data: "cliente.nome", title: "Cliente", responsivePriority: 2 },
         {
@@ -16,8 +17,9 @@ export const tableConfig = (ajustClass) => {
             render: "#rating",
             title: "Rating",
             responsivePriority: 6,
+            visible: !isNestedTable
         },
-        { data: "horarioPedido", title: "Data do Pedido" },
+        { data: "horarioPedido", title: "Data do Pedido", visible: !isNestedTable },
         { data: "dataAgendada", title: "Agendamento", responsivePriority: 4 },
         { data: "status.label", title: "status", responsivePriority: 5 },
         {
@@ -74,7 +76,7 @@ export const tableConfig = (ajustClass) => {
                         <div class="flex items-center gap-1">
                             <i class="${icon} text-lg"></i>
                             <span class="w-0 opacity-0 pointer-events-none">${peso}</span>
-                             <span class="hidden min-[768px]:block"> ${data} </span>
+                             <span class="hidden @[768px]:block"> ${data} </span>
                         </div >
                      `;
                     const getType = {
@@ -101,6 +103,7 @@ export const tableConfig = (ajustClass) => {
                     controls: false,
                     className: twMerge(
                         ajustClass,
+                        "@container",
                         "[&>div.dtsp-topRow]:hidden",
                         "[&_.dt-layout-row]:!m-0",
                         "[&_.dt-scroll]:!m-0",
@@ -116,6 +119,7 @@ export const tableConfig = (ajustClass) => {
                         "[&_tr.selected_.dtsp-nameCont]:translate-y-[5px]",
                         "[&_.dt-scroll-head]:hidden",
                         "[&_tr.selected_div]:!text-white",
+                        "[&_tr.selected_span.hidden]:!block",
                         "[&_.dt-scroll-body]:!h-[46px]",
                         "[&_table]:flex",
                         "[&_table>colgroup]:hidden",

@@ -1,5 +1,4 @@
 <script setup>
-import { ref, markRaw, defineComponent, h } from 'vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import Button from '@/components/Button.vue';
 import { Head, Link } from '@inertiajs/vue3';
@@ -21,7 +20,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { toast } from 'vue-sonner'
+import renderToast from '@/components/renderPromiseToast'
 
 defineProps({
     canResetPassword: {
@@ -45,12 +44,6 @@ const { handleSubmit, isSubmitting } = useForm({
     }
 })
 
-const CustomDiv = (title, description) => defineComponent({
-    setup() {
-        return () => h('div', { class: 'flex flex-col' }, title, h('span', { class: 'text-xs opacity-80' }, description))
-    }
-})
-
 const onSubmit = handleSubmit((values, { resetField }) => {
     const phoneRaw = values.telefone.replace(/\D/g, '')
 
@@ -64,24 +57,18 @@ const onSubmit = handleSubmit((values, { resetField }) => {
         remember: values.remember
     }
 
-    const renderToast = (promise) => {
-        toast.promise(promise, {
-            loading: 'Aguarde...',
-
-            success: (data) => {
-                resetField('senha')
-                location.reload();
-                return markRaw(CustomDiv('sucesso', 'Login realizado com sucesso'));
-            },
-            error: (data) => markRaw(CustomDiv('Error', data.response)),
-        });
-    }
-
-    const url = route('cliente.login')
-
     const request = axios.post(url, payload)
 
-    renderToast(request)
+    renderToast(
+        request,
+        'Realizando login...',
+        'Login realizado com sucesso',
+        'Erro ao realizar login',
+        () => {
+            resetField('senha')
+            location.reload();
+        }
+    )
 
 })
 

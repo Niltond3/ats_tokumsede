@@ -13,13 +13,15 @@ import DialogEditOrder from './DialogEditOrder.vue'
 import DialogShowOrder from './DialogShowOrder.vue'
 import DialogConfirmAction from './DialogConfirmAction.vue'
 import { usePage, } from '@inertiajs/vue3';
-import { orderAccept, orderDeliver, orderDispatch, orderReject } from '@/services/api/orders'
+import { useOrderActions } from '../composers/useOrderActions'
 
 const page = usePage()
 
 const props = defineProps({
     payloadData: { type: null, required: true },
     entregadores: { type: null, required: true },
+    isNestedTable: { type: Boolean, required: false },
+    loadTable: { type: Function, required: true },
 })
 
 const orderStatus = ref(props.payloadData.status.label)
@@ -27,54 +29,14 @@ const dropdownOpen = ref(false)
 
 const { tipoAdministrador } = page.props.auth.user
 
-
 const emit = defineEmits(['callback:edited-order'])
 
 const { id: idPedido, } = props.payloadData
 
-
-
 const handleEditOrder = () => emit('callback:edited-order')
 
-const CustomDiv = (title, description) => defineComponent({
-    setup() {
-        return () => h('div', { class: 'flex flex-col' }, title, h('span', { class: 'text-xs opacity-80' }, description))
-    }
-})
+const { handleAceitar, handleDespachar, handleEntregar, handleCancelar, handleToPendent } = useOrderActions(idPedido, props.loadTable)
 
-const renderToast = (promise, status, callbackSucess) => {
-    toast.promise(promise, {
-        loading: 'Aguarde...',
-
-        success: (data) => {
-            handleEditOrder()
-            callbackSucess && callbackSucess(data)
-            return markRaw(CustomDiv('sucesso', `O pedido ${idPedido} foi ${status} com sucesso!`));
-        },
-        error: (data) => markRaw(CustomDiv('Error', data.response.data)),
-    });
-}
-
-const handleAceitar = () => {
-    const promise = orderAccept(idPedido)
-    renderToast(promise, 'aceito')
-}
-
-const handleDespachar = (deliveryMan) => {
-    const promise = orderDispatch(idPedido, deliveryMan)
-    renderToast(promise, 'despachado')
-}
-
-const handleEntregar = (id) => {
-    const promise = orderDeliver(idPedido)
-    renderToast(promise, 'entregue')
-}
-
-const handleCancelar = (confirmCancellCalback) => {
-    const { reason, toggleDialog } = confirmCancellCalback
-    const promise = orderReject(idPedido, reason)
-    renderToast(promise, 'Cancelado', toggleDialog)
-}
 
 const handleToggleDropdown = (op) => {
     if (op || op == false) dropdownOpen.value = !dropdownOpen.value
@@ -86,8 +48,10 @@ const handleToggleDropdown = (op) => {
     <DropdownMenu :open="dropdownOpen" @update:open="handleToggleDropdown">
         <div>
             <DropdownMenuTrigger as-child>
-                <Button variant="ghost" class="transition-colors text-cyan-700 p-0 hidden min-[426px]:block"
-                    @click="handleToggleDropdown()">
+                <Button variant="ghost" :class="[
+                    'transition-colors text-cyan-700 p-0 hidden',
+                    isNestedTable ? '' : 'min-[426px]:block'
+                ]" @click="handleToggleDropdown()">
                     <span class="sr-only">Abrir Menú</span>
                     <MoreVertical class="w-6 h-6" />
                 </Button>
@@ -119,7 +83,14 @@ const handleToggleDropdown = (op) => {
                             </DropdownMenuItem>
                             <DialogConfirmAction dialog-title="Cancelar Pedido" trigger-icon="ri-close-circle-fill"
                                 trigger-label="Cancelar" variant="danger" :text-reson="true"
-                                @update:dialog-open="handleToggleDropdown" @on:confirm="handleCancelar" />
+                                @update:dialog-open="handleToggleDropdown" @on:confirm="() => {
+                                    const { reason, toggleDialog } = confirmCancellCalback
+                                    handleCancelar(reason, toggleDialog)
+                                }" />
+                            <DialogConfirmAction v-if="orderStatus !== 'Pendente'"
+                                @update:dialog-open="handleToggleDropdown" @on:confirm="handleToPendent"
+                                dialog-title="Retornar para Pendente" trigger-icon="ri-arrow-go-back-fill"
+                                trigger-label="Para Pendente" variant="warning" />
                         </DropdownMenuSubContent>
                     </DropdownMenuPortal>
                 </DropdownMenuSub>

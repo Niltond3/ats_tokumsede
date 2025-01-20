@@ -11,6 +11,8 @@ import { listAllDistributors } from '@/services/api/distributors'
 import renderToast from '@/components/renderPromiseToast'
 import { cn, utf8Decode } from '@/util'
 import DistributorCombobox from './DistributorCombobox.vue'
+import { jsPDF } from 'jspdf'
+import 'jspdf-autotable'
 
 const isOpen = ref(false)
 const dateRange = ref(undefined)
@@ -20,6 +22,8 @@ const searchTerm = ref('')
 const selectedDistributors = ref([])
 const distributors = ref([])
 const isLoading = ref(true)
+const filteredData = ref([])
+const showReportButton = computed(() => filteredData.value.length > 0)
 
 watch(selectedDistributors, () => {
     searchTerm.value = ''
@@ -34,6 +38,111 @@ const createDateRange = (daysBack) => {
     return [start, end]
 }
 
+const generateReport = () => {
+    const doc = new jsPDF()
+
+
+
+    const distribuidorData = filteredData.value.reduce((acc, pedido) => {
+        if (!acc[pedido.distribuidor]) {
+            acc[pedido.distribuidor] = {
+                clientes: {},
+                totalPedidos: 0,
+                valorTotal: 0
+            }
+        }
+
+
+        if (!acc[pedido.distribuidor].clientes[pedido.cliente]) {
+            acc[pedido.distribuidor].clientes[pedido.cliente] = {
+                pedidos: 0,
+
+                valorTotal: 0,
+                produtos: {}
+            }
+        }
+
+
+        // Track products for each client
+        pedido.itens.forEach(item => {
+            if (!acc[pedido.distribuidor].clientes[pedido.cliente].produtos[item.nome]) {
+                acc[pedido.distribuidor].clientes[pedido.cliente].produtos[item.nome] = {
+                    quantidade: 0,
+                    valorUnitario: item.valorUnitario
+                }
+            }
+            acc[pedido.distribuidor].clientes[pedido.cliente].produtos[item.nome].quantidade += item.quantidade
+        })
+
+        acc[pedido.distribuidor].clientes[pedido.cliente].pedidos++
+        acc[pedido.distribuidor].clientes[pedido.cliente].valorTotal += pedido.total
+        acc[pedido.distribuidor].totalPedidos++
+        acc[pedido.distribuidor].valorTotal += pedido.total
+
+
+        return acc
+    }, {})
+
+    doc.setFont('helvetica', 'bold')
+    doc.text('Relatório Detalhado de Pedidos por Distribuidor', 14, 20)
+
+
+    let yPos = 40
+
+
+    Object.entries(distribuidorData).forEach(([distribuidor, data]) => {
+
+        doc.setFont('helvetica', 'bold')
+        doc.text(`Distribuidor: ${distribuidor}`, 14, yPos)
+        doc.setFont('helvetica', 'normal')
+        doc.text(`Total de Pedidos: ${data.totalPedidos}`, 14, yPos + 10)
+        doc.text(`Valor Total: R$ ${data.valorTotal.toFixed(2)}`, 14, yPos + 20)
+
+
+        yPos += 35
+
+
+        const headers = [['Cliente', 'Qtd. Pedidos', 'Valor Total', 'Produtos (Qtd x Valor Unit.)']]
+        const clientData = Object.entries(data.clientes).map(([cliente, info]) => {
+            const produtosStr = Object.entries(info.produtos)
+                .map(([nome, dados]) =>
+                    `${nome}: ${dados.quantidade}x R${dados.valorUnitario.toFixed(2)}`
+                ).join('\n')
+
+            return [
+                cliente,
+                info.pedidos.toString(),
+                `R$ ${info.valorTotal.toFixed(2)}`,
+                produtosStr
+            ]
+        })
+
+        doc.autoTable({
+            startY: yPos,
+            head: headers,
+            body: clientData,
+            margin: { left: 14 },
+
+            theme: 'grid',
+            columnStyles: {
+                3: { cellWidth: 80 }
+            }
+        })
+
+
+        yPos = doc.lastAutoTable.finalY + 30
+
+
+
+        if (yPos > 250) {
+            doc.addPage()
+            yPos = 20
+        }
+    })
+
+    doc.save('relatorio-pedidos-detalhado.pdf')
+
+}
 const presets = computed(() => [
     {
         label: 'Último dia',
@@ -59,6 +168,7 @@ async function getDistributors() {
         listAllDistributors(),
         'Carregando distribuidores...',
         'Distribuidores carregados com sucesso!',
+        'Erro ao carregar distribuidores',
         (response) => {
             distributors.value = response.data.data.map(d => ({ id: d.id, nome: utf8Decode(d.nome) }))
             isLoading.value = false
@@ -78,16 +188,20 @@ async function fetchOrdersReport() {
         .map(name => distributors.value.find(d => d.nome === name)?.id)
         .filter(id => id) // Remove falsy values
         .join(',')
-    try {
-        const response = await axios.post('/relatorio/pedidos', {
-            dataInicial: startDate?.toLocaleDateString('pt-BR'),
-            dataFinal: endDate?.toLocaleDateString('pt-BR'),
-            idDistribuidores: distributorIds || null // Send null if no distributors selected
-        })
-        orderResponse.value = response
-    } catch (error) {
-        toast.error('Erro ao gerar relatório')
-    }
+
+    const promise = axios.post('/relatorio/pedidos', {
+        dataInicial: startDate?.toLocaleDateString('pt-BR'),
+        dataFinal: endDate?.toLocaleDateString('pt-BR'),
+        idDistribuidores: distributorIds || null // Send null if no distributors selected
+    })
+
+    renderToast(
+        promise,
+        'Carregando relatório...',
+        'Relatório gerado com sucesso!',
+        'Erro ao gerar relatório',
+        (response) => orderResponse.value = response,
+    )
 }
 
 watch(dateRange, () => {
@@ -97,15 +211,42 @@ watch(dateRange, () => {
 })
 
 getDistributors()
+
+/*
+@pointerDownOutside="(e) => {
+                const nestedDialog = e.target.closest(`[role='dialog']`)
+                const dataTable = e.target.closest('.display')
+                // @pointerdownOutside.prevent
+                if (!e.target.closest('.display')) {
+                    isOpen = false
+                }
+                if (!isTopDialog(dialogId) || nestedDialog) {
+                    console.log('preventing close')
+                    e.stopPropagation()
+                    e.preventDefault()
+                    return
+                } if (!dataTable) {
+                    console.log('closing')
+                    isOpen = false
+                }
+            }"
+*/
 </script>
 
 <template>
     <Dialog v-model:open="isOpen" :modal="true">
         <slot name="trigger" @click="isOpen = true" />
-        <DialogContent class="max-w-[90vw] sm:max-w-3xl" @pointerdownOutside.prevent
+        <DialogContent class="!z-[50] max-w-[90vw] sm:max-w-3xl" @close.prevent @pointerDownOutside.prevent
             :class="{ 'overflow-auto px-2 overflow-x-hidden': orderResponse, 'overflow-visible': !orderResponse }">
             <DialogHeader class="flex justify-between items-center mb-3">
-                <DialogTitle class="text-info">Relatório de Pedidos</DialogTitle>
+                <div class="flex items-center gap-4">
+                    <DialogTitle class="text-info">Relatório de Pedidos</DialogTitle>
+                    <Button v-if="showReportButton" @click="generateReport" variant="outline" size="sm"
+                        class="text-info">
+                        <i class="ri-file-list-3-line mr-2" />
+                        Baixar Relatório
+                    </Button>
+                </div>
                 <Button v-if="orderResponse" @click="orderResponse = null" variant="ghost" size="sm" :class='cn(
                     [
                         "group h-4 p-0 flex justify-start rounded-sm absolute top-4 font-thin opacity-70 transition-all",
@@ -141,8 +282,11 @@ getDistributors()
                 </Form>
             </div>
             <!-- Add DataTable section -->
-            <div v-else class="flex flex-col h-[80vh]">
-                <DataTablePedidos :orderResponse="orderResponse" ajustClass="!top-[100px] md:!top-[90px]" />
+            <div v-else class="flex flex-col h-[80vh]" @click.stop>
+                <div class="nested-dialog-context" @click.stop>
+                    <DataTablePedidos @update:filteredData="(data) => filteredData = data"
+                        :orderResponse="orderResponse" ajustClass="!top-[100px] md:!top-[90px]" :isNestedTable="true" />
+                </div>
             </div>
         </DialogContent>
     </Dialog>

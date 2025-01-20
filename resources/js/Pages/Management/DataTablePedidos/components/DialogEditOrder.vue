@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import {
     Dialog,
     DialogContent,
@@ -17,9 +17,11 @@ import renderToast from '@/components/renderPromiseToast';
 import { Skeleton } from '@/components/ui/skeleton'
 import Separator from '@/components/ui/separator/Separator.vue';
 
+const dialogId = 'edit-orders'
+
 const props = defineProps({
     orderId: { type: Number, required: true },
-    dropdown: { type: Boolean, required: false, default: true }
+    dropdown: { type: Boolean, required: false, default: true },
 });
 
 const emits = defineEmits(['callback:editOrder', 'update:dialogOpen'])
@@ -35,64 +37,73 @@ const products = ref()
 
 const { toCurrency } = formatMoney()
 
-
 const fetchOrder = () => {
     const urlOrder = `pedidos/editar/${props.orderId}`
     const promise = axios.get(urlOrder)
 
     isLoading.value = true; // Atualiza o estado de carregamento para true
 
-    renderToast(promise, `carregando pedido #${props.orderId}`, 'sucesso ao carregar pedido', (responseOrder) => {
-        const { data: orderEditData } = responseOrder
-        const orderData = orderEditData[0]
-        const distributorsData = orderEditData[1]
-        const clientName = utf8Decode(orderEditData[0].cliente.nome)
+    renderToast(
+        promise,
+        `carregando pedido #${props.orderId}`,
+        'sucesso ao carregar pedido',
+        'erro ao carregar pedido',
+        (responseOrder) => {
+            const { data: orderEditData } = responseOrder
+            const orderData = orderEditData[0]
+            const distributorsData = orderEditData[1]
+            const clientName = utf8Decode(orderEditData[0].cliente.nome)
 
-        distributors.value = distributorsData.filter(distributor => distributor.status == 1)
-        
-        const idDistribuidor = orderData.distribuidor.id
-        const idCliente = orderData.cliente.id
-        const urlProducts = `produtos/listarProdutos/${idDistribuidor}/${idCliente}`
+            distributors.value = distributorsData.filter(distributor => distributor.status == 1)
 
-        const productsPromise = axios.get(urlProducts)
+            const idDistribuidor = orderData.distribuidor.id
+            const idCliente = orderData.cliente.id
+            const urlProducts = `produtos/listarProdutos/${idDistribuidor}/${idCliente}`
 
-        renderToast(productsPromise, 'carregando produtos', 'produtos carregados com sucesso', (responseProducts) => {
-            const { data: productsData } = responseProducts
-            distributorExpedient.value = productsData[2];
-            distributorTaxes.value = productsData[3];
+            const productsPromise = axios.get(urlProducts)
 
-            const itensPedido = orderData.itensPedido.map((order) => { return { ...order, preco: toCurrency(order.preco), subtotal: toCurrency(order.subtotal), produto: { ...order.produto, nome: utf8Decode(order.produto.nome) } } })
+            renderToast(
+                productsPromise,
+                'carregando produtos',
+                'produtos carregados com sucesso',
+                'erro ao carregar produtos',
+                (responseProducts) => {
+                    const { data: productsData } = responseProducts
+                    distributorExpedient.value = productsData[2];
+                    distributorTaxes.value = productsData[3];
 
-            products.value = productsData[0].map(product => {
-                const orderItem = itensPedido.find(item => item.produto.id == product.id)
-                const quantidade = orderItem ? orderItem.qtd : 0
+                    const itensPedido = orderData.itensPedido.map((order) => { return { ...order, preco: toCurrency(order.preco), subtotal: toCurrency(order.subtotal), produto: { ...order.produto, nome: utf8Decode(order.produto.nome) } } })
 
-                return {
-                    ...product,
-                    quantidade
-                }
-            })
+                    products.value = productsData[0].map(product => {
+                        const orderItem = itensPedido.find(item => item.produto.id == product.id)
+                        const quantidade = orderItem ? orderItem.qtd : 0
 
-            const formatedOrder = formatOrder(orderData)
+                        return {
+                            ...product,
+                            quantidade
+                        }
+                    })
 
-            const order = {
-                ...formatedOrder, itensPedido
-            }
-            createOrderData.value = {
-                clientName,
-                order,
-                products: products.value,
-                distributor: order.distribuidor,
-                address: order.endereco,
-                distributorExpedient: distributorExpedient.value,
-                distributorTaxes: distributorTaxes.value,
-                formaPagamento: orderData.formaPagamento
-            }
-            data.value = order
+                    const formatedOrder = formatOrder(orderData)
 
-            isLoading.value = false
+                    const order = {
+                        ...formatedOrder, itensPedido
+                    }
+                    createOrderData.value = {
+                        clientName,
+                        order,
+                        products: products.value,
+                        distributor: order.distribuidor,
+                        address: order.endereco,
+                        distributorExpedient: distributorExpedient.value,
+                        distributorTaxes: distributorTaxes.value,
+                        formaPagamento: orderData.formaPagamento
+                    }
+                    data.value = order
+
+                    isLoading.value = false
+                })
         })
-    })
 }
 
 watch(() => isOpen.value, () => fetchOrder())
@@ -103,22 +114,29 @@ const handleCopyOrder = (order) => orderToClipboard(order)
 const handleDialogOpen = (op) => {
     !op && emits('update:dialogOpen', false)
     toggleDialog()
+    // event?.preventDefault()
+    event?.stopPropagation()
 }
 
 const handleUpdateOrder = (payload) => {
     const url = `pedidos/atualizar/${payload.idPedido}`
     const response = axios.put(url, payload)
-    renderToast(response, 'atualizando pedido', 'pedido atualizado', () => {
-        handleDialogOpen(false)
-        emits('callback:editOrder')
-    })
+    renderToast(
+        response,
+        'atualizando pedido',
+        'pedido atualizado',
+        'erro ao atualizar pedido',
+        () => {
+            handleDialogOpen(false)
+            emits('callback:editOrder')
+        })
 }
 
 </script>
 
 <template>
-    <Dialog :open="isOpen" @update:open="handleDialogOpen">
-        <DialogTrigger as-child>
+    <Dialog :open="isOpen" @update:open="handleDialogOpen" :modal="true">
+        <DialogTrigger as-child @click.stop>
             <DropdownMenuItem v-if="dropdown" class="cursor-pointer flex gap-2" @select="(e) => e.preventDefault()">
                 <i class="ri-edit-2-fill text-info"></i>
                 <span class="hidden min-[426px]:block">Editar Pedido</span>
@@ -126,10 +144,10 @@ const handleUpdateOrder = (payload) => {
             <button v-else
                 class="h-8 w-8 rounded-full bg-warning/80 focus:bg-warning text-white shadow-sm hover:shadow-md transition-all">
                 <i class="ri-edit-2-fill"></i>
-                <span class="hidden min-[426px]:block">Editar Pedido</span>
+                <span class="sr-only">Editar Pedido</span>
             </button>
         </DialogTrigger>
-        <DialogContent class="text-sm max-w-[22rem] sm:max-w-3xl">
+        <DialogContent class="!z-[60] text-sm max-w-[22rem] sm:max-w-3xl" @pointerDownOutside.prevent @close.prevent>
             <DialogHeader>
                 <DialogTitle class=" font-medium text-info leading-none">
                     <div v-if="isLoading" class="flex gap-3 justify-between mr-4">

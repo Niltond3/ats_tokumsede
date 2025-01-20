@@ -100,7 +100,12 @@ const onSubmit = (values) => {
 
     const promise = tipoAdministrador === 'Administrador' ? axios.put(`clientes/${id}`, payload) : axios.put(route('cliente.register'), payload);
 
-    renderToast(promise, 'Atualizando Cliente', 'Cliente atualizado com sucesso', () => emit('create:success'))
+    renderToast(
+        promise,
+        'Atualizando Cliente',
+        'Cliente atualizado com sucesso',
+        'Ocorreu um erro ao atualizar o cliente',
+        () => emit('create:success'))
 
 }
 

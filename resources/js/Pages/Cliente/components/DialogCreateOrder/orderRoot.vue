@@ -175,7 +175,13 @@ const handleCallbackPedido = () => {
     var url = "pedidos";
     const promise = axios.post(url, tableProductsState.payload)
     toggleDialog()
-    renderToast(promise, 'Cadastrando pedido', 'o pedido foi cadastrado com sucesso', () => toggleDialog())
+    renderToast(
+        promise,
+        'Cadastrando pedido',
+        'o pedido foi cadastrado com sucesso',
+        'Ocorreu um erro ao cadastrar o pedido',
+        () => toggleDialog()
+    )
 }
 
 //class="flex flex-col items-start"

@@ -30,35 +30,40 @@ const whenDialogOpen = () => {
     const url = `produtos/${props.idClienteAddress}`
     const promise = axios.get(url)
 
-    renderToast(promise, 'carregando produtos', 'Produtos carregados', (responseOrder) => {
-        const { data: orderData } = responseOrder
-        const responseDistributor = orderData[1];
-        const responseAddress = orderData[2];
-        const address = {
-            ...responseAddress,
-            "logradouro": utf8Decode(responseAddress.logradouro || ''),
-            "bairro": utf8Decode(responseAddress.bairro || ''),
-            "complemento": utf8Decode(responseAddress.complemento || ''),
-            "cidade": utf8Decode(responseAddress.cidade || ''),
-            "referencia": utf8Decode(responseAddress.referencia || ''),
-            "apelido": utf8Decode(responseAddress.apelido || ''),
-            "observacao": utf8Decode(responseAddress.observacao || ''),
-        }
+    renderToast(
+        promise,
+        'carregando produtos',
+        'Produtos carregados',
+        'Erro ao carregar produtos',
+        (responseOrder) => {
+            const { data: orderData } = responseOrder
+            const responseDistributor = orderData[1];
+            const responseAddress = orderData[2];
+            const address = {
+                ...responseAddress,
+                "logradouro": utf8Decode(responseAddress.logradouro || ''),
+                "bairro": utf8Decode(responseAddress.bairro || ''),
+                "complemento": utf8Decode(responseAddress.complemento || ''),
+                "cidade": utf8Decode(responseAddress.cidade || ''),
+                "referencia": utf8Decode(responseAddress.referencia || ''),
+                "apelido": utf8Decode(responseAddress.apelido || ''),
+                "observacao": utf8Decode(responseAddress.observacao || ''),
+            }
 
-        const distributor = {
-            ...responseDistributor,
-            nome: utf8Decode(responseDistributor.nome),
-        }
-        const products = orderData[0]
-        createOrderData.value = {
-            clientName: props.clientName,
-            products,
-            distributor,
-            address,
-            distributorExpedient: orderData[6],
-            distributorTaxes: orderData[4],
-        }
-    })
+            const distributor = {
+                ...responseDistributor,
+                nome: utf8Decode(responseDistributor.nome),
+            }
+            const products = orderData[0]
+            createOrderData.value = {
+                clientName: props.clientName,
+                products,
+                distributor,
+                address,
+                distributorExpedient: orderData[6],
+                distributorTaxes: orderData[4],
+            }
+        })
 }
 
 const handleDialogOpen = () => {
@@ -70,10 +75,15 @@ const handleDialogOpen = () => {
 const handleRealizarPedido = (payload) => {
     var url = "pedidos";
     const promise = axios.post(url, payload)
-    renderToast(promise, 'realizando pedido', 'Pedido realizado com sucesso!', () => {
-        props.toggleDialog()
-        props.setTab('pedidos')
-    })
+    renderToast(
+        promise,
+        'realizando pedido',
+        'Pedido realizado com sucesso!',
+        'Erro ao realizar pedido',
+        () => {
+            props.toggleDialog()
+            props.setTab('pedidos')
+        })
 }
 
 const handleSpecialOfferCreated = (isCreated) => updateTable.value = isCreated

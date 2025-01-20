@@ -9,11 +9,11 @@ const createSpecialOffer = (payload) => {
         promise,
         "Salvando oferta ...",
         "oferta salva com sucesso!",
+        "Erro ao Salvar oferta!",
         () => {
             emit("update:specialOfferCreated", true);
         },
-        "Erro ao Salvar oferta!",
-        (err) =>  console.error(err)
+        (err) => console.error(err)
     );
 };
 export const useUpdateData = (tableProductsState) => {

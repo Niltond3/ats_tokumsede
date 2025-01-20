@@ -123,7 +123,12 @@ const onSubmit = (values) => {
     }
 
     const promise = tipoAdministrador === 'Administrador' ? axios.post('clientes', payload) : axios.post(route('cliente.register'), payload);
-    renderToast(promise, 'Cadastrando Cliente ...', 'Cliente cadastrado com sucesso!', () => emit('create:success'))
+    renderToast(
+        promise,
+        'Cadastrando Cliente ...',
+        'Cliente cadastrado com sucesso!',
+        'Falha ao cadastrar cliente',
+        () => emit('create:success'))
 
 }
 

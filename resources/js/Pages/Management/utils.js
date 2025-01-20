@@ -8,8 +8,12 @@ export const getStatusString = (agendado, dataAgendada, horaInicio, status) => {
     const currentDate = new Date();
     const scheduleDate = new Date(dateIso);
 
-
-    const statusKey = ((agendado == 1) && (currentDate < scheduleDate)) ? 9 : status
+    const statusKey =
+        ((agendado == 1) && (currentDate < scheduleDate))
+            ? 9
+            : (status == 2 || status == 3 || status == 4 || status == 5)
+                ? 2
+                : status
 
     const statusString = {
         1: {
@@ -21,7 +25,7 @@ export const getStatusString = (agendado, dataAgendada, horaInicio, status) => {
             }
         },
         2: {
-            label: 'Cancelado pelo Usuário',
+            label: 'Cancelado',
             classes: {
                 bg: 'bg-danger',
                 text: 'text-danger',
@@ -86,16 +90,6 @@ export const getStatusString = (agendado, dataAgendada, horaInicio, status) => {
         }
     }
 
-    const statusId = {
-        'Pendente': 1,
-        'Cancelado pelo Usuário': 2,
-        'Não Localizado': 3,
-        'Trote': 4,
-        'Recusado': 5,
-        'Despachado': 6,
-        'Entregue': 7,
-        'Aceito': 8,
-    }
     return statusString[statusKey]
 }
 

@@ -84,16 +84,21 @@ const isOpen = ref(false)
 const getImages = () => {
     const url = '/api/listImages'
     const promise = axios.get(url)
-    renderToast(promise, 'carregando imagens ...', 'Imagens carregadas', (response) => {
-        const imageNames = response.data.img
+    renderToast(
+        promise,
+        'carregando imagens ...',
+        'Imagens carregadas',
+        'Erro ao carregar imagens',
+        (response) => {
+            const imageNames = response.data.img
 
-        images.value = imageNames.map(name => {
-            return {
-                name: name,
-                src: `images/uploads/${name}`
-            }
+            images.value = imageNames.map(name => {
+                return {
+                    name: name,
+                    src: `images/uploads/${name}`
+                }
+            })
         })
-    })
 };
 
 watch(

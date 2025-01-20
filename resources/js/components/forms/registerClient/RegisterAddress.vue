@@ -74,7 +74,13 @@ const onSubmit = (values) => {
     }
     const promise = props.addressDetails ? axios.put(`enderecos/${props.addressDetails.id}`, payload) : axios.post('enderecos', payload, { headers: { "Content-Type": "application/json" } });
 
-    renderToast(promise, 'Salvando Endereço...', 'Endereço salvo com sucesso!', () => emit('create:success'))
+    renderToast(
+        promise,
+        'Salvando Endereço...',
+        'Endereço salvo com sucesso!',
+        'Ocorreu um erro ao salvar o endereço!',
+        () => emit('create:success')
+    )
 
 }
 

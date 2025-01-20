@@ -6,7 +6,7 @@ import 'datatables.net-buttons-dt';
 import 'datatables.net-responsive-dt';
 import 'datatables.net-searchpanes-dt';
 import 'datatables.net-select-dt';
-import { utf8Decode, dateToISOFormat, dateToDayMonthYearFormat, checkDate } from '@/util';
+import { utf8Decode, dateToDayMonthYearFormat, checkDate } from '@/util';
 import { getStatusString } from '../utils';
 import DropDownPedidos from './components/DropDownPedidos.vue';
 import ActionOrders from './components/ActionOrders.vue';
@@ -25,9 +25,12 @@ const props = defineProps({
     orderResponse: { type: Function, required: false },
     setTab: { type: Function, required: false },
     ajustClass: { type: String, required: false },
+    isNestedTable: { type: Boolean, required: false },
 })
 
-const { columns, options } = tableConfig(props.ajustClass)
+const emit = defineEmits(['update:filteredData'])
+
+const { columns, options } = tableConfig(props.ajustClass, props.isNestedTable)
 
 let dt;
 const table = ref();
@@ -51,8 +54,7 @@ const transformOrder = (pedido) => {
     const clienteNome = utf8Decode(pedido.cliente.nome)
     const rawOrderDate = pedido.dataPedido || dateToDayMonthYearFormat(pedido.horarioPedido)
     const [_, orderTime] = rawOrderDate.split(" ")
-
-    return {
+    const order = {
         ...pedido,
         status,
         horarioPedido: `${checkDate(rawOrderDate)} às ${orderTime}`,
@@ -66,36 +68,35 @@ const transformOrder = (pedido) => {
             nome: clienteNome
         }
     }
+    return order
 }
 
 const transformedOrders = computed(() => orders.value.map(pedido => transformOrder(pedido)))
 
 const loadTableData = (response) => {
-    console.log(response.data);
     entregadores.value = response.data[7];
-
     const concatArray = [].concat(
-        response.data[0],
-        response.data[1],
-        response.data[2],
-        response.data[3],
-        response.data[4]
+        response.data[0], // pendentes
+        response.data[1], // aceitos
+        response.data[2], // despachados
+        response.data[3], // entregues
+        response.data[4], // cancelados
+        response.data[5], // agendados
     );
-    const today = new Date();
 
-    const orderMap = new Map(concatArray.map(p => [p.id, p]));
-    const scheduledOrders = response.data[5].filter(pedido => {
-        if (orderMap.has(pedido.id)) return false;
-        const scheduleDate = dateToISOFormat(`${pedido.dataAgendada} ${pedido.horaInicio}`);
-        return scheduleDate >= today;
-    })
-    orders.value = [].concat(concatArray, scheduledOrders);
+    orders.value = concatArray;
     data.value = transformedOrders.value;
 }
 
 const fetchOrders = async () => {
     try {
-        renderToast(getOrder(), 'Atualizando Tabela, aguarde...', 'tabela de pedidos atualizada', (response) => loadTableData(response))
+        renderToast(
+            getOrder(),
+            'Atualizando Tabela, aguarde...',
+            'tabela de pedidos atualizada',
+            'Erro ao atualizar tabela de pedidos',
+            loadTableData
+        )
     } catch (error) {
         toast.error('Erro ao carregar tabela de pedidos')
     }
@@ -110,8 +111,33 @@ const handleLoadTableData = () => {
 }
 
 const getAllFilteredData = () => {
-    const filteredData = dt.rows({ search: 'applied' }).data().toArray();
-    console.log('All filtered results:', filteredData);
+    const allData = dt.rows({ search: 'applied' }).data().toArray();
+
+    const filteredData = allData.map(row => ({
+        ...row,
+        status: row.status.label,
+        distribuidor: row.distribuidor.nome,
+        cliente: row.cliente.nome,
+        clienteTelefone: row.cliente.dddTelefone + row.cliente.telefone,
+        dataAgendada: row.dataAgendada,
+        horarioPedido: row.horarioPedido,
+        endereco: {
+            estado: row.endereco.estado,
+            cidade: row.endereco.cidade,
+            bairro: row.endereco.bairro,
+            logradouro: row.endereco.logradouro,
+            numero: row.endereco.numero,
+            referencia: row.endereco.referencia,
+            complemento: row.endereco.complemento,
+            observacao: row.endereco.observacao,
+        },
+        itens: row.itens.map(item => ({
+            nome: item.produto.nome,
+            quantidade: item.qtd,
+            valorUnitario: item.preco,
+        })),
+    }));
+    emit('update:filteredData', filteredData)
     return filteredData;
 }
 
@@ -130,9 +156,8 @@ onMounted(() => {
 
     handleLoadTableData();
 
-    dt.on('search.dt', () => {
-        getAllFilteredData();
-    });
+    props.isNestedTable && dt.on('search.dt', () => getAllFilteredData());
+
 
     window.setInterval(observeNewOrders(handleLoadTableData), POLLING_INTERVAL);
 })
@@ -143,14 +168,14 @@ const badgeClasses = 'font-normal inline-block px-2 text-[75%] text-center white
 
 
 <template>
-    <DataTable class="display [&_thead]:bg-info [&_thead]:text-[#F3F9FD]" :columns="columns" :data="data"
-        :options="options" ref="table" language="language">
+    <DataTable class="display [&_thead]:bg-info [&_thead]:text-[#F3F9FD] [&_td>div.flex>span.hidden]:!block"
+        :columns="columns" :data="data" :options="options" ref="table" language="language">
         <template #action="data">
             <div>
-                <DropDownPedidos :payloadData="data.rowData" :entregadores="entregadores"
-                    @callback:edited-order="handleLoadTableData" />
-                <ActionOrders :payloadData="data.rowData" :entregadores="entregadores"
-                    :loadTable="handleLoadTableData" />
+                <ActionOrders :payloadData="data.rowData" :entregadores="entregadores" :loadTable="handleLoadTableData"
+                    :isNestedTable="isNestedTable" />
+                <DropDownPedidos :payloadData="data.rowData" :entregadores="entregadores" :loadTable="fetchOrders"
+                    @callback:edited-order="handleLoadTableData" :isNestedTable="isNestedTable" />
             </div>
         </template>
         <template #rating="data">

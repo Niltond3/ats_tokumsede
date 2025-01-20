@@ -125,6 +125,16 @@
     }
 }
 
+.nested-dialog-context {
+    position: relative;
+    z-index: 100;
+}
+
+.nested-dialog-context [role="dialog"] {
+    position: fixed;
+    z-index: 101;
+}
+
 .dtsp-titleRow {
     opacity: 0;
     pointer-events: none;

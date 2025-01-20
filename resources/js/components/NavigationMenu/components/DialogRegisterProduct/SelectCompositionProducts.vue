@@ -42,16 +42,21 @@ const emits = defineEmits(['update:modelValue'])
 const getProducts = () => {
     const url = '/produtos'
     const promise = axios.get(url)
-    renderToast(promise, 'carregando produtos ...', 'Produtos carregados', (response) => {
-        const recomposeProducts = response.data.map((product) => {
-            const nome = utf8Decode(product.nome)
-            return {
-                ...product,
-                nome,
-            }
+    renderToast(
+        promise,
+        'carregando produtos ...',
+        'Produtos carregados',
+        'Erro ao carregar produtos',
+        (response) => {
+            const recomposeProducts = response.data.map((product) => {
+                const nome = utf8Decode(product.nome)
+                return {
+                    ...product,
+                    nome,
+                }
+            })
+            products.value = recomposeProducts
         })
-        products.value = recomposeProducts
-    })
 }
 
 onMounted(() => {

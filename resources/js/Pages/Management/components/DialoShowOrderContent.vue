@@ -38,15 +38,20 @@ const { toCurrency } = formatMoney()
 const fetchOrder = () => {
     var url = `pedidos/visualizar/${props.orderId}`
     const promise = axios.get(url)
-    renderToast(promise, `carregando pedido ${props.orderId}`, 'Pedido carregado', (response) => {
-        const formatedOrder = formatOrder(response.data)
+    renderToast(
+        promise,
+        `carregando pedido ${props.orderId}`,
+        'Pedido carregado',
+        'Erro ao carregar pedido',
+        (response) => {
+            const formatedOrder = formatOrder(response.data)
 
-        const itensPedido = response.data.itensPedido.map((order) => { return { ...order, preco: toCurrency(order.preco), subtotal: toCurrency(order.subtotal), produto: { ...order.produto, nome: utf8Decode(order.produto.nome) } } })
+            const itensPedido = response.data.itensPedido.map((order) => { return { ...order, preco: toCurrency(order.preco), subtotal: toCurrency(order.subtotal), produto: { ...order.produto, nome: utf8Decode(order.produto.nome) } } })
 
-        data.value = { ...formatedOrder, itensPedido }
+            data.value = { ...formatedOrder, itensPedido }
 
-        isLoading.value = false
-    })
+            isLoading.value = false
+        })
 }
 
 watch(() => props.isOpen, async () => fetchOrder())
@@ -64,33 +69,53 @@ const handlePrint = async () => {
 }
 const handlePrintOrder = () => {
     if (isMobile.value) {
-        renderToast(connectPrinter(), 'conectando-se a impressora', 'conectado', () => {
-            const printerData = getPrintData(data.value, selectedPrinter.value)
-            renderToast(printMobileData(printerData), 'imprimindo pedido', 'pedido impresso')
-        }, '', (err) => {
-            console.error(err)
-        })
+        renderToast(
+            connectPrinter(),
+            'conectando-se a impressora',
+            'Conectado',
+            'Erro ao conectar-se a impressora',
+            () => {
+                const printerData = getPrintData(data.value, selectedPrinter.value)
+                renderToast(
+                    printMobileData(printerData),
+                    'imprimindo pedido',
+                    'pedido impresso',
+                    'Erro ao imprimir pedido',
+                )
+            })
         return
     }
     const promiseConnection = checkConnection()
-    renderToast(promiseConnection, 'Verificando conexão', 'Conectando', () => {
-        const promiseFindPrinter = findPrinter(selectedPrinter.value)
-        renderToast(promiseFindPrinter, 'Procurando impressora padrão', 'impressora encontrada', () => {
-            handlePrint()
-        }, 'Impressora não encontrada', () => {
-            const promiseListPrinters = listPrinters()
-            renderToast(promiseListPrinters, 'Listando impressoras', 'Lista Obtida', (response) => {
-                printerList.value = response
-            })
+    renderToast(
+        promiseConnection,
+        'Verificando conexão',
+        'Conectado',
+        'Erro ao conectar-se a impressora',
+        () => {
+            const promiseFindPrinter = findPrinter(selectedPrinter.value)
+            renderToast(
+                promiseFindPrinter,
+                'Procurando impressora padrão',
+                'impressora encontrada',
+                'Impressora padrão não encontrada',
+                handlePrint,
+                () => {
+                    const promiseListPrinters = listPrinters()
+                    renderToast(
+                        promiseListPrinters,
+                        'Listando impressoras',
+                        'Lista Obtida',
+                        'Erro ao listar impressoras',
+                        (response) => printerList.value = response)
+                })
         })
-    })
 }
 
 </script>
 
 <template>
-    <DialogContent
-        class="flex flex-col text-sm max-w-[22rem] sm:max-w-[30rem] md:max-w-[40rem] [&_div]:w-full [&_div]:flex [&_div]:flex-wrap gap-4 max-h-[560px] overflow-scroll scrollbar !scrollbar-w-1.5 !scrollbar-h-1.5 !scrollbar-thumb-slate-200 !scrollbar-track-tr!scrollbar-thumb-rounded scrollbar-track-rounded dark:scrollbar-track:!bg-slate-500/[0.16] dark:scrollbar-thumb:!bg-slate-500/50 lg:supports-scrollbars:pr-2 text-slate-500">
+    <DialogContent @pointerdownOutside.prevent @close.prevent
+        class="!z-[60] flex flex-col text-sm max-w-[22rem] sm:max-w-[30rem] md:max-w-[40rem] [&_div]:w-full [&_div]:flex [&_div]:flex-wrap gap-4 max-h-[560px] overflow-scroll scrollbar !scrollbar-w-1.5 !scrollbar-h-1.5 !scrollbar-thumb-slate-200 !scrollbar-track-tr!scrollbar-thumb-rounded scrollbar-track-rounded dark:scrollbar-track:!bg-slate-500/[0.16] dark:scrollbar-thumb:!bg-slate-500/50 lg:supports-scrollbars:pr-2 text-slate-500">
         <DialogHeader>
             <DialogTitle class=" font-medium text-info mr-4">
                 <div class="leading-none flex gap-3 justify-between" v-if="isLoading">

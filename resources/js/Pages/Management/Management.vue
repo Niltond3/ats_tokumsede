@@ -57,8 +57,12 @@ const handleSetActiveTab = (tab) => setActiveTab(tab)
 // Função para conectar ao QZ Tray
 const connectQZTray = () => {
     const promise = connect()
-    renderToast(promise, 'Conectando ao QZ Tray', 'Conectado ao QZ Tray', () => {
-    }, 'QZ não encontrado! Inicie-o, atualize a página e tente novamente')
+    renderToast(
+        promise,
+        'Conectando ao QZ Tray',
+        'Conectado ao QZ Tray',
+        'QZ não encontrado! Inicie-o, atualize a página e tente novamente'
+    )
 }
 
 onMounted(() => {

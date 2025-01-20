@@ -35,7 +35,13 @@ const handleStatusClientChange = ({ id, status }) => {
     var url = `clientes/${idCliente}`
     handleToggleDropdown(true)
     const promise = axios.put(url, { status: id })
-    renderToast(promise, 'alterando status do cliente', `O cliente ${idCliente} foi ${status} com sucesso!`, () => handleUpdateDataTable())
+    renderToast(
+        promise,
+        'alterando status do cliente',
+        `O cliente ${idCliente} foi ${status} com sucesso!`,
+        'Erro ao alterar status do cliente',
+        handleUpdateDataTable
+    )
 }
 
 </script>

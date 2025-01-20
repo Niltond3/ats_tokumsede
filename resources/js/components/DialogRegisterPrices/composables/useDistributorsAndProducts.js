@@ -27,6 +27,7 @@ export function useDistributorsAndProducts() {
             promise,
             "carregando distribuidor ...",
             "Distribuidor carregado",
+            "erro ao carregar distribuidor",
             (response) => {
                 const formatResponse = {
                     ...response.data.data,
@@ -37,7 +38,6 @@ export function useDistributorsAndProducts() {
                 loadingDistributors.value = false;
                 return formatResponse;
             },
-            "erro ao carregar distribuidor",
             (err) => console.error(err)
         );
         return response;
@@ -49,6 +49,7 @@ export function useDistributorsAndProducts() {
             promise,
             "carregando distribuidores ...",
             "Distribuidores carregados",
+            "erro ao carregar distribuidores",
             (response) => {
                 distributors.value = response.data.data.map((distributor) => ({
                     ...distributor,

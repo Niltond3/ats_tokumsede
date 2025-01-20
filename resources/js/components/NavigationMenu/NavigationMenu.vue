@@ -222,14 +222,14 @@ function irParaProdutosComFiltro() {
                                 </template>
                             </DialogReportDelivery>
                         </li> -->
-                        <li key="stock_report">
+                        <!-- <li key="stock_report">
                             <DialogReportStock>
                                 <template #trigger>
                                     <DialogTrigger icon="ri-store-line" title="Relatório de Estoque"
                                         description="Controle de estoque por distribuidor" />
                                 </template>
                             </DialogReportStock>
-                        </li>
+                        </li> -->
                     </ul>
                 </NavigationMenuContent>
             </NavigationMenuItem>

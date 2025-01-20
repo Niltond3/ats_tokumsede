@@ -43,7 +43,7 @@ const handleDialogOpen = (op) => {
             <button v-else
                 class="h-8 w-8 rounded-full bg-dispatched/80 focus:bg-dispatched text-white shadow-sm hover:shadow-md transition-all">
                 <i class="ri-e-bike-2-fill group-hover:text-dispatched transition-colors"></i>
-                <span class="hidden min-[426px]:block">Despachar</span>
+                <span class="sr-only">Despachar</span>
             </button>
         </DialogTrigger>
         <DialogContent class="gap-2 sm:max-w-min">

@@ -90,20 +90,30 @@ function onDrop(acceptFiles, rejectReasons) {
 const getCategorie = () => {
     const url = '/categorias'
     const promise = axios.get(url)
-    renderToast(promise, 'carregando categorias ...', 'Categorias carregadas', (response) => {
-        const dataToUtf8 = response.data.map((category) => { return { ...category, nome: utf8Decode(category.nome) } })
-        categories.value = dataToUtf8
-        isLoading.value = false
-    })
+    renderToast(
+        promise,
+        'carregando categorias ...',
+        'Categorias carregadas',
+        'Ocorreu um erro ao carregar as categorias',
+        (response) => {
+            const dataToUtf8 = response.data.map((category) => { return { ...category, nome: utf8Decode(category.nome) } })
+            categories.value = dataToUtf8
+            isLoading.value = false
+        })
 }
 
 const getImages = () => {
     const url = '/api/listImages'
     const promise = axios.get(url)
-    renderToast(promise, 'carregando imagens ...', 'Imagens carregadas', (response) => {
-        const imageNames = response.data.img
-        imagesSrc.value = imageNames.map(name => `images/uploads/${name}`)
-    })
+    renderToast(
+        promise,
+        'carregando imagens ...',
+        'Imagens carregadas',
+        'Ocorreu um erro ao carregar as imagens',
+        (response) => {
+            const imageNames = response.data.img
+            imagesSrc.value = imageNames.map(name => `images/uploads/${name}`)
+        })
 }
 onMounted(() => {
     getCategorie()
@@ -117,7 +127,12 @@ const handleDefaultImage = () => img.value = defaultImgValue
 const registerProduct = (payload) => {
     const url = '/produtos'
     const promise = axios.post(url, payload)
-    renderToast(promise, 'Salvando produto ...', 'Produto salvo')
+    renderToast(
+        promise,
+        'Salvando produto ...',
+        'Produto salvo',
+        'Ocorreu um erro ao salvar o produto',
+    )
 }
 const uploadImage = (image, payload) => {
     const formData = new FormData();
@@ -129,14 +144,19 @@ const uploadImage = (image, payload) => {
         },
     });
 
-    renderToast(promise, 'Salvando imagem ...', 'Imagem salva', (response) => {
-        // Exibe a imagem carregada
-        const img = response.data.fineName
-        registerProduct({
-            ...payload,
-            img
+    renderToast(
+        promise,
+        'Salvando imagem ...',
+        'Imagem salva',
+        'Ocorreu um erro ao salvar a imagem',
+        (response) => {
+            // Exibe a imagem carregada
+            const img = response.data.fineName
+            registerProduct({
+                ...payload,
+                img
+            })
         })
-    })
 };
 
 const onSubmit = (values) => {

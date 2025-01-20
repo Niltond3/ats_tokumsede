@@ -41,9 +41,9 @@ const renderToast = (
     promise,
     loading = "Aguarde...",
     sucessMessage,
-    responseCalback,
     errorMessage,
-    errorCallback
+    successCallback = null,
+    errorCallback = null
 ) => {
     let result;
 
@@ -51,7 +51,9 @@ const renderToast = (
         loading: markRaw(LoadingDiv(loading)),
 
         success: (response) => {
-            result = responseCalback && responseCalback(response);
+            result = successCallback !== null && typeof successCallback === 'function'
+                ? successCallback(response)
+                : null;
             return markRaw(CustomDiv("sucesso", sucessMessage));
         },
         error: (error) => {
@@ -60,7 +62,7 @@ const renderToast = (
             return markRaw(
                 CustomDiv(
                     "Error",
-                    errorMessage || getError
+                    `${errorMessage}: ${getError}` || getError
                 )
             );
         },

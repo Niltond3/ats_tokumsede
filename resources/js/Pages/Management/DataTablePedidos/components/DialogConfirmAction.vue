@@ -62,9 +62,11 @@ const handleDialogOpen = (op) => {
                 <i :class="[props.triggerIcon, styleVariant.textClasses.text]" class="transition-colors"></i>
                 <span class="hidden min-[426px]:block">{{ props.triggerLabel }}</span>
             </DropdownMenuItem>
-            <button v-else class="h-8 w-8 rounded-full text-white shadow-sm hover:shadow-md transition-all">
-                <i :class="[props.triggerIcon, styleVariant.textClasses.text]" class="transition-colors text-3xl"></i>
-                <span class="hidden min-[426px]:block">{{ props.triggerLabel }}</span>
+            <button v-else
+                class="h-8 w-8 rounded-full text-white shadow-sm hover:shadow-md transition-all flex justify-center items-center">
+                <i :class="[props.triggerIcon, styleVariant.textClasses.text]"
+                    class="transition-colors text-[39px]"></i>
+                <span class="sr-only">{{ props.triggerLabel }}</span>
             </button>
         </DialogTrigger>
         <DialogConfirmActionContent v-bind="props" @on:confirm="handleConfirm" />

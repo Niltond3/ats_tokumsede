@@ -7,6 +7,7 @@ import DialogEditOrder from './DialogEditOrder.vue'
 import DialogShowOrder from './DialogShowOrder.vue'
 import DialogConfirmAction from './DialogConfirmAction.vue'
 import { usePage, } from '@inertiajs/vue3';
+import { useOrderActions } from '../composers/useOrderActions'
 
 const page = usePage()
 
@@ -14,65 +15,28 @@ const props = defineProps({
     payloadData: { type: null, required: true },
     entregadores: { type: null, required: true },
     loadTable: { type: Function, required: true },
+    isNestedTable: { type: Boolean, required: false },
 })
 
 const orderStatus = ref(props.payloadData.status.label)
 
 const { tipoAdministrador } = page.props.auth.user
 
-const emit = defineEmits(['callback:edited-order'])
+const emit = defineEmits(['callback:edited-order', 'update:'])
 
 const { id: idPedido, } = props.payloadData
 
-const CustomDiv = (title, description) => defineComponent({
-    setup() {
-        return () => h('div', { class: 'flex flex-col' }, title, h('span', { class: 'text-xs opacity-80' }, description))
-    }
-})
-
-const renderToast = (promise, status) => {
-    toast.promise(promise, {
-        loading: 'Aguarde...',
-
-        success: (data) => {
-            props.loadTable()
-            return markRaw(CustomDiv('sucesso', `O pedido ${idPedido} foi ${status} com sucesso!`));
-        },
-        error: (data) => markRaw(CustomDiv('Error', data.response.data)),
-    });
-}
-
-const handleAceitar = () => {
-    var url = `pedidos/aceitar/${idPedido}`
-    const promise = axios.put(url)
-    renderToast(promise, 'aceito')
-}
-
-const handleDespachar = (deliveryMan) => {
-    var url = `pedidos/despachar/${idPedido}`
-    const promise = axios.put(url, { entregador: deliveryMan })
-    renderToast(promise, 'despachado')
-}
-
-const handleEntregar = (id) => {
-    var url = `pedidos/entregar/${idPedido}`
-    const promise = axios.put(url)
-    renderToast(promise, 'entregue')
-}
-
-const handleCancelar = (reson) => {
-    var url = `pedidos/recusar/${idPedido}`
-    const promise = axios.put(url, { retorno: reson })
-    renderToast(promise, 'Cancelado')
-}
+const { handleAceitar, handleDespachar, handleEntregar, handleCancelar, handleToPendent } = useOrderActions(idPedido, props.loadTable)
 
 const handleEditOrder = () => emit('callback:edited-order')
-
 
 </script>
 
 <template>
-    <div class="min-[426px]:hidden flex gap-3">
+    <div :class="[
+        'flex gap-3',
+        isNestedTable ? '' : 'min-[426px]:hidden'
+    ]">
         <DialogShowOrder :dropdown="false" :order-id="idPedido" />
         <DialogEditOrder v-if="tipoAdministrador === 'Administrador'" :dropdown="false" :order-id="idPedido"
             @callback:edit-order="handleEditOrder" />
@@ -88,7 +52,11 @@ const handleEditOrder = () => emit('callback:edited-order')
             @click="handleEntregar()">
             <i class="ri-check-double-fill"></i>
         </button>
-        <DialogConfirmAction :dropdown="false" @on:confirm="handleCancelar" dialog-title="Cancelar Pedido"
-            trigger-icon="ri-close-circle-fill" trigger-label="Cancelar" variant="danger" :text-reson="true" />
+        <DialogConfirmAction v-if="orderStatus !== 'Recusado'" :dropdown="false" @on:confirm="handleCancelar"
+            dialog-title="Cancelar Pedido" trigger-icon="ri-close-circle-fill" trigger-label="Cancelar" variant="danger"
+            :text-reson="true" />
+        <DialogConfirmAction v-if="orderStatus !== 'Pendente'" :dropdown="false" @on:confirm="handleToPendent"
+            dialog-title="Retornar para Pendente" trigger-icon="ri-arrow-go-back-fill" trigger-label="Para Pendente"
+            variant="warning" />
     </div>
 </template>

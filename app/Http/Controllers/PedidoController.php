@@ -35,47 +35,8 @@ class PedidoController extends Controller
         }
 
         $user = auth()->user();
-
-        $baseQuery = Pedido::withBasicRelations();
-
-        if ($user->tipoAdministrador === null) {
-            // Cliente queries
-            $baseQuery->join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id')
-                ->where('enderecoCliente.idCliente', $user->id);
-        } else if (in_array($user->tipoAdministrador, ['Administrador', 'Atendente'])) {
-            // Admin/Atendente - no additional filters
-        } else {
-            // Distribuidor/Entregador queries
-            $baseQuery->where('idDistribuidor', $user->idDistribuidor);
-        }
-
-        // Format products for each pedido collection
-        $collections = [
-            'pendentes' => clone $baseQuery
-                ->where('status', Pedido::PENDENTE)
-                ->whereRaw("((pedido.agendado = 1 AND (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) <= 30)
-                            OR DATE(pedido.dataAgendada) < CURDATE()) OR pedido.agendado = 0)"),
-            'aceitos' => clone $baseQuery
-                ->where('status', Pedido::ACEITO),
-            'despachados' => clone $baseQuery
-                ->where('status', Pedido::DESPACHADO),
-            'entregues' => clone $baseQuery
-                ->where('status', Pedido::ENTREGUE)
-                ->whereRaw("DATE(pedido.horarioEntrega) = CURDATE()"),
-            'cancelados' => clone $baseQuery
-                ->whereIn('status', [
-                    Pedido::CANCELADO_USUARIO,
-                    Pedido::CANCELADO_NAO_LOCALIZADO,
-                    Pedido::CANCELADO_TROTE,
-                    Pedido::RECUSADO
-                ])
-                ->whereRaw("DATE(pedido.horarioPedido) = CURDATE()"),
-            'agendados' => clone $baseQuery
-                ->where([
-                    ['status', Pedido::PENDENTE],
-                    ['agendado', 1]
-                ])
-        ];
+        $baseQueryCallback = $this->getBaseQueryCallbackStructure($user);
+        $queries = $this->buildQueriesArray($baseQueryCallback);
 
         $this->loadOrderProducts($queries);
 
@@ -208,6 +169,7 @@ class PedidoController extends Controller
     public function show($id)
     {
         $pedido = Pedido::find($id);
+        $pedido = $this->formatPedidoDates($pedido);
         $pedido->itensPedido = ItemPedido::where('idPedido', $id)->where('qtd', ">", 0)->with('produto')->get();
         $pedido->clientePedido = Cliente::find($pedido->endereco->idCliente);
         return $pedido;
@@ -233,6 +195,41 @@ class PedidoController extends Controller
     }
 
     // Order Status Management
+    function setPendente($idPedido)
+{
+    $date = new \DateTime();
+    $pedido = Pedido::find($idPedido);
+    $pedido->statusChange = 1;
+    $pedido->save();
+
+    $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
+    $cliente = Cliente::find($enderecoCliente->idCliente);
+
+    $pedido->status = Pedido::PENDENTE;
+    $pedido->editadoPor = auth()->user()->nome;
+    $pedido->horarioAceito = null;
+    $pedido->horarioDespache = null;
+    $pedido->horarioEntrega = null;
+    $pedido->horarioCancelado = null;
+    $pedido->aceitoPor = null;
+    $pedido->despachadoPor = null;
+    $pedido->entreguePor = null;
+    $pedido->canceladoPor = null;
+    $pedido->idEntregador = null;
+    $pedido->agendado = 0;
+    $pedido->dataAgendada = null;
+    $pedido->horaInicio = null;
+    $pedido->horaFim = null;
+
+    if ($pedido->save()) {
+        if ($cliente->regId != null) {
+            $this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
+        }
+        return response($pedido->id, 200);
+    }
+
+    return response("Erro ao retornar pedido para pendente. Tente novamente.", 400);
+}
     function aceitar(Request $request, $idPedido)
     {
         $date = new \DateTime();
@@ -696,7 +693,10 @@ class PedidoController extends Controller
         }
 
         $queries = [
-            'pendentes' => Pedido::withBasicRelations()->withFormattedDates()->where('status', Pedido::PENDENTE),
+            'pendentes' => Pedido::withBasicRelations()->withFormattedDates()
+            ->whereRaw("((pedido.agendado = 1 AND (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) <= 30)
+            OR DATE(pedido.dataAgendada) < CURDATE()) OR pedido.agendado = 0)")
+            ->where('status', Pedido::PENDENTE),
             'aceitos' => Pedido::withBasicRelations()->withFormattedDates()->where('status', Pedido::ACEITO),
             'despachados' => Pedido::withBasicRelations()->withFormattedDates()->where('status', Pedido::DESPACHADO),
             'entregues' => Pedido::withBasicRelations()->withFormattedDates()->where('status', Pedido::ENTREGUE),
@@ -706,10 +706,12 @@ class PedidoController extends Controller
                 Pedido::CANCELADO_TROTE,
                 Pedido::RECUSADO
             ]),
-            'agendados' => Pedido::withBasicRelations()->withFormattedDates()->where([
+            'agendados' => Pedido::withBasicRelations()->withFormattedDates()
+            ->where([
                 ['status', Pedido::PENDENTE],
                 ['agendado', 1]
             ])
+            ->whereRaw("DATE(pedido.dataAgendada) > CURDATE() OR (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) > 30)")
         ];
         $this->applyDateFilters($queries, $request);
         $this->applyDistribuidorFilter($queries, $request);
@@ -762,7 +764,8 @@ class PedidoController extends Controller
     private function loadOrderProducts(&$queries)
     {
         foreach ($queries as $query) {
-            $query->map(function ($pedido) {
+            $query->get()->map(function ($pedido) {
+                $pedido = $this->formatPedidoDates($pedido);
                 $pedido->produtos = $this->formatProductsOutput(
                     $pedido->itens->map(function ($item) {
                         return (object) [
@@ -828,6 +831,20 @@ class PedidoController extends Controller
         });
         return $prices;
     }
+    private function formatDate($date) {
+        return date('d/m/Y', strtotime($date));
+    }
+    private function formatDateTime($datetime) {
+        return date('d/m/Y H:i', strtotime($datetime));
+    }
+    private function formatPedidoDates($pedido) {
+        $pedido->horarioPedido = $this->formatDateTime($pedido->horarioPedido);
+        $pedido->horarioAceito = $this->formatDateTime($pedido->horarioAceito);
+        $pedido->horarioDespache = $this->formatDateTime($pedido->horarioDespache);
+        $pedido->horarioEntrega = $this->formatDateTime($pedido->horarioEntrega);
+        $pedido->dataAgendada = $this->formatDateTime($pedido->dataAgendada);
+        return $pedido;
+    }
     private function getFormattedPedidoWithProducts($query)
     {
         return $query->with([
@@ -855,6 +872,51 @@ class PedidoController extends Controller
                 unset($pedido->itens);
                 return $pedido;
             });
+    }
+    private function getBaseQueryCallbackStructure($user) {
+        return $baseQueryCallback = function() use ($user) {
+            $query = Pedido::withBasicRelations();
+
+            if ($user->tipoAdministrador === null) {
+                // Cliente queries
+                $query->join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id')
+                    ->where('enderecoCliente.idCliente', $user->id);
+            } else if (in_array($user->tipoAdministrador, ['Administrador', 'Atendente'])) {
+                // Admin/Atendente - no additional filters
+            } else {
+                // Distribuidor/Entregador queries
+                $query->where('idDistribuidor', $user->idDistribuidor);
+            }
+            return $query;
+        };
+    }
+    private function buildQueriesArray($baseQueryCallback) {
+        return [
+            'pendentes' => clone $baseQueryCallback()
+                ->where('status', Pedido::PENDENTE)
+                ->whereRaw("((pedido.agendado = 1 AND (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) <= 30) OR DATE(pedido.dataAgendada) < CURDATE()) OR pedido.agendado = 0)"),
+            'aceitos' => clone $baseQueryCallback()
+                ->where('status', Pedido::ACEITO),
+            'despachados' => clone $baseQueryCallback()
+                ->where('status', Pedido::DESPACHADO),
+            'entregues' => clone $baseQueryCallback()
+                ->where('status', Pedido::ENTREGUE)
+                ->whereRaw("DATE(pedido.horarioEntrega) = CURDATE()"),
+            'cancelados' => clone $baseQueryCallback()
+                ->whereIn('status', [
+                    Pedido::CANCELADO_USUARIO,
+                    Pedido::CANCELADO_NAO_LOCALIZADO,
+                    Pedido::CANCELADO_TROTE,
+                    Pedido::RECUSADO
+                ])
+                ->whereRaw("DATE(pedido.horarioPedido) = CURDATE()"),
+            'agendados' => clone $baseQueryCallback()
+                ->where([
+                    ['status', Pedido::PENDENTE],
+                    ['agendado', 1]
+                ])
+                ->whereRaw("DATE(pedido.dataAgendada) > CURDATE() OR (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) > 30)")
+        ];
     }
     function notification($msg, $administradores)
     {

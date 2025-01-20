@@ -76,6 +76,7 @@ Route::middleware('auth')->group(function () {
                 'destroy' => 'pedidos.destroy',
             ]);
         Route::get('visualizar/{id}', [PedidoController::class, 'visualizar']);
+        Route::put('setPendente/{id}', [PedidoController::class, 'setPendente']);
         Route::put('aceitar/{id}', [PedidoController::class, 'aceitar']);
         Route::put('despachar/{id}', [PedidoController::class, 'despachar']);
         Route::put('recusar/{id}', [PedidoController::class, 'recusar']);

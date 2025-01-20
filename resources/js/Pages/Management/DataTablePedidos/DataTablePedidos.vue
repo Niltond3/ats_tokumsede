@@ -13,7 +13,6 @@ import ActionOrders from './components/ActionOrders.vue';
 import observeNewOrders from './components/observeNewOrders';
 import renderToast from '@/components/renderPromiseToast'
 import { tableConfig } from './config/tableConfig'
-import { toast } from 'vue-sonner';
 import { shallowRef } from 'vue';
 import { useMemoize } from '@vueuse/core';
 import { getOrder } from '@/services/api/orders';
@@ -89,17 +88,13 @@ const loadTableData = (response) => {
 }
 
 const fetchOrders = async () => {
-    try {
-        renderToast(
+    renderToast(
             getOrder(),
             'Atualizando Tabela, aguarde...',
             'tabela de pedidos atualizada',
             'Erro ao atualizar tabela de pedidos',
             loadTableData
         )
-    } catch (error) {
-        toast.error('Erro ao carregar tabela de pedidos')
-    }
 }
 
 

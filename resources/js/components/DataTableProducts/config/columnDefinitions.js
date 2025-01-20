@@ -162,7 +162,7 @@ export const actionsColumn = {
     id: "actions",
     size: COLUMN_SIZES.ACTIONS,
     enableHiding: false,
-    cell: ({ row, getValue, column, table, cell }) => {
+    cell: ({ row, table }) => {
         const payment = row.original;
         const preco = payment.preco;
         const precoEndArray = preco.length - 1;
@@ -188,7 +188,7 @@ export const actionsColumn = {
             h(DropDownOrderActions, {
                 payment,
                 offer,
-                onChanged: (isOffer) => {
+                onChanged: () => {
                     table.options.meta.updateData(
                         row.index,
                         "precoEspecial",

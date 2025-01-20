@@ -40,7 +40,6 @@ const mapOrderItems = (itensPedido) => {
             preco: itemPreco,
             qtd: quantidade,
             subtotal: itemSubtotal,
-            id,
             precoAcertado,
             idProduto,
         } = item;

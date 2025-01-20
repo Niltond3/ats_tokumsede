@@ -1,9 +1,6 @@
-import { ref } from 'vue'
 import { errorUtils } from "@/util";
 import { defineComponent, h, markRaw } from "vue";
 import { toast } from "vue-sonner";
-
-const data = ref(null)
 
 const CustomDiv = (title, sucessMessage) =>
     defineComponent({
@@ -62,7 +59,7 @@ const renderToast = (
             return markRaw(
                 CustomDiv(
                     "Error",
-                    `${errorMessage}: ${getError}` || getError
+                    errorMessage ? `${errorMessage}: ${getError}` : getError
                 )
             );
         },

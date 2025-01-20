@@ -130,7 +130,7 @@ export const handleActions = (props) => {
                         ...product,
                         preco: [
                             {
-                                qtd: product.preco[preco.length - 1].qtd,
+                                qtd: product.preco[product.preco.length - 1].qtd,
                                 val: toFloat(productToChange.preco),
                             },
                         ],
@@ -145,7 +145,6 @@ export const handleActions = (props) => {
                     preco: itemPreco,
                     qtd: quantidade,
                     subtotal: itemSubtotal,
-                    id,
                     precoAcertado,
                     idProduto,
                 } = item;

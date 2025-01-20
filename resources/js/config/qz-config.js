@@ -1,6 +1,3 @@
-import certificate from "./assets/digital-certificate.txt";
-import privateKey from "./assets/private-key.txt";
-
 const CERTIFICATE =
     "-----BEGIN CERTIFICATE-----\n" +
     "MIIEHzCCAwegAwIBAgIUWTChik79/a1dla88xn8lRAq72RcwDQYJKoZIhvcNAQEL\n" +

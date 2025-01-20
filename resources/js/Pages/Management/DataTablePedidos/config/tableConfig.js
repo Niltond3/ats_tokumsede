@@ -70,7 +70,7 @@ export const tableConfig = (ajustClass, isNestedTable = false) => {
         columnDefs: [
             {
                 orderable: false,
-                render: (data, type, row) => {
+                render: (data) => {
                     const state = (icon, peso) =>
                         `
                         <div class="flex items-center gap-1">

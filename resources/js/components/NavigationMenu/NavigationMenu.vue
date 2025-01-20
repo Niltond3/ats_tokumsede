@@ -1,5 +1,5 @@
 <script setup>
-import { watch, ref } from 'vue'
+import { watch } from 'vue'
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -10,18 +10,15 @@ import {
 } from '@/components/ui/navigation-menu'
 import { Link, } from '@inertiajs/vue3';
 import logo from '@/../../public/images/tokumsede-logo.png';
-import { onBeforeRouteUpdate, onBeforeRouteLeave, useRouter, useRoute } from 'vue-router';
+import {  useRoute } from 'vue-router';
 import { DialogRegisterProduct } from './components/DialogRegisterProduct';
 import DialogRegisterClient from './components/DialogRegisterClient.vue';
 import { DialogRegisterPrices } from '@/components/DialogRegisterPrices';
 import DialogTrigger from './components/DialogTrigger.vue';
 import DialogReportOrders from './components/reports/DialogReportOrders.vue'
-import DialogReportSales from './components/reports/DialogReportSales.vue'
-import DialogReportStock from './components/reports/DialogReportStock.vue'
 import { dialogState } from "@/hooks/useToggleDialog.js";
 
 const { isOpen: openRegisterPrices, toggleDialog: toggleRegisterPrices } = dialogState()
-const router = useRouter();
 // Obtém os parâmetros da rota
 const route = useRoute()
 
@@ -31,7 +28,7 @@ watch(() => route, (newId, oldId) => {
     // Você pode executar qualquer lógica aqui quando o parâmetro mudar
 })
 // Observar mudanças no parâmetro 'id'
-watch(() => route.query, (newId, oldId) => {
+watch(() => route.query, (newId) => {
     const query = {
         produto: () => console.log('catch')
     }
@@ -65,52 +62,6 @@ const homeLinks = [
     //     description: 'Entregas de águas Alkalinas.',
     // },
 ]
-
-const components = [
-    //    {
-    //        title: 'Cliente',
-    //        icon: 'ri-user-add-fill',
-    //        href: '/home/register/client',
-    //        description:
-    //'Formulário de cadastro de um novo Cliente.',
-    //    },
-    //    {
-    //        title: 'Pedido',
-    //        icon: 'ri-e-bike-2-fill',
-    //        href: '/home/register/order',
-    //        description:
-    //'Formulário de cadastro de um novo Pedido',
-    //    },
-    //    {
-    //        title: 'Distribuidor',
-    //        icon: 'ri-store-3-fill',
-    //        href: '/home/register/distribuidor',
-    //        description:
-    //'Formulário de cadastro de um novo Distribuidor.',
-    //    },
-    //    {
-    //        title: 'Entregador',
-    //        icon: 'ri-riding-fill',
-    //        href: '/home/register/entregador',
-    //        description: 'Formulário de cadastro de um novo Entregador.',
-    //    },
-    {
-        title: 'Produto',
-        icon: 'ri-shopping-bag-3-fill',//ri-box-3-fill
-        href: '?registro=produto',
-        description:
-            'Formulário de cadastro de um novo Produto.',
-    }
-]
-
-function irParaProdutosComFiltro() {
-    // Navega para /produtos com parâmetros de consulta
-    router.push({
-        name: 'home',
-        query: { registro: 'produto' }
-    });
-}
-
 
 
 </script>

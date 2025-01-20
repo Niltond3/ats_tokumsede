@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue';
 import {
     Dialog,
     DialogTrigger,
@@ -8,11 +7,10 @@ import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import DialogShowOrderContent from '../../components/DialoShowOrderContent.vue'
 import { dialogState } from '@/hooks/useToggleDialog';
 
-const dialogId = 'show-orders'
 
 const { isOpen, toggleDialog } = dialogState()
 
-const props = defineProps({
+defineProps({
     orderId: { type: Number, required: true },
     dropdown: { type: Boolean, required: false, default: true },
 });

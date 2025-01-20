@@ -1,8 +1,9 @@
 import { toast } from "vue-sonner";
 import { formatMoney } from "@/util";
 import renderToast from "@/components/renderPromiseToast";
+import axios from "axios";
 
-const createSpecialOffer = (payload) => {
+const createSpecialOffer = (payload, emit) => {
     const url = "preco";
     const promise = axios.post(url, payload);
     renderToast(
@@ -10,13 +11,10 @@ const createSpecialOffer = (payload) => {
         "Salvando oferta ...",
         "oferta salva com sucesso!",
         "Erro ao Salvar oferta!",
-        () => {
-            emit("update:specialOfferCreated", true);
-        },
-        (err) => console.error(err)
+        () => emit("update:specialOfferCreated", true),
     );
 };
-export const useUpdateData = (tableProductsState) => {
+export const useUpdateData = (tableProductsState, emit) => {
     const { toFloat } = formatMoney();
 
     const updateData = (rowIndex, columnId, value) => {
@@ -44,7 +42,7 @@ export const useUpdateData = (tableProductsState) => {
             precoEspecial: () => {
                 if (value.payload) {
                     const { payload, tableValue } = value;
-                    createSpecialOffer(payload);
+                    createSpecialOffer(payload, emit);
                     return updateTableData(tableValue);
                 }
                 const endRowLength = oldRow[columnId].length - 1;

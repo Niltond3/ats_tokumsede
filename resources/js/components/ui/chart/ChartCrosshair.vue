@@ -8,7 +8,7 @@ const props = defineProps({
   colors: { type: Array, required: true, default: () => [] },
   index: { type: String, required: true },
   items: { type: Array, required: true },
-  customTooltip: { type: null, required: false },
+  customTooltip: { type: null, required: false, default: null },
 });
 
 // Use weakmap to store reference to each datapoint for Tooltip

@@ -5,7 +5,6 @@ import {
     getDistributor,
 } from "@/services/api/distributors";
 import {
-    listProductsByClient,
     listProductsByDistributor,
 } from "@/services/api/products";
 import { utf8Decode } from "@/util";

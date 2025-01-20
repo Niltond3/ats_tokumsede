@@ -33,7 +33,7 @@ const props = defineProps({
     description: { type: String, required: false, default: 'Atualização dos preços padrões de cada distribuidor' },
 })
 
-const emit = defineEmits(['update:specialOfferCreated'])
+const emits = defineEmits(["on:create",'update:specialOfferCreated'])
 
 
 const page = usePage()
@@ -41,7 +41,7 @@ const { width } = useWindowSize()
 const selectedDistributorId = ref(null)
 const clientName = ref(null)
 const tableProductsState = useTableProductsState()
-const { updateData } = useUpdateData(tableProductsState,emit)
+const { updateData } = useUpdateData(tableProductsState,emits)
 
 const {
     tableIdentifier,
@@ -60,7 +60,6 @@ const {
     table
 } = useTableState(tableProductsState, updateData)
 
-const emits = defineEmits(["on:create"])
 
 const getDefaultValues = () => ({
     selectedDistributorId: null,

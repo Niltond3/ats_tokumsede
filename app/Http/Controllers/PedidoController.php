@@ -263,6 +263,7 @@ class PedidoController extends Controller
     }
     function despachar(Request $request, $idPedido)
     {
+        Debugbar::info($request);
         $date = new \DateTime();
         $pedido = Pedido::find($idPedido);
         if ($pedido->status == Pedido::ACEITO) {

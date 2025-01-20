@@ -30,8 +30,8 @@ export const aceitarPedido = async (pedidoId) => {
     return await axios.put(`pedidos/aceitar/${pedidoId}`);
 };
 
-export const despacharPedido = async (pedidoId) => {
-    return await axios.put(`pedidos/despachar/${pedidoId}`);
+export const despacharPedido = async (pedidoId, idEntregador) => {
+    return await axios.put(`pedidos/despachar/${pedidoId}`, { entregador: idEntregador });
 };
 
 export const recusarPedido = async (pedidoId, retorno) => {

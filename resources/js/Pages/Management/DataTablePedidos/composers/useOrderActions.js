@@ -22,7 +22,7 @@ export function useOrderActions(idPedido, loadTable) {
 
     const handleDespachar = (deliveryMan, sucessCalback = null, errorCallback = null) => {
         renderToast(
-            despacharPedido(idPedido, { entregador: deliveryMan }),
+            despacharPedido(idPedido, deliveryMan),
             'Atualizando Status ...',
             'Pedido despachado com sucesso',
             'Erro ao despachar pedido',

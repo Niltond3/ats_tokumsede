@@ -17,11 +17,13 @@ import {
   TagsInputItemText,
   TagsInputRoot,
 } from 'radix-vue';
+import { Skeleton } from '@/components/ui/skeleton';
 
 defineProps({
   modelValue: Array,
   searchTerm: String,
   distributors: Array,
+  isLoading: Boolean,
   disabled: Boolean,
 });
 
@@ -38,7 +40,9 @@ defineEmits(['update:modelValue', 'update:searchTerm']);
     @update:model-value="$emit('update:modelValue', $event)"
     @update:search-term="$emit('update:searchTerm', $event)"
   >
+    <Skeleton v-if="isLoading" class="w-full h-10 rounded-lg" />
     <ComboboxAnchor
+      v-else
       class="w-full inline-flex items-center justify-between p-2 text-[13px] leading-none gap-[5px] bg-white shadow-sm border hover:bg-info/10 rounded-sm border-[#ddd] hover:border-[#aaaeb7] transition-all minh-14"
     >
       <TagsInputRoot

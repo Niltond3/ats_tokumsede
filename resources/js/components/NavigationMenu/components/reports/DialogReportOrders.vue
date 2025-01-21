@@ -45,6 +45,15 @@ watch(
   { deep: true },
 );
 
+const filteredDistributors = computed(() => {
+  if (!searchTerm.value || tipoAdministrador === 'Distribuidor') {
+    return distributors.value;
+  }
+  return distributors.value.filter((d) =>
+    d.nome.toLowerCase().includes(searchTerm.value.toLowerCase()),
+  );
+});
+
 const createDateRange = (daysBack) => {
   const end = new Date();
   const start = new Date();
@@ -328,7 +337,7 @@ getDistributors();
             </div>
             <div class="sm:w-1/2 flex items-center justify-center">
               <Skeleton v-if="isLoading" class="w-full h-14 rounded-lg" />
-              <div v-else>
+              <div v-else class="w-full">
                 <span v-if="tipoAdministrador == 'Distribuidor'" class="text-info">
                   {{ distributorName !== null ? distributorName : administratorName }}
                 </span>
@@ -336,8 +345,9 @@ getDistributors();
                   v-else
                   v-model="selectedDistributors"
                   :search-term="searchTerm"
-                  :distributors="distributors"
+                  :distributors="filteredDistributors"
                   :disabled="isLoadingReport"
+                  @update:searchTerm="searchTerm = $event"
                 />
               </div>
             </div>

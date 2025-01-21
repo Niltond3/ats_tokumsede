@@ -37,10 +37,11 @@ const data = shallowRef([]);
 const orders = ref([]);
 const entregadores = ref([]);
 
-const getFormatedScheduleDate = (pedido) => {
-  if (!pedido.dataAgendada) return pedido.dataAgendada;
-  const rawScheduleDate = `${pedido.dataAgendada} ${pedido.horaInicio}`;
-  return `${checkDate(rawScheduleDate)} às ${pedido.horaInicio}`;
+const getFormatedScheduleDate = (dataAgendada, horaInicio) => {
+  if (!dataAgendada) return dataAgendada;
+  const rawScheduleDate = `${dataAgendada} ${horaInicio}`;
+  const { dateTime } = dateToDayMonthYearFormat(rawScheduleDate);
+  return dateTime;
 };
 
 const memoizedGetStatus = useMemoize((agendado, dataAgendada, horaInicio, status) => {
@@ -56,13 +57,13 @@ const transformOrder = (pedido) => {
   );
   const distribuidorNome = utf8Decode(pedido.distribuidor.nome);
   const clienteNome = utf8Decode(pedido.cliente.nome);
-  const rawOrderDate = pedido.dataPedido || dateToDayMonthYearFormat(pedido.horarioPedido);
-  const [_, orderTime] = rawOrderDate.split(' ');
+  const rawOrderDate = dateToDayMonthYearFormat(pedido.horarioPedido);
+  const { dateTime } = rawOrderDate;
   const order = {
     ...pedido,
     status,
-    horarioPedido: `${checkDate(rawOrderDate)} às ${orderTime}`,
-    dataAgendada: getFormatedScheduleDate(pedido),
+    horarioPedido: dateTime,
+    dataAgendada: getFormatedScheduleDate(pedido.dataAgendada, pedido.horaInicio),
     distribuidor: {
       ...pedido.distribuidor,
       nome: distribuidorNome.substr(distribuidorNome.indexOf(' ') + 1),

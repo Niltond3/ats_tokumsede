@@ -333,12 +333,6 @@ const options = {
       }
     });
   },
-  // drawCallback: function (settings) {
-  //     // Get the full filtered data across all pages
-  //     const api = new $.fn.dataTable.Api(settings);
-  //     const filteredData = api.rows({ filter: 'applied' }).data().toArray();
-  //     console.log('Full filtered dataset:', filteredData);
-  // },
 };
 const ajax = {
   url: 'clientes',

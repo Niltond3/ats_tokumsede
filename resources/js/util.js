@@ -51,8 +51,9 @@ export function utf8Decode(utf8String) {
     return unicodeString;
 }
 
-export function dateToDayMonthYearFormat(date) {
+export function dateToDayMonthYearFormat(rawDate) {
     try {
+        const date = new Date(rawDate);
         const YYYY = date.getFullYear();
         const unformattedMonth = date.getMonth() + 1;
         const unformattedDay = date.getDate();
@@ -69,13 +70,15 @@ export function dateToDayMonthYearFormat(date) {
                 ? `0${unformattedMinutes}`
                 : unformattedMinutes;
 
+        const extenseDate = checkDate(`${dd}/${MM}/${YYYY} ${hh}:${mm}`)
         return {
             date: `${dd}/${MM}/${YYYY}`,
             time: `${hh}:${mm}`,
+            dateTime: `${extenseDate} às ${hh}:${mm}`,
         };
     } catch (err) {
         console.error(err);
-        return date;
+        return rawDate;
     }
 }
 
@@ -132,7 +135,7 @@ export function dateToISOFormat(dateTimeString) {
     const [date, time] = dateTimeString.split(" ");
 
     // Dividimos a data em dia, mês e ano:
-    if (date == 'null' || !date) return null
+    if (date == 'null' || !date || !time) return null
 
 
     const { DD, MM, YYYY } = getDateComponents(date)

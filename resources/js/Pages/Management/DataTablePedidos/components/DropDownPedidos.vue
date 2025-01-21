@@ -47,11 +47,6 @@ const { handleAceitar, handleDespachar, handleEntregar, handleCancelar, handleTo
 const handleToggleDropdown = (op) => {
   if (op || op == false) dropdownOpen.value = !dropdownOpen.value;
 };
-
-const yourMethod = () => {
-  // Handle the click event here
-  console.log('DialogTrigger clicked!');
-};
 </script>
 
 <template>
@@ -115,7 +110,6 @@ const yourMethod = () => {
                 trigger-label="Cancelar"
                 variant="danger"
                 :text-reson="true"
-                @on:click="yourMethod"
                 @update:dialog-open="handleToggleDropdown"
                 @on:confirm="
                   (confirmCancellCalback) => {

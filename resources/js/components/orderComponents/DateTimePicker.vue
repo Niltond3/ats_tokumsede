@@ -20,7 +20,7 @@ const presetDates = ref([
   },
   {
     label: 'Amanhã',
-    value: startOfTomorrow(new Date()),
+    value: new Date(startOfTomorrow().setHours(8, 0, 0, 0)),
   },
 ]);
 

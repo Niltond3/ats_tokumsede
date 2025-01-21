@@ -238,7 +238,7 @@ class ProdutoController extends Controller
             if ($currentProduct !== $prod->idProd) {
                 $indexProduto++;
                 $currentProduct = $prod->idProd;
-
+                Debugbar::info($prod);
                 // Initialize new product structure
                 $out[$indexProduto] = [
                     "nome" => $prod->nome,
@@ -421,33 +421,8 @@ class ProdutoController extends Controller
                 $indexPrecoEspecial = 0;
                 $txtProduto = $produtos[0]->idProd;
 
-                foreach ($produtos as $prod) {
+                $out = $this->formatProductsOutput($produtos,$idCliente);
 
-                    if ($txtProduto != $prod->idProd) {
-                        $indexProduto++;
-                        $indexPreco = 0;
-                        $indexPrecoEspecial = 0;
-                        $txtProduto = $prod->idProd;
-                    }
-
-                    $out[$indexProduto]["nome"] = $prod->nome;
-                    $out[$indexProduto]["id"] = $prod->idProd;
-                    $out[$indexProduto]["img"] = $prod->img;
-                    //$out[$indexProduto]["categoria"] = $prod->categoria;
-
-                    if ($idCliente == $prod->idCliente) {
-                        $out[$indexProduto]['precoEspecial'][$indexPrecoEspecial]['qtd'] = $prod->qtdMin;
-                        $out[$indexProduto]['precoEspecial'][$indexPrecoEspecial]['val'] = $prod->valor;
-                        $indexPrecoEspecial++;
-                    } else if ($prod->idCliente == null) {
-                        $out[$indexProduto]['preco'][$indexPreco]['qtd'] = $prod->qtdMin;
-                        $out[$indexProduto]['preco'][$indexPreco]['val'] = $prod->valor;
-                        $indexPreco++;
-                    }
-                    if ($indexPrecoEspecial > 0) {
-                        $out[$indexProduto]['preco'] = $out[$indexProduto]['precoEspecial'];
-                    }
-                }
             } else {
                 $out = '';
             }

@@ -137,7 +137,7 @@ export const quantityColumn = {
         const payloadProduct = itens.filter(
             (produto) => produto.idProduto == payment.id
         );
-
+        console.log(table.options.meta.payload)
         const minQtd =
             itens.length > 0 &&
                 itens
@@ -149,9 +149,10 @@ export const quantityColumn = {
         return h(DataTableNumberField, {
             min: minQtd,
             value: payloadProduct.length > 0 ? payloadProduct[0].quantidade : 0,
-            payment,
             onExpand: row.toggleExpanded,
             "onUpdate:modelValue": (val) => {
+                console.log(val)
+                console.log(table.options.meta)
                 table.options.meta.updateData(row.index, column.id, val);
             },
         });

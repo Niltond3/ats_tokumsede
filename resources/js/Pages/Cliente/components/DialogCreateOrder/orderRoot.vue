@@ -334,7 +334,12 @@ const handleCallbackPedido = () => {
                         <div>
                           <NumberField
                             v-bind="numberFieldProps"
-                            @update:model-value="(val) => updateData(index, 'quantidade', val)"
+                            @update:model-value="
+                              (val) => {
+                                console.log(val);
+                                updateData(index, 'quantidade', val);
+                              }
+                            "
                           >
                           </NumberField>
                         </div>

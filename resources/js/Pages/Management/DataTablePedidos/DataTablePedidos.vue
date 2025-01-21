@@ -109,7 +109,7 @@ const handleLoadTableData = () => {
 
 const getAllFilteredData = () => {
   const allData = dt.rows({ search: 'applied' }).data().toArray();
-
+  console.log(row.cliente);
   const filteredData = allData.map((row) => ({
     ...row,
     status: row.status.label,

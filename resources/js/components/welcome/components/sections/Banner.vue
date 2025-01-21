@@ -3,5 +3,5 @@
 </script>
 
 <template>
-    <!-- Banner HTML -->
+  <div>Banner component</div>
 </template>

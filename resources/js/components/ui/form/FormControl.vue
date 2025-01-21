@@ -1,6 +1,6 @@
 <script setup>
-import { Slot } from "radix-vue";
-import { useFormField } from "./useFormField";
+import { Slot } from 'radix-vue';
+import { useFormField } from './useFormField';
 
 const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
 </script>
@@ -8,9 +8,7 @@ const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
 <template>
   <Slot
     :id="formItemId"
-    :aria-describedby="
-      !error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`
-    "
+    :aria-describedby="!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`"
     :aria-invalid="!!error"
   >
     <slot />

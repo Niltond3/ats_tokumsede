@@ -5,7 +5,7 @@ import { QZ_SECURITY } from "@/config/qz-config";
 const connected = ref(null);
 
 const setCertificatePromise = async () => {
-    await qz.security.setCertificatePromise(function (resolve, reject) {
+    await qz.security.setCertificatePromise(function (resolve) {
         resolve(QZ_SECURITY.certificate);
     });
 
@@ -31,8 +31,8 @@ const connectToQZ = async () => {
         await qz.websocket.connect();
         // Se a conexão for bem-sucedida
         connected.value = true;
-    } catch (error) {
-        // Se ocorrer algum erro, suprimimos qualquer mensagem
+    } catch (err) {
+        console.error("Erro ao conectar ao QZ Tray:", err);
         connected.value = false;
     }
 };
@@ -60,5 +60,5 @@ export const qzTrayService = {
         await qz.print(config, data);
         return true;
     },
-    async checkConnection() {},
+    async checkConnection() { },
 };

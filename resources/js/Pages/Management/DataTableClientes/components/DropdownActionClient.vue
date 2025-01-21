@@ -1,86 +1,100 @@
 <script setup>
-import { ref } from 'vue'
-import axios from 'axios'
+import { ref } from 'vue';
+import axios from 'axios';
 import {
-    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger, DropdownMenuPortal
-} from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
-import { MoreVertical } from 'lucide-vue-next'
-import DialogConfirmAction from './DialogConfirmAction.vue'
-import DialogEditClient from './DialogEditClient.vue'
-import renderToast from '@/components/renderPromiseToast'
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { MoreVertical } from 'lucide-vue-next';
+import DialogConfirmAction from './DialogConfirmAction.vue';
+import DialogEditClient from './DialogEditClient.vue';
+import renderToast from '@/components/renderPromiseToast';
 
 const props = defineProps({
-    payloadData: { type: null, required: true },
-    dataTable: { type: null, required: true },
-})
+  payloadData: { type: null, required: true },
+  dataTable: { type: null, required: true },
+});
 
-const { rowData } = props.payloadData
-const { id: idCliente } = rowData
-const dropdownOpen = ref(false)
-
+const { rowData } = props.payloadData;
+const { id: idCliente } = rowData;
+const dropdownOpen = ref(false);
 
 function copy() {
-    navigator.clipboard.writeText(props.payloadData)
+  navigator.clipboard.writeText(props.payloadData);
 }
 
-const handleUpdateDataTable = () => props.dataTable.ajax.reload()
+const handleUpdateDataTable = () => props.dataTable.ajax.reload();
 const handleToggleDropdown = (op) => {
-    if (op || op == false) dropdownOpen.value = !dropdownOpen.value
-}
+  if (op || op == false) dropdownOpen.value = !dropdownOpen.value;
+};
 
 const handleStatusClientChange = ({ id, status }) => {
-    var url = `clientes/${idCliente}`
-    handleToggleDropdown(true)
-    const promise = axios.put(url, { status: id })
-    renderToast(
-        promise,
-        'alterando status do cliente',
-        `O cliente ${idCliente} foi ${status} com sucesso!`,
-        'Erro ao alterar status do cliente',
-        handleUpdateDataTable
-    )
-}
-
+  var url = `clientes/${idCliente}`;
+  handleToggleDropdown(true);
+  const promise = axios.put(url, { status: id });
+  renderToast(
+    promise,
+    'alterando status do cliente',
+    `O cliente ${idCliente} foi ${status} com sucesso!`,
+    'Erro ao alterar status do cliente',
+    handleUpdateDataTable,
+  );
+};
 </script>
 
 <template>
-    <DropdownMenu :open="dropdownOpen" @update:open="handleToggleDropdown">
-        <DropdownMenuTrigger as-child>
-            <Button variant="ghost" class="transition-colors text-cyan-700 p-0">
-                <span class="sr-only">Abrir Menú</span>
-                <MoreVertical class="w-6 h-6" />
-            </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" class="border border-slate-200">
-            <DropdownMenuLabel class="text-info">Ações</DropdownMenuLabel>
-            <DropdownMenuItem class="gap-2 text-muted-foreground cursor-pointer"
-                @click="() => props.dataTable.ajax.reload()">
-                <i class="ri-eye-fill text-info"></i>
-                Visualizar Cliente
-            </DropdownMenuItem>
-            <DialogEditClient :client-details="rowData" @update:data-table="handleUpdateDataTable" />
-            <DropdownMenuSeparator />
-            <DropdownMenuSub>
-                <DropdownMenuSubTrigger class="text-info">
-                    Outros
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                    <DropdownMenuSubContent class="border border-slate-200">
-                        <DialogConfirmAction @update:dialog-open="handleToggleDropdown"
-                            @on:confirm="() => handleStatusClientChange({ id: 2, status: 'inativado' })"
-                            dialog-description="Deseja realmente inativar o cliente?" dialog-title="Inativar Cliente"
-                            trigger-icon="ri-pause-circle-fill" trigger-label="Inativar Cliente" variant="warning" />
-                        <DialogConfirmAction @update:dialog-open="handleToggleDropdown"
-                            @on:confirm="() => handleStatusClientChange({ id: 3, status: 'excluido' })"
-                            dialog-description="Deseja realmente Excluir o cliente?" dialog-title="Excluir Cliente"
-                            trigger-icon="ri-delete-bin-6-fill" trigger-label="Excluir Cliente" variant="danger" />
-                    </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-            </DropdownMenuSub>
-
-        </DropdownMenuContent>
-    </DropdownMenu>
+  <DropdownMenu :open="dropdownOpen" @update:open="handleToggleDropdown">
+    <DropdownMenuTrigger as-child>
+      <Button variant="ghost" class="transition-colors text-cyan-700 p-0">
+        <span class="sr-only">Abrir Menú</span>
+        <MoreVertical class="w-6 h-6" />
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" class="border border-slate-200">
+      <DropdownMenuLabel class="text-info">Ações</DropdownMenuLabel>
+      <DropdownMenuItem
+        class="gap-2 text-muted-foreground cursor-pointer"
+        @click="() => props.dataTable.ajax.reload()"
+      >
+        <i class="ri-eye-fill text-info"></i>
+        Visualizar Cliente
+      </DropdownMenuItem>
+      <DialogEditClient :client-details="rowData" @update:data-table="handleUpdateDataTable" />
+      <DropdownMenuSeparator />
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger class="text-info"> Outros </DropdownMenuSubTrigger>
+        <DropdownMenuPortal>
+          <DropdownMenuSubContent class="border border-slate-200">
+            <DialogConfirmAction
+              dialog-description="Deseja realmente inativar o cliente?"
+              dialog-title="Inativar Cliente"
+              trigger-icon="ri-pause-circle-fill"
+              trigger-label="Inativar Cliente"
+              variant="warning"
+              @update:dialog-open="handleToggleDropdown"
+              @on:confirm="() => handleStatusClientChange({ id: 2, status: 'inativado' })"
+            />
+            <DialogConfirmAction
+              dialog-description="Deseja realmente Excluir o cliente?"
+              dialog-title="Excluir Cliente"
+              trigger-icon="ri-delete-bin-6-fill"
+              trigger-label="Excluir Cliente"
+              variant="danger"
+              @update:dialog-open="handleToggleDropdown"
+              @on:confirm="() => handleStatusClientChange({ id: 3, status: 'excluido' })"
+            />
+          </DropdownMenuSubContent>
+        </DropdownMenuPortal>
+      </DropdownMenuSub>
+    </DropdownMenuContent>
+  </DropdownMenu>
 </template>

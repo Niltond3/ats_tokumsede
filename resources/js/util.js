@@ -73,7 +73,8 @@ export function dateToDayMonthYearFormat(date) {
             date: `${dd}/${MM}/${YYYY}`,
             time: `${hh}:${mm}`,
         };
-    } catch (error) {
+    } catch (err) {
+        console.error(err);
         return date;
     }
 }

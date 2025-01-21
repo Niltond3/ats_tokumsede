@@ -18,12 +18,10 @@ function template(d) {
     return wm.get(d);
   } else {
     const componentDiv = document.createElement('div');
-    const omittedData = Object.entries(omit(d, [props.index])).map(
-      ([key, value]) => {
-        const legendReference = props.items.find((i) => i.name === key);
-        return { ...legendReference, value };
-      },
-    );
+    const omittedData = Object.entries(omit(d, [props.index])).map(([key, value]) => {
+      const legendReference = props.items.find((i) => i.name === key);
+      return { ...legendReference, value };
+    });
     const TooltipComponent = props.customTooltip ?? ChartTooltip;
     createApp(TooltipComponent, {
       title: d[props.index].toString(),

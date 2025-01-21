@@ -1,30 +1,43 @@
 <script setup>
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
-const defaultValue = 'alkalina-leve'
+const defaultValue = 'alkalina-leve';
 
 const accordionItems = [
-    {
-        value: 'alkalina-leve',
-        title: 'Alkalina Leve',
-        subTitle: 'Pureza + Saúde + Leveza + Prazer',
-        content: html`
-        <p>
-            A água <span class="text-[#489BFB] font-bold">Alkalina Leve</span> é um hidratante alcalino onde na sua composição foi reduzido o teor de alguns sais, como sódio e potássio, para beneficiar aqueles consumidores que possam apresentar alguma restrição alimentar aos mesmos, bem como para favorecer aqueles que valorizam o prazer de beber e os adeptos das águas mais leves, mas que não abrem mão da qualidade do que consomem.
-        </p>
-        <p>
-            Ao contrário das águas minerais, que em sua grande maioria só tem mineral no nome, o seu conteúdo de sais é superior a quase todas as marcas existentes no mercado, o que a classifica como sendo um dos melhores líquidos para aliviar a sua sede.
-        </p>
-        <p>
-            Por ser muito leve e por ter o pH alcalino, a água <span class="text-[#489BFB] font-bold">Alkalina Leve</span> é simultâneamente uma excelente bebida e um verdadeiro isotônico que traz inúmeros benefícios ao seu corpo.
-        </p>
-        `
-    },
-    {
-        value: 'alkalina-rica',
-        title: 'Alkalina Rica',
-        subTitle: 'SAÚDE + JUVENTUDE + BELEZA',
-        content: /*html*/`
+  {
+    value: 'alkalina-leve',
+    title: 'Alkalina Leve',
+    subTitle: 'Pureza + Saúde + Leveza + Prazer',
+    content: html`
+      <p>
+        A água <span class="text-[#489BFB] font-bold">Alkalina Leve</span> é um hidratante alcalino
+        onde na sua composição foi reduzido o teor de alguns sais, como sódio e potássio, para
+        beneficiar aqueles consumidores que possam apresentar alguma restrição alimentar aos mesmos,
+        bem como para favorecer aqueles que valorizam o prazer de beber e os adeptos das águas mais
+        leves, mas que não abrem mão da qualidade do que consomem.
+      </p>
+      <p>
+        Ao contrário das águas minerais, que em sua grande maioria só tem mineral no nome, o seu
+        conteúdo de sais é superior a quase todas as marcas existentes no mercado, o que a
+        classifica como sendo um dos melhores líquidos para aliviar a sua sede.
+      </p>
+      <p>
+        Por ser muito leve e por ter o pH alcalino, a água
+        <span class="text-[#489BFB] font-bold">Alkalina Leve</span> é simultâneamente uma excelente
+        bebida e um verdadeiro isotônico que traz inúmeros benefícios ao seu corpo.
+      </p>
+    `,
+  },
+  {
+    value: 'alkalina-rica',
+    title: 'Alkalina Rica',
+    subTitle: 'SAÚDE + JUVENTUDE + BELEZA',
+    content: /*html*/ `
         <p>
             A <span class="text-[#078010] font-bold">Alkalina Rica</span> funciona como um potente antioxidante, ajudando a equilibrar as condições ácidas naturais do estômago, favorecendo a digestão dos alimentos e eliminando os resíduos ácidos, produzindo uma melhoria substancial na saúde, portanto, o consumo regular de <span class="text-[#078010] font-bold">Alkalina Rica</span> proporciona ao corpo um melhor funcionamento, purificando e hidratando adequadamente.
         </p>
@@ -49,177 +62,225 @@ const accordionItems = [
         <p>
             A composição balanceada de minerais essenciais da <span class="text-[#078010] font-bold">Alkalina Rica</span> é, portanto, o grande diferencial na dieta daqueles que têm sede de saúde, das gerações saudáveis que buscam o equilíbrio entre corpo e mente sãs.
         </p>
-        `
-    },
-    {
-        value: 'alkalina-sport',
-        title: 'Alkalina Sport',
-        subTitle: 'ELETRÓLITOS + ANTIOXIDANTES + ENERGIA',
-        content: `A Água Alcalina Tope, com pH 9.0 é um hidratante elaborado especialmente para o atleta, para o desportista, aquele que tem um trabalho extenuante e pra você que faz academia com regularidade. Sua formulação é composta por minerais de cálcio, magnésio e principalmente potássio que atua diretamente nos momentos de maior esforço físico, potencializando sua resistência ao desgaste natural dessa ação.
+        `,
+  },
+  {
+    value: 'alkalina-sport',
+    title: 'Alkalina Sport',
+    subTitle: 'ELETRÓLITOS + ANTIOXIDANTES + ENERGIA',
+    content: `A Água Alcalina Tope, com pH 9.0 é um hidratante elaborado especialmente para o atleta, para o desportista, aquele que tem um trabalho extenuante e pra você que faz academia com regularidade. Sua formulação é composta por minerais de cálcio, magnésio e principalmente potássio que atua diretamente nos momentos de maior esforço físico, potencializando sua resistência ao desgaste natural dessa ação.
         É no esporte, no trabalho pesado e na academia onde os músculos mais queimam energia. É no momento desse esforço que seu corpo mais precisa desses minerais para um melhor rendimento.
         1) O Cálcio O cálcio é quem te dá firmeza estrutural, na formação e renovação de toda sua massa óssea e articular.
 
         2) O Magnésio te dá precisão em todas as reações metabólicas que seu corpo exige para cada movimento.
 
-        3) O Potássio ativa a função cárdio-vascular, neuro-muscular, levando a energia necessária para cada reação.`
-    },
-]
-
+        3) O Potássio ativa a função cárdio-vascular, neuro-muscular, levando a energia necessária para cada reação.`,
+  },
+];
 </script>
 
 <template>
-    <section
-        class="relative min-h-screen flex flex-col items-center justify-center selection:bg-[#0B1020] selection:text-white">
-        <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
-            <header class="grid grid-cols-2 items-center gap-2 py-10 lg:grid-cols-3">
-                <nav class="flex lg:justify-center lg:col-start-2">
-                    <a href="#aguaalcalina"
-                        class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#0B1020] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white">
-                        Água Alcalina?
-                    </a>
-                    <a href="#puraeleve"
-                        class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#0B1020] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white">
-                        Alkalina Leve
-                    </a>
-                    <a href="#aguarica"
-                        class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#0B1020] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white">
-                        Alkalina Rica
-                    </a>
-                    <a href="#alcalinatope"
-                        class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#0B1020] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white">
-                        Alkalina Sport
-                    </a>
-                </nav>
-                <nav v-if="canLogin" class="-mx-3 flex flex-1 justify-end">
-                    <Link v-if="$page.props.auth.user" :href="route('dashboard')"
-                        class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#0B1020] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white">
-                    Dashboard
-                    </Link>
+  <section
+    class="relative min-h-screen flex flex-col items-center justify-center selection:bg-[#0B1020] selection:text-white"
+  >
+    <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
+      <header class="grid grid-cols-2 items-center gap-2 py-10 lg:grid-cols-3">
+        <nav class="flex lg:justify-center lg:col-start-2">
+          <a
+            href="#aguaalcalina"
+            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#0B1020] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+          >
+            Água Alcalina?
+          </a>
+          <a
+            href="#puraeleve"
+            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#0B1020] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+          >
+            Alkalina Leve
+          </a>
+          <a
+            href="#aguarica"
+            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#0B1020] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+          >
+            Alkalina Rica
+          </a>
+          <a
+            href="#alcalinatope"
+            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#0B1020] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+          >
+            Alkalina Sport
+          </a>
+        </nav>
+        <nav v-if="canLogin" class="-mx-3 flex flex-1 justify-end">
+          <Link
+            v-if="$page.props.auth.user"
+            :href="route('dashboard')"
+            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#0B1020] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+          >
+            Dashboard
+          </Link>
 
-                    <template v-else>
-                        <Link :href="route('login')"
-                            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#0B1020] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white">
-                        Log in
-                        </Link>
+          <template v-else>
+            <Link
+              :href="route('login')"
+              class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#0B1020] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+            >
+              Log in
+            </Link>
 
-                        <Link v-if="canRegister" :href="route('register')"
-                            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#0B1020] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white">
-                        Register
-                        </Link>
-                    </template>
-                </nav>
-            </header>
+            <Link
+              v-if="canRegister"
+              :href="route('register')"
+              class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#0B1020] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+            >
+              Register
+            </Link>
+          </template>
+        </nav>
+      </header>
 
-            <div class="mt-6">
-                <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
-                    <a href="https://laravel.com/docs" id="aguaalcalina"
-                        class="flex flex-col items-start gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#0B1020] md:row-span-3 lg:p-10 lg:pb-10 dark:bg-[#1E293B] dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#0B1020]">
-                        <div id="screenshot-container" class="relative flex w-full flex-1 items-stretch">
-                            <img src="/images/escala.png" alt="escalaPh"
-                                class="aspect-video h-[67.6%] w-full flex-1 rounded-[10px] object-top object-cover drop-shadow-[0px_4px_34px_rgba(0,0,0,0.06)] dark:hidden"
-                                @error="handleImageError" />
-                            <img src="/images/escala.png" alt="escalaPh"
-                                class="hidden aspect-video h-[67.6%] w-full flex-1 rounded-[10px] object-top object-cover drop-shadow-[0px_4px_34px_rgba(0,0,0,0.25)] dark:block" />
-                            <div
-                                class="absolute -bottom-16 -left-16 h-40 w-[calc(100%+8rem)] bg-gradient-to-b from-transparent via-white to-white dark:via-zinc-900 dark:to-zinc-900">
-                            </div>
-                        </div>
+      <div class="mt-6">
+        <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
+          <a
+            id="aguaalcalina"
+            href="https://laravel.com/docs"
+            class="flex flex-col items-start gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#0B1020] md:row-span-3 lg:p-10 lg:pb-10 dark:bg-[#1E293B] dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#0B1020]"
+          >
+            <div id="screenshot-container" class="relative flex w-full flex-1 items-stretch">
+              <img
+                src="/images/escala.png"
+                alt="escalaPh"
+                class="aspect-video h-[67.6%] w-full flex-1 rounded-[10px] object-top object-cover drop-shadow-[0px_4px_34px_rgba(0,0,0,0.06)] dark:hidden"
+                @error="handleImageError"
+              />
+              <img
+                src="/images/escala.png"
+                alt="escalaPh"
+                class="hidden aspect-video h-[67.6%] w-full flex-1 rounded-[10px] object-top object-cover drop-shadow-[0px_4px_34px_rgba(0,0,0,0.25)] dark:block"
+              />
+              <div
+                class="absolute -bottom-16 -left-16 h-40 w-[calc(100%+8rem)] bg-gradient-to-b from-transparent via-white to-white dark:via-zinc-900 dark:to-zinc-900"
+              ></div>
+            </div>
 
-                        <div class="relative flex items-center gap-6 lg:items-end">
-                            <div id="docs-card-content" class="flex items-start gap-6 lg:flex-col">
-                                <div
-                                    class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#0B1020]/20 sm:size-16">
-                                    <svg class="size-5 sm:size-6" xmlns="https://www.w3.org/2000/svg" fill="none"
-                                        viewBox="0 0 24 24">
-                                        <path fill="#fff"
-                                            d="M23 4a1 1 0 0 0-1.447-.894L12.224 7.77a.5.5 0 0 1-.448 0L2.447 3.106A1 1 0 0 0 1 4v13.382a1.99 1.99 0 0 0 1.105 1.79l9.448 4.728c.14.065.293.1.447.1.154-.005.306-.04.447-.105l9.453-4.724a1.99 1.99 0 0 0 1.1-1.789V4ZM3 6.023a.25.25 0 0 1 .362-.223l7.5 3.75a.251.251 0 0 1 .138.223v11.2a.25.25 0 0 1-.362.224l-7.5-3.75a.25.25 0 0 1-.138-.22V6.023Zm18 11.2a.25.25 0 0 1-.138.224l-7.5 3.75a.249.249 0 0 1-.329-.099.249.249 0 0 1-.033-.12V9.772a.251.251 0 0 1 .138-.224l7.5-3.75a.25.25 0 0 1 .362.224v11.2Z" />
-                                        <path fill="#fff"
-                                            d="m3.55 1.893 8 4.048a1.008 1.008 0 0 0 .9 0l8-4.048a1 1 0 0 0-.9-1.785l-7.322 3.706a.506.506 0 0 1-.452 0L4.454.108a1 1 0 0 0-.9 1.785H3.55Z" />
-                                    </svg>
-                                </div>
+            <div class="relative flex items-center gap-6 lg:items-end">
+              <div id="docs-card-content" class="flex items-start gap-6 lg:flex-col">
+                <div
+                  class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#0B1020]/20 sm:size-16"
+                >
+                  <svg
+                    class="size-5 sm:size-6"
+                    xmlns="https://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="#fff"
+                      d="M23 4a1 1 0 0 0-1.447-.894L12.224 7.77a.5.5 0 0 1-.448 0L2.447 3.106A1 1 0 0 0 1 4v13.382a1.99 1.99 0 0 0 1.105 1.79l9.448 4.728c.14.065.293.1.447.1.154-.005.306-.04.447-.105l9.453-4.724a1.99 1.99 0 0 0 1.1-1.789V4ZM3 6.023a.25.25 0 0 1 .362-.223l7.5 3.75a.251.251 0 0 1 .138.223v11.2a.25.25 0 0 1-.362.224l-7.5-3.75a.25.25 0 0 1-.138-.22V6.023Zm18 11.2a.25.25 0 0 1-.138.224l-7.5 3.75a.249.249 0 0 1-.329-.099.249.249 0 0 1-.033-.12V9.772a.251.251 0 0 1 .138-.224l7.5-3.75a.25.25 0 0 1 .362.224v11.2Z"
+                    />
+                    <path
+                      fill="#fff"
+                      d="m3.55 1.893 8 4.048a1.008 1.008 0 0 0 .9 0l8-4.048a1 1 0 0 0-.9-1.785l-7.322 3.706a.506.506 0 0 1-.452 0L4.454.108a1 1 0 0 0-.9 1.785H3.55Z"
+                    />
+                  </svg>
+                </div>
 
-                                <div class="pt-3 sm:pt-5 lg:pt-0">
-                                    <h2 class="text-xl font-semibold text-black dark:text-white">O que é água
-                                        Alcalina</h2>
-                                    <p class="mt-6 text-sm/relaxed opacity-80">
-                                        É chamada alcalina toda água com pH superior a 7,5</p>
+                <div class="pt-3 sm:pt-5 lg:pt-0">
+                  <h2 class="text-xl font-semibold text-black dark:text-white">
+                    O que é água Alcalina
+                  </h2>
+                  <p class="mt-6 text-sm/relaxed opacity-80">
+                    É chamada alcalina toda água com pH superior a 7,5
+                  </p>
 
-                                    <p class="mt-4 text-sm/relaxed">O termo <span>água alcalina</span> referece-se
-                                        ao
-                                        <span>potencial hidrogeniônico</span> ou simplemente <span>pH da
-                                            água</span>.
-                                        O nível de pH é uma medida que determina a alcalinidade ou a acidez de uma
-                                        solução. Ela é
-                                        medida em uma escala de 0 a 14, onde 7 é neutro, valores abaixo indicam
-                                        acidez e acima
-                                        representam alcalinidade.
-                                        Hoje no Brasil, quem determina todos os Padrões de Potabilidade é a <a
-                                            class="link"
-                                            href="https://bvsms.saude.gov.br/bvs/saudelegis/gm/2011/prt2914_12_12_2011.html"
-                                            target="_blank">Portaria 2.914</a> do Ministério da Saúde. Essa portaria
-                                        determina que o
-                                        valor do pH da água destinada ao consumo humano esteja na faixa entre 6,5 e
-                                        9,5.
-                                    </p>
-                                    <p>Nossos avós tomavam água de cacimba, alcalina e cheia de minerais e por
-                                        isso tinham "saúde de ferro". Hoje as principais águas encontradas no
-                                        mercado
-                                        apresentam níveis muito elevados de acidez, muitas delas <span>com pH abaixo
-                                            de 6.5 e
-                                            chegando
-                                            algumas marcas a 3.5</span>, ou seja, extremamente acidificantes e
-                                        prejudiciais.
-                                        Já as <span>águas alcalinas</span>, que têm <span>pH entre 7.5 e 9.5</span>,
-                                        são o alimento
-                                        da vida, o hidratante
-                                        que age naturalmente como preventivo dos males causados por radicais livres,
-                                        reduzindo-os e neutralizando os efeitos do consumo de alimentos ácidos.
-                                    </p>
-                                </div>
-                            </div>
+                  <p class="mt-4 text-sm/relaxed">
+                    O termo <span>água alcalina</span> referece-se ao
+                    <span>potencial hidrogeniônico</span> ou simplemente <span>pH da água</span>. O
+                    nível de pH é uma medida que determina a alcalinidade ou a acidez de uma
+                    solução. Ela é medida em uma escala de 0 a 14, onde 7 é neutro, valores abaixo
+                    indicam acidez e acima representam alcalinidade. Hoje no Brasil, quem determina
+                    todos os Padrões de Potabilidade é a
+                    <a
+                      class="link"
+                      href="https://bvsms.saude.gov.br/bvs/saudelegis/gm/2011/prt2914_12_12_2011.html"
+                      target="_blank"
+                      >Portaria 2.914</a
+                    >
+                    do Ministério da Saúde. Essa portaria determina que o valor do pH da água
+                    destinada ao consumo humano esteja na faixa entre 6,5 e 9,5.
+                  </p>
+                  <p>
+                    Nossos avós tomavam água de cacimba, alcalina e cheia de minerais e por isso
+                    tinham "saúde de ferro". Hoje as principais águas encontradas no mercado
+                    apresentam níveis muito elevados de acidez, muitas delas
+                    <span>com pH abaixo de 6.5 e chegando algumas marcas a 3.5</span>, ou seja,
+                    extremamente acidificantes e prejudiciais. Já as <span>águas alcalinas</span>,
+                    que têm <span>pH entre 7.5 e 9.5</span>, são o alimento da vida, o hidratante
+                    que age naturalmente como preventivo dos males causados por radicais livres,
+                    reduzindo-os e neutralizando os efeitos do consumo de alimentos ácidos.
+                  </p>
+                </div>
+              </div>
 
-                            <svg class="size-6 shrink-0 stroke-[#0B1020]" xmlns="https://www.w3.org/2000/svg"
-                                fill="none" viewBox="0 0 24 24" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
-                            </svg>
-                        </div>
-                    </a>
-                    <Accordion type="single" collapsible :default-value="defaultValue">
-                        <AccordionItem v-for="item in accordionItems" :key="item.value" :value="item.value"
-                            class="[&>h3]:w-full flex flex-col items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] lg:pb-10 dark:bg-[#1E293B] dark:ring-zinc-800">
+              <svg
+                class="size-6 shrink-0 stroke-[#0B1020]"
+                xmlns="https://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
+                />
+              </svg>
+            </div>
+          </a>
+          <Accordion type="single" collapsible :default-value="defaultValue">
+            <AccordionItem
+              v-for="item in accordionItems"
+              :key="item.value"
+              :value="item.value"
+              class="[&>h3]:w-full flex flex-col items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] lg:pb-10 dark:bg-[#1E293B] dark:ring-zinc-800"
+            >
+              <AccordionTrigger class="flex w-full gap-5 justify-center relative" as-child="true">
+                <button>
+                  <div
+                    class="absolute left-0 top-1/2 -translate-y-1/2 flex size-12 shrink-0 items-center justify-center rounded-full bg-[#0B1020]/20 sm:size-16"
+                  >
+                    <svg
+                      class="size-5 sm:size-6"
+                      xmlns="https://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <g fill="#fff">
+                        <path
+                          d="M8.75 4.5H5.5c-.69 0-1.25.56-1.25 1.25v4.75c0 .69.56 1.25 1.25 1.25h3.25c.69 0 1.25-.56 1.25-1.25V5.75c0-.69-.56-1.25-1.25-1.25Z"
+                        />
+                        <path
+                          d="M24 10a3 3 0 0 0-3-3h-2V2.5a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2V20a3.5 3.5 0 0 0 3.5 3.5h17A3.5 3.5 0 0 0 24 20V10ZM3.5 21.5A1.5 1.5 0 0 1 2 20V3a.5.5 0 0 1 .5-.5h14a.5.5 0 0 1 .5.5v17c0 .295.037.588.11.874a.5.5 0 0 1-.484.625L3.5 21.5ZM22 20a1.5 1.5 0 1 1-3 0V9.5a.5.5 0 0 1 .5-.5H21a1 1 0 0 1 1 1v10Z"
+                        />
+                        <path
+                          d="M12.751 6.047h2a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-2A.75.75 0 0 1 12 7.3v-.5a.75.75 0 0 1 .751-.753ZM12.751 10.047h2a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-2A.75.75 0 0 1 12 11.3v-.5a.75.75 0 0 1 .751-.753ZM4.751 14.047h10a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-10A.75.75 0 0 1 4 15.3v-.5a.75.75 0 0 1 .751-.753ZM4.75 18.047h7.5a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-7.5A.75.75 0 0 1 4 19.3v-.5a.75.75 0 0 1 .75-.753Z"
+                        />
+                      </g>
+                    </svg>
+                  </div>
+                  <h2 class="flex flex-col text-xl font-semibold text-black dark:text-white">
+                    <p class="text-xl font-semibold text-black dark:text-white">{{ item.title }}</p>
+                    <p class="text-sm/relaxed opacity-80">{{ item.subTitle }}</p>
+                  </h2>
+                </button>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div v-html="item.content"></div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
-                            <AccordionTrigger class="flex w-full gap-5 justify-center relative" as-child="true">
-                                <button>
-                                    <div
-                                        class="absolute left-0 top-1/2 -translate-y-1/2 flex size-12 shrink-0 items-center justify-center rounded-full bg-[#0B1020]/20 sm:size-16">
-                                        <svg class="size-5 sm:size-6" xmlns="https://www.w3.org/2000/svg" fill="none"
-                                            viewBox="0 0 24 24">
-                                            <g fill="#fff">
-                                                <path
-                                                    d="M8.75 4.5H5.5c-.69 0-1.25.56-1.25 1.25v4.75c0 .69.56 1.25 1.25 1.25h3.25c.69 0 1.25-.56 1.25-1.25V5.75c0-.69-.56-1.25-1.25-1.25Z" />
-                                                <path
-                                                    d="M24 10a3 3 0 0 0-3-3h-2V2.5a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2V20a3.5 3.5 0 0 0 3.5 3.5h17A3.5 3.5 0 0 0 24 20V10ZM3.5 21.5A1.5 1.5 0 0 1 2 20V3a.5.5 0 0 1 .5-.5h14a.5.5 0 0 1 .5.5v17c0 .295.037.588.11.874a.5.5 0 0 1-.484.625L3.5 21.5ZM22 20a1.5 1.5 0 1 1-3 0V9.5a.5.5 0 0 1 .5-.5H21a1 1 0 0 1 1 1v10Z" />
-                                                <path
-                                                    d="M12.751 6.047h2a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-2A.75.75 0 0 1 12 7.3v-.5a.75.75 0 0 1 .751-.753ZM12.751 10.047h2a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-2A.75.75 0 0 1 12 11.3v-.5a.75.75 0 0 1 .751-.753ZM4.751 14.047h10a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-10A.75.75 0 0 1 4 15.3v-.5a.75.75 0 0 1 .751-.753ZM4.75 18.047h7.5a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-7.5A.75.75 0 0 1 4 19.3v-.5a.75.75 0 0 1 .75-.753Z" />
-                                            </g>
-                                        </svg>
-                                    </div>
-                                    <h2 class=" flex flex-col text-xl font-semibold text-black dark:text-white">
-                                        <p class="text-xl font-semibold text-black dark:text-white">{{ item.title }}
-                                        </p>
-                                        <p class="text-sm/relaxed opacity-80">{{ item.subTitle }}</p>
-                                    </h2>
-                                </button>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                                <div v-html=item.content>
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
-                    </Accordion>
-
-                    <!-- <a href="https://laracasts.com" id="alkalina-leve"
+          <!-- <a href="https://laracasts.com" id="alkalina-leve"
                             class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#0B1020] lg:pb-10 dark:bg-[#1E293B] dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#0B1020]">
                             <div
                                 class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#0B1020]/20 sm:size-16">
@@ -346,8 +407,8 @@ const accordionItems = [
                                 </p>
                             </div>
                         </div> -->
-                </div>
-            </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 </template>

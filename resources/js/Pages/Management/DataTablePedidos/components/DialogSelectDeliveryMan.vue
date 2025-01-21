@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted } from 'vue';
 import {
   Dialog,
   DialogContent,
@@ -13,7 +12,7 @@ import { utf8Decode } from '@/util';
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
 import { dialogState } from '../../../../hooks/useToggleDialog';
 
-const props = defineProps({
+defineProps({
   entregadores: { type: Array, required: true },
   dropdown: { type: Boolean, required: false, default: true },
 });

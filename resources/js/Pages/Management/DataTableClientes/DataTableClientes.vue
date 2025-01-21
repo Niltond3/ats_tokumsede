@@ -38,8 +38,8 @@ import { DialogRegisterPrices } from '@/components/DialogRegisterPrices';
 DataTable.use(DataTablesCore);
 
 const props = defineProps({
-    setTab: { type: Function, required: true },
-})
+  setTab: { type: Function, required: true },
+});
 
 const { isOpen, toggleDialog } = dialogState();
 const { isOpen: openShowOrderDialog, toggleDialog: toggleShowOrderDialog } = dialogState();
@@ -48,181 +48,185 @@ const { isOpen: openEditAddress, toggleDialog: toggleEditAddress } = dialogState
 const { isOpen: openConfirmDialog, toggleDialog: toggleConfirmDialog } = dialogState();
 const { isOpen: openRegisterPrices, toggleDialog: toggleRegisterPrices } = dialogState();
 
-const idClienteAddress = ref('')
-const idClient = ref('')
-const clientName = ref('')
-const idAddress = ref('')
-const idOrder = ref('')
-const address = ref({})
-const addressTarget = ref({})
+const idClienteAddress = ref('');
+const idClient = ref('');
+const clientName = ref('');
+const idAddress = ref('');
+const idOrder = ref('');
+const address = ref({});
+const addressTarget = ref({});
 
 let dt;
 const table = ref();
 
 const initializeDataTable = (dt) => {
-    const format = (d) => rowChildtable(d)
+  const format = (d) => rowChildtable(d);
 
-    setupChildRowHandler(dt, format)
-    setupSearchStyling()
-    setupEventHandlers(dt)
-}
+  setupChildRowHandler(dt, format);
+  setupSearchStyling();
+  setupEventHandlers(dt);
+};
 
 const dragScrollList = (elementId) => {
-    const ele = document.getElementById(elementId);
+  const ele = document.getElementById(elementId);
+  ele.style.cursor = 'pointer';
+
+  let pos = { top: 0, left: 0, x: 0, y: 0 };
+
+  const mouseDownHandler = function (e) {
+    e.preventDefault();
+    ele.style.cursor = 'grabbing';
+    ele.style.userSelect = 'none';
+
+    pos = {
+      left: ele.scrollLeft,
+      top: ele.scrollTop,
+      // Get the current mouse position
+      x: e.clientX,
+      y: e.clientY,
+    };
+
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+  };
+
+  const mouseMoveHandler = function (e) {
+    e.preventDefault();
+    // How far the mouse has been moved
+    const dx = e.clientX - pos.x;
+    const dy = e.clientY - pos.y;
+
+    // Scroll the element
+    ele.scrollTop = pos.top - dy;
+    ele.scrollLeft = pos.left - dx;
+  };
+
+  const mouseUpHandler = function () {
     ele.style.cursor = 'pointer';
+    ele.style.removeProperty('user-select');
 
-    let pos = { top: 0, left: 0, x: 0, y: 0 };
+    document.removeEventListener('mousemove', mouseMoveHandler);
+    document.removeEventListener('mouseup', mouseUpHandler);
+  };
 
-    const mouseDownHandler = function (e) {
-        e.preventDefault();
-        ele.style.cursor = 'grabbing';
-        ele.style.userSelect = 'none';
-
-        pos = {
-            left: ele.scrollLeft,
-            top: ele.scrollTop,
-            // Get the current mouse position
-            x: e.clientX,
-            y: e.clientY,
-        };
-
-        document.addEventListener('mousemove', mouseMoveHandler);
-        document.addEventListener('mouseup', mouseUpHandler);
-    };
-
-    const mouseMoveHandler = function (e) {
-        e.preventDefault();
-        // How far the mouse has been moved
-        const dx = e.clientX - pos.x;
-        const dy = e.clientY - pos.y;
-
-        // Scroll the element
-        ele.scrollTop = pos.top - dy;
-        ele.scrollLeft = pos.left - dx;
-    };
-
-    const mouseUpHandler = function () {
-        ele.style.cursor = 'pointer';
-        ele.style.removeProperty('user-select');
-
-        document.removeEventListener('mousemove', mouseMoveHandler);
-        document.removeEventListener('mouseup', mouseUpHandler);
-    };
-
-    // Attach the handler
-    ele.addEventListener('mousedown', mouseDownHandler);
-}
+  // Attach the handler
+  ele.addEventListener('mousedown', mouseDownHandler);
+};
 
 const handleUpdateDataTable = () => dt.ajax.reload();
 
 const setupChildRowHandler = (dt, format) => {
-    $('#datatable-clientes tbody').on('click', 'td.dt-control', async function () {
-        const tr = $(this).closest('tr');
-        const row = dt.row(tr);
-        const client = row.data()
+  $('#datatable-clientes tbody').on('click', 'td.dt-control', async function () {
+    const tr = $(this).closest('tr');
+    const row = dt.row(tr);
+    const client = row.data();
 
-        if (row.child.isShown()) {
-            addressTarget.value == null && handleUpdateDataTable()
-            return row.child.hide();
-        }
+    if (row.child.isShown()) {
+      addressTarget.value == null && handleUpdateDataTable();
+      return row.child.hide();
+    }
 
-        const response = await axios.get(`clientes/${client.id}`)
-        const pedidos = response.data.pedidos.map((pedido) => formatOrder(pedido))
-        const childData = { ...client, pedidos }
+    const response = await axios.get(`clientes/${client.id}`);
+    const pedidos = response.data.pedidos.map((pedido) => formatOrder(pedido));
+    const childData = { ...client, pedidos };
 
-        row.child(format(childData)).show();
+    row.child(format(childData)).show();
 
-        dragScrollList('enderecos')
-        dragScrollList('pedidos')
-    });
-}
+    dragScrollList('enderecos');
+    dragScrollList('pedidos');
+  });
+};
 
 const setupSearchStyling = () => {
-    $('.dt-search').addClass('flex items-center py-2 px-4 gap-2 !text-info/80')
-    $('.dt-search > label').html(/*html*/`
+  $('.dt-search').addClass('flex items-center py-2 px-4 gap-2 !text-info/80');
+  $('.dt-search > label').html(/*html*/ `
         <span class="hidden">pesquisar</span>
         <i class="ri-search-2-fill"></i>
-    `)
+    `);
 
-    const inputClasses = 'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary !border-input placeholder:text-info/50 !text-info/80'
-    $('.dt-search > input').addClass(inputClasses)
-}
+  const inputClasses =
+    'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary !border-input placeholder:text-info/50 !text-info/80';
+  $('.dt-search > input').addClass(inputClasses);
+};
 
 const setupEventHandlers = (dt) => {
-    setupOrderHandlers()
-    setupAddressHandlers(dt)
-    setupCopyHandler(dt)
-    setupAccordionHandler()
-}
+  setupOrderHandlers();
+  setupAddressHandlers(dt);
+  setupCopyHandler(dt);
+  setupAccordionHandler();
+};
 
 const setupOrderHandlers = () => {
-    $('#datatable-clientes').on("click", '.iniciarPedido', function () {
-        clientName.value = this.getAttribute('data-client')
-        idClienteAddress.value = this.id
-        toggleDialog()
-    })
+  $('#datatable-clientes').on('click', '.iniciarPedido', function () {
+    clientName.value = this.getAttribute('data-client');
+    idClienteAddress.value = this.id;
+    toggleDialog();
+  });
 
-    $('#datatable-clientes').on("click", '.visualizarPedido', function () {
-        idOrder.value = parseInt(this.id)
-        toggleShowOrderDialog()
-    })
-}
+  $('#datatable-clientes').on('click', '.visualizarPedido', function () {
+    idOrder.value = parseInt(this.id);
+    toggleShowOrderDialog();
+  });
+};
 
 const setupAddressHandlers = (dt) => {
-    $('#datatable-clientes').on("click", '.editarEndereco', function () {
-        const idAddress = this.getAttribute('addr_id')
-        const idClient = this.getAttribute('cli_id')
-        const data = dt.data()
-        address.value = Object.values(data)
-            .filter(cli => cli.id == idClient)[0]
-            .enderecos.filter(addr => addr.id == idAddress)[0]
-        toggleEditAddress()
-    })
+  $('#datatable-clientes').on('click', '.editarEndereco', function () {
+    const idAddress = this.getAttribute('addr_id');
+    const idClient = this.getAttribute('cli_id');
+    const data = dt.data();
+    address.value = Object.values(data)
+      .filter((cli) => cli.id == idClient)[0]
+      .enderecos.filter((addr) => addr.id == idAddress)[0];
+    toggleEditAddress();
+  });
 
-    $("#datatable-clientes").on("click", ".novoEndereco", function () {
-        idClient.value = this.id
-        toggleRegisterAddress()
-    })
+  $('#datatable-clientes').on('click', '.novoEndereco', function () {
+    idClient.value = this.id;
+    toggleRegisterAddress();
+  });
 
-    $('#datatable-clientes').on("click", '.excluirEndereco', toggleConfirmDialog)
+  $('#datatable-clientes').on('click', '.excluirEndereco', toggleConfirmDialog);
 
-    $('#datatable-clientes').on("click", '.novoPrecoEspecial', (event) => {
-        idClient.value = event.target.id
-        toggleRegisterPrices()
-    })
+  $('#datatable-clientes').on('click', '.novoPrecoEspecial', (event) => {
+    idClient.value = event.target.id;
+    toggleRegisterPrices();
+  });
 
-    $('#datatable-clientes').on("long-press", '.deleteEndereco', function (e) {
-        idClient.value = e.target.id
-        idAddress.value = e.target.getAttribute('addr_id')
-        e.target.setAttribute('aria-selected', e.target.getAttribute('aria-selected') === 'true' ? 'false' : 'true');
-        addressTarget.value = e.target
-        e.target.parentNode.classList.toggle("[&>li[aria-selected='false']]:pointer-events-none");
-    })
-}
+  $('#datatable-clientes').on('long-press', '.deleteEndereco', function (e) {
+    idClient.value = e.target.id;
+    idAddress.value = e.target.getAttribute('addr_id');
+    e.target.setAttribute(
+      'aria-selected',
+      e.target.getAttribute('aria-selected') === 'true' ? 'false' : 'true',
+    );
+    addressTarget.value = e.target;
+    e.target.parentNode.classList.toggle("[&>li[aria-selected='false']]:pointer-events-none");
+  });
+};
 
 const setupCopyHandler = (dt) => {
-    $('#datatable-clientes').on("click", '.copiarEndereco', function () {
-        const data = dt.data()
-        const payload = Object.values(data)
-            .filter(cli => cli.id == idClient.value)[0]
-            .enderecos.filter(addr => addr.id == idAddress.value)[0]
+  $('#datatable-clientes').on('click', '.copiarEndereco', function () {
+    const data = dt.data();
+    const payload = Object.values(data)
+      .filter((cli) => cli.id == idClient.value)[0]
+      .enderecos.filter((addr) => addr.id == idAddress.value)[0];
 
-        const clipboard = formatAddressForClipboard(payload)
-        navigator.clipboard.writeText(clipboard)
-        toast.info('Copiado para a área de transferência')
-    })
-}
+    const clipboard = formatAddressForClipboard(payload);
+    navigator.clipboard.writeText(clipboard);
+    toast.info('Copiado para a área de transferência');
+  });
+};
 
 const setupAccordionHandler = () => {
-    $('#datatable-clientes').on("click", '.accordionController', function (e) {
-        e.target.classList.toggle('after:!content-["-"]')
-        const panel = e.target.parentNode.nextElementSibling
-        panel.firstChild.nextElementSibling.classList.toggle('!max-h-[11rem]')
-    })
-}
+  $('#datatable-clientes').on('click', '.accordionController', function (e) {
+    e.target.classList.toggle('after:!content-["-"]');
+    const panel = e.target.parentNode.nextElementSibling;
+    panel.firstChild.nextElementSibling.classList.toggle('!max-h-[11rem]');
+  });
+};
 
 const formatAddressForClipboard = (address) => {
-    return `
+  return `
 ------------- endereço -------------
 ${address.cep ? 'CEP: ' + address.cep : ''}
 Cidade: ${address.cidade}
@@ -233,191 +237,224 @@ Número: ${address.numero}
 Bairro: ${address.bairro}
 ${address.complemento ? 'Complemento: ' + address.complemento : ''}
 ${address.referencia ? 'Referência: ' + address.referencia : ''}
-`.replace(/(^[ \t]*\n)/gm, "")
-}
+`.replace(/(^[ \t]*\n)/gm, '');
+};
 
 onMounted(() => {
-    dt = table.value.dt
-    initializeDataTable(dt)
-    window.setInterval(observeNewOrders, 10000);
-})
+  dt = table.value.dt;
+  initializeDataTable(dt);
+  window.setInterval(observeNewOrders, 10000);
+});
 
 const columns = [
-    {
-        className: 'dt-control',
-        orderable: false,
-        data: null,
-        defaultContent: '',
-        render: '#dt-control',
-        responsivePriority: 1
-    },
-    { data: 'nome', title: 'Nome', responsivePriority: 2 },
-    { data: 'tipoPessoa', title: 'CPF/CNPJ', searchable: false, responsivePriority: 6 },
-    { data: 'telefone', title: 'Telefone', responsivePriority: 3 },
-    { data: 'outrosContatos', title: 'Outros Contatos', responsivePriority: 4 },
-    { data: 'rating', title: 'Rating', searchable: false, responsivePriority: 5 },
-    { data: 'opcoes', title: 'Opções', render: '#actions', searchable: false, responsivePriority: 1 },
-    { data: 'enderecos[].logradouro', name: 'enderecos.logradouro', visible: false },
-    { data: 'enderecos[].bairro', name: 'enderecos.bairro', visible: false },
-    { data: 'enderecos[].numero', name: 'enderecos.numero', visible: false },
-    { data: 'enderecos[].cidade', name: 'enderecos.cidade', visible: false },
-    { data: 'enderecos[].estado', name: 'enderecos.estado', visible: false },
-    { data: 'dddTelefone', visible: false }
-]
+  {
+    className: 'dt-control',
+    orderable: false,
+    data: null,
+    defaultContent: '',
+    render: '#dt-control',
+    responsivePriority: 1,
+  },
+  { data: 'nome', title: 'Nome', responsivePriority: 2 },
+  { data: 'tipoPessoa', title: 'CPF/CNPJ', searchable: false, responsivePriority: 6 },
+  { data: 'telefone', title: 'Telefone', responsivePriority: 3 },
+  { data: 'outrosContatos', title: 'Outros Contatos', responsivePriority: 4 },
+  { data: 'rating', title: 'Rating', searchable: false, responsivePriority: 5 },
+  { data: 'opcoes', title: 'Opções', render: '#actions', searchable: false, responsivePriority: 1 },
+  { data: 'enderecos[].logradouro', name: 'enderecos.logradouro', visible: false },
+  { data: 'enderecos[].bairro', name: 'enderecos.bairro', visible: false },
+  { data: 'enderecos[].numero', name: 'enderecos.numero', visible: false },
+  { data: 'enderecos[].cidade', name: 'enderecos.cidade', visible: false },
+  { data: 'enderecos[].estado', name: 'enderecos.estado', visible: false },
+  { data: 'dddTelefone', visible: false },
+];
 
 const options = {
-    language: languagePtBR,
-    serverSide: true,
-    processing: true,
-    responsive: {
-        details: false,
-        breakpoints: [
-            { name: 'bigdesktop', width: Infinity },
-            { name: 'meddesktop', width: 1480 },
-            { name: 'smalldesktop', width: 1280 },
-            { name: 'medium', width: 1188 },
-            { name: 'tabletl', width: 1024 },
-            { name: 'btwtabllandp', width: 848 },
-            { name: 'tabletp', width: 768 },
-            { name: 'mobilel', width: 480 },
-            { name: 'mobilep', width: 320 }
-        ]
-    },
-    layout: {
-        top: 'search',
-        topStart: null,
-        topEnd: null,
-        bottomStart: 'info',
-        bottomEnd: 'paging'
-    },
-    initComplete: function (settings, json) {
-        const table = this.api();
+  language: languagePtBR,
+  serverSide: true,
+  processing: true,
+  responsive: {
+    details: false,
+    breakpoints: [
+      { name: 'bigdesktop', width: Infinity },
+      { name: 'meddesktop', width: 1480 },
+      { name: 'smalldesktop', width: 1280 },
+      { name: 'medium', width: 1188 },
+      { name: 'tabletl', width: 1024 },
+      { name: 'btwtabllandp', width: 848 },
+      { name: 'tabletp', width: 768 },
+      { name: 'mobilel', width: 480 },
+      { name: 'mobilep', width: 320 },
+    ],
+  },
+  layout: {
+    top: 'search',
+    topStart: null,
+    topEnd: null,
+    bottomStart: 'info',
+    bottomEnd: 'paging',
+  },
+  initComplete: function (settings, json) {
+    const table = this.api();
 
-        table.on('search.dt', async function () {
-            const searchValue = table.search();
-            if (searchValue) {
-                try {
-                    const dtParams = table.ajax.params();
-                    const response = await axios.post('clientes', {
-                        ...dtParams,
-                        length: 999999,
-                        start: 0,
-                        search: {
-                            value: searchValue,
-                            regex: false
-                        }
-                    });
+    table.on('search.dt', async function () {
+      const searchValue = table.search();
+      if (searchValue) {
+        try {
+          const dtParams = table.ajax.params();
+          const response = await axios.post('clientes', {
+            ...dtParams,
+            length: 999999,
+            start: 0,
+            search: {
+              value: searchValue,
+              regex: false,
+            },
+          });
 
-                    const fullData = response.data.data.map((client) => ({
-                        ...client,
-                        nome: utf8Decode(client.nome),
-                        enderecos: client.enderecos.map((address) => ({
-                            ...address,
-                            logradouro: utf8Decode(address.logradouro || ''),
-                            bairro: utf8Decode(address.bairro || ''),
-                            cidade: utf8Decode(address.cidade || ''),
-                            observacao: utf8Decode(address.observacao || ''),
-                            referencia: utf8Decode(address.referencia || ''),
-                            apelido: utf8Decode(address.apelido || ''),
-                        }))
-                    }));
+          const fullData = response.data.data.map((client) => ({
+            ...client,
+            nome: utf8Decode(client.nome),
+            enderecos: client.enderecos.map((address) => ({
+              ...address,
+              logradouro: utf8Decode(address.logradouro || ''),
+              bairro: utf8Decode(address.bairro || ''),
+              cidade: utf8Decode(address.cidade || ''),
+              observacao: utf8Decode(address.observacao || ''),
+              referencia: utf8Decode(address.referencia || ''),
+              apelido: utf8Decode(address.apelido || ''),
+            })),
+          }));
 
-                    console.log('Complete filtered dataset:', fullData);
-                } catch (error) {
-                    console.error('Error fetching complete dataset:', error);
-                }
-            }
-        });
-    },
-    // drawCallback: function (settings) {
-    //     // Get the full filtered data across all pages
-    //     const api = new $.fn.dataTable.Api(settings);
-    //     const filteredData = api.rows({ filter: 'applied' }).data().toArray();
-    //     console.log('Full filtered dataset:', filteredData);
-    // },
-}
+          console.log('Complete filtered dataset:', fullData);
+        } catch (error) {
+          console.error('Error fetching complete dataset:', error);
+        }
+      }
+    });
+  },
+  // drawCallback: function (settings) {
+  //     // Get the full filtered data across all pages
+  //     const api = new $.fn.dataTable.Api(settings);
+  //     const filteredData = api.rows({ filter: 'applied' }).data().toArray();
+  //     console.log('Full filtered dataset:', filteredData);
+  // },
+};
 const ajax = {
-    url: 'clientes', dataFilter: function (data) {
-        const obj = JSON.parse(data)
-        const newData = obj.data.map((client) => {
+  url: 'clientes',
+  dataFilter: function (data) {
+    const obj = JSON.parse(data);
+    const newData = obj.data.map((client) => {
+      const nome = utf8Decode(client.nome);
+      const enderecos = client.enderecos.map((address) => {
+        return {
+          ...address,
+          logradouro: utf8Decode(address.logradouro || ''),
+          bairro: utf8Decode(address.bairro || ''),
+          cidade: utf8Decode(address.cidade || ''),
+          observacao: utf8Decode(address.observacao || ''),
+          referencia: utf8Decode(address.referencia || ''),
+          apelido: utf8Decode(address.apelido || ''),
+        };
+      });
 
-            const nome = utf8Decode(client.nome)
-            const enderecos = client.enderecos.map((address) => {
-                return {
-                    ...address,
-                    logradouro: utf8Decode(address.logradouro || ''),
-                    bairro: utf8Decode(address.bairro || ''),
-                    cidade: utf8Decode(address.cidade || ''),
-                    observacao: utf8Decode(address.observacao || ''),
-                    referencia: utf8Decode(address.referencia || ''),
-                    apelido: utf8Decode(address.apelido || ''),
-                }
-            })
+      const newClient = { ...client, nome, enderecos };
 
-            const newClient = { ...client, nome, enderecos }
+      return newClient;
+    });
+    const newObj = { ...obj, data: newData };
 
-            return newClient
-        })
-        const newObj = { ...obj, data: newData };
-
-        return JSON.stringify(newObj);
-    },
-    error: function (err) {
-        console.error(errorUtils.getError(err))
-        toast.error('Ocorreu um erro ao carregar os clientes!' + errorUtils.getError(err))
-    }
-}
+    return JSON.stringify(newObj);
+  },
+  error: function (err) {
+    console.error(errorUtils.getError(err));
+    toast.error('Ocorreu um erro ao carregar os clientes!' + errorUtils.getError(err));
+  },
+};
 
 const handleDeleteAddress = (confirm) => {
+  if (confirm === false) return toggleConfirmDialog();
 
-    if (confirm === false) return toggleConfirmDialog()
+  let container = addressTarget.value;
 
-    let container = addressTarget.value;
+  container.classList.add('w-0');
+  container.classList.add('opacity-0');
+  container.classList.add('hidden');
 
-    container.classList.add('w-0');
-    container.classList.add('opacity-0');
-    container.classList.add('hidden');
-
-    container.parentNode.classList.toggle("[&>li[aria-selected='false']]:pointer-events-none");
-    addressTarget.value = null
-    toggleConfirmDialog()
-    container.ontransitionend = function () {
-    }
-}
-
+  container.parentNode.classList.toggle("[&>li[aria-selected='false']]:pointer-events-none");
+  addressTarget.value = null;
+  toggleConfirmDialog();
+  container.ontransitionend = function () {};
+};
 </script>
 
 <template>
-    <div class="[&_.dt-search]:relative [&_.dt-search>label]:ri-search-2-fill">
-        <DialogRegisterPrices :addressId="idAddress" :clientId="idClient" :isOpen="openRegisterPrices"
-            :toggleDialog="toggleRegisterPrices" description="Cadastro de preços especiais" />
-        <DialogCreateOrder :open="isOpen" :toggleDialog="toggleDialog" :id-cliente-address="idClienteAddress"
-            :client-name="clientName" :set-tab="props.setTab" @update:data-table="handleUpdateDataTable" />
-        <DialogShowOrder :open="openShowOrderDialog" :toggleDialog="toggleShowOrderDialog" :order-id="idOrder" />
-        <DialogRegisterClient @update:data-table="handleUpdateDataTable" />
-        <DialogRegisterAddress :open="openRegisterAddress" :toggleDialog="toggleRegisterAddress" :id-client="idClient"
-            @update:data-table="handleUpdateDataTable" />
-        <DialogRegisterAddress :open="openEditAddress" :toggleDialog="toggleEditAddress"
-            @update:data-table="handleUpdateDataTable" :address-details="address" />
-        <DialogConfirmAddressDelete dialog-title="Excluir Endereço" variant="danger" :id-address="idAddress"
-            @delete:confirm="handleDeleteAddress" dialog-description="Tem certeza que deseja excluir o endereço?"
-            :open="openConfirmDialog" />
-        <DataTable id="datatable-clientes"
-            class="display [&_thead]:bg-info [&_thead]:text-[#F3F9FD] [&_tbody>tr>td.dt-control]:before:hidden [&_tbody>tr.dt-hasChild_span.transition-all]:rotate-90 [&_tbody>tr.dt-hasChild_div.relative]:bg-danger"
-            :columns="columns" :ajax="ajax" :options="options" ref="table" language="language">
-            <template #actions="data">
-                <DropdownActionClient :payloadData="data" :data-table="dt" />
-            </template>
-            <template #dt-control>
-                <div class="relative group m-auto w-[14px] h-[14px] bg-info rounded-full p-2">
-                    <span
-                        class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 block w-[2px] h-[10px] bg-white transition-all"></span>
-                    <span
-                        class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 block h-px w-[10px] bg-white"></span>
-                </div>
-            </template>
-        </DataTable>
-    </div>
+  <div class="[&_.dt-search]:relative [&_.dt-search>label]:ri-search-2-fill">
+    <DialogRegisterPrices
+      :addressId="idAddress"
+      :clientId="idClient"
+      :isOpen="openRegisterPrices"
+      :toggleDialog="toggleRegisterPrices"
+      description="Cadastro de preços especiais"
+    />
+    <DialogCreateOrder
+      :open="isOpen"
+      :toggleDialog="toggleDialog"
+      :id-cliente-address="idClienteAddress"
+      :client-name="clientName"
+      :set-tab="props.setTab"
+      @update:data-table="handleUpdateDataTable"
+    />
+    <DialogShowOrder
+      :open="openShowOrderDialog"
+      :toggleDialog="toggleShowOrderDialog"
+      :order-id="idOrder"
+    />
+    <DialogRegisterClient @update:data-table="handleUpdateDataTable" />
+    <DialogRegisterAddress
+      :open="openRegisterAddress"
+      :toggleDialog="toggleRegisterAddress"
+      :id-client="idClient"
+      @update:data-table="handleUpdateDataTable"
+    />
+    <DialogRegisterAddress
+      :open="openEditAddress"
+      :toggleDialog="toggleEditAddress"
+      :address-details="address"
+      @update:data-table="handleUpdateDataTable"
+    />
+    <DialogConfirmAddressDelete
+      dialog-title="Excluir Endereço"
+      variant="danger"
+      :id-address="idAddress"
+      dialog-description="Tem certeza que deseja excluir o endereço?"
+      :open="openConfirmDialog"
+      @delete:confirm="handleDeleteAddress"
+    />
+    <DataTable
+      id="datatable-clientes"
+      ref="table"
+      class="display [&_thead]:bg-info [&_thead]:text-[#F3F9FD] [&_tbody>tr>td.dt-control]:before:hidden [&_tbody>tr.dt-hasChild_span.transition-all]:rotate-90 [&_tbody>tr.dt-hasChild_div.relative]:bg-danger"
+      :columns="columns"
+      :ajax="ajax"
+      :options="options"
+      language="language"
+    >
+      <template #actions="data">
+        <DropdownActionClient :payloadData="data" :data-table="dt" />
+      </template>
+      <template #dt-control>
+        <div class="relative group m-auto w-[14px] h-[14px] bg-info rounded-full p-2">
+          <span
+            class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 block w-[2px] h-[10px] bg-white transition-all"
+          ></span>
+          <span
+            class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 block h-px w-[10px] bg-white"
+          ></span>
+        </div>
+      </template>
+    </DataTable>
+  </div>
 </template>
 
 <style>

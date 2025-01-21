@@ -14,7 +14,11 @@ import DistributorCombobox from './DistributorCombobox.vue';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
-const isOpen = ref(false);
+const props = defineProps({
+  isOpen: { type: Boolean, required: false, default: null },
+  toggleDialog: { type: Function, required: false, default: null },
+});
+
 const dateRange = ref(undefined);
 const hasDateError = ref(false);
 const orderResponse = ref(null);
@@ -211,16 +215,20 @@ const resetValues = () => {
   isLoadingReport.value = false;
 };
 
+const handleDialogOpen = (op) => {
+  resetValues();
+  if (!op) return props.toggleDialog();
+  props.toggleDialog();
+};
+
 getDistributors();
 </script>
 
 <template>
-  <Dialog v-model:open="isOpen" :modal="true">
-    <slot name="trigger" @click="isOpen = true" />
+  <Dialog :open="props.isOpen" @update:open="handleDialogOpen">
+    <slot name="trigger" />
     <DialogContent
-      class="!z-[50] max-w-[90vw] sm:max-w-3xl"
-      @close.prevent
-      @pointerDownOutside.prevent
+      class="max-w-[90vw] sm:max-w-3xl"
       :class="{
         'overflow-auto px-2 overflow-x-hidden': orderResponse,
         'overflow-visible': !orderResponse,
@@ -231,10 +239,10 @@ getDistributors();
           <DialogTitle class="text-info">Relatório de Pedidos</DialogTitle>
           <Button
             v-if="showReportButton"
-            @click="generateReport"
             variant="outline"
             size="sm"
             class="text-info/40 hover:text-info transi"
+            @click="generateReport"
           >
             <i class="ri-file-list-3-line mr-2" />
             Baixar Relatório
@@ -242,7 +250,6 @@ getDistributors();
         </div>
         <Button
           v-if="orderResponse"
-          @click="resetValues()"
           variant="ghost"
           size="sm"
           :class="
@@ -253,6 +260,7 @@ getDistributors();
               'sm:hover:w-24 sm:hover:h-8 sm:hover:top-2 sm:hover:bg-info sm:hover:text-white sm:hover:font-bold sm:hover:px-2 sm:hover:right-8 hover:text-info hover:opacity-100',
             ])
           "
+          @click="resetValues()"
         >
           <i class="ri-arrow-left-line" />
           <span
@@ -289,7 +297,7 @@ getDistributors();
             <div class="sm:w-1/2">
               <DistributorCombobox
                 v-model="selectedDistributors"
-                v-model:search-term="searchTerm"
+                :search-term="searchTerm"
                 :distributors="distributors"
                 :is-loading="isLoading"
                 :disabled="isLoadingReport"
@@ -306,10 +314,10 @@ getDistributors();
       <div v-else class="flex flex-col h-[80vh]" @click.stop>
         <div class="nested-dialog-context" @click.stop>
           <DataTablePedidos
-            @update:filteredData="(data) => (filteredData = data)"
             :orderResponse="orderResponse"
             ajustClass="!top-[100px] md:!top-[90px]"
             :isNestedTable="true"
+            @update:filteredData="(data) => (filteredData = data)"
           />
         </div>
       </div>

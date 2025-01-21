@@ -35,7 +35,7 @@ const showReportButton = computed(() => filteredData.value.length > 0);
 
 const page = usePage();
 
-const { tipoAdministrador } = page.props.auth.user;
+const { tipoAdministrador, nome: administratorName } = page.props.auth.user;
 
 watch(
   selectedDistributors,
@@ -162,7 +162,6 @@ const presets = computed(() => [
 
 async function getDistributors() {
   isLoading.value = true;
-  // const promise = tipoAdministrador === 'Administrador'
   const fetchDistributor = {
     Distribuidor: {
       request: () => getDistributor(page.props.auth.user.idDistribuidor),
@@ -330,7 +329,9 @@ getDistributors();
             <div class="sm:w-1/2 flex items-center justify-center">
               <Skeleton v-if="isLoading" class="w-full h-14 rounded-lg" />
               <div v-else>
-                <span v-if="distributorName != null" class="text-info">{{ distributorName }}</span>
+                <span v-if="tipoAdministrador == 'Distribuidor'" class="text-info">
+                  {{ distributorName !== null ? distributorName : administratorName }}
+                </span>
                 <DistributorCombobox
                   v-else
                   v-model="selectedDistributors"

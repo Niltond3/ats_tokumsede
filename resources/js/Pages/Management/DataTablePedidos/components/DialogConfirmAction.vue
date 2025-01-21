@@ -46,7 +46,7 @@ const getVariant = {
 const styleVariant = getVariant[props.variant];
 
 const handleDialogOpen = (op) => {
-  emits('update:dialogOpen', op);
+  !op && emits('update:dialogOpen', op);
   toggleDialog();
 };
 </script>

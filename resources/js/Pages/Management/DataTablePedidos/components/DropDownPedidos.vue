@@ -118,7 +118,7 @@ const yourMethod = () => {
                 @on:click="yourMethod"
                 @update:dialog-open="handleToggleDropdown"
                 @on:confirm="
-                  () => {
+                  (confirmCancellCalback) => {
                     const { reason, toggleDialog } = confirmCancellCalback;
                     handleCancelar(reason, toggleDialog);
                   }

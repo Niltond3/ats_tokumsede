@@ -70,6 +70,7 @@ export function dateToDayMonthYearFormat(rawDate) {
                 ? `0${unformattedMinutes}`
                 : unformattedMinutes;
 
+
         const extenseDate = checkDate(`${dd}/${MM}/${YYYY} ${hh}:${mm}`)
         return {
             date: `${dd}/${MM}/${YYYY}`,

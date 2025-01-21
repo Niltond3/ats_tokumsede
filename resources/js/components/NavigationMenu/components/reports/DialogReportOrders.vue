@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { toast } from 'vue-sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import DataTablePedidos from '@/Pages/Management/DataTablePedidos/DataTablePedidos.vue';
@@ -7,11 +8,12 @@ import { Form } from '@/components/ui/form';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 import { Button } from '@/components/ui/button';
-import { listAllDistributors } from '@/services/api/distributors';
+import { getDistributor, listAllDistributors } from '@/services/api/distributors';
 import renderToast from '@/components/renderPromiseToast';
 import { cn, utf8Decode } from '@/util';
 import DistributorCombobox from './DistributorCombobox.vue';
 import { jsPDF } from 'jspdf';
+import { Skeleton } from '@/components/ui/skeleton';
 import 'jspdf-autotable';
 
 const props = defineProps({
@@ -25,10 +27,15 @@ const orderResponse = ref(null);
 const searchTerm = ref('');
 const selectedDistributors = ref([]);
 const distributors = ref([]);
+const distributorName = ref(null);
 const isLoading = ref(true);
 const isLoadingReport = ref(false);
 const filteredData = ref([]);
 const showReportButton = computed(() => filteredData.value.length > 0);
+
+const page = usePage();
+
+const { tipoAdministrador } = page.props.auth.user;
 
 watch(
   selectedDistributors,
@@ -133,6 +140,7 @@ const generateReport = () => {
 
   doc.save('relatorio-pedidos-detalhado.pdf');
 };
+
 const presets = computed(() => [
   {
     label: 'Último dia',
@@ -154,16 +162,40 @@ const presets = computed(() => [
 
 async function getDistributors() {
   isLoading.value = true;
-  renderToast(
-    listAllDistributors(),
-    'Carregando distribuidores...',
-    'Distribuidores carregados com sucesso!',
-    'Erro ao carregar distribuidores',
-    (response) => {
-      distributors.value = response.data.data.map((d) => ({ id: d.id, nome: utf8Decode(d.nome) }));
-      isLoading.value = false;
+  // const promise = tipoAdministrador === 'Administrador'
+  const fetchDistributor = {
+    Distribuidor: {
+      request: () => getDistributor(page.props.auth.user.idDistribuidor),
+      loadingText: 'Carregando informações...',
+      successText: 'Informações carregadas com sucesso!',
+      errorText: 'Erro ao carregar informações',
+      onSuccess: (response) => {
+        selectedDistributors.value = [response.data.data.id];
+        distributorName.value = utf8Decode(response.data.data.nome);
+        isLoading.value = false;
+      },
     },
-  );
+    Administrador: {
+      request: () => listAllDistributors(),
+      loadingText: 'Carregando distribuidores...',
+      successText: 'Distribuidores carregados com sucesso!',
+      errorText: 'Erro ao carregar distribuidores',
+      onSuccess: (response) => {
+        distributors.value = response.data.data.map((d) => ({
+          id: d.id,
+          nome: utf8Decode(d.nome),
+        }));
+        isLoading.value = false;
+      },
+    },
+  };
+  const { request, loadingText, successText, errorText, onSuccess } = fetchDistributor[
+    tipoAdministrador
+  ]
+    ? fetchDistributor[tipoAdministrador]
+    : fetchDistributor.Administrador;
+
+  renderToast(request(), loadingText, successText, errorText, onSuccess);
 }
 
 async function fetchOrdersReport() {
@@ -213,6 +245,7 @@ const resetValues = () => {
   selectedDistributors.value = [];
   filteredData.value = [];
   isLoadingReport.value = false;
+  distributorName.value = null;
 };
 
 const handleDialogOpen = (op) => {
@@ -294,14 +327,18 @@ getDistributors();
                 ]"
               />
             </div>
-            <div class="sm:w-1/2">
-              <DistributorCombobox
-                v-model="selectedDistributors"
-                :search-term="searchTerm"
-                :distributors="distributors"
-                :is-loading="isLoading"
-                :disabled="isLoadingReport"
-              />
+            <div class="sm:w-1/2 flex items-center justify-center">
+              <Skeleton v-if="isLoading" class="w-full h-14 rounded-lg" />
+              <div v-else>
+                <span v-if="distributorName != null" class="text-info">{{ distributorName }}</span>
+                <DistributorCombobox
+                  v-else
+                  v-model="selectedDistributors"
+                  :search-term="searchTerm"
+                  :distributors="distributors"
+                  :disabled="isLoadingReport"
+                />
+              </div>
             </div>
           </div>
 

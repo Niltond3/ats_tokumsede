@@ -25,6 +25,7 @@ defineProps({
   distributors: Array,
   isLoading: Boolean,
   disabled: Boolean,
+  multiple: { type: Boolean, default: true },
 });
 
 defineEmits(['update:modelValue', 'update:searchTerm']);
@@ -34,7 +35,7 @@ defineEmits(['update:modelValue', 'update:searchTerm']);
   <ComboboxRoot
     :model-value="modelValue"
     :search-term="searchTerm"
-    multiple
+    :multiple="multiple"
     class="relative"
     :disabled="disabled"
     @update:model-value="$emit('update:modelValue', $event)"

@@ -109,8 +109,11 @@ const loadDistributorProducts = async (distributorId, clientId) => {
   tableProductsState.tableData = getDefaultValues().tableData;
 
   selectedDistributorId.value = distributorId;
+  // aqui tá o problema
 
   const response = await fetchProductsForDistributor(distributorId, clientId);
+
+
   if (response) {
     globalFilter.value = '';
     tableProductsState.tableData = response;

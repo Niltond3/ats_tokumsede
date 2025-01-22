@@ -15,11 +15,15 @@ import { DialogRegisterProduct } from './components/DialogRegisterProduct';
 import DialogRegisterClient from './components/DialogRegisterClient.vue';
 import { DialogRegisterPrices } from '@/components/DialogRegisterPrices';
 import DialogTrigger from './components/DialogTrigger.vue';
+import DialogReportStock from './components/reports/DialogReportStock.vue';
 import DialogReportOrders from './components/reports/DialogReportOrders.vue';
+
 import { dialogState } from '@/hooks/useToggleDialog.js';
 
 const { isOpen: openRegisterPrices, toggleDialog: toggleRegisterPrices } = dialogState();
 const { isOpen: openRegisterReportOrders, toggleDialog: toggleReportOrders } = dialogState();
+const { isOpen: openRegisterReportStock, toggleDialog: toggleReportStock } = dialogState();
+
 // Obtém os parâmetros da rota
 const route = useRoute();
 
@@ -170,6 +174,20 @@ const homeLinks = [
                 </template>
               </DialogReportOrders>
             </li>
+            <li key="stock_report">
+              <DialogReportStock
+                :isOpen="openRegisterReportStock"
+                :toggleDialog="toggleReportStock"
+              >
+                <template #trigger>
+                  <DialogTrigger
+                    icon="ri-store-line"
+                    title="Relatório de Estoque"
+                    description="Controle de estoque por distribuidor"
+                  />
+                </template>
+              </DialogReportStock>
+            </li>
             <!-- <li key="sales_report">
                             <DialogReportSales>
                                 <template #trigger>
@@ -193,14 +211,6 @@ const homeLinks = [
                                         description="Desempenho e entregas por entregador" />
                                 </template>
                             </DialogReportDelivery>
-                        </li> -->
-            <!-- <li key="stock_report">
-                            <DialogReportStock>
-                                <template #trigger>
-                                    <DialogTrigger icon="ri-store-line" title="Relatório de Estoque"
-                                        description="Controle de estoque por distribuidor" />
-                                </template>
-                            </DialogReportStock>
                         </li> -->
           </ul>
         </NavigationMenuContent>

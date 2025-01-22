@@ -21,7 +21,6 @@ export const useUpdateData = (tableProductsState, emit) => {
         const oldRow = tableProductsState.tableData[rowIndex];
 
         const updateTableData = (updateValue) => {
-            console.log(updateValue)
             return tableProductsState.tableData.map((row, index) =>
                 index === rowIndex
                     ? { ...oldRow, [columnId]: updateValue, updated: true }

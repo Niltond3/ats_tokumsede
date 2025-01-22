@@ -430,4 +430,53 @@ class ProdutoController extends Controller
         }
         return 'Erro ao carregar os produtos do distribuidor';
     }
+    /**
+ * Update product status
+ *
+ * @param int $idProduto Product ID
+ * @param bool $idStatus New status value
+ * @return \Illuminate\Http\Response
+ */
+public function updateStatus($idProduto, $idStatus)
+{
+    try {
+        $produto = Produto::findOrFail($idProduto);
+
+        // Validate status value
+        if (!in_array($idStatus, [1, 3])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid status value'
+            ], 422);
+        }
+
+        $produto->status = $idStatus;
+
+        if ($produto->save()) {
+            // Update related stocks if product becomes inactive
+            if ($idStatus == Produto::INATIVO) {
+                Estoque::where('idProduto', $idProduto)
+                    ->update(['quantidade' => 0]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product status updated successfully',
+                'data' => $produto
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to update product status'
+        ], 500);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error updating product status: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
 }

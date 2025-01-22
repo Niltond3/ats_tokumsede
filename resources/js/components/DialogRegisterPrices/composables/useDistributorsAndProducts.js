@@ -39,6 +39,7 @@ export function useDistributorsAndProducts() {
             },
             (err) => console.error(err)
         );
+
         return response;
     };
 
@@ -58,18 +59,20 @@ export function useDistributorsAndProducts() {
             }
         );
     };
-    const fetchProducts = (promise) => {
+
+    const fetchProducts = async (promise) => {
         const response = renderToast(
             promise,
             "Carregando produtos...",
             "Produtos carregados com sucesso",
-            (response) => response.data,
             "Falha ao carregar produtos",
+            (response) => response.data,
             () => []
         );
         response.finally(() => (loadingProducts.value = false));
         return response;
     };
+
     const fetchProductsForDistributor = async (distributorId, clientId) => {
         loadingProducts.value = true;
         const promise = listProductsByDistributor(distributorId, clientId);

@@ -47,8 +47,6 @@ const whenDialogOpen = () => {
         observacao: utf8Decode(responseAddress.observacao || ''),
       };
 
-      console.log(orderData);
-
       const distributor = {
         ...responseDistributor,
         nome: utf8Decode(responseDistributor.nome),

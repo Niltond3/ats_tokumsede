@@ -106,6 +106,9 @@ Route::middleware('auth')->group(function () {
         Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class, 'listarProdutos'])->name('produtos.listar');
         Route::get('listarPorDistribuidor/{idDistribuidor}/{idCliente?}', [ProdutoController::class, 'showByDistribuidor'])->name('produtos.por-distribuidor');
         Route::get('{idEnderecoCliente}', [ProdutoController::class, 'show'])->name('produtos.show-by-endereco');
+        Route::put('status/{idProduto}/{idStatus}', [ProdutoController::class, 'updateStatus'])->name('produtos.status.update');
+
+
     });
 
     //DISTRIBUIDORES
@@ -144,6 +147,12 @@ Route::middleware('auth')->group(function () {
         Route::post('vendasProduto', [PedidoController::class, 'relatorioVendasProduto']);
         Route::post('vendasEntregador', [PedidoController::class, 'relatorioVendasEntregador']);
         Route::post('estoque', [EstoqueController::class, 'relatorioEstoque']);
+    });
+
+    //ESTOQUE
+    Route::group(['prefix' => 'estoque'], function () {
+        Route::get('/', [EstoqueController::class, 'index'])->name('estoque.index');
+        Route::put('/{id}', [EstoqueController::class, 'update'])->name('estoque.update');
     });
 
 });

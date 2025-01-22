@@ -86,8 +86,6 @@ const fetchOrder = () => {
               quantidade,
             };
           });
-          
-          console.log(products.value);
 
           const formatedOrder = formatOrder(orderData);
 

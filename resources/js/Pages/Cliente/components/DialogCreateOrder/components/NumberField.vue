@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import {
   NumberField,
   NumberFieldContent,
@@ -14,14 +14,9 @@ const props = defineProps(['value', 'min']);
 
 const value = ref(props.value);
 
-onMounted(() => {
-  console.log(props);
-});
-
 watch(
   () => value.value,
   (newValue) => {
-    console.log(newValue);
     emit('update:modelValue', newValue);
   },
 );

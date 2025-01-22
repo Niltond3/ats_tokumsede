@@ -14,14 +14,9 @@ const props = defineProps(['value', 'min']);
 
 const value = ref(props.value);
 
-onMounted(() => {
-  console.log(props);
-});
-
 watch(
   () => value.value,
   (newValue) => {
-    console.log(newValue);
     emit('update:modelValue', newValue);
   },
 );

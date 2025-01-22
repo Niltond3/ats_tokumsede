@@ -149,8 +149,7 @@ watch(
     const { id: idDistribuidor, nome: distributorName } = distributor;
     const { id: idEndereco, observacao, idCliente } = address;
     const order = createOrderData.order;
-    console.log('rawProducts');
-    console.log(rawProducts);
+
     const { updateOrder, orderPayload, orderStatus, products } = useDataToTableFormat(
       rawProducts,
       taxaEntrega,

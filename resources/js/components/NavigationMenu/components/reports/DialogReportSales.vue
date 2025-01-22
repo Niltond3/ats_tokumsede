@@ -18,7 +18,6 @@ async function fetchSalesReport() {
     dataFinal: endDate?.toLocaleDateString('pt-BR'),
     idDistribuidores: selectedDistributors.value.join(','),
   });
-  console.log(response);
   // Handle response data
 }
 </script>

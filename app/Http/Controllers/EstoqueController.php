@@ -63,7 +63,7 @@ class EstoqueController extends Controller
                 ->with('distribuidor:id,nome', 'produto:id,nome,img,componente,status')
                 ->get();
             } else {
-                $estoques = Estoque::with('distribuidor:id,nome', 'produto:id,nome,img')->get();
+                $estoques = Estoque::with('distribuidor:id,nome', 'produto:id,nome,img,componente,status')->get();
             }
 
             return $estoques;

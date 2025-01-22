@@ -23,7 +23,6 @@ const props = defineProps({
   toggleDialog: { type: Function, required: false, default: null },
 });
 
-const hasDateError = ref(false);
 const stockResponse = ref(null);
 const searchTerm = ref('');
 const selectedDistributors = ref([]);
@@ -40,11 +39,15 @@ const { tipoAdministrador, nome: administratorName } = page.props.auth.user;
 
 async function fetchStockReport() {
   isLoadingReport.value = true;
-  hasDateError.value = false;
+
   selectedDistributorIds.value = selectedDistributors.value
     .map((name) => distributors.value.find((d) => d.nome === name)?.id)
     .filter((id) => id)
     .join(',');
+
+  console.log(distributors.value);
+  console.log(selectedDistributors.value);
+  console.log(selectedDistributorIds.value);
 
   renderToast(
     getStockReport(selectedDistributorIds.value),
@@ -52,6 +55,7 @@ async function fetchStockReport() {
     'Relatório gerado com sucesso!',
     'Erro ao gerar relatório',
     (response) => {
+      console.log(response);
       stockResponse.value = response;
       isLoadingReport.value = false;
     },
@@ -84,9 +88,19 @@ async function getDistributors() {
       successText: 'Informações carregadas com sucesso!',
       errorText: 'Erro ao carregar informações',
       onSuccess: (response) => {
-        selectedDistributors.value = [response.data.data.id];
+        const { id, nome } = response.data.data;
+        distributorName.value = utf8Decode(nome);
+
+        distributors.value = [
+          {
+            id,
+            nome: distributorName.value,
+          },
+        ];
+        selectedDistributors.value = [distributorName.value];
         distributorName.value = utf8Decode(response.data.data.nome);
         isLoading.value = false;
+        fetchStockReport();
       },
     },
     Administrador: {
@@ -113,19 +127,21 @@ async function getDistributors() {
 }
 
 const resetValues = () => {
-  hasDateError.value = false;
   stockResponse.value = null;
   searchTerm.value = '';
   selectedDistributors.value = [];
   selectedDistributorIds.value = [];
-  distributorName.value = null;
   isLoadingReport.value = false;
   filteredData.value = [];
 };
 
 const handleDialogOpen = (op) => {
-  resetValues();
-  if (!op) return props.toggleDialog();
+  if (!op) {
+    resetValues();
+    props.toggleDialog();
+    return;
+  }
+  getDistributors();
   props.toggleDialog();
 };
 
@@ -147,7 +163,7 @@ getDistributors();
           <DialogTitle class="text-info">Relatório de Estoque</DialogTitle>
         </div>
         <Button
-          v-if="stockResponse"
+          v-if="stockResponse && tipoAdministrador !== 'Distribuidor'"
           variant="ghost"
           size="sm"
           :class="

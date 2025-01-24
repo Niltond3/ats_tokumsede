@@ -16,7 +16,7 @@ use Aws\Sns\SnsClient;
 
 abstract class Controller extends BaseController
 {
-	public $composicoesArray = array();
+    public $composicoesArray = array();
 
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
     function maior30Minutos($dataAgendada) {

@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { DataTableProducts } from '@/components/DataTableProducts';
 import { utf8Decode } from '@/util';
 import renderToast from '@/components/renderPromiseToast';
+import ReminderManager from '@/components/ReminderManager.vue';
 
 const props = defineProps({
   open: { type: Boolean, required: false },
@@ -52,7 +53,6 @@ const whenDialogOpen = () => {
         nome: utf8Decode(responseDistributor.nome),
       };
       const products = orderData[0];
-
       createOrderData.value = {
         clientName: props.clientName,
         products,
@@ -101,6 +101,10 @@ const handleToggleDialog = () => {
         :create-order-data="createOrderData"
         @callback:payload-pedido="handleRealizarPedido"
         @update:special-offer-created="handleSpecialOfferCreated"
+      />
+      <ReminderManager
+        :client-id="createOrderData?.address?.idCliente"
+        :client-name="createOrderData?.clientName"
       />
     </DialogContent>
   </Dialog>

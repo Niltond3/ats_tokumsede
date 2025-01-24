@@ -96,4 +96,9 @@ class Cliente extends Authenticatable
      public function getPedidosAttribute(){
         return $this->pedidos()->get();
      }
+
+     public function reminders(): HasMany
+{
+    return $this->hasMany(Reminder::class, 'id_cliente');
+}
 }

@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use Illuminate\Database\Eloquent\Builder;
 use \Barryvdh\Debugbar\Facades\Debugbar;
+use App\Enums\ReminderStatus;
+use App\Models\Reminder;
 
 class ClienteController extends Controller
 {
@@ -133,52 +135,34 @@ class ClienteController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {
-        $cliente = Cliente::find($id)->load('enderecos', 'pedidos');
-        $cliente->dataNascimento = $cliente->dataNascimento ? date("d/m/Y", strtotime($cliente->dataNascimento)) : '';
+{
+    $cliente = Cliente::with([
+        'enderecos' => function($query) {
+            $query->select('id', 'idCliente', 'logradouro', 'numero', 'bairro', 'cidade', 'estado', 'cep', 'complemento', 'referencia')
+                  ->where('status', 1);
+        },
+        'pedidos' => function($query) {
+    $query->select(
+        'pedido.*' // Select all pedido fields to ensure we have required data
+    )
+    ->with(['distribuidor' => function($q) {
+        $q->select('id', 'nome');  // Include any other distribuidor fields you need
+    }])
+    ->orderBy('pedido.id', 'desc')
+    ->limit(50);
+        },
+        'reminders' => function($query) {
+            $query->select('reminders.id', 'reminders.descricao', 'reminders.data_limite', 'reminders.status')
+                  ->where('status', ReminderStatus::ATIVO)
+                  ->orderBy('data_limite');
+        }
+    ])->select('id', 'nome', 'dddTelefone', 'telefone', 'email', 'dataNascimento', 'rating')
+      ->find($id);
 
-        // $pedidos = Pedido::create()
-        //     ->select("p.*, CONCAT('R$ ', REPLACE(REPLACE(REPLACE(FORMAT( p.total , 2),'.',';'),',','.'),';',',')) AS total, a.nome as administrador, c.nome as cliente, d.nome as distribuidor, c.rating as rating, date_format(p.horarioPedido, '%d/%m/%Y %H:%i') as dataPedido") // Seleciona os campos
-        //     ->from("Pedido p")
-        //     ->leftJoin("p.Enderecocliente e")
-        //     ->leftJoin("p.Administrador a")
-        //     ->leftJoin("e.Cliente c")
-        //     ->leftJoin("p.Distribuidor d")
-        //     ->where("e.idCliente = $id")
-        //     ->limit(100)
-        //     ->orderBy('id', 'DESC')
-        //     ->get();
+    $cliente->dataNascimento = $cliente->dataNascimento ?
+        date("d/m/Y", strtotime($cliente->dataNascimento)) : '';
 
-        // $pedidosPendentes = Pedido::with('distribuidor', 'endereco', 'entregador')
-        //         ->selectRaw("pedido.*, CONCAT('R$', REPLACE(REPLACE(REPLACE(FORMAT( pedido.total , 2),'.',';'),',','.'),';',',')) AS total, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horaInicio, '%H:%i') as horaInicio, date_format(pedido.horaFim, '%H:%i') as horaFim") // Seleciona os campos
-        //         ->whereRaw("((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
-        //         ->orderBy('id', 'DESC')->get();
-        //         foreach ($pedidosPendentes as $pedido) {
-        //             $cliente = Cliente::find($pedido->endereco->idCliente);
-        //             $pedido->endereco->cliente = $cliente->nome;
-        //             $pedido->endereco->rating = $cliente->rating;
-        //         }
-        // $data = array(
-        //     'id'                => $cliente->id,
-        //     'nome'              => $cliente->nome,
-        //     'cnpj'              => $cliente->cpf,
-        //     'dddTelefone'       => $cliente->dddTelefone,
-        //     'telefonePrincipal' => $cliente->telefone,
-        //     'email'             => $cliente->email,
-
-        //     // 'logradouro'        => $cliente->enderecoCliente->logradouro,
-        //     // 'numero'            => $cliente->enderecoCliente->numero,
-        //     // 'bairro'            => $cliente->enderecoCliente->bairro,
-        //     // 'complemento'       => $cliente->enderecoCliente->complemento,
-        //     // 'cep'               => $cliente->enderecoCliente->cep,
-        //     // 'cidade'            => $cliente->enderecoCliente->cidade,
-        //     // 'estado'            => $cliente->enderecoCliente->estado,
-        //     // 'referencia'        => $cliente->enderecoCliente->referencia,
-        // );
-        return $cliente;
-        //RETORNA DISTRIBUIDOR
-        // $enderecos = EnderecoCliente::where('idCliente',$id)->get();
-        // return $enderecos;
+        return response()->json($cliente);
     }
 
     /**

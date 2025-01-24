@@ -12,6 +12,7 @@ use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\PrecoController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -145,6 +146,16 @@ Route::middleware('auth')->group(function () {
         Route::post('vendasEntregador', [PedidoController::class, 'relatorioVendasEntregador']);
         Route::post('estoque', [EstoqueController::class, 'relatorioEstoque']);
     });
+
+    //ESTOQUE
+    Route::group(['prefix' => 'estoque'], function () {
+        Route::get('/', [EstoqueController::class, 'index'])->name('estoque.index');
+        Route::put('/{id}', [EstoqueController::class, 'update'])->name('estoque.update');
+    });
+
+
+    //REMINDER
+    Route::apiResource('reminders', ReminderController::class);
 
 });
 

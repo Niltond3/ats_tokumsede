@@ -34,6 +34,7 @@ import DialogRegisterAddress from './components/DialogRegisterAddress.vue';
 import DialogConfirmAddressDelete from './components/DialogConfirmAddressDelete.vue';
 import observeNewOrders from '../DataTablePedidos/components/observeNewOrders';
 import { DialogRegisterPrices } from '@/components/DialogRegisterPrices';
+import renderToast from '@/components/renderPromiseToast';
 
 DataTable.use(DataTablesCore);
 
@@ -55,6 +56,7 @@ const idAddress = ref('');
 const idOrder = ref('');
 const address = ref({});
 const addressTarget = ref({});
+const clientCache = new Map();
 
 let dt;
 const table = ref();
@@ -69,6 +71,7 @@ const initializeDataTable = (dt) => {
 
 const dragScrollList = (elementId) => {
   const ele = document.getElementById(elementId);
+  if (!ele) return;
   ele.style.cursor = 'pointer';
 
   let pos = { top: 0, left: 0, x: 0, y: 0 };
@@ -126,14 +129,32 @@ const setupChildRowHandler = (dt, format) => {
       return row.child.hide();
     }
 
-    const response = await axios.get(`clientes/${client.id}`);
-    const pedidos = response.data.pedidos.map((pedido) => formatOrder(pedido));
-    const childData = { ...client, pedidos };
+    try {
+      let clientData;
+      if (clientCache.has(client.id)) {
+        clientData = clientCache.get(client.id);
+      } else {
+        console.log(client);
+        await renderToast(
+          axios.get(`clientes/${client.id}`),
+          'Carregando Cliente...',
+          'Cliente carregado',
+          'Falha ao carregar cliente',
+          (response) => {
+            console.log(response.data);
+            clientData = response.data;
+            clientCache.set(client.id, clientData);
+          },
+        );
+      }
 
-    row.child(format(childData)).show();
-
-    dragScrollList('enderecos');
-    dragScrollList('pedidos');
+      const pedidos = clientData.pedidos.map((pedido) => formatOrder(pedido));
+      const childData = { ...client, pedidos };
+      row.child(format(childData)).show();
+    } finally {
+      dragScrollList('enderecos');
+      dragScrollList('pedidos');
+    }
   });
 };
 

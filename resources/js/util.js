@@ -111,9 +111,10 @@ function isValidDateFormat(dateString) {
 }
 
 function getDateComponents(dateString) {
+    console.log(dateString)
     const { isValid, format } = isValidDateFormat(dateString);
 
-    if (!isValid) return null
+    if (!isValid) return ''
 
     const loadBaseFormat = {
         'YYYY-MM-DD': () => {
@@ -137,7 +138,6 @@ export function dateToISOFormat(dateTimeString) {
 
     // Dividimos a data em dia, mês e ano:
     if (date == 'null' || !date || !time) return null
-
 
     const { DD, MM, YYYY } = getDateComponents(date)
 

@@ -67,8 +67,8 @@ export default (d) => {
         <dl>
             <ul class="${containerAddressClasses}" id="enderecos">
                 ${rowChildData.enderecos
-                    .map((endereco) => customLiAddress(endereco, clientName))
-                    .join("")}
+            .map((endereco) => customLiAddress(endereco, clientName))
+            .join("")}
             </ul>
         </dl>
     </div>
@@ -82,8 +82,8 @@ export default (d) => {
         <dl>
             <ul class="${containerAddressClasses}" id="pedidos">
                 ${rowChildData.pedidos
-                    .map((pedido) => customLiOrder(pedido))
-                    .join("")}
+            .map((pedido) => customLiOrder(pedido))
+            .join("")}
             </ul>
         </dl>
     </div>

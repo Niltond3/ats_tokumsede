@@ -24,6 +24,7 @@ import { useQzTray } from '@/composables/useQzTray';
 import { connectPrinter, printMobileData } from '@/services/printer/MobilePrinterService';
 import getPrintData from './config/printOrder';
 import useIsMobile from '@/composables/useIsMobile';
+import ReminderManager from '@/components/ReminderManager.vue';
 
 const { checkConnection, selectedPrinter, findPrinter, listPrinters, print } = useQzTray();
 const { isMobile, detectDevice } = useIsMobile();
@@ -299,5 +300,6 @@ const handlePrintOrder = () => {
         {{ data.troco }}
       </span>
     </p>
+    <ReminderManager :client-id="data.cliente?.id" :client-name="data.cliente?.nome" />
   </DialogContent>
 </template>

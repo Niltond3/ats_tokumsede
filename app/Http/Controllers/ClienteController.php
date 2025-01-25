@@ -152,10 +152,10 @@ class ClienteController extends Controller
     ->limit(50);
         },
         'reminders' => function($query) {
-            $query->select('reminders.id', 'reminders.descricao', 'reminders.data_limite', 'reminders.status')
-                  ->where('status', ReminderStatus::ATIVO)
-                  ->orderBy('data_limite');
-        }
+    $query->select('id', 'id_cliente', 'descricao', 'data_limite', 'status')
+          ->where('status', ReminderStatus::ATIVO)
+          ->orderBy('data_limite');
+}
     ])->select('id', 'nome', 'dddTelefone', 'telefone', 'email', 'dataNascimento', 'rating')
       ->find($id);
 

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted } from 'vue';
 import { useReminderActions } from '@/composables/useReminderActions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,88 +31,104 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['saved', 'cancel']);
+const { isSubmitting, createReminder, updateReminder } = useReminderActions();
+
 onMounted(() => {
   console.log(props.reminder);
 });
-const emit = defineEmits(['saved', 'cancel']);
-
-const { isSubmitting, createReminder, updateReminder } = useReminderActions();
-
-const formSchema = toTypedSchema(
-  z.object({
-    descricao: z.string().min(1, 'Descrição é obrigatória'),
-    data_limite: z
-      .string()
-      .optional()
-      .transform((val) => val || null),
-  }),
-);
-
-const form = useForm({
-  validationSchema: formSchema,
-  initialValues: {
-    descricao: props.reminder?.descricao || '',
-    data_limite: props.reminder?.data_limite ? props.reminder.data_limite.split('T')[0] : '',
-  },
-});
 
 const handleSubmit = async (values) => {
-  try {
-    const reminderData = {
-      ...values,
-      id_cliente: props.clientId,
-      nome_cliente: props.clientName,
-    };
+  console.log(values);
+  const reminderData = {
+    ...values,
+    id_cliente: props.clientId,
+    nome_cliente: props.clientName,
+  };
+  console.log(reminderData);
 
-    if (props.reminder) {
-      await updateReminder(props.reminder.id, reminderData);
-    } else {
-      await createReminder(reminderData);
-    }
-    emit('saved');
-  } catch (error) {
-    console.error('Error submitting form:', error);
+  if (props.reminder) {
+    await updateReminder(props.reminder.id, reminderData);
+  } else {
+    await createReminder(reminderData);
   }
+  emit('saved');
 };
 </script>
 
 <template>
-  <Form :initial-values="reminder" keep-values @submit="handleSubmit">
+  <Form
+    :validation-schema="
+      toTypedSchema(
+        z.object({
+          descricao: z.string().min(1, 'Descrição é obrigatória'),
+          data_limite: z.string().nullable().optional(),
+        }),
+      )
+    "
+    :initial-values="{
+      descricao: props.reminder?.descricao ?? '',
+      data_limite: props.reminder?.data_limite
+        ? new Date(props.reminder.data_limite).toISOString().split('T')[0]
+        : '',
+    }"
+    keep-values
+    class="bg-white/10 backdrop-blur-sm rounded-lg p-4 transition-all duration-300 ease-in-out"
+    @submit="handleSubmit"
+  >
     <div class="space-y-4">
       <FormField v-slot="{ field, errors }" name="descricao">
         <FormItem>
-          <FormLabel>Descrição</FormLabel>
+          <FormLabel
+            class="bg-transparent text-white/90 font-display text-sm uppercase tracking-wide"
+            >Descrição</FormLabel
+          >
           <FormControl>
             <Textarea
               v-bind="field"
               :disabled="isSubmitting"
               placeholder="Digite a descrição do lembrete"
+              class="bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:bg-white/20 transition-colors duration-300"
             />
           </FormControl>
-          <FormMessage>{{ errors[0] }}</FormMessage>
+          <FormMessage class="text-destructive">{{ errors[0] }}</FormMessage>
         </FormItem>
       </FormField>
 
       <FormField v-slot="{ field, errors }" name="data_limite">
         <FormItem>
-          <FormLabel>Prazo</FormLabel>
+          <FormLabel
+            class="bg-transparent text-white/90 font-display text-sm uppercase tracking-wide"
+            >Prazo</FormLabel
+          >
           <FormControl>
             <Input
               type="date"
               v-bind="field"
               :disabled="isSubmitting"
               :min="new Date().toISOString().split('T')[0]"
+              class="bg-white/10 border-white/20 text-white focus:bg-white/20 transition-colors duration-300"
             />
           </FormControl>
-          <FormMessage>{{ errors[0] }}</FormMessage>
+          <FormMessage class="text-destructive">{{ errors[0] }}</FormMessage>
         </FormItem>
       </FormField>
 
-      <div class="flex justify-end gap-2">
-        <Button type="button" variant="ghost" :disabled="isSubmitting" @click="emit('cancel')">
+      <div class="flex justify-end gap-2 pt-2">
+        <Button
+          type="button"
+          variant="ghost"
+          :disabled="isSubmitting"
+          class="text-white hover:bg-white/20 transition-colors duration-300 hover:text-info"
+          @click="emit('cancel')"
+        >
           Cancelar
         </Button>
-        <Button type="submit" :disabled="isSubmitting">
+        <Button
+          type="submit"
+          :disabled="isSubmitting"
+          class="bg-info hover:bg-info/80 text-white transition-colors duration-300"
+        >
           {{ isSubmitting ? 'Salvando...' : reminder ? 'Atualizar' : 'Criar' }}
         </Button>
       </div>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import axios from 'axios';
 import { useForwardPropsEmits } from 'radix-vue';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -7,11 +7,13 @@ import { DataTableProducts } from '@/components/DataTableProducts';
 import { utf8Decode } from '@/util';
 import renderToast from '@/components/renderPromiseToast';
 import ReminderManager from '@/components/ReminderManager.vue';
+import { useReminders } from '@/composables/useReminders';
 
 const props = defineProps({
   open: { type: Boolean, required: false },
   toggleDialog: { type: Function, required: false },
   idClienteAddress: { type: String, required: false },
+  reminders: { type: Array, required: false, default: null },
   clientName: { type: String, required: false },
   setTab: { type: Function, required: true },
 });
@@ -33,7 +35,7 @@ const whenDialogOpen = () => {
     'carregando produtos',
     'Produtos carregados',
     'Erro ao carregar produtos',
-    (responseOrder) => {
+    async (responseOrder) => {
       const { data: orderData } = responseOrder;
       const responseDistributor = orderData[1];
       const responseAddress = orderData[2];
@@ -61,6 +63,10 @@ const whenDialogOpen = () => {
         distributorExpedient: orderData[6],
         distributorTaxes: orderData[4],
       };
+
+      const { fetchReminders, activeRemindersCount } = useReminders(address?.idCliente);
+      await fetchReminders(1);
+      console.log('activeRemindersCount', activeRemindersCount.value);
     },
   );
 };
@@ -103,6 +109,7 @@ const handleToggleDialog = () => {
         @update:special-offer-created="handleSpecialOfferCreated"
       />
       <ReminderManager
+        :reminders="reminders"
         :client-id="createOrderData?.address?.idCliente"
         :client-name="createOrderData?.clientName"
       />

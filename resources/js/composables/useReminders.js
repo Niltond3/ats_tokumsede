@@ -1,17 +1,25 @@
-import { ref, computed } from 'vue'
+import { ref, computed } from 'vue';
+import axios from 'axios';
 
-export function useReminders(clientId) {
-    const reminders = ref([])
+export function useReminders(clientId, initialReminders = []) {
+    const reminders = ref(initialReminders)
     const isLoading = ref(false)
     const currentPage = ref(1)
     const totalPages = ref(1)
-    const activeFilters = ref({ status: 'ATIVO' })
+    const activeFilters = ref({ status: 'ATIVO' });
+
+
+    const activeRemindersCount = computed(() => {
+        return reminders.value ? reminders.value.filter(r => r.status === 'ATIVO').length : 0
+    }
+    );
 
     const filteredReminders = computed(() => {
         return reminders.value.filter(reminder =>
             reminder.status === activeFilters.value.status
         )
     })
+
 
     const fetchReminders = async (page = 1) => {
         isLoading.value = true
@@ -33,6 +41,9 @@ export function useReminders(clientId) {
         currentPage,
         totalPages,
         activeFilters,
-        fetchReminders
+        activeRemindersCount,
+        fetchReminders,
+        rawReminders: reminders // Export raw reminders for direct updates
+
     }
 }

@@ -111,7 +111,6 @@ function isValidDateFormat(dateString) {
 }
 
 function getDateComponents(dateString) {
-    console.log(dateString)
     const { isValid, format } = isValidDateFormat(dateString);
 
     if (!isValid) return ''

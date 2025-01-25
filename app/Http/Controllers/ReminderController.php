@@ -54,7 +54,7 @@ public function store(Request $request): JsonResponse
 
         $validated = $request->validate([
             'descricao' => 'sometimes|string|max:1000',
-            'data_limite' => 'sometimes|date|after:today',
+            'data_limite' => 'nullable|date', // Removed after:today to allow any date
             'status' => 'sometimes|in:ATIVO,INATIVO'
         ]);
 

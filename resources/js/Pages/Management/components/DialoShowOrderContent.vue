@@ -25,12 +25,14 @@ import { connectPrinter, printMobileData } from '@/services/printer/MobilePrinte
 import getPrintData from './config/printOrder';
 import useIsMobile from '@/composables/useIsMobile';
 import ReminderManager from '@/components/ReminderManager.vue';
+import { useReminders } from '@/composables/useReminders';
 
 const { checkConnection, selectedPrinter, findPrinter, listPrinters, print } = useQzTray();
 const { isMobile, detectDevice } = useIsMobile();
 
 const props = defineProps({
   orderId: { type: Number, required: true },
+  reminders: { type: Array, required: false, default: null },
   isOpen: { type: Boolean, required: false },
 });
 
@@ -38,7 +40,9 @@ const isLoading = ref(true); // Estado de carregamento
 const data = ref({});
 const printerList = ref([]);
 
-onMounted(() => detectDevice());
+onMounted(() => {
+  detectDevice();
+});
 
 const { toCurrency } = formatMoney();
 
@@ -50,7 +54,7 @@ const fetchOrder = () => {
     `carregando pedido ${props.orderId}`,
     'Pedido carregado',
     'Erro ao carregar pedido',
-    (response) => {
+    async (response) => {
       const formatedOrder = formatOrder(response.data);
 
       const itensPedido = response.data.itensPedido.map((order) => {
@@ -71,7 +75,9 @@ const fetchOrder = () => {
 
 watch(
   () => props.isOpen,
-  async () => fetchOrder(),
+  (isOpen) => {
+    fetchOrder();
+  },
 );
 
 const handleCopyOrder = (order) => orderToClipboard(order);
@@ -300,6 +306,10 @@ const handlePrintOrder = () => {
         {{ data.troco }}
       </span>
     </p>
-    <ReminderManager :client-id="data.cliente?.id" :client-name="data.cliente?.nome" />
+    <ReminderManager
+      :reminders="reminders"
+      :client-id="data.cliente?.id"
+      :client-name="data.cliente?.nome"
+    />
   </DialogContent>
 </template>

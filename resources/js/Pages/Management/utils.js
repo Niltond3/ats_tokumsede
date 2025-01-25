@@ -3,10 +3,6 @@ import { dateToISOFormat, utf8Decode, formatMoney } from "@/util";
 import { toast } from 'vue-sonner'
 
 export const getStatusString = (agendado, dataAgendada, horaInicio, status) => {
-    console.log('agendado', agendado)
-    console.log('dataAgendada', dataAgendada)
-    console.log('horaInicio', horaInicio)
-    console.log('status', status)
     const dateIso = dateToISOFormat(`${dataAgendada} ${horaInicio}`)
     const currentDate = new Date();
     const scheduleDate = new Date(dateIso);
@@ -172,7 +168,6 @@ export const formatOrder = (order) => {
         observacao: utf8Decode(responseEndereco.observacao || ''),
         cliente: { ...responseEndereco.cliente, nome, telefone },
     }
-    console.log(order)
     return {
         ...order,
         distribuidor: { ...order.distribuidor, nome: utf8Decode(order.distribuidor.nome) },

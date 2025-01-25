@@ -51,6 +51,7 @@ const { isOpen: openRegisterPrices, toggleDialog: toggleRegisterPrices } = dialo
 
 const idClienteAddress = ref('');
 const idClient = ref('');
+const reminders = ref([]);
 const clientName = ref('');
 const idAddress = ref('');
 const idOrder = ref('');
@@ -134,7 +135,6 @@ const setupChildRowHandler = (dt, format) => {
       if (clientCache.has(client.id)) {
         clientData = clientCache.get(client.id);
       } else {
-        console.log(client);
         await renderToast(
           axios.get(`clientes/${client.id}`),
           'Carregando Cliente...',
@@ -143,6 +143,7 @@ const setupChildRowHandler = (dt, format) => {
           (response) => {
             console.log(response.data);
             clientData = response.data;
+            reminders.value = response.data.reminders;
             clientCache.set(client.id, clientData);
           },
         );
@@ -415,6 +416,7 @@ const handleDeleteAddress = (confirm) => {
     <DialogCreateOrder
       :open="isOpen"
       :toggleDialog="toggleDialog"
+      :reminders="reminders"
       :id-cliente-address="idClienteAddress"
       :client-name="clientName"
       :set-tab="props.setTab"
@@ -422,6 +424,7 @@ const handleDeleteAddress = (confirm) => {
     />
     <DialogShowOrder
       :open="openShowOrderDialog"
+      :reminders="reminders"
       :toggleDialog="toggleShowOrderDialog"
       :order-id="idOrder"
     />

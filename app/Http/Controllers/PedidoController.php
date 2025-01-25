@@ -38,12 +38,18 @@ class PedidoController extends Controller
         $baseQueryCallback = $this->getBaseQueryCallbackStructure($user);
         $queries = $this->buildQueriesArray($baseQueryCallback);
 
+        Debugbar::info($user->tipoAdministrador);
+
         $this->loadOrderProducts($queries);
 
         $ultimoPedido = Pedido::orderBy('id', 'DESC')->first();
+
         $entregadores = Entregador::where("status", Entregador::ATIVO)
-            ->select('id', 'nome')
-            ->get();
+    ->when(auth()->user()->tipoAdministrador === 'Distribuidor', function($query) {
+        return $query->where('idDistribuidor', auth()->user()->idDistribuidor);
+    })
+    ->select('id', 'nome')
+    ->get();
 
         return response()->json([
             $queries['pendentes']->orderBy('horarioPedido', 'desc')->get(),
@@ -720,8 +726,11 @@ class PedidoController extends Controller
 
         $ultimoPedido = Pedido::orderBy('id', 'DESC')->first();
         $entregadores = Entregador::where("status", Entregador::ATIVO)
-            ->select('id', 'nome')
-            ->get();
+    ->when(auth()->user()->tipoAdministrador === 'Distribuidor', function($query) {
+        return $query->where('idDistribuidor', auth()->user()->idDistribuidor);
+    })
+    ->select('id', 'nome')
+    ->get();
 
         return [
             $queries['pendentes']->orderBy('horarioPedido', 'desc')->get(),
@@ -875,8 +884,9 @@ class PedidoController extends Controller
             });
     }
     private function getBaseQueryCallbackStructure($user) {
-        return $baseQueryCallback = function() use ($user) {
+        return function() use ($user) {
             $query = Pedido::withBasicRelations();
+
 
             if ($user->tipoAdministrador === null) {
                 // Cliente queries

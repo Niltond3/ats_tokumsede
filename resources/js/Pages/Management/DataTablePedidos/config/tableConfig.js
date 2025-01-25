@@ -19,8 +19,8 @@ export const tableConfig = (ajustClass, isNestedTable = false) => {
             responsivePriority: 6,
             visible: !isNestedTable
         },
-        { data: "horarioPedido", title: "Data do Pedido", visible: !isNestedTable },
-        { data: "dataAgendada", title: "Agendamento", responsivePriority: 4 },
+        { data: "horarioPedido", title: "Data do Pedido" },
+        { data: "dataAgendada", title: "Agendamento", responsivePriority: 4, visible: !isNestedTable },
         { data: "status.label", title: "status", responsivePriority: 5 },
         {
             data: "cliente.nome",

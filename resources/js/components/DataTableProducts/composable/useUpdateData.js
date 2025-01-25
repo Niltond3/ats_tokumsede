@@ -20,12 +20,13 @@ export const useUpdateData = (tableProductsState, emit) => {
     const updateData = (rowIndex, columnId, value) => {
         const oldRow = tableProductsState.tableData[rowIndex];
 
-        const updateTableData = (updateValue) =>
-            tableProductsState.tableData.map((row, index) =>
+        const updateTableData = (updateValue) => {
+            return tableProductsState.tableData.map((row, index) =>
                 index === rowIndex
                     ? { ...oldRow, [columnId]: updateValue, updated: true }
                     : row
-            );
+            )
+        };
 
         const actions = {
             preco: () => {

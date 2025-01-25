@@ -6,7 +6,7 @@ import 'datatables.net-buttons-dt';
 import 'datatables.net-responsive-dt';
 import 'datatables.net-searchpanes-dt';
 import 'datatables.net-select-dt';
-import { utf8Decode, dateToDayMonthYearFormat, checkDate } from '@/util';
+import { utf8Decode, dateToDayMonthYearFormat } from '@/util';
 import { getStatusString } from '../utils';
 import DropDownPedidos from './components/DropDownPedidos.vue';
 import ActionOrders from './components/ActionOrders.vue';
@@ -109,31 +109,32 @@ const handleLoadTableData = () => {
 
 const getAllFilteredData = () => {
   const allData = dt.rows({ search: 'applied' }).data().toArray();
-
-  const filteredData = allData.map((row) => ({
-    ...row,
-    status: row.status.label,
-    distribuidor: row.distribuidor.nome,
-    cliente: row.cliente.nome,
-    clienteTelefone: row.cliente.dddTelefone + row.cliente.telefone,
-    dataAgendada: row.dataAgendada,
-    horarioPedido: row.horarioPedido,
-    endereco: {
-      estado: row.endereco.estado,
-      cidade: row.endereco.cidade,
-      bairro: row.endereco.bairro,
-      logradouro: row.endereco.logradouro,
-      numero: row.endereco.numero,
-      referencia: row.endereco.referencia,
-      complemento: row.endereco.complemento,
-      observacao: row.endereco.observacao,
-    },
-    itens: row.itens.map((item) => ({
-      nome: item.produto.nome,
-      quantidade: item.qtd,
-      valorUnitario: item.preco,
-    })),
-  }));
+  const filteredData = allData.map((row) => {
+    return {
+      ...row,
+      status: row.status.label,
+      distribuidor: row.distribuidor.nome,
+      cliente: row.cliente.nome,
+      clienteTelefone: row.cliente.dddTelefone + row.cliente.telefone,
+      dataAgendada: row.dataAgendada,
+      horarioPedido: row.horarioPedido,
+      endereco: {
+        estado: row.endereco.estado,
+        cidade: row.endereco.cidade,
+        bairro: row.endereco.bairro,
+        logradouro: row.endereco.logradouro,
+        numero: row.endereco.numero,
+        referencia: row.endereco.referencia,
+        complemento: row.endereco.complemento,
+        observacao: row.endereco.observacao,
+      },
+      itens: row.itens.map((item) => ({
+        nome: item.produto.nome,
+        quantidade: item.qtd,
+        valorUnitario: item.preco,
+      })),
+    };
+  });
   emit('update:filteredData', filteredData);
   return filteredData;
 };

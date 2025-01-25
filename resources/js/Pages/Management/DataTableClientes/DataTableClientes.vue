@@ -411,7 +411,7 @@ const handleDeleteAddress = (confirm) => {
       :clientId="idClient"
       :isOpen="openRegisterPrices"
       :toggleDialog="toggleRegisterPrices"
-      description="Cadastro de preços especiais"
+      title="Cadastro de preços especiais"
     />
     <DialogCreateOrder
       :open="isOpen"

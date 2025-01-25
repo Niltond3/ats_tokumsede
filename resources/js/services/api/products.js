@@ -14,6 +14,12 @@ export const updateProductPrices = async (productData) => {
     return await axios.put("/preco", productData);
 };
 
+export const updateProductStatus = async (productId, newStatus) => {
+    return await axios.put(
+        `/produtos/status/${productId}/${newStatus}`
+    );
+}
+
 export const deleteProductPrice = async (priceId) => {
     return await axios.delete(`/preco/${priceId}`);
 };

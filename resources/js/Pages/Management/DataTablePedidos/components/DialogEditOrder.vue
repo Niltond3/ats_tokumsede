@@ -77,7 +77,6 @@ const fetchOrder = () => {
               produto: { ...order.produto, nome: utf8Decode(order.produto.nome) },
             };
           });
-
           products.value = productsData[0].map((product) => {
             const orderItem = itensPedido.find((item) => item.produto.id == product.id);
             const quantidade = orderItem ? orderItem.qtd : 0;
@@ -94,6 +93,7 @@ const fetchOrder = () => {
             ...formatedOrder,
             itensPedido,
           };
+
           createOrderData.value = {
             clientName,
             order,

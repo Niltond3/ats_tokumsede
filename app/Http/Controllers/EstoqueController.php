@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Estoque;
 use App\Models\Produto;
+use App\Models\Distribuidor;
+use Debugbar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -54,9 +56,14 @@ class EstoqueController extends Controller
                         $contDistribuidor++;
                     }
                 }
-                $estoques = Estoque::whereRaw($complementoSql)->with('distribuidor:id,nome', 'produto:id,nome,img,componente')->get();
+                $estoques = Estoque::whereRaw($complementoSql)
+                ->whereHas('distribuidor', function($query) {
+                    $query->where('status', Distribuidor::ATIVO);
+                })
+                ->with('distribuidor:id,nome', 'produto:id,nome,img,componente,status')
+                ->get();
             } else {
-                $estoques = Estoque::with('distribuidor:id,nome', 'produto:id,nome,img')->get();
+                $estoques = Estoque::with('distribuidor:id,nome', 'produto:id,nome,img,componente,status')->get();
             }
 
             return $estoques;
@@ -79,16 +86,24 @@ class EstoqueController extends Controller
             return response('Sua sessão expirou. Por favor, refaça seu login.', 401);
         }
 
-        $estoque = Estoque::find($id);
-        $qtd = $request->dif;
+        Debugbar::info($request);
+        Debugbar::info($request->all());
 
-        if ($qtd != 0) {
+        $estoque = Estoque::find($id);
+
+        Debugbar::info($estoque);
+
+
+        $quantidade = $request->quantidade;
+
+        if ($quantidade != 0) {
             $this->composicoesArray = array();
             $produto = Produto::find($estoque->idProduto);
-            if ($qtd > 0) {
-                $this->atualizaEstoque($estoque->idDistribuidor, $produto, $qtd, true);
+
+            if ($quantidade > 0) {
+                $this->atualizaEstoque($estoque->idDistribuidor, $produto, $quantidade, true);
             } else {
-                $this->atualizaEstoque($estoque->idDistribuidor, $produto, ($qtd * -1), false);
+                $this->atualizaEstoque($estoque->idDistribuidor, $produto, ($quantidade * -1), false);
             }
             $this->atualizaComposicoes($estoque->idDistribuidor);
             return response('Estoque atualizado com sucesso.', 200);

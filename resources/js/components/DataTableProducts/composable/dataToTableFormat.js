@@ -3,15 +3,17 @@ import { formatMoney } from "@/util";
 
 const { toFloat } = formatMoney();
 
-const getPrice = (product, orderItem) => ({
-    ...product,
-    preco: [
-        {
-            qtd: product.preco[product.preco.length - 1].qtd,
-            val: toFloat(orderItem.preco),
-        },
-    ],
-});
+const getPrice = (product, orderItem) => {
+    return {
+        ...product,
+        preco: [
+            {
+                qtd: orderItem.qtd,
+                val: toFloat(orderItem.preco),
+            },
+        ],
+    }
+};
 const mapProductPrice = (product, orderItem) => {
     const price = getPrice(product, orderItem);
     const specialPrice = product.precoEspecial;
@@ -82,7 +84,6 @@ const handleOrderData = (order, products) => {
         Pix: 3,
         Transferência: 4,
     };
-
     const formaPagamento = paymentFormToIndex[paymentString];
     const productsWithPrice = mapProductsWithPrices(products, itensPedido);
     const itens = mapOrderItems(itensPedido);
@@ -121,6 +122,7 @@ const useDataToTableFormat = (
     idEndereco,
     order
 ) => {
+
     if (order) return handleOrderData(order, products);
 
     const orderPayload = {

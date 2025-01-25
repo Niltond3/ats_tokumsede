@@ -107,6 +107,9 @@ Route::middleware('auth')->group(function () {
         Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class, 'listarProdutos'])->name('produtos.listar');
         Route::get('listarPorDistribuidor/{idDistribuidor}/{idCliente?}', [ProdutoController::class, 'showByDistribuidor'])->name('produtos.por-distribuidor');
         Route::get('{idEnderecoCliente}', [ProdutoController::class, 'show'])->name('produtos.show-by-endereco');
+        Route::put('status/{idProduto}/{idStatus}', [ProdutoController::class, 'updateStatus'])->name('produtos.status.update');
+
+
     });
 
     //DISTRIBUIDORES

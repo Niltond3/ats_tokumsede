@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import {
   NumberField,
   NumberFieldContent,
@@ -23,7 +23,7 @@ watch(
 </script>
 
 <template>
-  <NumberField id="quantidade" :model-value="value" :default-value="0" :min="min">
+  <NumberField id="quantidade" v-model="value" :default-value="0" :min="min">
     <NumberFieldContent>
       <NumberFieldDecrement />
       <NumberFieldInput />

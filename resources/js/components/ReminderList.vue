@@ -93,7 +93,7 @@ const handleEdit = (index) => {
 const handleSaved = async () => {
   editingIndex.value = null;
   await loadLocalReminders(props.clientId);
-  emit('reminderUpdated', reminderData);
+  emit('reminderUpdated');
 };
 </script>
 

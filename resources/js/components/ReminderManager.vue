@@ -8,7 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { useReminders } from '@/composables/useReminders';
 
 const props = defineProps({
-  reminders: { type: Array, required: false, default: () => [] },
+  buttonClass: {
+    type: String,
+    required: false,
+    default: 'bottom-[-5.5rem] right-5',
+  },
   clientId: {
     type: Number,
     required: true,
@@ -63,7 +67,7 @@ watch(
 
 const handleReminderUpdate = async (createNewReminder) => {
   isCreating.value = false;
-  if (createNewReminder) reminderBeCreated.value = createNewReminder;
+  reminderBeCreated.value = createNewReminder;
   await loadLocalReminders(props.clientId);
 };
 
@@ -74,7 +78,10 @@ defineExpose({ toggleDialog });
 
 <template>
   <div>
-    <Button class="fixed bottom-6 right-5 rounded-full size-14 p-0 shadow-lg" @click="toggleDialog">
+    <Button
+      :class="[buttonClass, 'fixed rounded-full size-14 p-0 shadow-lg min-[640px]:bottom-6']"
+      @click="toggleDialog"
+    >
       <i class="ri-alarm-line text-xl" />
       <Badge
         v-if="localActiveCount > 0"
@@ -109,6 +116,7 @@ defineExpose({ toggleDialog });
               :class="isCreating ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'"
             >
               <ReminderForm
+                v-if="isCreating"
                 :client-id="clientId"
                 :client-name="clientName"
                 @saved="handleReminderUpdate"

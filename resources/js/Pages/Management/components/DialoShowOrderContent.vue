@@ -310,6 +310,11 @@ const handlePrintOrder = () => {
         {{ data.troco }}
       </span>
     </p>
-    <ReminderManager :reminders="reminders" :client-id="clientId" :client-name="clientName" />
+    <ReminderManager
+      button-class="bottom-[30.5rem] right-[7.5rem] min-[640px]:right-5 "
+      :reminders="reminders"
+      :client-id="clientId"
+      :client-name="clientName"
+    />
   </DialogContent>
 </template>

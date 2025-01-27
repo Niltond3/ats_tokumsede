@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import ReminderList from './ReminderList.vue';
 import ReminderForm from './ReminderForm.vue';
@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useReminders } from '@/composables/useReminders';
 
 const props = defineProps({
-  reminders: { type: Array, required: false, default: null },
+  reminders: { type: Array, required: false, default: () => [] },
   clientId: {
     type: Number,
     required: true,
@@ -19,12 +19,53 @@ const props = defineProps({
   },
 });
 
+const localReminders = ref([]);
+const localIsLoading = ref(false);
+const localCurrentPage = ref(1);
+const localTotalPages = ref(1);
+const localActiveFilters = ref({ status: 'ATIVO' });
+const localActiveCount = ref(0);
 const isOpen = ref(false);
 const isCreating = ref(false);
+const reminderBeCreated = ref(false);
 
-const { activeRemindersCount } = useReminders(props.clientId, props.reminders);
+const loadLocalReminders = async (clientId) => {
+  if (clientId !== null && clientId !== undefined) {
+    const {
+      reminders,
+      isLoading,
+      currentPage,
+      totalPages,
+      activeFilters,
+      activeRemindersCount,
+      fetchReminders,
+    } = useReminders(clientId);
 
-// watch(activeRemindersCount, async (newCount) => fetchReminders(1));
+    await fetchReminders().then((count) => {
+      // Sync values with local refs
+      localReminders.value = reminders;
+      localIsLoading.value = isLoading;
+      localCurrentPage.value = currentPage;
+      localTotalPages.value = totalPages;
+      localActiveFilters.value = activeFilters;
+      localActiveCount.value = count;
+    });
+  }
+};
+
+watch(
+  () => props.clientId,
+  async (newClientId) => {
+    await loadLocalReminders(newClientId);
+  },
+  { immediate: true },
+);
+
+const handleReminderUpdate = async (createNewReminder) => {
+  isCreating.value = false;
+  if (createNewReminder) reminderBeCreated.value = createNewReminder;
+  await loadLocalReminders(props.clientId);
+};
 
 const toggleDialog = () => (isOpen.value = !isOpen.value);
 
@@ -36,10 +77,10 @@ defineExpose({ toggleDialog });
     <Button class="fixed bottom-6 right-5 rounded-full size-14 p-0 shadow-lg" @click="toggleDialog">
       <i class="ri-alarm-line text-xl" />
       <Badge
-        v-if="activeRemindersCount > 0"
+        v-if="localActiveCount > 0"
         class="absolute flex items-center justify-center -top-1 -right-1 bg-info ring-2 ring-white text-white p-0 !size-5"
       >
-        {{ activeRemindersCount }}
+        {{ localActiveCount }}
       </Badge>
     </Button>
 
@@ -68,14 +109,19 @@ defineExpose({ toggleDialog });
               :class="isCreating ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'"
             >
               <ReminderForm
-                :reminder="selectedReminder"
                 :client-id="clientId"
                 :client-name="clientName"
-                @saved="toggleDialog"
+                @saved="handleReminderUpdate"
                 @cancel="isCreating = false"
               />
             </div>
-            <ReminderList :client-id="clientId" :client-name="clientName" />
+            <ReminderList
+              :client-id="clientId"
+              :client-name="clientName"
+              :observe-new-reminder="reminderBeCreated"
+              @reminder-updated="handleReminderUpdate"
+              @delete="handleReminderUpdate"
+            />
           </div>
         </div>
       </DialogContent>

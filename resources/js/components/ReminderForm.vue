@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted } from 'vue';
 import { useReminderActions } from '@/composables/useReminderActions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +11,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useForm } from 'vee-validate';
 import * as z from 'zod';
 import { toTypedSchema } from '@vee-validate/zod';
 
@@ -34,25 +32,21 @@ const props = defineProps({
 const emit = defineEmits(['saved', 'cancel']);
 const { isSubmitting, createReminder, updateReminder } = useReminderActions();
 
-onMounted(() => {
-  console.log(props.reminder);
-});
-
 const handleSubmit = async (values) => {
-  console.log(values);
   const reminderData = {
     ...values,
     id_cliente: props.clientId,
     nome_cliente: props.clientName,
   };
-  console.log(reminderData);
 
+  let result;
   if (props.reminder) {
-    await updateReminder(props.reminder.id, reminderData);
+    result = await updateReminder(props.reminder.id, reminderData);
   } else {
-    await createReminder(reminderData);
+    result = await createReminder(reminderData);
   }
-  emit('saved');
+
+  emit('saved', result); // Pass the result data
 };
 </script>
 

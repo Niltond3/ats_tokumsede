@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useReminders } from '@/composables/useReminders';
 import { useReminderActions } from '@/composables/useReminderActions';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,6 +9,8 @@ import ReminderForm from './ReminderForm.vue';
 import draggable from 'vuedraggable';
 
 const props = defineProps({
+  reminders: { type: Array, required: false, default: null },
+  observeNewReminder: { type: null, required: true },
   clientId: {
     type: Number,
     required: true,
@@ -21,14 +23,47 @@ const props = defineProps({
 
 const searchQuery = ref('');
 const editingIndex = ref(null);
-const { reminders, isLoading, currentPage, totalPages, activeFilters, fetchReminders } =
-  useReminders(props.clientId);
+
+const localReminders = ref([]);
+const localIsLoading = ref(false);
+const localCurrentPage = ref(1);
+const localTotalPages = ref(1);
+const localFetchingReminders = ref(null);
+
+const loadLocalReminders = async (clientId) => {
+  if (clientId !== null && clientId !== undefined) {
+    const { reminders, isLoading, currentPage, totalPages, rawReminders, fetchReminders } =
+      useReminders(clientId);
+
+    localFetchingReminders.value = fetchReminders;
+
+    await fetchReminders().then((count) => {
+      // Sync values with local refs
+      localReminders.value = reminders.value;
+      localIsLoading.value = isLoading.value;
+      localCurrentPage.value = currentPage.value;
+      localTotalPages.value = totalPages.value;
+    });
+  }
+};
+
+watch(
+  () => props.observeNewReminder,
+  async (newVal) => {
+    await loadLocalReminders(props.clientId);
+  },
+);
+
+onMounted(async () => {
+  await loadLocalReminders(props.clientId);
+});
+
+const emit = defineEmits(['delete', 'reminderUpdated']);
+
 const { deleteReminder } = useReminderActions();
 
-onMounted(() => fetchReminders(1));
-
 const filteredAndGroupedReminders = computed(() => {
-  const filtered = reminders.value.filter((reminder) =>
+  const filtered = localReminders.value.filter((reminder) =>
     reminder.descricao.toLowerCase().includes(searchQuery.value.toLowerCase()),
   );
 
@@ -38,21 +73,27 @@ const filteredAndGroupedReminders = computed(() => {
 });
 
 const handleDelete = async (id) => {
-  await deleteReminder(id);
-  fetchReminders(currentPage.value);
+  try {
+    await deleteReminder(id);
+    await loadLocalReminders(props.clientId);
+    emit('delete', localReminders.value.length);
+  } catch (error) {
+    console.error('Erro ao excluir lembrete:', error);
+  }
 };
 
 const handleDragEnd = async (evt) => {
-  await fetchReminders(currentPage.value);
+  await fetchReminders(localCurrentPage.value);
 };
 
 const handleEdit = (index) => {
   editingIndex.value = index;
 };
 
-const handleSaved = () => {
+const handleSaved = async () => {
   editingIndex.value = null;
-  fetchReminders(currentPage.value);
+  await loadLocalReminders(props.clientId);
+  emit('reminderUpdated', reminderData);
 };
 </script>
 
@@ -64,32 +105,32 @@ const handleSaved = () => {
       class="bg-white/10 border-white/20 text-white placeholder:text-white/60"
     />
 
-    <div v-if="isLoading" class="space-y-2">
+    <div v-if="localIsLoading" class="space-y-2">
       <Card v-for="n in 3" :key="n" class="animate-pulse">
         <CardContent class="h-24 bg-muted/50" />
       </Card>
     </div>
 
     <TransitionGroup v-else name="list" tag="div" class="space-y-6">
-      <template v-for="(reminders, status) in filteredAndGroupedReminders" :key="status">
+      <template v-for="(filteredReminders, status) in filteredAndGroupedReminders" :key="status">
         <div>
           <h3 class="text-xl font-display font-semibold text-white mb-4 capitalize">
             {{ status }}
           </h3>
 
           <draggable
-            :model-value="reminders"
+            :model-value="filteredReminders"
             group="reminders"
             item-key="id"
             class="space-y-2"
             @end="handleDragEnd"
           >
-            <template #item="{ element: reminder, index }">
+            <template #item="{ element: filteredReminders, index }">
               <div class="transition-all duration-300 ease-in-out">
                 <Transition name="fade" mode="out-in">
                   <ReminderForm
                     v-if="editingIndex === index"
-                    :reminder="reminder"
+                    :reminder="filteredReminders"
                     :client-id="clientId"
                     :client-name="clientName"
                     class="bg-white/10 rounded-lg shadow-lg"
@@ -99,9 +140,9 @@ const handleSaved = () => {
                   <Card v-else class="bg-white/10 hover:bg-white/20 transition-colors duration-300">
                     <CardContent class="p-4 flex justify-between items-start">
                       <div>
-                        <p class="font-medium text-white">{{ reminder.descricao }}</p>
-                        <p v-if="reminder.data_limite" class="text-sm text-white/70">
-                          Prazo: {{ new Date(reminder.data_limite).toLocaleDateString() }}
+                        <p class="font-medium text-white">{{ filteredReminders.descricao }}</p>
+                        <p v-if="filteredReminders.data_limite" class="text-sm text-white/70">
+                          Prazo: {{ new Date(filteredReminders.data_limite).toLocaleDateString() }}
                         </p>
                       </div>
                       <div class="flex gap-2">
@@ -117,7 +158,7 @@ const handleSaved = () => {
                           variant="ghost"
                           size="icon"
                           class="text-destructive hover:bg-destructive/20"
-                          @click="handleDelete(reminder.id)"
+                          @click="handleDelete(filteredReminders.id)"
                         >
                           <i class="ri-delete-bin-line" />
                         </Button>
@@ -132,20 +173,20 @@ const handleSaved = () => {
       </template>
     </TransitionGroup>
 
-    <div v-if="totalPages > 1" class="flex justify-center gap-2 mt-4">
+    <div v-if="localTotalPages > 1" class="flex justify-center gap-2 mt-4">
       <Button
         variant="outline"
         size="sm"
-        :disabled="currentPage === 1"
-        @click="fetchReminders(currentPage - 1)"
+        :disabled="localCurrentPage === 1"
+        @click="localFetchingReminders(localCurrentPage - 1)"
       >
         Anterior
       </Button>
       <Button
         variant="outline"
         size="sm"
-        :disabled="currentPage === totalPages"
-        @click="fetchReminders(currentPage + 1)"
+        :disabled="localCurrentPage === localTotalPages"
+        @click="localFetchingReminders(localCurrentPage + 1)"
       >
         Próxima
       </Button>

@@ -1,6 +1,6 @@
 <script setup>
 // Vue Core
-import { ref, onMounted, reactive, watch, computed } from 'vue';
+import { ref, reactive, watch, computed } from 'vue';
 import { useWindowSize } from '@vueuse/core';
 
 // Table Logic
@@ -17,7 +17,6 @@ import { columns } from './config/Columns';
 import { createTableOptions } from './config/tableConfig';
 
 // Utilities
-import { formatMoney } from '@/util';
 import useDataToTableFormat from './composable/dataToTableFormat';
 import DataTableProducts from './components/DataTableProducts';
 

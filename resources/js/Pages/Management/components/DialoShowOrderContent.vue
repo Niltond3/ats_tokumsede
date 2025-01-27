@@ -39,6 +39,8 @@ const props = defineProps({
 const isLoading = ref(true); // Estado de carregamento
 const data = ref({});
 const printerList = ref([]);
+const clientId = ref(null);
+const clientName = ref(null);
 
 onMounted(() => {
   detectDevice();
@@ -67,7 +69,9 @@ const fetchOrder = () => {
       });
 
       data.value = { ...formatedOrder, itensPedido };
-
+      clientId.value = data.value.cliente.id;
+      clientName.value = data.value.cliente.nome;
+      console.log();
       isLoading.value = false;
     },
   );
@@ -306,10 +310,6 @@ const handlePrintOrder = () => {
         {{ data.troco }}
       </span>
     </p>
-    <ReminderManager
-      :reminders="reminders"
-      :client-id="data.cliente?.id"
-      :client-name="data.cliente?.nome"
-    />
+    <ReminderManager :reminders="reminders" :client-id="clientId" :client-name="clientName" />
   </DialogContent>
 </template>

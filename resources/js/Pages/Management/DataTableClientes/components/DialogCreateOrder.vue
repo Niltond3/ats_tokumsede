@@ -63,7 +63,7 @@ const whenDialogOpen = () => {
         distributorExpedient: orderData[6],
         distributorTaxes: orderData[4],
       };
-
+      console.log(address?.idCliente)
       const { fetchReminders, activeRemindersCount } = useReminders(address?.idCliente);
       await fetchReminders(1);
       console.log('activeRemindersCount', activeRemindersCount.value);

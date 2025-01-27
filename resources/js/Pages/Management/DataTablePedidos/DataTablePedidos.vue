@@ -1,12 +1,12 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import DataTable from 'datatables.net-vue3';
 import DataTablesLib from 'datatables.net';
 import 'datatables.net-buttons-dt';
 import 'datatables.net-responsive-dt';
 import 'datatables.net-searchpanes-dt';
 import 'datatables.net-select-dt';
-import { utf8Decode, dateToDayMonthYearFormat } from '@/util';
+import { utf8Decode, dateToDayMonthYearFormat, dateToISOFormat } from '@/util';
 import { getStatusString } from '../utils';
 import DropDownPedidos from './components/DropDownPedidos.vue';
 import ActionOrders from './components/ActionOrders.vue';
@@ -35,6 +35,7 @@ let dt;
 const table = ref();
 const data = shallowRef([]);
 const orders = ref([]);
+const scheduleOrder = ref([]);
 const entregadores = ref([]);
 
 const getFormatedScheduleDate = (dataAgendada, horaInicio) => {
@@ -44,12 +45,8 @@ const getFormatedScheduleDate = (dataAgendada, horaInicio) => {
   return dateTime;
 };
 
-const memoizedGetStatus = useMemoize((agendado, dataAgendada, horaInicio, status) => {
-  return getStatusString(agendado, dataAgendada, horaInicio, status);
-});
-
 const transformOrder = (pedido) => {
-  const status = memoizedGetStatus(
+  const status = getStatusString(
     pedido.agendado,
     pedido.dataAgendada,
     pedido.horaInicio,
@@ -80,6 +77,7 @@ const transformedOrders = computed(() => orders.value.map((pedido) => transformO
 
 const loadTableData = (response) => {
   entregadores.value = response.data[7];
+  scheduleOrder.value = response.data[5]; // agendados
   const concatArray = [].concat(
     response.data[0], // pendentes
     response.data[1], // aceitos
@@ -88,7 +86,6 @@ const loadTableData = (response) => {
     response.data[4], // cancelados
     response.data[5], // agendados
   );
-
   orders.value = concatArray;
   data.value = transformedOrders.value;
 };
@@ -158,8 +155,27 @@ onMounted(() => {
   handleLoadTableData();
 
   props.isNestedTable && dt.on('search.dt', () => getAllFilteredData());
+  const getScheduleOrder = () => {
+    return orders.value.filter((order) => {
+      const dateIso = dateToISOFormat(`${order.dataAgendada} ${order.horaInicio}`);
+      const currentDate = new Date();
+      const scheduleDate = new Date(dateIso);
 
-  window.setInterval(observeNewOrders(handleLoadTableData), POLLING_INTERVAL);
+      const timeDiff = (scheduleDate - currentDate) / (1000 * 60);
+
+      if (currentDate < scheduleDate && timeDiff > 30) {
+        return order;
+      }
+    });
+  };
+  window.setInterval(async () => {
+    await observeNewOrders(handleLoadTableData);
+    const currentScheduleOrders = getScheduleOrder();
+    const isEqual = JSON.stringify(scheduleOrder.value) === JSON.stringify(currentScheduleOrders);
+    if (!isEqual) {
+      await fetchOrders();
+    }
+  }, POLLING_INTERVAL);
 });
 
 const badgeClasses =

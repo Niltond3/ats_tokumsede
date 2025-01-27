@@ -10,7 +10,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import observeNewOrders from '@/Pages/Management/DataTablePedidos/components/observeNewOrders';
 
 onMounted(() => {
-  window.setInterval(observeNewOrders, 10000);
+  window.setInterval(async () => {
+    await observeNewOrders();
+  }, 10000);
 });
 </script>
 

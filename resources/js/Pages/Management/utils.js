@@ -7,8 +7,12 @@ export const getStatusString = (agendado, dataAgendada, horaInicio, status) => {
     const currentDate = new Date();
     const scheduleDate = new Date(dateIso);
 
+    const timeDiff = (scheduleDate - currentDate) / (1000 * 60);
+
+
     const statusKey =
-        ((agendado == 1) && (currentDate < scheduleDate))
+        (agendado == 1 &&
+            (currentDate < scheduleDate && timeDiff > 30))
             ? 9
             : (status == 2 || status == 3 || status == 4 || status == 5)
                 ? 2

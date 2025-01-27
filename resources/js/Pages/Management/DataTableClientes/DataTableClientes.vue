@@ -265,7 +265,9 @@ ${address.referencia ? 'Referência: ' + address.referencia : ''}
 onMounted(() => {
   dt = table.value.dt;
   initializeDataTable(dt);
-  window.setInterval(observeNewOrders, 10000);
+  window.setInterval(async () => {
+    await observeNewOrders;
+  }, 10000);
 });
 
 const columns = [

@@ -36,9 +36,11 @@ class PedidoController extends Controller
 
         $user = auth()->user();
         $baseQueryCallback = $this->getBaseQueryCallbackStructure($user);
-        $queries = $this->buildQueriesArray($baseQueryCallback);
+        $queries = $this->buildQueriesArray($baseQueryCallback, $user);
 
-        Debugbar::info($user->tipoAdministrador);
+        // Debug the query before execution
+        Debugbar::info($queries['agendados']->toSql());
+        Debugbar::info($queries['agendados']->getBindings());
 
         $this->loadOrderProducts($queries);
 
@@ -50,8 +52,9 @@ class PedidoController extends Controller
     })
     ->select('id', 'nome')
     ->get();
+    // Get results using the original query structure
 
-        return response()->json([
+        $result = response()->json([
             $queries['pendentes']->orderBy('horarioPedido', 'desc')->get(),
             $queries['aceitos']->orderBy('horarioPedido', 'desc')->get(),
             $queries['despachados']->orderBy('horarioPedido', 'desc')->get(),
@@ -61,6 +64,8 @@ class PedidoController extends Controller
             $ultimoPedido->id,
             $entregadores
         ]);
+        Debugbar::info($result);
+        return $result;
     }
     /**
      * Store a newly created resource in storage.
@@ -883,34 +888,35 @@ class PedidoController extends Controller
     }
     private function getBaseQueryCallbackStructure($user) {
         return function() use ($user) {
-            $query = Pedido::withBasicRelations();
+            $query = Pedido::query()
+            ->withBasicRelations()
+            ->when($user->tipoAdministrador === 'Distribuidor', function($q) use ($user) {
+                $q->where('pedido.idDistribuidor', $user->idDistribuidor);
+            })
+            ->when($user->tipoAdministrador === null, function($q) use ($user) {
+                $q->join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id')
+                  ->where('enderecoCliente.idCliente', $user->id);
+            });
 
-
-            if ($user->tipoAdministrador === null) {
-                // Cliente queries
-                $query->join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id')
-                    ->where('enderecoCliente.idCliente', $user->id);
-            } else if (in_array($user->tipoAdministrador, ['Administrador', 'Atendente'])) {
-                // Admin/Atendente - no additional filters
-            } else {
-                // Distribuidor/Entregador queries
-                $query->where('idDistribuidor', $user->idDistribuidor);
-            }
-            return $query;
+        return $query;
         };
     }
-    private function buildQueriesArray($baseQueryCallback) {
+    private function buildQueriesArray($baseQueryCallback, $user) {
         return [
             'pendentes' => clone $baseQueryCallback()
                 ->where('status', Pedido::PENDENTE)
                 ->whereRaw("((pedido.agendado = 1 AND (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) <= 30) OR DATE(pedido.dataAgendada) < CURDATE()) OR pedido.agendado = 0)"),
+
             'aceitos' => clone $baseQueryCallback()
                 ->where('status', Pedido::ACEITO),
+
             'despachados' => clone $baseQueryCallback()
                 ->where('status', Pedido::DESPACHADO),
+
             'entregues' => clone $baseQueryCallback()
                 ->where('status', Pedido::ENTREGUE)
                 ->whereRaw("DATE(pedido.horarioEntrega) = CURDATE()"),
+
             'cancelados' => clone $baseQueryCallback()
                 ->whereIn('status', [
                     Pedido::CANCELADO_USUARIO,
@@ -919,7 +925,11 @@ class PedidoController extends Controller
                     Pedido::RECUSADO
                 ])
                 ->whereRaw("DATE(pedido.horarioPedido) = CURDATE()"),
+
             'agendados' => clone $baseQueryCallback()
+                ->when($user->tipoAdministrador === 'Distribuidor', function($q) use ($user) {
+                    $q->where('pedido.idDistribuidor', $user->idDistribuidor);
+                })
                 ->where([
                     ['status', Pedido::PENDENTE],
                     ['agendado', 1]

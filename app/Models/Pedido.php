@@ -18,6 +18,15 @@ class Pedido extends Model
     use \Znck\Eloquent\Traits\BelongsToThrough;
     protected $table = 'pedido';
 
+    protected static function booted()
+    {
+        static::addGlobalScope('distributor', function ($query) {
+            if (auth()->check() && auth()->user()->tipoAdministrador === 'Distribuidor') {
+                $query->where('pedido.idDistribuidor', auth()->user()->idDistribuidor);
+            }
+        });
+    }
+
     public function scopeWithBasicRelations($query)
     {
         return $query->with([

@@ -88,6 +88,7 @@ const loadTableData = (response) => {
   );
   orders.value = concatArray;
   data.value = transformedOrders.value;
+  console.log(data.value);
 };
 
 const fetchOrders = async () => {

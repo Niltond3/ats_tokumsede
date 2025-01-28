@@ -33,6 +33,11 @@ export const tableConfig = (ajustClass, isNestedTable = false) => {
             title: "cliente.dddTelefone",
             visible: false,
         },
+        {
+            data: "cliente.outrosContatos",
+            title: "cliente.outrosContatos",
+            visible: false,
+        },
         { data: "cliente.telefone", title: "cliente.telefone", visible: false },
         {
             data: "endereco.logradouro",

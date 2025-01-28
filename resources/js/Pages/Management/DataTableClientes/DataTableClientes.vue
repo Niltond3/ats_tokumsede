@@ -35,6 +35,7 @@ import DialogConfirmAddressDelete from './components/DialogConfirmAddressDelete.
 import observeNewOrders from '../DataTablePedidos/components/observeNewOrders';
 import { DialogRegisterPrices } from '@/components/DialogRegisterPrices';
 import renderToast from '@/components/renderPromiseToast';
+import DialogEditOrder from '../DataTablePedidos/components/DialogEditOrder.vue';
 
 DataTable.use(DataTablesCore);
 
@@ -44,6 +45,7 @@ const props = defineProps({
 
 const { isOpen, toggleDialog } = dialogState();
 const { isOpen: openShowOrderDialog, toggleDialog: toggleShowOrderDialog } = dialogState();
+const { isOpen: openEditOrderDialog, toggleDialog: toggleEditOrderDialog } = dialogState();
 const { isOpen: openRegisterAddress, toggleDialog: toggleRegisterAddress } = dialogState();
 const { isOpen: openEditAddress, toggleDialog: toggleEditAddress } = dialogState();
 const { isOpen: openConfirmDialog, toggleDialog: toggleConfirmDialog } = dialogState();
@@ -54,7 +56,7 @@ const idClient = ref('');
 const reminders = ref([]);
 const clientName = ref('');
 const idAddress = ref('');
-const idOrder = ref('');
+const idOrder = ref(0);
 const address = ref({});
 const addressTarget = ref({});
 const clientCache = new Map();
@@ -186,8 +188,14 @@ const setupOrderHandlers = () => {
   });
 
   $('#datatable-clientes').on('click', '.visualizarPedido', function () {
+    console.log('visualizar pedido');
     idOrder.value = parseInt(this.id);
     toggleShowOrderDialog();
+  });
+
+  $('#datatable-clientes').on('click', '.editOrder', function () {
+    idOrder.value = parseInt(this.getAttribute('order_id'));
+    toggleEditOrderDialog();
   });
 };
 
@@ -212,6 +220,17 @@ const setupAddressHandlers = (dt) => {
   $('#datatable-clientes').on('click', '.novoPrecoEspecial', (event) => {
     idClient.value = event.target.id;
     toggleRegisterPrices();
+  });
+
+  $('#datatable-clientes').on('long-press', '.selectOrder', function (e) {
+    idClient.value = e.target.getAttribute('client_id');
+    idOrder.value = e.target.getAttribute('order_id');
+    e.target.setAttribute(
+      'aria-selected',
+      e.target.getAttribute('aria-selected') === 'true' ? 'false' : 'true',
+    );
+    addressTarget.value = e.target;
+    e.target.parentNode.classList.toggle("[&>li[aria-selected='false']]:pointer-events-none");
   });
 
   $('#datatable-clientes').on('long-press', '.deleteEndereco', function (e) {
@@ -451,6 +470,11 @@ const handleDeleteAddress = (confirm) => {
       :open="openConfirmDialog"
       @delete:confirm="handleDeleteAddress"
     />
+    <DialogEditOrder v-model="openEditOrderDialog" :order-id="idOrder" :controlled="true">
+      <template #trigger>
+        <button class="sr-only" @click="openEditOrderDialog = true">Custom Open Dialog</button>
+      </template>
+    </DialogEditOrder>
     <DataTable
       id="datatable-clientes"
       ref="table"

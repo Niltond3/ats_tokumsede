@@ -60,10 +60,10 @@ export default () => {
         return details.map(detail => {
             const iconClasses = `${detail.classIcon} ${detail.classColor}`
             return /*html*/`
-            <div class="flex flex-col gap-2 items-start">
+            <div class="flex flex-col gap-2 items-start group-aria-selected/line:!text-white">
                 <div class="flex gap-1 items-center">
                     <span class="text-xs opacity-70 min-w-[35px] max-w-[35px] min-[375px]:min-w-[70px] min-[375px]:max-w-[70px] truncate">${detail.label.short}</span>
-                    <i class="${iconClasses} group-hover/line:text-white"></i>
+                    <i class="${iconClasses} group-hover/line:text-white group-aria-selected/line:!text-white"></i>
                     <span class=" text-sm">${detail.data}</span>
                 </div>
                 ${renderOrderDetailConditional(detail, 'author', 'responsável')}
@@ -95,16 +95,27 @@ export default () => {
     </li>`;
         },
         customLiOrder: (order) => {
+
             return /*html*/`
-            <li class="${liStyles} hover:text-white">
-             <i class="ri-e-bike-fill group-hover/line:text-white group-aria-selected/line:!text-white transition-colors hidden"></i>
-             <div class="${separatorStyles} hidden"></div>
-             <div class="flex flex-col gap-2 text-info group-hover/line:! group-aria-selected/line!:!text-white group-hover/line:text-white">
+            <li class="${liStyles} selectOrder hover:text-white aria-selected:bg-dispatched aria-selected:my-2 aria-selected:text-white transition-all duration-300 [transition-behavior:allow-discrete]"
+            aria-selected="false" data-long-press-delay="500" client_id="${order.cliente.id}" order_id="${order.id}"
+            >
+            <button
+            class="${buttonStyles} editOrder text-info/60 hover:text-info/100 group-aria-selected/line:hover:text-dispatched/100 group-aria-selected/line:text-dispatched/60"
+            client_id="${order.cliente.id}" order_id="${order.id}">
+            <i
+                class="ri-pencil-fill ${iconStyles} opacity-0 group-hover/line:opacity-100 group-aria-selected/line:!opacity-100"></i>
+            <i
+                class="ri-truck-fill ${iconStyles} group-hover/line:opacity-0 group-aria-selected/line:!opacity-0 "></i>
+        </button>
+             <i class="ri-e-bike-fill group-hover/line:text-white group-aria-selected/line:!text-white transition-colors hidden select-none pointer-events-none"></i>
+             <div class="${separatorStyles} hidden select-none pointer-events-none"></div>
+             <div class="flex flex-col gap-2 text-info group-aria-selected/line!:!text-white group-hover/line:text-white select-none pointer-events-none">
                  ${renderOrderDetails(order.details)}
-                 <div class="h-px bg-slate-300"></div>
+                 <div class="h-px bg-slate-300 select-none pointer-events-none"></div>
                  <div
-                     class='overflow-hidden flex gap-2 mt-2 transition-max-height max-h-0 group-hover/line:max-h-40 group-aria-selected/line:!max-h-40 ease-in-out delay-150'>
-                     <div class="flex flex-col">
+                     class='overflow-hidden flex gap-2 mt-2 transition-max-height max-h-0 group-hover/line:max-h-40 group-aria-selected/line:!max-h-40 ease-in-out delay-150 select-none pointer-events-none'>
+                     <div class="flex flex-col select-none pointer-events-none">
                         ${renderAddress(order.endereco)}
                          </div>
                  </div>

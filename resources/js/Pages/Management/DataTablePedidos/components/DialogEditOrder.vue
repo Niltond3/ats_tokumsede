@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, useSlots } from 'vue';
 import {
   Dialog,
   DialogContent,
@@ -19,11 +19,25 @@ import { Skeleton } from '@/components/ui/skeleton';
 const props = defineProps({
   orderId: { type: Number, required: true },
   dropdown: { type: Boolean, required: false, default: true },
+  // New props for external control when using slot
+  modelValue: { type: Boolean, required: false },
+  controlled: { type: Boolean, required: false, default: false },
 });
 
-const emits = defineEmits(['callback:editOrder', 'update:dialogOpen']);
+const emits = defineEmits(['callback:editOrder', 'update:dialogOpen', 'update:modelValue']);
 
-const { isOpen, toggleDialog } = dialogState();
+// Check if slot exists
+const slots = useSlots();
+const hasCustomTrigger = !!slots.trigger;
+
+// Only use internal state if not controlled externally
+const { isOpen, toggleDialog } = !props.controlled
+  ? dialogState()
+  : {
+      isOpen: ref(props.modelValue),
+      toggleDialog: () => {},
+    };
+
 const isLoading = ref(true); // Estado de carregamento
 const data = ref({});
 const distributors = ref([]);
@@ -121,11 +135,30 @@ watch(
 const handleCopyOrder = (order) => orderToClipboard(order);
 
 const handleDialogOpen = (op) => {
+  if (props.controlled) {
+    emits('update:modelValue', op);
+    return;
+  }
   !op && emits('update:dialogOpen', false);
   toggleDialog();
-  // event?.preventDefault()
   event?.stopPropagation();
 };
+
+// Watch for external modelValue changes when controlled
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (props.controlled) {
+      isOpen.value = newVal;
+    }
+  },
+);
+
+// Original watch for fetching data
+watch(
+  () => isOpen.value,
+  () => fetchOrder(),
+);
 
 const handleUpdateOrder = (payload) => {
   const url = `pedidos/atualizar/${payload.idPedido}`;
@@ -144,8 +177,11 @@ const handleUpdateOrder = (payload) => {
 </script>
 
 <template>
-  <Dialog :open="isOpen" :modal="true" @update:open="handleDialogOpen">
-    <DialogTrigger as-child @click.stop>
+  <Dialog :open="controlled ? modelValue : isOpen" :modal="true" @update:open="handleDialogOpen">
+    <template v-if="hasCustomTrigger">
+      <slot name="trigger" />
+    </template>
+    <DialogTrigger v-else as-child @click.stop>
       <DropdownMenuItem
         v-if="dropdown"
         class="cursor-pointer flex gap-2"

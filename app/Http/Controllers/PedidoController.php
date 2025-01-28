@@ -720,15 +720,13 @@ class PedidoController extends Controller
             ])
             ->whereRaw("DATE(pedido.dataAgendada) > CURDATE() OR (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) > 30)")
         ];
+
         $this->applyDateFilters($queries, $request);
         $this->applyDistribuidorFilter($queries, $request);
         $this->loadOrderProducts($queries);
 
         $ultimoPedido = Pedido::orderBy('id', 'DESC')->first();
         $entregadores = Entregador::where("status", Entregador::ATIVO)
-    ->when(auth()->user()->tipoAdministrador === 'Distribuidor', function($query) {
-        return $query->where('idDistribuidor', auth()->user()->idDistribuidor);
-    })
     ->select('id', 'nome')
     ->get();
 

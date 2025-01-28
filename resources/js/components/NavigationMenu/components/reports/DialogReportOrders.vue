@@ -178,6 +178,7 @@ async function getDistributors() {
       successText: 'Informações carregadas com sucesso!',
       errorText: 'Erro ao carregar informações',
       onSuccess: (response) => {
+        console.log(response.data.data);
         selectedDistributors.value = [response.data.data.id];
         distributorName.value = utf8Decode(response.data.data.nome);
         isLoading.value = false;
@@ -215,10 +216,14 @@ async function fetchOrdersReport() {
   isLoadingReport.value = true;
   hasDateError.value = false;
   const [startDate, endDate] = dateRange.value;
-  const distributorIds = selectedDistributors.value
-    .map((name) => distributors.value.find((d) => d.nome === name)?.id)
-    .filter((id) => id) // Remove falsy values
-    .join(',');
+
+  const distributorIds =
+    distributors.value.length < 1
+      ? selectedDistributors.value[0]
+      : selectedDistributors.value
+          .map((name) => distributors.value.find((d) => d.nome === name)?.id)
+          .filter((id) => id) // Remove falsy values
+          .join(',');
 
   const promise = axios.post('/relatorio/pedidos', {
     dataInicial: startDate?.toLocaleDateString('pt-BR'),
@@ -258,6 +263,7 @@ const resetValues = () => {
 
 const handleDialogOpen = (op) => {
   resetValues();
+  getDistributors();
   if (!op) return props.toggleDialog();
   props.toggleDialog();
 };

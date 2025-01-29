@@ -113,7 +113,6 @@ const loadDistributorProducts = async (distributorId, clientId) => {
 
   const response = await fetchProductsForDistributor(distributorId, clientId);
 
-
   if (response) {
     globalFilter.value = '';
     tableProductsState.tableData = response;

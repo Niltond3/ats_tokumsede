@@ -8,6 +8,8 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
+import { usePage } from '@inertiajs/vue3';
+
 import { Link } from '@inertiajs/vue3';
 import logo from '@/../../public/images/tokumsede-logo.png';
 import { useRoute } from 'vue-router';
@@ -26,6 +28,9 @@ const { isOpen: openRegisterReportOrders, toggleDialog: toggleReportOrders } = d
 const { isOpen: openRegisterReportStock, toggleDialog: toggleReportStock } = dialogState();
 const { isOpen: openStockMerge, toggleDialog: toggleStockMerge } = dialogState();
 
+const page = usePage();
+const { user } = page.props.auth;
+const { tipoAdministrador } = user;
 // Obtém os parâmetros da rota
 const route = useRoute();
 
@@ -132,13 +137,13 @@ const homeLinks = [
           <ul
             class="grid w-[90vw] gap-3 p-4 md:w-[500px] md:grid-cols-3 lg:w-[600px] max-h-[64vh] overflow-auto"
           >
-            <li key="product_register">
+            <li key="product_register" class="self-center justify-self-center">
               <DialogRegisterProduct />
             </li>
-            <li key="client_register">
+            <li key="client_register" class="self-center justify-self-center">
               <DialogRegisterClient />
             </li>
-            <li key="client_price">
+            <li key="client_price" class="self-center justify-self-center">
               <DialogRegisterPrices
                 :isOpen="openRegisterPrices"
                 :toggleDialog="toggleRegisterPrices"
@@ -149,7 +154,11 @@ const homeLinks = [
                 </template>
               </DialogRegisterPrices>
             </li>
-            <li key="stock_merge">
+            <li
+              v-if="tipoAdministrador === 'Administrador'"
+              key="stock_merge"
+              class="self-center justify-self-center"
+            >
               <DialogStockMerge :isOpen="openStockMerge" :toggleDialog="toggleStockMerge">
                 <template #trigger>
                   <DialogTrigger
@@ -173,7 +182,7 @@ const homeLinks = [
           <ul
             class="grid w-[90vw] gap-5 p-4 md:w-[500px] md:grid-cols-3 lg:w-[600px] max-h-[64vh] overflow-auto"
           >
-            <li key="orders_report">
+            <li key="orders_report" class="self-center justify-self-center">
               <DialogReportOrders
                 :isOpen="openRegisterReportOrders"
                 :toggleDialog="toggleReportOrders"
@@ -187,7 +196,7 @@ const homeLinks = [
                 </template>
               </DialogReportOrders>
             </li>
-            <li key="stock_report">
+            <li key="stock_report" class="self-center justify-self-center">
               <DialogReportStock
                 :isOpen="openRegisterReportStock"
                 :toggleDialog="toggleReportStock"

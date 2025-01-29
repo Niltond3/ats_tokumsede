@@ -90,6 +90,11 @@ class EstoqueController extends Controller
         Debugbar::info($request->all());
 
         $estoque = Estoque::find($id);
+        $effectiveDistributorId = $this->getEffectiveDistributorId($estoque->idDistribuidor);
+
+        if ($estoque->idDistribuidor != $effectiveDistributorId) {
+            return response()->json(['message' => 'Este estoque pertence a uma união e não pode ser modificado diretamente'], 422);
+        }
 
         Debugbar::info($estoque);
 

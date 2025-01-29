@@ -37,5 +37,10 @@ class EnderecoCliente extends Model
     {
         return $this->belongsTo(Cliente::class, 'idCliente');
     }
+    public function clientePedido()
+{
+    return $this->belongsTo(Cliente::class, 'idCliente');
+}
+
 
 }

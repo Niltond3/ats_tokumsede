@@ -14,6 +14,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\PrecoController;
+use App\Http\Controllers\StockUnionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -156,6 +157,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/{id}', [EstoqueController::class, 'update'])->name('estoque.update');
     });
 
+    Route::post('/stock-unions', [StockUnionController::class, 'createUnion'])->name('stock-unions.create');
 
     //REMINDER
     Route::apiResource('reminders', ReminderController::class);

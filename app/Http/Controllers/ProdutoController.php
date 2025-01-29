@@ -19,6 +19,11 @@ use \Barryvdh\Debugbar\Facades\Debugbar;
 
 class ProdutoController extends Controller
 {
+    private function getEffectiveDistributorId($distributorId)
+{
+    $distributor = Distribuidor::find($distributorId);
+    return $distributor->getMainDistributorIdAttribute() ?? $distributorId;
+}
     /**
      * Display a listing of the resource.
      *
@@ -27,9 +32,22 @@ class ProdutoController extends Controller
     public function index()
     {
         if (auth()->user()->tipoAdministrador == "Distribuidor") {
-            $produtos = Produto::where('status', '!=', Produto::EXCLUIDO)->with('categoria:id,nome', 'estoque:id,idProduto,quantidade')->withCount('preco')->get();
+            $effectiveDistributorId = $this->getEffectiveDistributorId(auth()->user()->idDistribuidor);
+
+            $produtos = Produto::where('status', '!=', Produto::EXCLUIDO)
+                ->with(['categoria:id,nome',
+                       'estoque' => function($query) use ($effectiveDistributorId) {
+                           $query->where('idDistribuidor', $effectiveDistributorId);
+                       }
+                ])
+                ->withCount(['preco' => function($query) use ($effectiveDistributorId) {
+                    $query->where('idDistribuidor', $effectiveDistributorId);
+                }])
+                ->get();
         } else {
-            $produtos = Produto::where('status', '!=', Produto::EXCLUIDO)->with('categoria:id,nome')->get();
+            $produtos = Produto::where('status', '!=', Produto::EXCLUIDO)
+                ->with('categoria:id,nome')
+                ->get();
         }
         return $produtos;
     }
@@ -147,36 +165,42 @@ class ProdutoController extends Controller
         ];
     }
     private function getActiveProducts($distribuidorId)
-    {
-        return DB::table('preco')
-            ->leftJoin('produto', 'produto.id', '=', 'preco.idProduto')
-            ->leftJoin('estoque', 'estoque.id', '=', 'preco.idEstoque')
-            ->select([
-                'preco.*',
-                'preco.id as idPreco',
-                'produto.id as idProd',
-                'produto.nome as nome',
-                'produto.img as img'
-            ])
-            ->where([
-                ['preco.status', '=', 1],
-                ['preco.idDistribuidor', '=', $distribuidorId],
-                ['estoque.quantidade', '>', 0]
-            ])
-            ->where(function ($query) {
-                $query->whereNull('preco.inicioValidade')
-                    ->orWhere('preco.inicioValidade', '<=', DB::raw('curdate()'));
-            })
-            ->where(function ($query) {
-                $query->whereNull('preco.fimValidade')
-                    ->orWhere('preco.fimValidade', '>', DB::raw('curdate()'));
-            })
-            ->orderby('produto.nome')
-            ->orderBy('produto.id')
-            ->orderBy('preco.valor')
-            ->orderBy('preco.qtdMin')
-            ->get();
-    }
+{
+    // Get effective distributor ID (main distributor if in union)
+    $effectiveDistributorId = $this->getEffectiveDistributorId($distribuidorId);
+
+    return DB::table('preco')
+        ->leftJoin('produto', 'produto.id', '=', 'preco.idProduto')
+        ->leftJoin('estoque', function($join) use ($effectiveDistributorId) {
+            $join->on('estoque.idProduto', '=', 'produto.id')
+                 ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
+        })
+        ->select([
+            'preco.*',
+            'preco.id as idPreco',
+            'produto.id as idProd',
+            'produto.nome as nome',
+            'produto.img as img'
+        ])
+        ->where([
+            ['preco.status', '=', 1],
+            ['preco.idDistribuidor', '=', $distribuidorId],
+            ['estoque.quantidade', '>', 0]
+        ])
+        ->where(function ($query) {
+            $query->whereNull('preco.inicioValidade')
+                ->orWhere('preco.inicioValidade', '<=', DB::raw('curdate()'));
+        })
+        ->where(function ($query) {
+            $query->whereNull('preco.fimValidade')
+                ->orWhere('preco.fimValidade', '>', DB::raw('curdate()'));
+        })
+        ->orderby('produto.nome')
+        ->orderBy('produto.id')
+        ->orderBy('preco.valor')
+        ->orderBy('preco.qtdMin')
+        ->get();
+}
     private function getNearbyDistributors($enderecoCliente)
     {
         $fator = doubleval(0.2);

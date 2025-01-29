@@ -89,6 +89,7 @@ const loadTableData = (response) => {
   orders.value = concatArray;
   data.value = transformedOrders.value;
   console.log(data.value);
+  console.log(scheduleOrder.value);
 };
 
 const fetchOrders = async () => {
@@ -173,6 +174,7 @@ onMounted(() => {
     await observeNewOrders(handleLoadTableData);
     const currentScheduleOrders = getScheduleOrder();
     const isEqual = JSON.stringify(scheduleOrder.value) === JSON.stringify(currentScheduleOrders);
+    console.log(isEqual);
     if (!isEqual) {
       await fetchOrders();
     }

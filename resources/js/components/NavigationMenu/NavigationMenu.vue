@@ -19,10 +19,12 @@ import DialogReportStock from './components/reports/DialogReportStock.vue';
 import DialogReportOrders from './components/reports/DialogReportOrders.vue';
 
 import { dialogState } from '@/hooks/useToggleDialog.js';
+import DialogStockMerge from './components/stock/DialogStockMerge.vue';
 
 const { isOpen: openRegisterPrices, toggleDialog: toggleRegisterPrices } = dialogState();
 const { isOpen: openRegisterReportOrders, toggleDialog: toggleReportOrders } = dialogState();
 const { isOpen: openRegisterReportStock, toggleDialog: toggleReportStock } = dialogState();
+const { isOpen: openStockMerge, toggleDialog: toggleStockMerge } = dialogState();
 
 // Obtém os parâmetros da rota
 const route = useRoute();
@@ -147,6 +149,17 @@ const homeLinks = [
                 </template>
               </DialogRegisterPrices>
             </li>
+            <li key="stock_merge">
+              <DialogStockMerge :isOpen="openStockMerge" :toggleDialog="toggleStockMerge">
+                <template #trigger>
+                  <DialogTrigger
+                    icon="ri-git-merge-fill"
+                    title="Unificar Estoques"
+                    description="Combine estoques de múltiplos distribuidores"
+                  />
+                </template>
+              </DialogStockMerge>
+            </li>
           </ul>
         </NavigationMenuContent>
       </NavigationMenuItem>
@@ -181,7 +194,7 @@ const homeLinks = [
               >
                 <template #trigger>
                   <DialogTrigger
-                    icon="ri-store-line"
+                    icon="ri-store-3-fill"
                     title="Relatório de Estoque"
                     description="Controle de estoque por distribuidor"
                   />

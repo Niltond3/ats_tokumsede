@@ -11,17 +11,56 @@ use App\Models\Cliente;
 use App\Models\Produto;
 use App\Models\ItemPedido;
 use App\Models\Preco;
+use App\Models\DistributorStockUnion;
 use App\Services\FCMNotificationService;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use \Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\database\query\JoinClause;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Auth\AuthenticationException;
+use Carbon\Carbon;
+use App\Enums\TipoAdministrador;
+
 
 date_default_timezone_set('America/Sao_Paulo');
 
 class PedidoController extends Controller
 {
+    private function getEffectiveDistributorId($distributorId) {
+        $distributor = Distribuidor::find($distributorId);
+        return $distributor->getMainDistributorIdAttribute() ?? $distributorId;
+    }
+private function getDistributorQueryScope($user)
+{
+    if ($user->tipoAdministrador == "Distribuidor") {
+        $distributor = Distribuidor::find($user->idDistribuidor);
+
+        // Se for distribuidor principal, vê todos os pedidos da união
+        if ($distributor->stockUnionsAsMain()->exists()) {
+            $unionIds = $distributor->stockUnionsAsMain()
+                ->pluck('secondary_distributor_id')
+                ->push($distributor->id)
+                ->toArray();
+
+            return function($query) use ($unionIds) {
+                $query->whereIn('pedido.idDistribuidor', $unionIds);
+            };
+        }
+
+        // Se for distribuidor secundário, vê apenas seus próprios pedidos
+        return function($query) use ($user) {
+            $query->where('pedido.idDistribuidor', $user->idDistribuidor);
+        };
+    }
+
+    // Para outros tipos de usuário, não aplica filtro
+    return function($query) {
+        return $query;
+    };
+}
+
     // Core CRUD Operations
     /**
      * Display a listing of the resource.
@@ -47,11 +86,11 @@ class PedidoController extends Controller
         $ultimoPedido = Pedido::orderBy('id', 'DESC')->first();
 
         $entregadores = Entregador::where("status", Entregador::ATIVO)
-    ->when(auth()->user()->tipoAdministrador === 'Distribuidor', function($query) {
-        return $query->where('idDistribuidor', auth()->user()->idDistribuidor);
-    })
-    ->select('id', 'nome')
-    ->get();
+        ->when($user->tipoAdministrador === 'Distribuidor', function($query) use ($user) {
+            return $query->where('idDistribuidor', $user->idDistribuidor);
+        })
+        ->select('id', 'nome')
+        ->get();
     // Get results using the original query structure
 
         $result = response()->json([
@@ -82,8 +121,11 @@ class PedidoController extends Controller
         //*Recupera o id do usuário logado
         $idAdministrador = auth()->user()->id;//$this->escape("user");
 
+        $effectiveDistributorId = $this->getEffectiveDistributorId($request->idDistribuidor);
+
         //*Faz o cadastro
         $pedido = new Pedido($request->all());
+        $pedido->idDistribuidor = $effectiveDistributorId;
         $pedido->trocoPara = $request->trocoPara ? $request->trocoPara : 0;
         $pedido->obs = $request->obs ? $request->obs : "";
         $pedido->horarioPedido = date('Y-m-d H:i:s');
@@ -91,7 +133,16 @@ class PedidoController extends Controller
         $pedido->origem = $request->origem ? $request->origem : Pedido::PLATAFORMA;
         $pedido->dataAgendada = $dataAgendada;
         $pedido->idAdministrador = $request->origem ? null : $idAdministrador;
-        $administradores = Administrador::where([['idDistribuidor', $request->idDistribuidor], ['status', 'Ativo'], ['id', '!=', $idAdministrador]])->orwhere([['tipoAdministrador', 'Administrador'], ['status', 'Ativo'], ['id', '!=', $idAdministrador]])->orwhere([['tipoAdministrador', 'Atendente'], ['status', 'Ativo'], ['id', '!=', $idAdministrador]])->get();
+        $distribuidor = Distribuidor::find($effectiveDistributorId);
+        $administradores = Administrador::where(function($query) use ($distribuidor) {
+            $query->where('idDistribuidor', $distribuidor->id)
+                  ->orWhereIn('idDistribuidor',
+                      $distribuidor->stockUnionsAsMain()
+                          ->pluck('secondary_distributor_id')
+                  );
+        })
+        ->orWhere('tipoAdministrador', 'Administrador')
+        ->orwhere([['tipoAdministrador', 'Atendente'], ['status', 'Ativo'], ['id', '!=', $idAdministrador]])->get();
         $endereco = EnderecoCliente::find($request->idEndereco);
         $endereco->update($request->all());
         $cliente = Cliente::find($endereco->idCliente);
@@ -332,27 +383,20 @@ class PedidoController extends Controller
     {
         $date = new \DateTime();
         $pedido = Pedido::find($idPedido);
+        $effectiveDistributorId = $this->getEffectiveDistributorId($pedido->idDistribuidor);
+
         $pedido->statusChange = 1;
         $pedido->save();
         $distribuidor = Distribuidor::find($pedido->idDistribuidor);
         $itensPedido = ItemPedido::with('produto')->where("idPedido", $idPedido)->get();
         //ALTERA OS ESTOQUES
         if ($pedido->status == Pedido::DESPACHADO) {
-            //$itensPedido = ItemPedido::with('produto')->where("idPedido", $idPedido)->get();
-            //VERIFICA SE OS PRODUTOS SAO COMPOSICOES OU COMPONENTES ANTES DE ATUALIZAR
-            $this->composicoesArray = array();// Zera array
-            if ($distribuidor->tipoDistribuidor == "revendedor") {
-                foreach ($itensPedido as $itemPedido) {
-                    $this->atualizaEstoque($distribuidor->idDistribuidor, $itemPedido->Produto, $itemPedido->qtd, false);
-                }
-                $this->atualizaComposicoes($distribuidor->idDistribuidor);
-            } else {
-                foreach ($itensPedido as $itemPedido) {
-                    $this->atualizaEstoque($pedido->idDistribuidor, $itemPedido->Produto, $itemPedido->qtd, false);
-                }
-                $this->atualizaComposicoes($pedido->idDistribuidor);
-            }
+            $itensPedido = ItemPedido::with('produto')->where("idPedido", $idPedido)->get();
 
+            foreach ($itensPedido as $itemPedido) {
+                $this->atualizaEstoque($effectiveDistributorId, $itemPedido->Produto, $itemPedido->qtd, false);
+            }
+            $this->atualizaComposicoes($effectiveDistributorId);
         }
 
         $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
@@ -889,80 +933,218 @@ class PedidoController extends Controller
     private function getBaseQueryCallbackStructure($user) {
         return function() use ($user) {
             $query = Pedido::query()
-            ->withBasicRelations()
-            ->when($user->tipoAdministrador === 'Distribuidor', function($q) use ($user) {
-                $q->where('pedido.idDistribuidor', $user->idDistribuidor);
-            })
-            ->when($user->tipoAdministrador === null, function($q) use ($user) {
-                $q->join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id')
-                  ->where('enderecoCliente.idCliente', $user->id);
-            });
+                ->withBasicRelations()
+                ->when($user->tipoAdministrador === 'Distribuidor', function($q) use ($user) {
+                    $distributor = Distribuidor::find($user->idDistribuidor);
 
-        return $query;
+                    if ($distributor->stockUnionsAsMain()->exists()) {
+                        $unionIds = $distributor->stockUnionsAsMain()
+                            ->pluck('secondary_distributor_id')
+                            ->push($distributor->id)
+                            ->toArray();
+
+                        return $q->whereIn('pedido.idDistribuidor', $unionIds);
+                    }
+
+                    return $q->where('pedido.idDistribuidor', $user->idDistribuidor);
+                })
+                ->when($user->tipoAdministrador === null, function($q) use ($user) {
+                    $q->join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id')
+                      ->where('enderecoCliente.idCliente', $user->id);
+                });
+
+            return $query;
         };
     }
-    private function buildQueriesArray($baseQueryCallback, $user) {
-        return [
-            'pendentes' => clone $baseQueryCallback()
-                ->where('status', Pedido::PENDENTE)
-                ->whereRaw("((pedido.agendado = 1 AND (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) <= 30) OR DATE(pedido.dataAgendada) < CURDATE()) OR pedido.agendado = 0)"),
 
-            'aceitos' => clone $baseQueryCallback()
-                ->where('status', Pedido::ACEITO),
-
-            'despachados' => clone $baseQueryCallback()
-                ->where('status', Pedido::DESPACHADO),
-
-            'entregues' => clone $baseQueryCallback()
-                ->where('status', Pedido::ENTREGUE)
-                ->whereRaw("DATE(pedido.horarioEntrega) = CURDATE()"),
-
-            'cancelados' => clone $baseQueryCallback()
-                ->whereIn('status', [
-                    Pedido::CANCELADO_USUARIO,
-                    Pedido::CANCELADO_NAO_LOCALIZADO,
-                    Pedido::CANCELADO_TROTE,
-                    Pedido::RECUSADO
-                ])
-                ->whereRaw("DATE(pedido.horarioPedido) = CURDATE()"),
-
-            'agendados' => clone $baseQueryCallback()
-                ->when($user->tipoAdministrador === 'Distribuidor', function($q) use ($user) {
-                    $q->where('pedido.idDistribuidor', $user->idDistribuidor);
-                })
-                ->where([
-                    ['status', Pedido::PENDENTE],
-                    ['agendado', 1]
-                ])
-                ->whereRaw("DATE(pedido.dataAgendada) > CURDATE() OR (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) > 30)")
-        ];
+    private function buildQueriesArray($baseQueryCallback, $user)
+{
+    // Get union IDs if distributor is main
+    $unionDistributorIds = [];
+    if ($user->tipoAdministrador === 'Distribuidor') {
+        $distributor = Distribuidor::find($user->idDistribuidor);
+        if ($distributor->stockUnionsAsMain()->exists()) {
+            $unionDistributorIds = $distributor->stockUnionsAsMain()
+                ->pluck('secondary_distributor_id')
+                ->push($user->idDistribuidor)
+                ->toArray();
+        }
     }
+
+    $distributorFilter = function($query) use ($user, $unionDistributorIds) {
+        if ($user->tipoAdministrador === 'Distribuidor') {
+            if (!empty($unionDistributorIds)) {
+                $query->whereIn('pedido.idDistribuidor', $unionDistributorIds);
+            } else {
+                $query->where('pedido.idDistribuidor', $user->idDistribuidor);
+            }
+        }
+    };
+
+    $queries = [
+        'pendentes' => $baseQueryCallback()->tap($distributorFilter)
+            ->where('status', Pedido::PENDENTE)
+            ->whereRaw("((pedido.agendado = 1 AND (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) <= 30) OR DATE(pedido.dataAgendada) < CURDATE()) OR pedido.agendado = 0)"),
+
+        'aceitos' => $baseQueryCallback()->tap($distributorFilter)
+            ->where('status', Pedido::ACEITO),
+
+        'despachados' => $baseQueryCallback()->tap($distributorFilter)
+            ->where('status', Pedido::DESPACHADO),
+
+        'entregues' => $baseQueryCallback()->tap($distributorFilter)
+            ->where('status', Pedido::ENTREGUE)
+            ->whereRaw("DATE(pedido.horarioEntrega) = CURDATE()"),
+
+        'cancelados' => $baseQueryCallback()->tap($distributorFilter)
+            ->whereIn('status', [
+                Pedido::CANCELADO_USUARIO,
+                Pedido::CANCELADO_NAO_LOCALIZADO,
+                Pedido::CANCELADO_TROTE,
+                Pedido::RECUSADO
+            ])
+            ->whereRaw("DATE(pedido.horarioPedido) = CURDATE()"),
+
+        'agendados' => $baseQueryCallback()->tap($distributorFilter)
+            ->where([
+                ['status', Pedido::PENDENTE],
+                ['agendado', 1]
+            ])
+            ->whereRaw("DATE(pedido.dataAgendada) > CURDATE() OR (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) > 30)")
+    ];
+
+    return $queries;
+}
     function notification($msg, $administradores)
     {
         $fcmService = new FCMNotificationService();
         $fcmService->sendOrderNotification($administradores, $msg);
     }
-    function buscarNovosPedidos($ultimoPedido)
+    private const TEMPO_LIMITE_AGENDAMENTO = 30; // minutos
+    /**
+     * Busca novos pedidos pendentes baseado em critérios específicos por tipo de usuário
+     *
+     * @param int $ultimoPedidoId ID do último pedido verificado
+     * @return Collection
+     * @throws AuthenticationException
+     */
+    public function buscarNovosPedidos($ultimoPedidoId): Collection
     {
-        $novosPedidos = '';
-        $u = auth()->user();//Administrador::find($idUsuario);
-        if (auth()->check()) {
-            if (strcmp($u->tipoAdministrador, "Administrador") == 0) {
-                $novosPedidos = Pedido::select("pedido.*") // Seleciona os campos
-                    ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and pedido.id > " . $ultimoPedido . " and ((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
-                    ->get();
-            } else {
-                $novosPedidos = Pedido::select("pedido.*") // Seleciona os campos
-                    ->leftJoin('distribuidor', 'distribuidor.id', '=', 'pedido.idDistribuidor')
-                    ->whereRaw("pedido.status = " . Pedido::PENDENTE . " and pedido.id > " . $ultimoPedido . " and pedido.idDistribuidor = " . $u->idDistribuidor .
-                        " and ((pedido.agendado = 1 and (DATE(pedido.dataAgendada) = CURDATE() and ((pedido.horaInicio - CURTIME())/100) <= 30) or DATE(pedido.dataAgendada) < CURDATE()) or pedido.agendado = 0)")
-                    ->get();
-            }
-        }
-        if ($novosPedidos != '') {
-            return $novosPedidos;
-        }
+        $ultimoPedidoId = (int) $ultimoPedidoId;
+        $usuario = $this->getAuthenticatedUser();
+        Debugbar::info("Tipo de Usuário", $usuario->tipoAdministrador);
+
+        return match (TipoAdministrador::from($usuario->tipoAdministrador)) {
+            TipoAdministrador::ADMIN => $this->buscarPedidosAdministrador($ultimoPedidoId),
+            default => $this->buscarPedidosDistribuidor($ultimoPedidoId, $usuario),
+        };
     }
+
+    /**
+     * Retorna o usuário autenticado ou lança uma exceção
+     *
+     * @throws AuthenticationException
+     */
+    private function getAuthenticatedUser(): Administrador
+{
+    if (!auth()->check()) {
+        throw new AuthenticationException('Usuário não autenticado');
+    }
+
+    return auth()->user();
+}
+
+    /**
+     * Busca pedidos pendentes para administradores
+     *
+     * @param int $ultimoPedidoId
+     * @return Collection
+     */
+    private function buscarPedidosAdministrador(int $ultimoPedidoId): Collection
+    {
+        Debugbar::info('Entrando na função buscarPedidosAdministrador');
+        return Pedido::query()
+            ->where('status', Pedido::PENDENTE)
+            ->where('id', '>', $ultimoPedidoId)
+            ->where(function ($query) {
+                $query->where($this->getCriteriosAgendamento())
+                    ->orWhere('agendado', false);
+            })
+            ->with(['distribuidor', 'endereco.clientePedido'])
+            ->orderBy('id', 'asc')
+            ->get();
+    }
+    /**
+     * Busca pedidos pendentes para distribuidores
+     *
+     * @param int $ultimoPedidoId
+     * @param Administrador $usuario
+     * @return Collection
+     */
+    private function buscarPedidosDistribuidor(int $ultimoPedidoId, Administrador $usuario): Collection
+    {
+        Debugbar::info('Entrando na função buscarPedidosDistribuidor');
+        $distribuidor = Distribuidor::findOrFail($usuario->idDistribuidor);
+        $distribuidorIds = $this->getDistribuidorIds($distribuidor);
+        Debugbar::info('Distribuidor IDs', $distribuidorIds);
+
+        $query = Pedido::query()
+            ->where('id', '>', $ultimoPedidoId)
+            ->where('status', Pedido::PENDENTE)
+            ->whereIn('idDistribuidor', $distribuidorIds)
+            ->where(function($query) {
+                $now = Carbon::now();
+                $query->where([
+                    ['agendado', '=', true],
+                    ['dataAgendada', '>=', $now->format('Y-m-d')]
+                ])
+                ->orWhere('agendado', false);
+            })
+            ->with(['endereco.cliente']);
+
+        // Log the SQL query for debugging
+        Debugbar::info('SQL Query:', $query->toSql());
+        Debugbar::info('SQL Bindings:', $query->getBindings());
+
+        return $query->orderBy('id', 'asc')->get();
+    }
+
+    /**
+     * Retorna os critérios para pedidos agendados
+     */
+    private function getCriteriosAgendamento(): \Closure
+    {
+        return function ($query) {
+            $now = Carbon::now();
+            $query->where('agendado', true)
+                ->where(function ($subquery) use ($now) {
+                    $subquery->whereDate('dataAgendada', $now)
+                        ->whereRaw(
+                            'TIME_TO_SEC(TIMEDIFF(horaInicio, ?)) / 3600 <= ?',
+                            [$now->format('H:i:s'), self::TEMPO_LIMITE_AGENDAMENTO / 60]
+                        )
+                        ->orWhereDate('dataAgendada', '<', $now);
+                });
+        };
+    }
+
+    /**
+     * Retorna array com IDs dos distribuidores (incluindo uniões de estoque)
+     *
+     * @param Distribuidor $distribuidor
+     * @return array
+     */
+    private function getDistribuidorIds(Distribuidor $distribuidor): array
+{
+    if ($distribuidor->stockUnionsAsMain()->exists()) {
+        return $distribuidor->stockUnionsAsMain()
+            ->pluck('secondary_distributor_id')
+            ->push($distribuidor->id)
+            ->toArray();
+    }
+
+    return [$distribuidor->id];
+}
     function ultimoPedido()
     {
         $u = auth()->user();

@@ -33,6 +33,26 @@ class Distribuidor extends Model
     const ATIVO = 1;
     const INATIVO = 2;
     const EXCLUIDO = 3;
+    public function stockUnionsAsMain()
+{
+    return $this->hasMany(DistributorStockUnion::class, 'main_distributor_id');
+}
+
+public function stockUnionAsSecondary()
+{
+    return $this->hasOne(DistributorStockUnion::class, 'secondary_distributor_id');
+}
+
+public function getMainDistributorIdAttribute()
+{
+    $union = $this->stockUnionAsSecondary()->first();
+    return $union ? $union->main_distributor_id : null;
+}
+
+public function isPartOfUnion()
+{
+    return $this->stockUnionsAsMain()->exists() || $this->stockUnionAsSecondary()->exists();
+}
     //relacionamento UM para Muitos Inverso
     public function enderecoDistribuidor(): BelongsTo
     {

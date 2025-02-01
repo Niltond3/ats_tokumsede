@@ -1,28 +1,61 @@
 <script setup>
+import { ref, onMounted } from 'vue';
 import ApplicationLogo from '@/components/ApplicationLogo.vue';
 import { Link } from '@inertiajs/vue3';
 import { Toaster } from '@/components/ui/sonner';
+
+const isLoaded = ref(false);
+
+onMounted(() => {
+  isLoaded.value = true;
+});
 </script>
 
 <template>
-  <div>
-    <Toaster richColors />
-
-    <div class="bg-water-desktop bg-[center_top] w-full h-full fixed bottom-[-30rem]"></div>
+  <div class="min-h-screen relative overflow-hidden">
+    <!-- Enhanced background with gradient and animation -->
     <div
-      class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900"
+      class="absolute inset-0 bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-background"
+      :class="{ 'opacity-100': isLoaded }"
     >
-      <div>
-        <Link href="/">
-          <ApplicationLogo class="w-36 h-36 z-10" />
-        </Link>
-      </div>
+      <div class="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]" />
+    </div>
 
-      <div
-        class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg z-10 grid gap-4 max-h-96 overflow-y-scroll text-xs scrollbar !scrollbar-w-1.5 !scrollbar-h-1.5 !scrollbar-thumb-slate-200 !scrollbar-track-tr!scrollbar-thumb-rounded scrollbar-track-rounded dark:scrollbar-track:!bg-slate-500/[0.16] dark:scrollbar-thumb:!bg-slate-500/50 lg:supports-scrollbars:pr-2 bg-white/30 backdrop-blur-sm"
-      >
-        <slot />
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 flex items-center justify-center">
+      <div class="bg-water-desktop opacity-10 dark:opacity-5 animate-float" />
+    </div>
+
+    <div class="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
+      <!-- Enhanced logo container -->
+      <Link href="/" class="mb-8 transform hover:scale-105 transition-transform duration-200">
+        <ApplicationLogo class="w-36 h-36" />
+      </Link>
+
+      <!-- Enhanced content container -->
+      <div class="w-full max-w-md animate-in slide-in-from-bottom-4 duration-700">
+        <div class="backdrop-blur-sm bg-background/95 rounded-lg shadow-lg border border-border">
+          <slot />
+        </div>
       </div>
     </div>
+
+    <Toaster richColors position="top-center" />
   </div>
 </template>
+
+<style>
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+</style>

@@ -1,7 +1,8 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { Card, CardContent } from '@/components/ui/card';
 import Aos from 'aos';
+import DOMPurify from 'dompurify';
 
 const selectedIndex = ref(0);
 
@@ -134,6 +135,12 @@ const whaterTypes = [
   },
 ];
 
+const sanitizedTitle = computed(() => {
+  return (index) => {
+    return DOMPurify.sanitize(whaterTypes[index].title);
+  };
+});
+
 onMounted(() => {
   Aos.init();
 });
@@ -156,7 +163,10 @@ const handleNext = () => {
         class="absolute -top-14 md:-top-16 left-[53%] -translate-x-1/2 text-black dark:text-white flex flex-col items-center"
       >
         <h3 class="text-[0.7rem] md:text-sm text-info">Composição mineral da:</h3>
-        <h4 class="text-xs min-[425px]:text-sm md:text-lg lg:text-2xl">{{ title }}</h4>
+        <h4
+          class="text-xs min-[425px]:text-sm md:text-lg lg:text-2xl"
+          v-html="sanitizedTitle(index)"
+        ></h4>
         <img class="w-10" src="/images/heading-bg.png" alt="Heading background" />
       </div>
 
@@ -210,7 +220,7 @@ const handleNext = () => {
                 />
               </div>
             </figure>
-            <div class="intersect:animate-jump-in intersect-full z-[-1]">
+            <div class="intersect:animate-jump-in intersect-full z-[-1] relative">
               <figure class="mb-0 inline-block align-top m-0 max-w-full">
                 <div class="inline-block align-top max-w-full">
                   <img

@@ -122,4 +122,5 @@ Route::prefix('cliente')->name('cliente.')->group(function () {
             Route::get('{idEnderecoCliente}', [ProdutoController::class, 'show']);
         });
     });
+
 });

@@ -36,18 +36,20 @@ function handleImageError() {
 </script>
 
 <template>
-  <Head title="Ats - Águas Terra Santa"></Head>
-  <div
-    class="bg-gray-50 text-black/50 dark:bg-[#0B1020] dark:text-white/50 w-full overflow-x-hidden"
-  >
-    <Header />
-    <WhatInside />
-    <DeliveryService />
-    <AboutUs />
-    <Informations />
-    <Support />
-    <GetInTouch />
-    <PrivacyPolicy />
-    <Footer />
+  <div>
+    <Head title="Ats - Águas Terra Santa"></Head>
+    <div
+      class="bg-gray-50 text-black/50 dark:bg-[#0B1020] dark:text-white/50 w-full overflow-x-hidden"
+    >
+      <Header />
+      <WhatInside />
+      <DeliveryService />
+      <AboutUs />
+      <Informations />
+      <Support />
+      <GetInTouch />
+      <PrivacyPolicy />
+      <Footer />
+    </div>
   </div>
 </template>

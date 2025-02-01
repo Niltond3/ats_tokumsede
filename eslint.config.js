@@ -52,6 +52,7 @@ export default [
                 module: 'readonly',
                 exports: 'readonly',
                 Audio: 'readonly',
+                localStorage: 'readonly',
 
                 // Vue.js 3 globals
                 defineComponent: 'readonly',
@@ -125,7 +126,8 @@ export default [
                 KEYUTIL: 'readonly',
                 KJUR: 'readonly',
                 stob64: 'readonly',
-                hextorstr: 'readonly'
+                hextorstr: 'readonly',
+                localStorage: 'readonly',
             }
         },
         ...js.configs.recommended

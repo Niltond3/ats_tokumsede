@@ -14,7 +14,6 @@ import observeNewOrders from './components/observeNewOrders';
 import renderToast from '@/components/renderPromiseToast';
 import { tableConfig } from './config/tableConfig';
 import { shallowRef } from 'vue';
-import { useMemoize } from '@vueuse/core';
 import { getOrder } from '@/services/api/orders';
 import { POLLING_INTERVAL } from './config/constants';
 
@@ -25,9 +24,10 @@ const props = defineProps({
   setTab: { type: Function, required: false },
   ajustClass: { type: String, required: false },
   isNestedTable: { type: Boolean, required: false },
+  updatedTable: { type: Boolean, required: false },
 });
 
-const emit = defineEmits(['update:filteredData']);
+const emit = defineEmits(['update:filteredData', 'tableDataLoaded']);
 
 const { columns, options } = tableConfig(props.ajustClass, props.isNestedTable);
 
@@ -88,8 +88,7 @@ const loadTableData = (response) => {
   );
   orders.value = concatArray;
   data.value = transformedOrders.value;
-  console.log(data.value);
-  console.log(scheduleOrder.value);
+  emit('tableDataLoaded');
 };
 
 const fetchOrders = async () => {
@@ -138,6 +137,13 @@ const getAllFilteredData = () => {
   return filteredData;
 };
 
+watch(
+  () => props.updatedTable,
+  () => {
+    if (props.updatedTable) fetchOrders();
+  },
+);
+
 onMounted(() => {
   dt = table.value.dt;
   $('.dt-search').addClass(
@@ -174,7 +180,6 @@ onMounted(() => {
     await observeNewOrders(handleLoadTableData);
     const currentScheduleOrders = getScheduleOrder();
     const isEqual = JSON.stringify(scheduleOrder.value) === JSON.stringify(currentScheduleOrders);
-    console.log(isEqual);
     if (!isEqual) {
       await fetchOrders();
     }

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, markRaw, defineComponent, h, onMounted, watch, reactive } from 'vue';
+import { ref, onMounted, watch, reactive, nextTick, onUnmounted } from 'vue';
 import axios from 'axios';
 import { useForwardPropsEmits } from 'radix-vue';
 import { Button } from '@/components/ui/button';
@@ -34,108 +34,136 @@ import DialogCreateOrderNote from '../../../../components/orderComponents/Dialog
 import { Check } from 'lucide-vue-next';
 import renderToast from '@/components/renderPromiseToast';
 import { useTableProductsState } from '@/composables/tableProductsState';
-
-const { isOpen, toggleDialog } = dialogState();
+import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 
 const tableProductsState = useTableProductsState();
+const isLoading = ref(true);
 
 const { toCurrency, toFloat } = formatMoney();
 
 const props = defineProps({
-  setTab: { type: Function, required: false },
-  address: { type: Object, required: true },
-  value: { type: String, required: true },
+  open: { type: Boolean, required: false },
+  toggleDialog: { type: Function, required: false },
+  idClienteAddress: { type: String, required: false },
+  clientName: { type: String, required: false },
+  //   setTab: { type: Function, required: true },
+  //   address: { type: Object, required: true },
 });
 
-const emits = defineEmits(['update:modelValue', 'update:commandOpen']);
+const createOrderData = ref();
 
-const readbleOrderData = reactive({ value: {} });
+const updateTable = ref(false);
+
+const emits = defineEmits(['update:modelValue', 'update:dataTable', 'update:commandOpen']);
+
+const forwarded = useForwardPropsEmits(props, emits);
+
+// const props = defineProps({
+//   setTab: { type: Function, required: false },
+//   address: { type: Object, required: true },
+//   value: { type: String, required: true },
+// });
 
 const numberFieldProps = ref({
   min: 0,
-  value: 0,
+  modelValue: 0,
 });
 
 const disabledButton = ref(true);
 
-const interableProducts = ref([]);
+const whenDialogOpen = () => {
+  isLoading.value = true;
 
-const forwarded = useForwardPropsEmits(props, emits);
+  const url = `produtos/${props.idClienteAddress}`;
+  const promise = axios.get(url);
 
-const whenDialogOpen = async () => {
-  const { id: addredId } = props.address;
-  const url = `produtos/${addredId}`;
-  const responseOrder = await axios.get(url);
-  const { data: orderData } = responseOrder;
-  const products = orderData[0]
-    .map((product) => {
-      return { ...product, nome: utf8Decode(product.nome) };
-    })
-    .filter((product) => product.id != 3 && product.id != 334)
-    .sort();
-  const responseDistributor = orderData[1];
-  const responseAddress = orderData[2];
-  const address = {
-    ...responseAddress,
-    logradouro: utf8Decode(responseAddress.logradouro),
-    bairro: utf8Decode(responseAddress.bairro),
-    complemento: utf8Decode(responseAddress.complemento || ''),
-    cidade: utf8Decode(responseAddress.cidade),
-    referencia: utf8Decode(responseAddress.referencia || ''),
-    apelido: utf8Decode(responseAddress.apelido || ''),
-    observacao: utf8Decode(responseAddress.observacao || ''),
-  };
+  renderToast(
+    promise,
+    'carregando produtos',
+    'Produtos carregados',
+    'Erro ao carregar produtos',
+    (responseOrder) => {
+      const { data: orderData } = responseOrder;
 
-  const distributor = {
-    ...responseDistributor,
-    nome: utf8Decode(responseDistributor.nome),
-  };
+      const responseAddress = orderData[2];
 
-  const values = {
-    products,
-    distributor,
-    address,
-    distributorExpedient: orderData[6],
-    distributorTaxes: orderData[4],
-  };
-  readbleOrderData.value = values;
+      const address = {
+        ...orderData[2],
+        logradouro: utf8Decode(responseAddress.logradouro || ''),
+        bairro: utf8Decode(responseAddress.bairro || ''),
+        complemento: utf8Decode(responseAddress.complemento || ''),
+        cidade: utf8Decode(responseAddress.cidade || ''),
+        referencia: utf8Decode(responseAddress.referencia || ''),
+        apelido: utf8Decode(responseAddress.apelido || ''),
+        observacao: utf8Decode(responseAddress.observacao || ''),
+      };
+      const distributor = {
+        ...orderData[1],
+        nome: utf8Decode(orderData[1].nome),
+      };
 
-  const {
-    distributorTaxes: { taxaUnica: taxaEntrega },
-    distributor: { id: idDistribuidor, observacao },
-    address: { id: idEndereco },
-  } = readbleOrderData.value;
-  tableProductsState.payload = {
-    ...tableProductsState.payload,
-    taxaEntrega,
-    idDistribuidor,
-    idEndereco,
-    observacao,
-  };
+      const products = orderData[0]
+        .map((product) => {
+          return { ...product, nome: utf8Decode(product.nome) };
+        })
+        .filter((product) => product.id != 3 && product.id != 334)
+        .sort();
+
+      createOrderData.value = {
+        clientName: props.clientName,
+        products,
+        distributor,
+        address,
+        distributorExpedient: orderData[6],
+        distributorTaxes: orderData[4],
+      };
+      const {
+        distributorTaxes: { taxaUnica: taxaEntrega },
+        distributor: { id: idDistribuidor, observacao },
+        address: { id: idEndereco },
+      } = createOrderData.value;
+
+      tableProductsState.payload = {
+        ...tableProductsState.payload,
+        taxaEntrega,
+        idDistribuidor,
+        idEndereco,
+        observacao,
+      };
+      isLoading.value = false;
+    },
+  );
 };
 
-watch(
-  () => isOpen.value,
-  () => whenDialogOpen(),
-);
-
-watch(
-  () => readbleOrderData.value.products,
-  (newValue) => (interableProducts.value = newValue),
-);
-
-const handleToggleOpenDialog = (op) => {
-  !op && emits('update:commandOpen', false);
-  toggleDialog();
+const handleDialogOpen = () => {
+  props.open && whenDialogOpen();
+  return props.open;
 };
+
+const handleToggleDialog = (op) => {
+  if (!op && !tableProductsState.payload.isDatePickerOpen) emits('update:commandOpen', false);
+  props.toggleDialog();
+};
+
+const handleDatePickerState = (state) => {
+  //   isDatePickerOpen.value = state;
+  //   if (state) {
+  //     nextTick(() => {
+  //       isOpen.value = true;
+  //     });
+  //   }
+  //   tableProductsState.payload.isDatePickerOpen = state;
+};
+
+tableProductsState.payload.isDatePickerOpen = false;
 
 const updateData = (rowIndex, columnId, value) => {
   const newData =
     columnId !== 'quantidade'
       ? [
-          ...readbleOrderData.value.products.map((row, index) => {
+          ...createOrderData.value.products.map((row, index) => {
             if (index == rowIndex) {
-              const oldRow = readbleOrderData.value.products[rowIndex];
+              const oldRow = createOrderData.value.products[rowIndex];
               return {
                 ...oldRow,
                 [columnId]: [
@@ -147,9 +175,9 @@ const updateData = (rowIndex, columnId, value) => {
           }),
         ]
       : [
-          ...readbleOrderData.value.products.map((row, index) => {
+          ...createOrderData.value.products.map((row, index) => {
             if (index == rowIndex) {
-              const oldRow = readbleOrderData.value.products[rowIndex];
+              const oldRow = createOrderData.value.products[rowIndex];
               return {
                 ...oldRow,
                 [columnId]: value,
@@ -158,7 +186,7 @@ const updateData = (rowIndex, columnId, value) => {
             return row;
           }),
         ];
-  readbleOrderData.value = { ...readbleOrderData.value, products: newData };
+  createOrderData.value = { ...createOrderData.value, products: newData };
 
   const itens = newData
     .map((product) => {
@@ -204,6 +232,7 @@ const handleExchange = ({ value }) =>
     ...tableProductsState.payload,
     trocoPara: parseFloat(value.split(' ')[1]),
   });
+
 const handleScheduling = (date) => {
   if (date) {
     const { date: formattedDate, time } = dateToDayMonthYearFormat(date);
@@ -241,44 +270,64 @@ watch(
 
 const handleCallbackPedido = () => {
   disabledButton.value = true;
-  var url = 'pedidos';
-  const promise = axios.post(url, tableProductsState.payload);
-  toggleDialog();
   renderToast(
-    promise,
+    axios.post('pedidos', tableProductsState.payload),
     'Cadastrando pedido',
     'o pedido foi cadastrado com sucesso',
     'Ocorreu um erro ao cadastrar o pedido',
-    () => toggleDialog(),
+    () => {
+      emits('update:dataTable', true);
+      props.toggleDialog();
+    },
   );
 };
 
-//class="flex flex-col items-start"
+const useDialogObserver = () => {
+  let observer;
+
+  onMounted(() => {
+    nextTick(() => {
+      observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'data-state') {
+            const dialog = document.querySelector('[role="dialog"]');
+            if (dialog) {
+              const rect = dialog.getBoundingClientRect();
+              dialog.style.setProperty('--dialog-top', `${rect.top}px`);
+              dialog.style.setProperty('--dialog-left', `${rect.left}px`);
+              dialog.style.setProperty('--dialog-width', `${rect.width}px`);
+            }
+          }
+        });
+      });
+
+      const dialog = document.querySelector('[role="dialog"]');
+      dialog && observer.observe(dialog, { attributes: true });
+    });
+  });
+
+  onUnmounted(() => observer?.disconnect());
+};
+
+useDialogObserver();
+
+//@select.prevent
 </script>
 
 <template>
   <div>
-    <Dialog v-bind="forwarded" :open="isOpen" @update:open="handleToggleOpenDialog">
-      <DialogTrigger as-child>
-        <CommandItem
-          :key="address.value"
-          :value="address.value"
-          class="flex flex-col items-start"
-          @select="(e) => e.preventDefault()"
-        >
-          <Check
-            :class="cn('mr-2 h-4 w-4', value === address.value ? 'opacity-100' : 'opacity-0')"
-          />
-          <span>{{ address.value }}</span>
-          <span class="text-xs text-muted-foreground">{{ address.city }}</span>
-          <span v-if="address.complement" class="text-xs text-info/70">{{
-            address.complement
-          }}</span>
-          <span v-if="address.referency" class="text-xs text-info/70">{{ address.referency }}</span>
-        </CommandItem>
-      </DialogTrigger>
+    <Dialog
+      v-bind="forwarded"
+      :open="handleDialogOpen()"
+      :prevent-close="true"
+      @update:open="handleToggleDialog"
+    >
       <DialogContent
-        class="bg-info/60 backdrop-blur-sm sm:max-w-[600px] grid-rows-[auto_minmax(0,1fr)_auto] p-0 h-full max-h-full"
+        :class="[
+          'bg-info/60 backdrop-blur-sm sm:max-w-[600px] grid-rows-[auto_minmax(0,1fr)_auto] p-0 h-full max-h-full',
+          'dialog-content-custom',
+        ]"
+        style="overflow: visible; pointer-events: all"
       >
         <DialogHeader class="p-6 pb-0 text-white">
           <DialogTitle class="">Nossos Produtos</DialogTitle>
@@ -304,51 +353,59 @@ const handleCallbackPedido = () => {
             </div>
           </DialogDescription>
         </DialogHeader>
-        <Carousel v-slot="{ canScrollNext }" class="relative w-full max-w-xs sm:max-w-full">
+        <Carousel v-slot="{ canScrollNext }" class="relative w-full max-w-full">
           <DialogCreateOrderNote
             :order-note="tableProductsState.payload.obs"
             class="top-[6%] right-[6%]"
             @callback:order-note="handleOrderNote"
           >
           </DialogCreateOrderNote>
-          <CarouselContent class="bg-transparent relative">
-            <Suspense>
-              <template #default>
-                <CarouselItem
-                  v-for="(product, index) in interableProducts"
-                  :key="product.id"
-                  class="md:basis-1/2"
-                >
-                  <div class="p-1">
-                    <Card class="border-none bg-transparent">
-                      <CardContent
-                        class="flex aspect-square items-center justify-center p-6 gap-3 flex-col"
-                      >
-                        <div class="flex flex-col items-center justify-center">
-                          <h3 class="text-white/50 text-sm">{{ product.nome }}</h3>
-                          <h2 class="text-white text-base mb-4">
-                            {{ toCurrency(parseFloat(product.preco[preco.length - 1].val)) }}
-                          </h2>
-                        </div>
-                        <img :src="`public/images/uploads/${product.img}`" class="h-[227px]" />
-                        <div>
-                          <NumberField
-                            v-bind="numberFieldProps"
-                            @update:model-value="
-                              (val) => {
-                                updateData(index, 'quantidade', val);
-                              }
-                            "
-                          >
-                          </NumberField>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CarouselItem>
-              </template>
-              <template #fallback> carregando... </template>
-            </Suspense>
+          <CarouselContent class="bg-transparent relative !ml-0">
+            <template v-if="isLoading">
+              <CarouselItem v-for="n in 2" :key="n" class="md:basis-1/2">
+                <div class="p-1">
+                  <Card class="border-none bg-transparent">
+                    <CardContent
+                      class="flex aspect-square items-center justify-center p-6 gap-3 flex-col"
+                    >
+                      <Skeleton class="h-4 w-[200px]" />
+                      <Skeleton class="h-[227px] w-[200px]" />
+                      <Skeleton class="h-10 w-[150px]" />
+                    </CardContent>
+                  </Card>
+                </div>
+              </CarouselItem>
+            </template>
+            <template v-else>
+              <CarouselItem
+                v-for="(product, index) in createOrderData.products"
+                :key="product.id"
+                class="md:basis-1/2"
+              >
+                <div class="p-1">
+                  <Card class="border-none bg-transparent">
+                    <CardContent
+                      class="flex aspect-square items-center justify-center p-6 gap-3 flex-col"
+                    >
+                      <div class="flex flex-col items-center justify-center">
+                        <h3 class="text-white/50 text-sm">{{ product.nome }}</h3>
+                        <h2 class="text-white text-base mb-4">
+                          {{ toCurrency(parseFloat(product.preco[product.preco.length - 1].val)) }}
+                        </h2>
+                      </div>
+                      <img :src="`/images/uploads/${product.img}`" class="h-[227px]" />
+                      <div>
+                        <NumberField
+                          v-bind="numberFieldProps"
+                          @update:model-value="(val) => updateData(index, 'quantidade', val)"
+                        >
+                        </NumberField>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CarouselItem>
+            </template>
           </CarouselContent>
           <CarouselPrevious class="left-[1rem] bg-transparent text-white !border-input/30 ring-0" />
           <CarouselNext
@@ -374,6 +431,7 @@ const handleCallbackPedido = () => {
                 `${tableProductsState.payload.dataAgendada} ${tableProductsState.payload.horaInicio}`,
               )
             "
+            @date-picker-open="handleDatePickerState"
             @update:scheduling="handleScheduling"
           />
         </div>
@@ -391,3 +449,14 @@ const handleCallbackPedido = () => {
     </Dialog>
   </div>
 </template>
+<style>
+.dialog-content-custom {
+  overflow: visible !important;
+  contain: none !important;
+}
+
+:deep(.dp__outer_menu_wrap) {
+  position: fixed !important;
+  z-index: 99999 !important;
+}
+</style>

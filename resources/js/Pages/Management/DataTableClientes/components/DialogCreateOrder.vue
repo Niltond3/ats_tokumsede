@@ -54,7 +54,13 @@ const whenDialogOpen = () => {
         ...responseDistributor,
         nome: utf8Decode(responseDistributor.nome),
       };
-      const products = orderData[0];
+      const products = orderData[0]
+        .map((product) => {
+          return { ...product, nome: utf8Decode(product.nome) };
+        })
+        .filter((product) => product.id != 3 && product.id != 334)
+        .sort();
+        
       createOrderData.value = {
         clientName: props.clientName,
         products,

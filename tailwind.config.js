@@ -21,6 +21,8 @@ module.exports = {
         "./storage/framework/views/*.php",
         "./resources/views/**/*.blade.php",
         "./resources/js/**/*.{js,jsx,vue}",
+        './resources/**/*.{vue,js}',
+
     ],
 
     theme: {
@@ -33,7 +35,12 @@ module.exports = {
         },
         extend: {
             colors: {
-                primary: "#7460ee",
+                primary: {
+                    DEFAULT: 'hsl(var(--primary))',
+                    90: 'hsl(var(--primary) / 0.9)' // Adicionando opacidade personalizada
+                },
+                'primary-foreground': 'var(--primary-foreground)',
+                'accent-foreground': 'var(--accent-foreground)',
                 success: "#26c6da",
                 info: "#1e88e5",
                 warning: "#ffb22b",
@@ -46,10 +53,6 @@ module.exports = {
                 ring: "hsl(var(--ring))",
                 background: "hsl(var(--background))",
                 foreground: "hsl(var(--foreground))",
-                primary: {
-                    DEFAULT: "hsl(var(--primary))",
-                    foreground: "hsl(var(--primary-foreground))",
-                },
                 secondary: {
                     DEFAULT: "hsl(var(--secondary))",
                     foreground: "#6c757d",

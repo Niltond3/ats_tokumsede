@@ -35,7 +35,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('cliente.dashboard', absolute: false));
+        return redirect()->intended(route('cliente.dashboard', absolute: false))
+        ->withHeaders([
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Access-Control-Allow-Credentials' => 'true',
+            'Access-Control-Allow-Origin' => $request->header('Origin')
+        ]);
     }
 
     /**

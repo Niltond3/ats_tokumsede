@@ -169,40 +169,40 @@ Route::middleware('auth')->group(function () {
 Route::get('/homepage', [HomeController::class, 'getHomepage'])->name('homepage');
 
 
-//API
-Route::group(['prefix' => 'api'], function () {
-    Route::resource('/', Api::class, ['except' => 'create'])
-        ->names([
-            'index' => 'api.index',
-            'show' => 'api.show',
-            'store' => 'api.store',
-            'edit' => 'api.edit',
-            'update' => 'api.update',
-            'destroy' => 'api.destroy'
-        ]);
-    // Demais rotas configuradas
-    Route::get('verificaPedidoAlterado', [Api::class, 'verificaPedidoAlterado']);
-    Route::get('verificaEmail', [Api::class, 'verificaEmail']);
-    Route::get('consultaInicial', [Api::class, 'consultaInicial']);
-    Route::get('solicitaContato', [Api::class, 'solicitaContato']);
-    Route::get('enviaEmail', [Api::class, 'enviaEmail']);
-    Route::get('removerEndereco', [Api::class, 'removerEndereco']);
-    Route::get('listImages', [Api::class, 'listImages']);
-    Route::get('consultaInicialSemCadastro', [Api::class, 'consultaInicialSemCadastro']);
-    Route::get('clientePotencial', [Api::class, 'clientePotencial']);
-    Route::get('login', [Api::class, 'login']);
-    Route::get('refreshRegId', [Api::class, 'refreshRegId']);
-    Route::get('notificacaoRecebida', [Api::class, 'notificacaoRecebida']);
-    Route::get('senhaModoTeste', [Api::class, 'senhaModoTeste']);
-    Route::get('alteraEnderecoAtual', [Api::class, 'alteraEnderecoAtual']);
-    Route::get('cadastrarNovoEndereco', [Api::class, 'cadastrarNovoEndereco']);
-    Route::get('cancelarPedido', [Api::class, 'cancelarPedido']);
-    Route::get('pedidoRecebido', [Api::class, 'pedidoRecebido']);
-    Route::get('alteraDadosCliente', [Api::class, 'alteraDadosCliente']);
-    Route::get('verifyRecover', [Api::class, 'verifyRecover']);
-    Route::get('alteraSenha', [Api::class, 'alteraSenha']);
-    Route::get('novoPedido', [Api::class, 'novoPedido']);
-});
+// //API
+// Route::group(['prefix' => 'api'], function () {
+    // Route::resource('/', Api::class, ['except' => 'create'])
+    //     ->names([
+    //         'index' => 'api.index',
+    //         'show' => 'api.show',
+    //         'store' => 'api.store',
+    //         'edit' => 'api.edit',
+    //         'update' => 'api.update',
+    //         'destroy' => 'api.destroy'
+    //     ]);
+//     // Demais rotas configuradas
+//     Route::get('verificaPedidoAlterado', [Api::class, 'verificaPedidoAlterado']);
+//     Route::get('verificaEmail', [Api::class, 'verificaEmail']);
+//     Route::get('consultaInicial', [Api::class, 'consultaInicial']);
+//     Route::get('solicitaContato', [Api::class, 'solicitaContato']);
+//     Route::get('enviaEmail', [Api::class, 'enviaEmail']);
+//     Route::get('removerEndereco', [Api::class, 'removerEndereco']);
+//     Route::get('listImages', [Api::class, 'listImages']);
+//     Route::get('consultaInicialSemCadastro', [Api::class, 'consultaInicialSemCadastro']);
+//     Route::get('clientePotencial', [Api::class, 'clientePotencial']);
+//     Route::get('login', [Api::class, 'login']);
+//     Route::get('refreshRegId', [Api::class, 'refreshRegId']);
+//     Route::get('notificacaoRecebida', [Api::class, 'notificacaoRecebida']);
+//     Route::get('senhaModoTeste', [Api::class, 'senhaModoTeste']);
+//     Route::get('alteraEnderecoAtual', [Api::class, 'alteraEnderecoAtual']);
+//     Route::get('cadastrarNovoEndereco', [Api::class, 'cadastrarNovoEndereco']);
+//     Route::get('cancelarPedido', [Api::class, 'cancelarPedido']);
+//     Route::get('pedidoRecebido', [Api::class, 'pedidoRecebido']);
+//     Route::get('alteraDadosCliente', [Api::class, 'alteraDadosCliente']);
+//     Route::get('verifyRecover', [Api::class, 'verifyRecover']);
+//     Route::get('alteraSenha', [Api::class, 'alteraSenha']);
+//     Route::get('novoPedido', [Api::class, 'novoPedido']);
+// });
 
 
 require __DIR__ . '/auth.php';

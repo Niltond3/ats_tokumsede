@@ -983,21 +983,21 @@ private function getDistributorQueryScope($user)
 
     $queries = [
         'pendentes' => $baseQueryCallback()->tap($distributorFilter)
-            ->where('status', Pedido::PENDENTE)
-            ->whereRaw("((pedido.agendado = 1 AND (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) <= 30) OR DATE(pedido.dataAgendada) < CURDATE()) OR pedido.agendado = 0)"),
+        ->where('pedido.status', Pedido::PENDENTE)
+        ->whereRaw("((pedido.agendado = 1 AND (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) <= 30) OR DATE(pedido.dataAgendada) < CURDATE()) OR pedido.agendado = 0)"),
 
         'aceitos' => $baseQueryCallback()->tap($distributorFilter)
-            ->where('status', Pedido::ACEITO),
+            ->where('pedido.status', Pedido::ACEITO),
 
         'despachados' => $baseQueryCallback()->tap($distributorFilter)
-            ->where('status', Pedido::DESPACHADO),
+            ->where('pedido.status', Pedido::DESPACHADO),
 
         'entregues' => $baseQueryCallback()->tap($distributorFilter)
-            ->where('status', Pedido::ENTREGUE)
+            ->where('pedido.status', Pedido::ENTREGUE)
             ->whereRaw("DATE(pedido.horarioEntrega) = CURDATE()"),
 
         'cancelados' => $baseQueryCallback()->tap($distributorFilter)
-            ->whereIn('status', [
+            ->whereIn('pedido.status', [
                 Pedido::CANCELADO_USUARIO,
                 Pedido::CANCELADO_NAO_LOCALIZADO,
                 Pedido::CANCELADO_TROTE,
@@ -1007,7 +1007,7 @@ private function getDistributorQueryScope($user)
 
         'agendados' => $baseQueryCallback()->tap($distributorFilter)
             ->where([
-                ['status', Pedido::PENDENTE],
+                ['pedido.status', Pedido::PENDENTE],
                 ['agendado', 1]
             ])
             ->whereRaw("DATE(pedido.dataAgendada) > CURDATE() OR (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) > 30)")
@@ -1064,8 +1064,8 @@ private function getDistributorQueryScope($user)
     {
         Debugbar::info('Entrando na função buscarPedidosAdministrador');
         return Pedido::query()
-            ->where('status', Pedido::PENDENTE)
-            ->where('id', '>', $ultimoPedidoId)
+        ->where('pedido.status', Pedido::PENDENTE)
+        ->where('id', '>', $ultimoPedidoId)
             ->where(function ($query) {
                 $query->where($this->getCriteriosAgendamento())
                     ->orWhere('agendado', false);
@@ -1090,7 +1090,7 @@ private function getDistributorQueryScope($user)
 
         $query = Pedido::query()
             ->where('id', '>', $ultimoPedidoId)
-            ->where('status', Pedido::PENDENTE)
+            ->where('pedido.status', Pedido::PENDENTE)
             ->whereIn('idDistribuidor', $distribuidorIds)
             ->where(function($query) {
                 $now = Carbon::now();

@@ -36,8 +36,8 @@ module.exports = {
         extend: {
             colors: {
                 primary: {
-                    DEFAULT: 'hsl(var(--primary))',
-                    90: 'hsl(var(--primary) / 0.9)' // Adicionando opacidade personalizada
+                    DEFAULT: 'var(--primary)',
+                    90: 'var(--primary) / 0.9' // Adicionando opacidade personalizada
                 },
                 'primary-foreground': 'var(--primary-foreground)',
                 'accent-foreground': 'var(--accent-foreground)',

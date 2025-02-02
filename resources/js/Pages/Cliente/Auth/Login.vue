@@ -27,7 +27,15 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { IconPhone, IconLock, IconSun, IconMoon, IconEye, IconEyeOff } from '@tabler/icons-vue';
+import {
+  IconPhone,
+  IconLock,
+  IconSun,
+  IconMoon,
+  IconEye,
+  IconEyeOff,
+  IconLoader2,
+} from '@tabler/icons-vue';
 import { Separator } from '@/components/ui/separator';
 import renderToast from '@/components/renderPromiseToast';
 
@@ -42,7 +50,7 @@ const socialProviders = [
     color: 'bg-red-500',
   },
   {
-    name: 'GitHub',
+    name: 'Facebook',
     icon: 'IconBrandGithub',
     color: 'bg-gray-900',
   },
@@ -222,7 +230,7 @@ const onSubmit = handleSubmit((values, { resetField }) => {
             :class="{ 'opacity-50': isSubmitting }"
             :disabled="isSubmitting"
           >
-            <IconLoader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
+            <IconLoader2 class="mr-2 h-4 w-4 animate-spin" />
             {{ isSubmitting ? 'Processando...' : 'Entrar' }}
           </Button>
         </form>

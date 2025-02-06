@@ -39,7 +39,7 @@ import {
 } from '@tabler/icons-vue';
 import { Separator } from '@/components/ui/separator';
 import renderToast from '@/components/renderPromiseToast';
-import SocialLogin from '@/Components/SocialLogin.vue';
+import SocialLogin from '@/components/SocialLogin.vue';
 import { login } from '@/services/api/clientAuth';
 
 const { theme, toggleTheme } = useTheme();

@@ -39,8 +39,8 @@ import {
 } from '@tabler/icons-vue';
 import { Separator } from '@/components/ui/separator';
 import renderToast from '@/components/renderPromiseToast';
-import SocialLogin from '@/components/SocialLogin.vue';
 import { login } from '@/services/api/clientAuth';
+import SocialLogin from '@/components/SocialLogin.vue';
 
 const { theme, toggleTheme } = useTheme();
 const showPassword = ref(false);
@@ -124,10 +124,8 @@ const handleSuccessLogin = (response) => {
 
       <CardContent>
         <SocialLogin @login:success="handleSuccessLogin"></SocialLogin>
-
         <Separator class="my-4" />
         <!-- Enhanced Form -->
-
         <form class="space-y-4 animate-in fade-in-50" @submit="onSubmit">
           <FormField v-slot="{ componentField, errorMessage }" name="telefone">
             <FormItem>

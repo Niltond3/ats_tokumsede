@@ -143,7 +143,6 @@ const setupChildRowHandler = (dt, format) => {
           'Cliente carregado',
           'Falha ao carregar cliente',
           (response) => {
-            console.log(response.data);
             clientData = response.data;
             reminders.value = response.data.reminders;
             clientCache.set(client.id, clientData);
@@ -354,7 +353,6 @@ const options = {
               regex: false,
             },
           });
-
           const fullData = response.data.data.map((client) => ({
             ...client,
             nome: utf8Decode(client.nome),

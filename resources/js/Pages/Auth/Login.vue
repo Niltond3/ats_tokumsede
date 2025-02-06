@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { useForm } from 'vee-validate';
@@ -23,8 +23,6 @@ import { Switch } from '@/components/ui/switch';
 import {
   IconPhone,
   IconLock,
-  IconSun,
-  IconMoon,
   IconEye,
   IconEyeOff,
   IconLogin2,
@@ -37,18 +35,6 @@ const { theme, toggleTheme } = useTheme();
 const showPassword = ref(false);
 
 // Add social login providers
-const socialProviders = [
-  {
-    name: 'Google',
-    icon: 'IconBrandGoogle',
-    color: 'bg-red-500',
-  },
-  {
-    name: 'Facebook',
-    icon: 'IconBrandGithub',
-    color: 'bg-gray-900',
-  },
-];
 
 defineProps({
   canResetPassword: {
@@ -75,17 +61,20 @@ const { handleSubmit, isSubmitting } = useForm({
 });
 
 const onSubmit = handleSubmit((values, { resetField }) => {
-  axios
-    .post(route('login'), values)
-    .then((response) => {
+  renderToast(
+    axios.post(route('login'), values),
+    'Realizando login...',
+    'Login realizado com sucesso!',
+    'Erro ao realizar login',
+    () => {
       resetField('senha');
       location.reload();
-    })
-    .catch((error) => {
-      console.error(error);
+    },
+    () => {
       resetField('senha');
       location.reload();
-    });
+    },
+  );
 });
 </script>
 <template>
@@ -111,7 +100,7 @@ const onSubmit = handleSubmit((values, { resetField }) => {
           </Button> -->
         </div>
         <CardDescription class="text-muted-foreground">
-          Entre com suas credenciais administrativas, ou use login social
+          Entre com suas credenciais administrativas
         </CardDescription>
       </CardHeader>
 
@@ -120,17 +109,6 @@ const onSubmit = handleSubmit((values, { resetField }) => {
       </div>
 
       <CardContent>
-        <div class="grid grid-cols-2 gap-4 mb-6">
-          <Button
-            v-for="provider in socialProviders"
-            :key="provider.name"
-            variant="outline"
-            class="w-full"
-          >
-            <component :is="provider.icon" class="mr-2 h-4 w-4" />
-            {{ provider.name }}
-          </Button>
-        </div>
         <Separator class="my-4" />
         <form class="space-y-5 animate-in fade-in-50" @submit="onSubmit">
           <FormField v-slot="{ componentField, errorMessage }" name="login">
@@ -153,7 +131,6 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                 </div>
               </FormControl>
               <FormMessage>{{ errorMessage }}</FormMessage>
-              <FormMessage />
             </FormItem>
           </FormField>
           <FormField v-slot="{ componentField, errorMessage }" name="senha">
@@ -196,8 +173,6 @@ const onSubmit = handleSubmit((values, { resetField }) => {
                 <FormLabel class="!m-0 whitespace-nowrap -top-5">Lembrar-me</FormLabel>
               </FormItem>
             </FormField>
-
-            <Button variant="link" :href="route('password.request')"> Esqueceu a senha? </Button>
           </div>
           <Button
             type="submit"

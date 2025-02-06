@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, reactive, nextTick, onUnmounted } from 'vue';
+import { ref, onMounted, watch, nextTick, onUnmounted } from 'vue';
 import axios from 'axios';
 import { useForwardPropsEmits } from 'radix-vue';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
@@ -84,7 +83,6 @@ const whenDialogOpen = () => {
     'Erro ao carregar produtos',
     (responseOrder) => {
       const { data: orderData } = responseOrder;
-
       const responseAddress = orderData[2];
 
       const address = {
@@ -135,11 +133,12 @@ const whenDialogOpen = () => {
   );
 };
 
-const handleDialogOpen = () => {
-  props.open && whenDialogOpen();
-  return props.open;
-};
-
+watch(
+  () => props.idClienteAddress,
+  (newVal) => {
+    if (props.open && newVal) whenDialogOpen();
+  },
+);
 const handleToggleDialog = (op) => {
   if (!op && !tableProductsState.payload.isDatePickerOpen) emits('update:commandOpen', false);
   props.toggleDialog();
@@ -318,7 +317,7 @@ useDialogObserver();
   <div>
     <Dialog
       v-bind="forwarded"
-      :open="handleDialogOpen()"
+      :open="props.open"
       :prevent-close="true"
       @update:open="handleToggleDialog"
     >

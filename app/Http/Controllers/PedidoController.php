@@ -28,11 +28,21 @@ date_default_timezone_set('America/Sao_Paulo');
 
 class PedidoController extends Controller
 {
+    /**
+ * Gets the effective distributor ID considering stock unions
+ * @param int $distributorId Original distributor ID
+ * @return int Main distributor ID or original ID if no union exists
+ */
     private function getEffectiveDistributorId($distributorId) {
         $distributor = Distribuidor::find($distributorId);
         return $distributor->getMainDistributorIdAttribute() ?? $distributorId;
     }
-private function getDistributorQueryScope($user)
+/**
+ * Builds distributor query scope based on user type and stock unions
+ * @param User $user Authenticated user
+ * @return Closure Query scope function
+ */
+    private function getDistributorQueryScope($user)
 {
     if ($user->tipoAdministrador == "Distribuidor") {
         $distributor = Distribuidor::find($user->idDistribuidor);
@@ -61,12 +71,11 @@ private function getDistributorQueryScope($user)
     };
 }
 
-    // Core CRUD Operations
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+/**
+ * Lists all orders with status-based filtering
+ * Includes relationships: distributor, address, delivery person, items
+ * @return JsonResponse Orders grouped by status
+ */
     public function index()
     {
         if (!auth()->check()) {
@@ -74,6 +83,7 @@ private function getDistributorQueryScope($user)
         }
 
         $user = auth()->user();
+        Debugbar::info($user);
         $baseQueryCallback = $this->getBaseQueryCallbackStructure($user);
         $queries = $this->buildQueriesArray($baseQueryCallback, $user);
 
@@ -106,12 +116,11 @@ private function getDistributorQueryScope($user)
         Debugbar::info($result);
         return $result;
     }
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+/**
+ * Creates new order with items and notifications
+ * @param Request $request Order data
+ * @return mixed Order ID or error response
+ */
     public function store(Request $request)
     {
 
@@ -222,12 +231,11 @@ private function getDistributorQueryScope($user)
         return $itens;
         //CADASTRAR PEDIDO
     }
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\pedido  $pedido
-     * @return \Illuminate\Http\Response
-     */
+  /**
+ * Shows detailed order information
+ * @param int $id Order ID
+ * @return Pedido Order with relationships
+ */
     public function show($id)
     {
         $pedido = Pedido::find($id);
@@ -237,13 +245,12 @@ private function getDistributorQueryScope($user)
         return $pedido;
         //
     }
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\pedido  $pedido
-     * @return \Illuminate\Http\Response
-     */
+/**
+ * Updates order status and related data
+ * @param Request $request Update data
+ * @param int $id Order ID
+ * @return Response Status update result
+ */
     public function update(Request $request, $id)
     {
         $pedido = Pedido::find($id);
@@ -257,6 +264,11 @@ private function getDistributorQueryScope($user)
     }
 
     // Order Status Management
+    /**
+ * Resets order to pending status
+ * @param int $idPedido Order ID
+ * @return \Response Operation result
+ */
     function setPendente($idPedido)
 {
     $date = new \DateTime();
@@ -292,6 +304,12 @@ private function getDistributorQueryScope($user)
 
     return response("Erro ao retornar pedido para pendente. Tente novamente.", 400);
 }
+/**
+ * Accepts order and assigns to delivery person
+ * @param Request $request Delivery person data
+ * @param int $idPedido Order ID
+ * @return \Response Operation result
+ */
     function aceitar(Request $request, $idPedido)
     {
         $date = new \DateTime();
@@ -323,6 +341,12 @@ private function getDistributorQueryScope($user)
         }
 
     }
+    /**
+ * Dispatches order for delivery
+ * @param Request $request Delivery details
+ * @param int $idPedido Order ID
+ * @return \Response Operation result
+ */
     function despachar(Request $request, $idPedido)
     {
         Debugbar::info($request);
@@ -356,6 +380,12 @@ private function getDistributorQueryScope($user)
         }
 
     }
+    /**
+ * Rejects order with reason
+ * @param Request $request Rejection reason
+ * @param int $idPedido Order ID
+ * @return \Response Operation result
+ */
     function recusar(Request $request, $idPedido)
     {
         $date = new \DateTime();
@@ -379,6 +409,11 @@ private function getDistributorQueryScope($user)
             return response("Erro ao recusar o pedido. Tente novamente ou contate o administrador.", 400);//$this->error();
         }
     }
+    /**
+ * Marks order as delivered
+ * @param int $idPedido Order ID
+ * @return Response Operation result
+ */
     function entregar($idPedido)
     {
         $date = new \DateTime();
@@ -430,6 +465,12 @@ private function getDistributorQueryScope($user)
             response("Erro ao entregar o pedido. Tente novamente ou contate o administrador.", 200);//$this->error();
         }
     }
+    /**
+ * Cancels order with specified reason
+ * @param Request $request Cancellation reason
+ * @param int $idPedido Order ID
+ * @return Response Operation result
+ */
     function cancelar(Request $request, $idPedido)
     {
         $date = new \DateTime();
@@ -462,6 +503,12 @@ private function getDistributorQueryScope($user)
     }
 
     // Report Methods
+
+/**
+ * Generates sales report based on filters
+ * @param Request $request Report filters
+ * @return array Sales data and totals
+ */
     function relatorioVendas(Request $request)
     {
         $u = auth()->user();//Administrador::find($idUsuario);
@@ -540,6 +587,11 @@ private function getDistributorQueryScope($user)
 
         return [$pedidos, $valorTotalGeral];
     }
+    /**
+ * Generates product-based sales report
+ * @param Request $request Report filters
+ * @return array Product sales data
+ */
     function relatorioVendasProduto(Request $request)
     {
         $u = auth()->user();
@@ -641,6 +693,11 @@ private function getDistributorQueryScope($user)
 
         return [$pedidos, $valorTotalGeral];
     }
+    /**
+ * Generates delivery person sales report
+ * @param Request $request Report filters
+ * @return array Delivery person performance data
+ */
     function relatorioVendasEntregador(Request $request)
     {
         $u = auth()->user();
@@ -742,6 +799,11 @@ private function getDistributorQueryScope($user)
 
         return [$pedidos, $valorTotalGeral];
     }
+    /**
+ * Generates filtered orders report
+ * @param Request $request Report filters
+ * @return array Filtered orders data
+ */
     public function relatorioPedidos(Request $request)
     {
         if (!auth()->check()) {
@@ -791,6 +853,12 @@ private function getDistributorQueryScope($user)
         ];
     }
     // Helper Methods
+
+/**
+ * Applies date range filters to queries
+ * @param array $queries Query collection
+ * @param Request $request Filter parameters
+ */
     private function applyDateFilters(&$queries, $request)
     {
         if ($request->dataInicial) {
@@ -809,6 +877,11 @@ private function getDistributorQueryScope($user)
             }
         }
     }
+    /**
+ * Applies distributor filters to queries
+ * @param array $queries Query collection
+ * @param Request $request Filter parameters
+ */
     private function applyDistribuidorFilter(&$queries, $request)
     {
         if ($request->idDistribuidores) {
@@ -818,6 +891,10 @@ private function getDistributorQueryScope($user)
             }
         }
     }
+    /**
+ * Loads and formats product information for orders
+ * @param array $queries Order queries
+ */
     private function loadOrderProducts(&$queries)
     {
         foreach ($queries as $query) {
@@ -840,6 +917,11 @@ private function getDistributorQueryScope($user)
             });
         }
     }
+    /**
+ * Formats product output structure
+ * @param array $produtos Raw product data
+ * @return array Formatted product structure
+ */
     private function formatProductsOutput($produtos)
     {
         if (empty($produtos[0]->idProd)) {
@@ -881,6 +963,11 @@ private function getDistributorQueryScope($user)
 
         return $out;
     }
+    /**
+ * Sorts price array by price ID
+ * @param array $prices Price data
+ * @return array Sorted prices
+ */
     private function sortPriceArrayByPrecoId(array $prices): array
     {
         usort($prices, function ($a, $b) {
@@ -888,12 +975,20 @@ private function getDistributorQueryScope($user)
         });
         return $prices;
     }
-    private function formatDate($date) {
-        return date('d/m/Y', strtotime($date));
-    }
+
+/**
+ * Formats datetime to d/m/Y H:i
+ * @param string $datetime Raw datetime
+ * @return string Formatted datetime
+ */
     private function formatDateTime($datetime) {
         return date('d/m/Y H:i', strtotime($datetime));
     }
+    /**
+ * Formats all dates in order object
+ * @param Pedido $pedido Order object
+ * @return Pedido Order with formatted dates
+ */
     private function formatPedidoDates($pedido) {
         $pedido->horarioPedido = $this->formatDateTime($pedido->horarioPedido);
         $pedido->horarioAceito = $this->formatDateTime($pedido->horarioAceito);
@@ -902,6 +997,11 @@ private function getDistributorQueryScope($user)
         $pedido->dataAgendada = $this->formatDateTime($pedido->dataAgendada);
         return $pedido;
     }
+    /**
+ * Gets order with formatted products
+ * @param Builder $query Base query
+ * @return Collection Formatted orders
+ */
     private function getFormattedPedidoWithProducts($query)
     {
         return $query->with([
@@ -930,10 +1030,16 @@ private function getDistributorQueryScope($user)
                 return $pedido;
             });
     }
+    /**
+ * Builds base query structure for orders
+ * @param User $user Authenticated user
+ * @return Closure Query builder function
+ */
     private function getBaseQueryCallbackStructure($user) {
         return function() use ($user) {
             $query = Pedido::query()
                 ->withBasicRelations()
+                ->withCoreFields()
                 ->when($user->tipoAdministrador === 'Distribuidor', function($q) use ($user) {
                     $distributor = Distribuidor::find($user->idDistribuidor);
 
@@ -956,7 +1062,12 @@ private function getDistributorQueryScope($user)
             return $query;
         };
     }
-
+/**
+ * Builds array of queries for different order statuses
+ * @param Closure $baseQueryCallback Base query builder
+ * @param User $user Authenticated user
+ * @return array Status-based queries
+ */
     private function buildQueriesArray($baseQueryCallback, $user)
 {
     // Get union IDs if distributor is main

@@ -7,10 +7,28 @@ import DropdownLink from '@/components/DropdownLink.vue';
 import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { utf8Decode } from '@/util';
+import renderToast from '@/components/renderPromiseToast';
+import { logout } from '@/services/api/clientAuth';
 
 const page = usePage();
 
 const name = utf8Decode(page.props.auth.user.nome);
+
+const handleLogout = () => {
+  renderToast(
+    logout(),
+    'Desconectando cliente...',
+    'Cliente desconectado com sucesso!',
+    'Erro ao desconectar cliente!',
+    'error',
+    () => {
+      location.reload();
+    },
+    (err) => {
+      if (err === 'Network Error') location.reload();
+    },
+  );
+};
 
 const showingNavigationDropdown = ref(false);
 </script>
@@ -20,7 +38,7 @@ const showingNavigationDropdown = ref(false);
     <Toaster richColors />
     <div>
       <div class="min-h-screen bg-white dark:bg-gray-900">
-        <nav class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+        <nav class="bg-info dark:bg-gray-800 dark:border-gray-700">
           <!-- Primary Navigation Menu -->
           <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
@@ -72,10 +90,13 @@ const showingNavigationDropdown = ref(false);
                     </template>
 
                     <template #content>
-                      <DropdownLink :href="route('cliente.profile.edit')"> Profile </DropdownLink>
-                      <DropdownLink :href="route('cliente.logout')" method="post" as="button">
+                      <DropdownLink :href="route('cliente.profile.edit')"> Perfil </DropdownLink>
+                      <button
+                        class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out"
+                        @click="handleLogout"
+                      >
                         Log Out
-                      </DropdownLink>
+                      </button>
                     </template>
                   </Dropdown>
                 </div>

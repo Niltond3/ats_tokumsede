@@ -14,6 +14,8 @@ import { ZiggyVue } from "../../vendor/tightenco/ziggy";
 import VueTheMask from "vue-the-mask";
 import money from 'v-money3'
 import VueGoogleMaps from "@fawmi/vue-google-maps";
+import vue3GoogleLogin from 'vue3-google-login'
+
 import jQuery from "jquery";
 
 window.$ = window.jQuery = jQuery;
@@ -30,6 +32,9 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         return createApp({ render: () => h(App, props) })
             .use(plugin)
+            .use(vue3GoogleLogin, {
+                clientId: '687836923187-t2qej6ustc58mmkpke3151ned7adjb9e.apps.googleusercontent.com'
+            })
             .use(ZiggyVue)
             .use(autoAnimatePlugin)
             .use(VueTheMask)

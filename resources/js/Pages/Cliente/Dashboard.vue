@@ -21,27 +21,35 @@ import renderToast from '@/components/renderPromiseToast';
 import { cn } from '@/lib/utils';
 import { dialogState } from '@/hooks/useToggleDialog';
 import { Check } from 'lucide-vue-next';
+import DialogRegisterAddress from '../Management/DataTableClientes/components/DialogRegisterAddress.vue';
+import Separator from '@/components/ui/separator/Separator.vue';
+import DialogConfirmAddressDelete from '../Management/DataTableClientes/components/DialogConfirmAddressDelete.vue';
 
 const { isOpen, toggleDialog } = dialogState();
+const { isOpen: isOpenDialogRegisterAddress, toggleDialog: toggleDialogRegisterAddress } =
+  dialogState();
+const { isOpen: isOpenDialogConfirmDeleAddress, toggleDialog: toggleDialogConfirmDeleAddress } =
+  dialogState();
 
 const page = usePage();
 
 const client = page.props.auth.user;
+const addressDetails = ref(null);
 const clientIdAddress = ref(null);
 const updateDataTable = ref(false);
+const addressTarget = ref({});
 const welcome = ref(
   client.sexo == 1
     ? 'Bem vindo senhor ' + utf8Decode(client.nome)
     : 'Bem vinda senhora ' + utf8Decode(client.nome),
 );
 
-const addresses = ref([]);
+const formatAddresses = ref([]);
 
 const open = ref(false);
 
 const value = ref('');
-
-onMounted(async () => {
+const fetchAddresses = () => {
   const promise = axios.get(`enderecos/${client.id}`);
 
   renderToast(
@@ -50,10 +58,11 @@ onMounted(async () => {
     'Endereços carregados com sucesso!',
     'Erro ao carregar endereços!',
     (response) => {
-      const formatAddresses = response.data[1].map((address) => {
+      formatAddresses.value = response.data[1].map((address) => {
         const { logradouro, numero, bairro, cidade, estado, complemento, referencia, id } = address;
 
         return {
+          ...address,
           id,
           value: `${utf8Decode(logradouro)}, ${numero} - ${utf8Decode(bairro)}`,
           city: `${utf8Decode(cidade)} - ${utf8Decode(estado)}`,
@@ -61,27 +70,47 @@ onMounted(async () => {
           referency: utf8Decode(referencia) || '',
         };
       });
-
-      addresses.value = formatAddresses;
     },
   );
-});
+};
+onMounted(async () => fetchAddresses());
+
+const setDefaultValues = () => {
+  addressDetails.value = null;
+  value.value = '';
+  open.value = false;
+};
+
+const handleEditAddress = () => {
+  setTimeout(() => {
+    addressDetails.value && toggleDialogRegisterAddress();
+  }, 50);
+};
+
+const handleDeleteAddress = () => {
+  toggleDialogConfirmDeleAddress();
+  fetchAddresses();
+  setDefaultValues();
+};
 
 watch(
   () => value.value,
   (newValue) => {
     if (!newValue) return;
-    clientIdAddress.value = addresses.value.find((address) => address.value === newValue).id;
-    toggleDialog();
+    addressDetails.value = formatAddresses.value.find((address) => address.value === newValue);
+    clientIdAddress.value = addressDetails.value.id;
+  },
+);
+watch(
+  () => isOpenDialogRegisterAddress.value,
+  (newValue) => {
+    if (!newValue) setDefaultValues();
   },
 );
 watch(
   () => isOpen.value,
   (newValue) => {
-    if (!newValue) {
-      value.value = '';
-      open.value = false;
-    }
+    if (!newValue) setDefaultValues();
   },
 );
 </script>
@@ -105,7 +134,7 @@ watch(
                 <i class="ri-truck-fill"></i>
                 {{
                   value
-                    ? addresses.find((address) => address.value === value)?.value
+                    ? formatAddresses.find((address) => address.value === value)?.value
                     : 'Realizar Pedido'
                 }}
                 <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -115,30 +144,76 @@ watch(
               <Command v-model="value">
                 <CommandInput placeholder="Endereços..." class="!ring-0 border-0 text-info/80" />
                 <CommandList>
-                  <CommandEmpty class="p-2">Nenhum endereço encontrado.</CommandEmpty>
+                  <CommandEmpty class="p-1 hover:bg-slate-100"
+                    ><button
+                      class="group flex items-center text-info/80 transition-colors border-2 rounded-md py-1 px-3 border-white hover:bg-info hover:text-white w-full justify-center gap-3"
+                      @click="toggleDialogRegisterAddress"
+                    >
+                      <i class="ri-map-pin-add-fill text-2xl"></i>
+                      <div class="flex flex-col">
+                        <p class="text-info/40">Nenhum endereço encontrado:</p>
+                        <p
+                          class="transition-all group-hover:scale-125 group-hover:translate-y-[-10px] group-hover:font-bold"
+                        >
+                          Cadastrar novo endereço
+                        </p>
+                      </div>
+                    </button>
+                  </CommandEmpty>
                   <CommandGroup>
-                    <div v-for="address in addresses" v-bind:key="address.id">
+                    <div v-for="address in formatAddresses" v-bind:key="address.id">
                       <CommandItem
                         :key="address.value"
                         :value="address.value"
                         class="flex flex-col items-start"
+                        @click="(e) => (addressTarget.value = e.currentTarget)"
                       >
-                        <Check
-                          :class="
-                            cn(
-                              'mr-2 h-4 w-4',
-                              value === address.value ? 'opacity-100' : 'opacity-0',
-                            )
-                          "
-                        />
-                        <span>{{ address.value }}</span>
-                        <span class="text-xs text-muted-foreground">{{ address.city }}</span>
-                        <span v-if="address.complement" class="text-xs text-info/70">{{
-                          address.complement
-                        }}</span>
-                        <span v-if="address.referency" class="text-xs text-info/70">{{
-                          address.referency
-                        }}</span>
+                        <div class="flex gap-2 items-center">
+                          <button
+                            class="group hover:text-white hover:bg-info/90 transition-colors border-white border-2 py-1 px-2 rounded-md text-info/80"
+                            @click="toggleDialog"
+                          >
+                            <div
+                              class="flex items-start flex-col justify-start pointer-events-none select-none"
+                            >
+                              <p class="text-start">{{ address.value }}</p>
+                              <p class="text-xs text-muted-foreground group-hover:text-white/60">
+                                {{ address.city }}
+                              </p>
+                              <p
+                                v-if="address.complement"
+                                class="text-xs text-info/70 group-hover:text-white/60"
+                              >
+                                {{ address.complement }}
+                              </p>
+                              <p
+                                v-if="address.referency"
+                                class="text-xs text-info/70 group-hover:text-white/60"
+                              >
+                                {{ address.referency }}
+                              </p>
+                            </div>
+                          </button>
+                          <Separator orientation="vertical" class="h-8" />
+                          <div class="flex gap-2 ml-auto">
+                            <button
+                              class="size-8 text-lg bg-info rounded-md text-white transition-colors hover:text-warning"
+                              @click="handleEditAddress"
+                            >
+                              <i class="ri-edit-2-fill"></i>
+                            </button>
+                            <button
+                              class="size-8 text-lg bg-info rounded-md text-white transition-colors hover:text-danger"
+                              @click="
+                                (event) => {
+                                  toggleDialogConfirmDeleAddress();
+                                }
+                              "
+                            >
+                              <i class="ri-delete-bin-6-fill"></i>
+                            </button>
+                          </div>
+                        </div>
                       </CommandItem>
                     </div>
                   </CommandGroup>
@@ -155,6 +230,21 @@ watch(
         :client-name="utf8Decode(client.nome)"
         :value="value"
         @update:dataTable="(date) => (updateDataTable = date)"
+      />
+      <DialogRegisterAddress
+        :open="isOpenDialogRegisterAddress"
+        :toggle-dialog="toggleDialogRegisterAddress"
+        :id-client="client.id"
+        :address-details="addressDetails"
+        @update:data-table="fetchAddresses"
+      />
+      <DialogConfirmAddressDelete
+        variant="danger"
+        dialog-title="Excluir Endereço"
+        dialog-description="Tem certeza que deseja excluir o endereço?"
+        :open="isOpenDialogConfirmDeleAddress"
+        :id-address="clientIdAddress"
+        @delete:confirm="handleDeleteAddress"
       />
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">

@@ -2,6 +2,12 @@ import { errorUtils } from "@/util";
 import { defineComponent, h, markRaw } from "vue";
 import { toast } from "vue-sonner";
 
+/**
+ * Creates a custom div component for toast messages
+ * @param {string} title - Toast title
+ * @param {string} successMessage - Success message to display
+ * @returns {Component} Vue component
+ */
 const CustomDiv = (title, sucessMessage) =>
     defineComponent({
         setup() {
@@ -15,6 +21,11 @@ const CustomDiv = (title, sucessMessage) =>
         },
     });
 
+/**
+ * Creates a loading div component for toast messages
+ * @param {string} successMessage - Message to display while loading
+ * @returns {Component} Vue component
+ */
 const LoadingDiv = (sucessMessage) =>
     defineComponent({
         setup() {
@@ -33,6 +44,17 @@ const LoadingDiv = (sucessMessage) =>
                 );
         },
     });
+
+/**
+ * Renders a toast notification for async operations
+ * @param {Promise} promise - Promise to monitor
+ * @param {string} loading - Loading message
+ * @param {string} successMessage - Success message
+ * @param {string} errorMessage - Error message
+ * @param {Function} successCallback - Success callback function
+ * @param {Function} errorCallback - Error callback function
+ * @returns {Promise} Promise that resolves with callback result
+ */
 
 const renderToast = (
     promise,

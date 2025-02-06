@@ -63,7 +63,23 @@ Route::prefix('cliente')->name('cliente.')->group(function () {
         //ENDERECOS CLIENTES
         // Route::get('/enderecos', [EnderecoClienteController::class,'show'])->name('enderecos.show');
 
-        Route::resource('clientes', ClienteController::class, ['except' => 'create']);
+        Route::resource('clientes', ClienteController::class, ['except' => 'create'])
+    ->names([
+        'index' => 'clientes.index',
+        'show' => 'clientes.show',
+        'store' => 'clientes.store',
+        'edit' => 'clientes.edit',
+        'update' => 'clientes.update',
+        'destroy' => 'clientes.destroy'
+    ]);
+    Route::put('clientes/{id}/password', [ClienteController::class, 'updatePassword'])->name('cliente.password.update');
+    Route::delete('/profile', [ClienteController::class, 'destroy'])
+    ->name('cliente.profile.destroy');
+
+
+
+// Additional custom routes
+Route::get('clientes/buscar-latitude-longitude', [ClienteController::class, 'buscarLatitudeLongitude']);
 
         //ENDERECOS CLIENTES
         Route::resource('enderecos', EnderecoClienteController::class, ['except' => 'create']);

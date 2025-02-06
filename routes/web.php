@@ -2,6 +2,7 @@
 include 'cors.php';
 
 use App\Http\Controllers\Api\IndexController as Api;
+use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\DistribuidorController;
@@ -50,6 +51,12 @@ Route::get('/home/dashboard', function () {
 Route::get('/home/register/produto', function () {
     return Inertia::render('Home');
 })->middleware(['auth', 'verified'])->name('novo-produto');
+
+Route::get('auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])
+    ->name('social.redirect');
+Route::get('auth/{provider}/callback', [SocialAuthController::class, 'callback'])
+    ->name('social.callback');
+Route::post('/auth/google/callback', [SocialAuthController::class, 'callbackToken']);
 
 // Route::get('/dashboard', function () {
 //     return view('home-one');

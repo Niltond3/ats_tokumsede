@@ -1,107 +1,156 @@
 <script setup>
-import InputError from '@/components/InputError.vue';
-import InputLabel from '@/components/InputLabel.vue';
-import PrimaryButton from '@/components/Button.vue';
-import TextInput from '@/components/TextInput.vue';
-import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { useForm } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/zod';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import Button from '@/components/Button.vue';
+import * as z from 'zod';
+import validator from 'validator';
+import renderToast from '@/components/renderPromiseToast';
+import { updatePassword } from '@/services/api/client';
+import { usePage } from '@inertiajs/vue3';
 
-const passwordInput = ref(null);
-const currentPasswordInput = ref(null);
+const page = usePage();
+const clientId = page.props.auth.user.id;
+// Password validation schema using Zod
+const formSchema = z
+  .object({
+    current_password: z.string().optional(),
+    password: z
+      .string()
+      .min(5, { message: 'A senha deve ter no mínimo 5 caracteres' })
+      .refine(
+        (value) =>
+          validator.isStrongPassword(value || '', {
+            minLength: 5,
+            minLowercase: 1,
+            minUppercase: 1,
+            minNumbers: 1,
+            minSymbols: 0,
+            returnScore: false,
+            pointsPerUnique: 1,
+            pointsPerRepeat: 0.5,
+            pointsForContainingLower: 10,
+            pointsForContainingUpper: 10,
+            pointsForContainingNumber: 10,
+            pointsForContainingSymbol: 10,
+          }),
+        {
+          message: 'Senha: 5 caracteres, com maiúscula, minúscula e número.',
+        },
+      ),
+    password_confirmation: z.string(),
+  })
+  .refine((data) => data.password === data.password_confirmation, {
+    message: 'As senhas não conferem',
+    path: ['password_confirmation'],
+  });
 
-const form = useForm({
-  current_password: '',
-  password: '',
-  password_confirmation: '',
+const { handleSubmit, setFieldValue, values, errors, resetForm } = useForm({
+  validationSchema: toTypedSchema(formSchema),
+  initialValues: {
+    current_password: '',
+    password: null,
+    password_confirmation: null,
+  },
 });
 
-const updatePassword = () => {
-  form.put(route('cliente.password.update'), {
-    preserveScroll: true,
-    onSuccess: () => form.reset(),
-    onError: () => {
-      if (form.errors.password) {
-        form.reset('password', 'password_confirmation');
-        passwordInput.value.focus();
-      }
-      if (form.errors.current_password) {
-        form.reset('current_password');
-        currentPasswordInput.value.focus();
-      }
-    },
-  });
-};
+const onSubmit = handleSubmit((formValues) => {
+  const payload = {
+    old_password: formValues.current_password.length === 0 ? null : formValues.current_password,
+    new_password: formValues.password,
+  };
+
+  // Here you can use your API call or Inertia form submission
+  console.log(payload);
+  renderToast(
+    updatePassword(clientId, payload),
+    'Atualizando Senha ...',
+    'Senha atualizada com sucesso!',
+    'Erro ao atualizar senha',
+    () => resetForm(),
+    () => resetForm(),
+  );
+});
+
+// Style constants remain the same
+const inputClass = `peer w-full rounded-md border-gray-300 py-3 px-4
+    placeholder-transparent
+    focus:border-info focus:ring-info
+    transition-all duration-300 ease-in-out`;
+
+const labelClass = `absolute -top-2.5 left-2 text-sm !mt-0 rounded-md
+    transition-all duration-300 ease-in-out
+    peer-placeholder-shown:text-base
+    peer-placeholder-shown:top-1/2
+    peer-placeholder-shown:-translate-y-1/2
+    peer-placeholder-shown:text-gray-400
+    peer-focus:-top-1
+    peer-focus:text-sm
+    peer-focus:text-info
+    bg-white px-1`;
 </script>
 
 <template>
-  <section>
-    <header>
-      <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Update Password</h2>
+  <div class="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg">
+    <h2 class="text-2xl text-info/80 font-semibold text-center mb-6">Atualizar Senha</h2>
+    <form class="space-y-6" @submit.prevent="onSubmit">
+      <div class="grid grid-cols-1 gap-6">
+        <FormField v-slot="{ componentField }" name="current_password">
+          <FormItem class="relative">
+            <FormControl>
+              <Input
+                v-bind="componentField"
+                type="password"
+                :class="inputClass"
+                placeholder="Senha atual"
+              />
+            </FormControl>
+            <FormLabel :class="labelClass">Senha Atual</FormLabel>
+            <FormMessage class="absolute -bottom-5 right-3" />
+          </FormItem>
+        </FormField>
 
-      <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-        Ensure your account is using a long, random password to stay secure.
-      </p>
-    </header>
+        <FormField v-slot="{ componentField }" name="password">
+          <FormItem class="relative">
+            <FormControl>
+              <Input
+                v-bind="componentField"
+                type="password"
+                :class="inputClass"
+                placeholder="Nova senha"
+              />
+            </FormControl>
+            <FormLabel :class="labelClass">Nova Senha</FormLabel>
+            <FormMessage class="absolute -bottom-5 right-3" />
+          </FormItem>
+        </FormField>
 
-    <form class="mt-6 space-y-6" @submit.prevent="updatePassword">
-      <div>
-        <InputLabel for="current_password" value="Current Password" />
-
-        <TextInput
-          id="current_password"
-          ref="currentPasswordInput"
-          v-model="form.current_password"
-          type="password"
-          class="mt-1 block w-full"
-          autocomplete="current-password"
-        />
-
-        <InputError :message="form.errors.current_password" class="mt-2" />
+        <FormField v-slot="{ componentField }" name="password_confirmation">
+          <FormItem class="relative">
+            <FormControl>
+              <Input
+                v-bind="componentField"
+                type="password"
+                :class="inputClass"
+                placeholder="Confirme a nova senha"
+              />
+            </FormControl>
+            <FormLabel :class="labelClass">Confirmar Nova Senha</FormLabel>
+            <FormMessage class="absolute -bottom-5 right-3" />
+          </FormItem>
+        </FormField>
       </div>
 
-      <div>
-        <InputLabel for="password" value="New Password" />
-
-        <TextInput
-          id="password"
-          ref="passwordInput"
-          v-model="form.password"
-          type="password"
-          class="mt-1 block w-full"
-          autocomplete="new-password"
-        />
-
-        <InputError :message="form.errors.password" class="mt-2" />
-      </div>
-
-      <div>
-        <InputLabel for="password_confirmation" value="Confirm Password" />
-
-        <TextInput
-          id="password_confirmation"
-          v-model="form.password_confirmation"
-          type="password"
-          class="mt-1 block w-full"
-          autocomplete="new-password"
-        />
-
-        <InputError :message="form.errors.password_confirmation" class="mt-2" />
-      </div>
-
-      <div class="flex items-center gap-4">
-        <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
-
-        <Transition
-          enter-active-class="transition ease-in-out"
-          enter-from-class="opacity-0"
-          leave-active-class="transition ease-in-out"
-          leave-to-class="opacity-0"
+      <div class="flex justify-end">
+        <Button
+          type="submit"
+          class="inline-flex items-center px-6 py-2 bg-info text-white rounded-md hover:bg-info-dark transition-colors"
         >
-          <p v-if="form.recentlySuccessful" class="text-sm text-gray-600 dark:text-gray-400">
-            Saved.
-          </p>
-        </Transition>
+          Salvar Alterações
+        </Button>
       </div>
     </form>
-  </section>
+  </div>
 </template>

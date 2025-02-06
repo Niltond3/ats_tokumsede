@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use \Barryvdh\Debugbar\Facades\Debugbar;
 use App\Enums\ReminderStatus;
 use App\Models\Reminder;
+use Illuminate\Support\Facades\Hash;
 
 class ClienteController extends Controller
 {
@@ -156,9 +157,9 @@ class ClienteController extends Controller
           ->where('status', ReminderStatus::ATIVO)
           ->orderBy('data_limite');
 }
-    ])->select('id', 'nome', 'dddTelefone', 'telefone', 'email', 'dataNascimento', 'rating')
+    ])->select('id', 'nome', 'dddTelefone', 'telefone', 'email', 'dataNascimento', 'rating','outrosContatos', 'senha')
       ->find($id);
-
+    Debugbar::info($cliente);
     $cliente->dataNascimento = $cliente->dataNascimento ?
         date("d/m/Y", strtotime($cliente->dataNascimento)) : '';
 
@@ -184,33 +185,119 @@ class ClienteController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {
-        if (!$request->status) {
-            $request['cpf'] = preg_replace("/[^0-9]/", "", $request->cpf);
-            $request['cnpj'] = preg_replace("/[^0-9]/", "", $request->cnpj);
-            $telefone = explode(" ", str_replace("-", "", $request->telefone));
-            $formatacaoTelefone = array("(", ")");
-            $request['dddTelefone'] = str_replace($formatacaoTelefone, "", $telefone[0]);
-            $request['telefone'] = $telefone[1];
-            $request['dataNascimento'] = $request->dataNascimento == "" ? null : implode("-", array_reverse(explode("/", $request->dataNascimento)));
-        }
-
-        $cliente = Cliente::find($id);
-        $cliente->update($request->all());
-        return response('Cliente ' . $cliente->nome, 200);
-        //
+{
+    if (!$request->status) {
+        $request['cpf'] = preg_replace("/[^0-9]/", "", $request->cpf);
+        $request['cnpj'] = preg_replace("/[^0-9]/", "", $request->cnpj);
+        $telefone = explode(" ", str_replace("-", "", $request->telefone));
+        $formatacaoTelefone = array("(", ")");
+        $request['dddTelefone'] = str_replace($formatacaoTelefone, "", $telefone[0]);
+        $request['telefone'] = $telefone[1];
+        $request['dataNascimento'] = $request->dataNascimento == "" ? null : implode("-", array_reverse(explode("/", $request->dataNascimento)));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\cliente  $cliente
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(cliente $cliente)
-    {
-        //
+    $cliente = Cliente::find($id);
+
+    if (!$cliente) {
+        return response('Cliente não encontrado', 404);
     }
+
+    $cliente->update($request->all());
+    return response('Cliente ' . $cliente->nome, 200);
+}
+
+/**
+ * Update customer password with security best practices
+ *
+ * @param Request $request Contains old_password and new_password
+ * @param int $id Customer ID
+ * @return \Illuminate\Http\Response
+ */
+public function updatePassword(Request $request, $id)
+{
+    // Validate request data
+    $validated = $request->validate([
+        'old_password' => 'nullable|string',
+        'new_password' => 'required|string|min:5|different:old_password'
+    ]);
+
+    // Find customer by ID
+    $cliente = Cliente::findOrFail($id);
+
+    // Verify if old password matches
+
+    if ($cliente->senha !== null && $validated['old_password'] !== $cliente->senha) {
+        return response()->json([
+            'message' => 'Senha atual incorreta'
+        ], 422);
+    }
+
+    // Update password with new hashed value
+    $cliente->senha = $validated['new_password'];
+
+    // Save changes
+    $cliente->save();
+
+    return response()->json([
+        'message' => 'Senha atualizada com sucesso'
+    ], 200);
+}
+
+   /**
+ * Permanently delete the user's profile and associated data
+ *
+ * @param Request $request Contains password for verification
+ * @param int $id Customer ID
+ * @return \Illuminate\Http\Response
+ */
+public function destroy(Request $request)
+{
+    // Validate request data
+    $request->validate([
+        'password' => 'required|string'
+    ]);
+
+    // Get authenticated client
+    $cliente = auth('cliente')->user();
+
+    // Verify password matches
+    if ($cliente->senha !== $request->password) {
+        return response()->json([
+            'message' => 'Senha incorreta'
+        ], 422);
+    }
+
+    // Begin transaction to ensure all related data is deleted
+    DB::beginTransaction();
+    try {
+        // Delete related data
+        $cliente->enderecos()->delete();
+        $cliente->reminders()->delete();
+
+        // Soft delete the client
+        $cliente->status = Cliente::EXCLUIDO;
+        $cliente->save();
+
+        // Delete the client
+        $cliente->delete();
+
+        DB::commit();
+
+        // Logout after successful deletion
+        auth('cliente')->logout();
+
+        return response()->json([
+            'message' => 'Conta excluída com sucesso'
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'message' => 'Erro ao excluir conta: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
 
     function buscarLatitudeLongitude($logradouro, $numero, $cidade, $estado, $cep)
     {

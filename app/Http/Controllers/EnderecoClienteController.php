@@ -112,6 +112,12 @@ class EnderecoClienteController extends Controller
         $enderecoCliente->referencia = $request->referencia?$request->referencia:"";
         $enderecoCliente->complemento = $request->complemento?$request->complemento:"";
         $enderecoCliente->cep = $request->cep?$request->cep:"";
+
+        $coordenadas = $this->buscarLatitudeLongitude($enderecoCliente->logradouro, $enderecoCliente->numero, $enderecoCliente->cidade, $enderecoCliente->estado, $enderecoCliente->cep);
+
+        $enderecoCliente->latitude = $coordenadas[0];
+        $enderecoCliente->longitude = $coordenadas[1];
+
         $enderecoCliente->update(array_filter($request->all()));
         return response('O endereço '.$enderecoCliente->id, 200);
         //

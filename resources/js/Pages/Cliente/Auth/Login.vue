@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { useForm } from 'vee-validate';
@@ -35,26 +35,15 @@ import {
   IconEye,
   IconEyeOff,
   IconLoader2,
+  IconLogin2,
 } from '@tabler/icons-vue';
 import { Separator } from '@/components/ui/separator';
 import renderToast from '@/components/renderPromiseToast';
+import SocialLogin from '@/Components/SocialLogin.vue';
+import { login } from '@/services/api/clientAuth';
 
 const { theme, toggleTheme } = useTheme();
 const showPassword = ref(false);
-
-// Add social login providers
-const socialProviders = [
-  {
-    name: 'Google',
-    icon: 'IconBrandGoogle',
-    color: 'bg-red-500',
-  },
-  {
-    name: 'Facebook',
-    icon: 'IconBrandGithub',
-    color: 'bg-gray-900',
-  },
-];
 
 const formSchema = toTypedSchema(
   z.object({
@@ -67,7 +56,7 @@ const formSchema = toTypedSchema(
   }),
 );
 
-const { handleSubmit, isSubmitting } = useForm({
+const { handleSubmit, isSubmitting, resetForm } = useForm({
   validationSchema: formSchema,
   initialValues: {
     remember: false,
@@ -77,51 +66,38 @@ const { handleSubmit, isSubmitting } = useForm({
   validateOnMount: true,
 });
 
-const onSubmit = handleSubmit((values, { resetField }) => {
+const onSubmit = handleSubmit((values) => {
   console.log('Starting form submission');
   //   const values = form.values;
   console.log('Form submitted with values:', values);
   const phoneRaw = values.telefone.replace(/\D/g, '');
-  const payload = {
+  const credentials = {
     ddd: phoneRaw.slice(0, 2),
     telefone: phoneRaw.slice(2),
     senha: values.senha,
     remember: values.remember,
   };
 
-  axios.defaults.baseURL = import.meta.env.VITE_APP_URL || 'http://127.0.0.1:8000';
-  axios.defaults.withCredentials = true;
-
   renderToast(
-    axios
-      .post('/cliente/login', payload, {
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      })
-      .then(async (response) => {
-        console.log(response);
-        if (response.status === 200) {
-          window.location.href = route('cliente.dashboard');
-        }
-        return response;
-      }),
+    login(credentials),
     'Realizando Login...',
     'Login realizado com sucesso',
     'Falha ao realizar login',
-    (resp) => {
-      console.log(resp);
+    () => {
+      location.reload();
     },
     (err) => {
-      console.log(err);
+      if (err === 'Network Error') location.reload();
     },
   ).finally(() => {
-    console.log('Form submission completed');
+    resetForm();
     // window.location.href = route('cliente.dashboard');
   });
 });
+const handleSuccessLogin = (response) => {
+  console.log('Login successful:', response);
+  location.reload();
+};
 </script>
 
 <template>
@@ -147,19 +123,8 @@ const onSubmit = handleSubmit((values, { resetField }) => {
       </CardHeader>
 
       <CardContent>
-        <!-- Social Login -->
+        <SocialLogin @login:success="handleSuccessLogin"></SocialLogin>
 
-        <div class="grid grid-cols-2 gap-4 mb-6">
-          <Button
-            v-for="provider in socialProviders"
-            :key="provider.name"
-            variant="outline"
-            class="w-full"
-          >
-            <component :is="provider.icon" class="mr-2 h-4 w-4" />
-            {{ provider.name }}
-          </Button>
-        </div>
         <Separator class="my-4" />
         <!-- Enhanced Form -->
 
@@ -230,7 +195,8 @@ const onSubmit = handleSubmit((values, { resetField }) => {
             :class="{ 'opacity-50': isSubmitting }"
             :disabled="isSubmitting"
           >
-            <IconLoader2 class="mr-2 h-4 w-4 animate-spin" />
+            <IconLoader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
+            <IconLogin2 v-else class="mr-2" />
             {{ isSubmitting ? 'Processando...' : 'Entrar' }}
           </Button>
         </form>

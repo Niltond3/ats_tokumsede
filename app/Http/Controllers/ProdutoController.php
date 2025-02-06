@@ -220,22 +220,24 @@ class ProdutoController extends Controller
 
     private function selectNearestDistributor($distribuidores, $enderecoCliente)
     {
-        $indexDistribuidor = 0;
-        $dists = array();
+        $dists = [];
         foreach ($distribuidores as $pos2 => $d) {
-            if ($enderecoCliente->latitude == NULL || $enderecoCliente->longitude == NULL) {
+            if ($enderecoCliente->latitude === null || $enderecoCliente->longitude === null) {
                 $dist = PHP_INT_MAX;
             } else {
-                $lat1 = $d->latitude;
-                $long1 = $d->longitude;
-                $lat2 = $enderecoCliente->latitude;
-                $long2 = $enderecoCliente->longitude;
-
-                $dist = $this->calculateDistance($lat1, $long1, $lat2, $long2);
+                $dist = $this->calculateDistance($d->latitude, $d->longitude, $enderecoCliente->latitude, $enderecoCliente->longitude);
             }
-            $dists[$pos2] = array("max" => $d->distanciaMaxima, "atual" => $dist, "pos" => $pos2);//array("max" => $d["distanciaMaxima"], "atual" => $dist, "pos" => $pos2);
+            $dists[$pos2] = [
+                "max" => $d->distanciaMaxima,
+                "atual" => $dist,
+                "pos" => $pos2
+            ];
         }
         $indexDistribuidor = $this->selectDist($dists);
+        if ($indexDistribuidor === -1) {
+            // No distributor was found within range, so return null or handle accordingly.
+            return null;
+        }
         return $distribuidores[$indexDistribuidor];
     }
 
@@ -313,7 +315,8 @@ class ProdutoController extends Controller
     public function show($idEnderecoCliente)
     {
         $enderecoCliente = EnderecoCliente::findOrFail($idEnderecoCliente);
-        $distribuidores = $this->getNearbyDistributors($enderecoCliente);
+    $distribuidores = $this->getNearbyDistributors($enderecoCliente);
+
 
         if (empty($distribuidores)) {
             return $enderecoCliente->idCliente;
@@ -321,7 +324,8 @@ class ProdutoController extends Controller
 
         $distribuidor = $this->selectNearestDistributor($distribuidores, $enderecoCliente);
         if (!$distribuidor) {
-            return $enderecoCliente->idCliente;
+             // If no distributor is available within the valid distance, handle it accordingly.
+        return $enderecoCliente->idCliente;
         }
 
         $horarioFuncionamento = HorarioFuncionamento::find($distribuidor->idHorarioFuncionamento);

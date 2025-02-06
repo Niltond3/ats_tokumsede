@@ -44,7 +44,10 @@ class Cliente extends Authenticatable
         'regld',
         'ultimoLogin',
         'outrosContatos',
-        'appVersion'
+        'appVersion',
+        'provider',
+        'provider_id',
+        'avatar'
     ];
 
     /**

@@ -49,6 +49,14 @@ class Pedido extends Model
         pedido.agendado, pedido.status
     ");
     }
+    public function scopeWithCoreFields($query)
+    {
+        return $query->selectRaw("
+            pedido.*,
+            pedido.id, pedido.total, pedido.formaPagamento, pedido.origem,
+            pedido.agendado, pedido.status
+        ");
+    }
     protected $appends = ['cliente'];
     protected $fillable = [
         'idDistribuidor',//chave estrangeira

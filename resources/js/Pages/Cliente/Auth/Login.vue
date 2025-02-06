@@ -63,7 +63,6 @@ const { handleSubmit, isSubmitting, resetForm } = useForm({
     telefone: '',
     senha: '',
   },
-  validateOnMount: true,
 });
 
 const onSubmit = handleSubmit((values) => {
@@ -112,10 +111,10 @@ const handleSuccessLogin = (response) => {
           >
             Bem-vindo
           </CardTitle>
-          <Button variant="ghost" size="icon" @click="toggleTheme">
+          <!-- <Button variant="ghost" size="icon" @click="toggleTheme">
             <IconSun v-if="theme === 'dark'" class="h-5 w-5 transition-all" />
             <IconMoon v-else class="h-5 w-5 transition-all" />
-          </Button>
+          </Button> -->
         </div>
         <CardDescription class="text-muted-foreground">
           Entre com suas credenciais ou use login social
@@ -129,7 +128,7 @@ const handleSuccessLogin = (response) => {
         <form class="space-y-4 animate-in fade-in-50" @submit="onSubmit">
           <FormField v-slot="{ componentField, errorMessage }" name="telefone">
             <FormItem>
-              <FormLabel>Telefone</FormLabel>
+              <FormLabel class="bg-white rounded-md z-10">Telefone</FormLabel>
               <FormControl>
                 <div class="relative">
                   <IconPhone class="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
@@ -148,7 +147,7 @@ const handleSuccessLogin = (response) => {
 
           <FormField v-slot="{ componentField, errorMessage }" name="senha">
             <FormItem>
-              <FormLabel>Senha</FormLabel>
+              <FormLabel class="bg-white rounded-md z-10">Senha</FormLabel>
               <FormControl>
                 <div class="relative">
                   <IconLock class="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
@@ -156,17 +155,17 @@ const handleSuccessLogin = (response) => {
                     v-bind="componentField"
                     :type="showPassword ? 'text' : 'password'"
                     placeholder="Digite sua senha"
-                    class="pl-10"
+                    class="px-10"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    class="absolute right-2 top-2"
+                    class="absolute right-1 px-0 top-1/2 -translate-y-1/2 text-info/70 transition-colors rounded-md !bg-transparent hover:text-info"
                     @click="showPassword = !showPassword"
                   >
-                    <IconEye v-if="!showPassword" class="h-5 w-5" />
-                    <IconEyeOff v-else class="h-5 w-5" />
+                    <i v-if="!showPassword" class="ri-eye-fill"></i>
+                    <i v-else class="ri-eye-off-fill"></i>
                   </Button>
                 </div>
               </FormControl>

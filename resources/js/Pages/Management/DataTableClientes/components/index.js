@@ -1,5 +1,3 @@
-export { default as DialogCreateOrder } from './DialogCreateOrder.vue'
-export { default as DialogRegisterAddress } from './DialogRegisterAddress.vue'
-export { default as DialogRegisterClient } from './DialogRegisterClient.vue'
-export { default as DialogShowOrder } from './DialogShowOrder.vue'
-export { default as DropdownActionClient } from './DropdownActionClient.vue'
+export { default as DialogCreateOrder } from '../../../../components/dialogs/DialogCreateOrder.vue'
+export { default as DialogRegisterAddress } from '../../../../components/dialogs/DialogRegisterAddress.vue'
+export { default as DialogRegisterClient } from '../../../../components/dialogs/DialogRegisterClient.vue'

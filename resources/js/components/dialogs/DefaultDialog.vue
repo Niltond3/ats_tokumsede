@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
 import { dialogState } from '@/hooks/useToggleDialog';
@@ -14,9 +15,9 @@ const props = defineProps({
   dropdown: { type: Boolean, required: false, default: true },
 });
 
-const { isOpen, toggleDialog } = dialogState('ConfirmAction');
+const { isOpen, toggleDialog } = dialogState('ConfirAction');
 
-const emits = defineEmits(['on:confirm', 'update:dialogOpen', 'on:click']);
+const emits = defineEmits(['on:confirm', 'update:dialogOpen']);
 
 const handleConfirm = (confirm) => {
   emits('update:dialogOpen', false);
@@ -46,7 +47,7 @@ const getVariant = {
 const styleVariant = getVariant[props.variant];
 
 const handleDialogOpen = (op) => {
-  !op && emits('update:dialogOpen', op);
+  !op && emits('update:dialogOpen', false);
   toggleDialog();
 };
 </script>
@@ -57,7 +58,6 @@ const handleDialogOpen = (op) => {
       <DropdownMenuItem
         v-if="dropdown"
         class="cursor-pointer group gap-1"
-        @click="emits('on:click')"
         @select="(e) => e.preventDefault()"
       >
         <i
@@ -68,13 +68,13 @@ const handleDialogOpen = (op) => {
       </DropdownMenuItem>
       <button
         v-else
-        class="h-8 w-8 rounded-full text-white shadow-sm hover:shadow-md transition-all flex justify-center items-center"
+        class="h-8 w-8 rounded-full text-white shadow-sm hover:shadow-md transition-all"
       >
         <i
           :class="[props.triggerIcon, styleVariant.textClasses.text]"
-          class="transition-colors text-[39px]"
+          class="transition-colors text-3xl"
         ></i>
-        <span class="sr-only">{{ props.triggerLabel }}</span>
+        <span class="hidden min-[426px]:block">{{ props.triggerLabel }}</span>
       </button>
     </DialogTrigger>
     <DialogConfirmActionContent v-bind="props" @on:confirm="handleConfirm" />

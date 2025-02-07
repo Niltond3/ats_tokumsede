@@ -62,9 +62,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- MODAL REALIZAR PEDIDOS -->
   <div class="row">
-    <!-- Column -->
     <Tabs default-value="account" :default-value="tab" :model-value="activeTab">
       <TabsList class="grid w-full grid-cols-2">
         <TabsTrigger :value="tab" @Click="handleSetActiveTab(tab)">

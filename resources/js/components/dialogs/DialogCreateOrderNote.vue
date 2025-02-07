@@ -14,7 +14,7 @@ import {
 import { dialogState } from '@/hooks/useToggleDialog';
 import { twMerge } from 'tailwind-merge';
 
-const { isOpen, toggleDialog } = dialogState();
+const { isOpen, toggleDialog } = dialogState('CreateOrderNote');
 
 const emit = defineEmits(['callback:order-note']);
 

@@ -15,7 +15,7 @@ import { dialogState } from '@/hooks/useToggleDialog';
 import { twMerge } from 'tailwind-merge';
 import { FormControl, FormField, FormItem } from '@/components/ui/form';
 
-const { isOpen, toggleDialog } = dialogState();
+const { isOpen, toggleDialog } = dialogState('OthersContacts');
 
 const emit = defineEmits(['callback:orderNote']);
 

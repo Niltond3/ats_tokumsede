@@ -3,6 +3,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { toast } from 'vue-sonner';
+import { useWindowSize } from '@vueuse/core';
 
 // DataTables Core and Extensions
 import DataTable from 'datatables.net-vue3';
@@ -20,22 +21,22 @@ import 'datatables.net-select-dt';
 import 'datatables.net-staterestore-dt';
 
 // Utility imports
-import { errorUtils, utf8Decode } from '../../../util';
-import { dialogState } from '../../../hooks/useToggleDialog';
+import { errorUtils, utf8Decode } from '@/util';
+import { dialogState } from '@/hooks/useToggleDialog';
 import languagePtBR from './dataTablePtBR.mjs';
 import { formatOrder } from '../utils';
-
 import rowChildtable from './components/rowChildTable/index';
-import DialogShowOrder from './components/DialogShowOrder.vue';
-import DialogCreateOrder from './components/DialogCreateOrder.vue';
-import DropdownActionClient from './components/DropdownActionClient.vue';
-import DialogRegisterClient from './components/DialogRegisterClient.vue';
-import DialogRegisterAddress from './components/DialogRegisterAddress.vue';
-import DialogConfirmAddressDelete from './components/DialogConfirmAddressDelete.vue';
+import DialogShowOrder from '@/components/dialogs/DialogShowOrder.vue';
+import DialogCreateOrder from '@/components/dialogs/DialogCreateOrder.vue';
+import DialogRegisterAddress from '@/components/dialogs/DialogRegisterAddress.vue';
+import DialogConfirmAddressDelete from '@/components/dialogs/DialogConfirmAddressDelete.vue';
+import DialogRegisterClient from '@/components/dialogs/DialogRegisterClient.vue';
+import { DialogRegisterPrices } from '@/components/dialogs/DialogRegisterPrices';
 import observeNewOrders from '../DataTablePedidos/components/observeNewOrders';
-import { DialogRegisterPrices } from '@/components/DialogRegisterPrices';
 import renderToast from '@/components/renderPromiseToast';
 import DialogEditOrder from '../DataTablePedidos/components/DialogEditOrder.vue';
+import ClientActionsWrapper from '@/components/wrapper/ClientActionsWrapper.vue';
+import ClientActionsDropdown from '@/components/dropdowns/ClientActionsDropdown.vue';
 
 DataTable.use(DataTablesCore);
 
@@ -43,13 +44,21 @@ const props = defineProps({
   setTab: { type: Function, required: true },
 });
 
-const { isOpen, toggleDialog } = dialogState();
-const { isOpen: openShowOrderDialog, toggleDialog: toggleShowOrderDialog } = dialogState();
-const { isOpen: openEditOrderDialog, toggleDialog: toggleEditOrderDialog } = dialogState();
-const { isOpen: openRegisterAddress, toggleDialog: toggleRegisterAddress } = dialogState();
-const { isOpen: openEditAddress, toggleDialog: toggleEditAddress } = dialogState();
-const { isOpen: openConfirmDialog, toggleDialog: toggleConfirmDialog } = dialogState();
-const { isOpen: openRegisterPrices, toggleDialog: toggleRegisterPrices } = dialogState();
+const { isOpen: isOpenCreateOrderDialog, toggleDialog: toggleCreateOrderDialog } =
+  dialogState('CreateOrder');
+const { isOpen: openShowOrderDialog, toggleDialog: toggleShowOrderDialog } =
+  dialogState('ShowOrder');
+const { isOpen: openEditOrderDialog, toggleDialog: toggleEditOrderDialog } =
+  dialogState('EditOrder');
+const { isOpen: openRegisterAddress, toggleDialog: toggleRegisterAddress } =
+  dialogState('RegisterAddres');
+const { isOpen: openEditAddress, toggleDialog: toggleEditAddress } = dialogState('RegisterAddress');
+const { isOpen: openConfirmDialog, toggleDialog: toggleConfirmDialog } =
+  dialogState('ConfirmAddressDelete');
+const { isOpen: openRegisterPrices, toggleDialog: toggleRegisterPrices } =
+  dialogState('RegisterPrices');
+
+const { width } = useWindowSize();
 
 const idClienteAddress = ref('');
 const idClient = ref('');
@@ -183,7 +192,7 @@ const setupOrderHandlers = () => {
   $('#datatable-clientes').on('click', '.iniciarPedido', function () {
     clientName.value = this.getAttribute('data-client');
     idClienteAddress.value = this.id;
-    toggleDialog();
+    toggleCreateOrderDialog();
   });
 
   $('#datatable-clientes').on('click', '.visualizarPedido', function () {
@@ -433,8 +442,8 @@ const handleDeleteAddress = (confirm) => {
       title="Cadastro de preços especiais"
     />
     <DialogCreateOrder
-      :open="isOpen"
-      :toggleDialog="toggleDialog"
+      :open="isOpenCreateOrderDialog"
+      :toggleDialog="toggleCreateOrderDialog"
       :reminders="reminders"
       :id-cliente-address="idClienteAddress"
       :client-name="clientName"
@@ -483,7 +492,8 @@ const handleDeleteAddress = (confirm) => {
       language="language"
     >
       <template #actions="data">
-        <DropdownActionClient :payloadData="data" :data-table="dt" />
+        <ClientActionsDropdown v-if="width >= 768" :payload-data="data" :data-table="dt" />
+        <ClientActionsWrapper v-else :payloadData="data" :data-table="dt" />
       </template>
       <template #dt-control>
         <div class="relative group m-auto w-[14px] h-[14px] bg-info rounded-full p-2">

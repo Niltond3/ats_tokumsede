@@ -27,6 +27,7 @@ const emits = defineEmits(['update:modelValue', 'update:dataTable']);
 const forwarded = useForwardPropsEmits(props, emits);
 
 const whenDialogOpen = () => {
+  console.log('open dialog');
   const url = `produtos/${props.idClienteAddress}`;
   const promise = axios.get(url);
 
@@ -60,7 +61,7 @@ const whenDialogOpen = () => {
         })
         .filter((product) => product.id != 3 && product.id != 334)
         .sort();
-        
+
       createOrderData.value = {
         clientName: props.clientName,
         products,
@@ -77,11 +78,12 @@ const whenDialogOpen = () => {
   );
 };
 
-const handleDialogOpen = () => {
-  props.open && whenDialogOpen();
-  return props.open;
-};
-
+watch(
+  () => props.open,
+  () => {
+    if (props.open) whenDialogOpen();
+  },
+);
 const handleRealizarPedido = (payload) => {
   var url = 'pedidos';
   const promise = axios.post(url, payload);
@@ -107,7 +109,7 @@ const handleToggleDialog = () => {
 </script>
 
 <template>
-  <Dialog v-bind="forwarded" :open="handleDialogOpen()" @update:open="handleToggleDialog">
+  <Dialog v-bind="forwarded" :open="props.open" @update:open="handleToggleDialog">
     <DialogContent class="sm:max-w-3xl">
       <DataTableProducts
         :create-order-data="createOrderData"

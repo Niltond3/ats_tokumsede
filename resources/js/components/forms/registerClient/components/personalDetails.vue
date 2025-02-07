@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import DatePicker from './datePicker.vue';
 import Button from '@/components/Button.vue';
 import { generatePassword } from '@/util';
-import DialogOthersContacts from './DialogOthersContacts.vue';
+import DialogOthersContacts from '../../../dialogs/DialogOthersContacts.vue';
 
 const { values } = defineProps({ values: Object });
 

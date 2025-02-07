@@ -4,24 +4,23 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { RegisterDetails } from '@/components/forms/registerClient';
 import { dialogState } from '@/hooks/useToggleDialog';
-
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 const props = defineProps({
   clientDetails: { type: Object, required: false },
+  dialogControllers: { type: Object, required: false },
 });
+
+const { isOpen, toggleDialog } = props.dialogControllers || dialogState('EditClient');
 
 const details = ref();
 
 const emits = defineEmits(['update:dataTable']);
-
-const { isOpen, toggleDialog } = dialogState();
 
 const handleDialogOutsideInteract = (event) => {
   const classes = [];
@@ -61,7 +60,7 @@ const handleDialogOpen = () => {
 
 <template>
   <Dialog :open="handleDialogOpen()" @update:open="(op) => toggleDialog()">
-    <DialogTrigger as-child>
+    <DialogTrigger v-if="!dialogControllers" as-child>
       <DropdownMenuItem class="cursor-pointer gap-2" @select="(e) => e.preventDefault()">
         <i class="ri-pencil-fill text-info" />
         Editar Cliente

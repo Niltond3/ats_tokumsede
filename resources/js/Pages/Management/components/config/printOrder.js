@@ -202,10 +202,10 @@ const imprimirPedido = (pedido, printer) => {
         : printData.push("\x1B" + "\x33" + "\x00"); //Spacing
     printData.push(
         "Cadastrado por " +
-            (pedido.administrador
-                ? pedido.administrador
-                : "Aplicativo Cliente") +
-            "\x0A"
+        (pedido.administrador
+            ? pedido.administrador
+            : "Aplicativo Cliente") +
+        "\x0A"
     );
     printData.push("\x1B" + "\x61" + "\x32"); // right align
     printData.push(pedido.horarioPedido + "\x0A");
@@ -254,9 +254,9 @@ const imprimirPedido = (pedido, printer) => {
         characters == 38
             ? "ITEM CODIGO NOME    QTD PRECO SUBTOTAL" + "\x0A"
             : "ITEM CODIGO NOME " +
-                  Array(characters - 41).join(" ") +
-                  "QUANTIDADE PRECO SUBTOTAL" +
-                  "\x0A"
+            Array(characters - 41).join(" ") +
+            "QUANTIDADE PRECO SUBTOTAL" +
+            "\x0A"
     );
     printData.push(Array(characters + 1).join("-") + "\x0A");
     for (var i = 0; i < pedido.itensPedido.length; i++) {
@@ -273,8 +273,8 @@ const imprimirPedido = (pedido, printer) => {
     ) {
         printData.push(
             "Outros Contatos: " +
-                removeAccents(pedido.cliente.outrosContatos) +
-                "\x0A"
+            removeAccents(pedido.cliente.outrosContatos) +
+            "\x0A"
         );
         printData.push(Array(characters + 1).join("-") + "\x0A");
     }
@@ -282,8 +282,8 @@ const imprimirPedido = (pedido, printer) => {
     printData.push("\x1B" + "\x45" + "\x0D"); // bold on
     printData.push(
         "TOTAL  R$" +
-            pad(padding, pedido.total.substring(2, pedido.total.length), true) +
-            "\x0A"
+        pad(padding, pedido.total.substring(2, pedido.total.length), true) +
+        "\x0A"
     );
     printData.push("\x1B" + "\x45" + "\x0A"); // bold off
     printData.push(Array(characters + 1).join("=") + "\x0A");
@@ -292,10 +292,10 @@ const imprimirPedido = (pedido, printer) => {
     if (parseFloat(pedido.troco.replace(/,/g, ".")) > 0) {
         printData.push(
             "Troco para: " +
-                pedido.trocoPara +
-                " => R$ " +
-                pedido.troco +
-                "\x0A"
+            pedido.trocoPara +
+            " => R$ " +
+            pedido.troco +
+            "\x0A"
         );
     }
     printData.push(Array(characters + 1).join("-") + "\x0A");

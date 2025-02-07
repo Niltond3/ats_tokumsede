@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormField } from '@/components/ui/form';
-import { FormItem, FormLabel, FormControl, FormMessage } from '../../../ui/form';
+import { FormItem, FormLabel, FormControl, FormMessage } from '../../ui/form';
 import {
   Dialog,
   DialogContent,
@@ -34,7 +34,7 @@ import { Link } from '@inertiajs/vue3';
 // Utilities
 import { useDropzone } from 'vue3-dropzone';
 import { dialogState } from '@/hooks/useToggleDialog';
-import renderToast from '../../../renderPromiseToast';
+import renderToast from '../../renderPromiseToast';
 import { utf8Decode } from '@/util';
 import SelectImages from './SelectImages.vue';
 import SelectCompositionProducts from './SelectCompositionProducts.vue';
@@ -51,7 +51,7 @@ const defaultImgValue = {
 };
 const img = ref(defaultImgValue);
 
-const { isOpen, toggleDialog } = dialogState();
+const { isOpen, toggleDialog } = dialogState('RegisterProduct');
 
 const { getRootProps, getInputProps, open, ...rest } = useDropzone({ onDrop, multiple: false });
 

@@ -1410,7 +1410,7 @@ class PedidoController extends Controller
     }
     public function visualizar($id)
     {
-        $pedido = Pedido::selectRaw("pedido.*, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioEntrega, '%d/%m/%Y %H:%i') as horarioEntrega, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada")->find($id);
+        $pedido = Pedido::withBasicRelations()->withFormattedDates()->find($id);
         $u = auth()->user();
         if ($u->tipoAdministrador == 'Distribuidor' && $u->idDistribuidor != $pedido->idDistribuidor) {
             return false;

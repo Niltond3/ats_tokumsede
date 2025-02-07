@@ -13,20 +13,23 @@ import { usePage } from '@inertiajs/vue3';
 import { Link } from '@inertiajs/vue3';
 import logo from '@/../../public/images/tokumsede-logo.png';
 import { useRoute } from 'vue-router';
-import { DialogRegisterProduct } from './components/DialogRegisterProduct';
-import DialogRegisterClient from './components/DialogRegisterClient.vue';
-import { DialogRegisterPrices } from '@/components/DialogRegisterPrices';
-import DialogTrigger from './components/DialogTrigger.vue';
-import DialogReportStock from './components/reports/DialogReportStock.vue';
-import DialogReportOrders from './components/reports/DialogReportOrders.vue';
+import { DialogRegisterProduct } from '../dialogs/DialogRegisterProduct';
+import DialogRegisterClient from '../dialogs/DialogRegisterClient.vue';
+import { DialogRegisterPrices } from '@/components/dialogs/DialogRegisterPrices';
+import DialogTrigger from '../dialogs/DialogTrigger.vue';
+import DialogReportStock from '../dialogs/DialogReportStock.vue';
+import DialogReportOrders from '../dialogs/DialogReportOrders.vue';
 
 import { dialogState } from '@/hooks/useToggleDialog.js';
-import DialogStockMerge from './components/stock/DialogStockMerge.vue';
+import DialogStockMerge from '../dialogs/DialogStockMerge/DialogStockMerge.vue';
 
-const { isOpen: openRegisterPrices, toggleDialog: toggleRegisterPrices } = dialogState();
-const { isOpen: openRegisterReportOrders, toggleDialog: toggleReportOrders } = dialogState();
-const { isOpen: openRegisterReportStock, toggleDialog: toggleReportStock } = dialogState();
-const { isOpen: openStockMerge, toggleDialog: toggleStockMerge } = dialogState();
+const { isOpen: openRegisterPrices, toggleDialog: toggleRegisterPrices } =
+  dialogState('RegisterPrices');
+const { isOpen: openRegisterReportOrders, toggleDialog: toggleReportOrders } =
+  dialogState('ReportOrders');
+const { isOpen: openRegisterReportStock, toggleDialog: toggleReportStock } =
+  dialogState('ReportStock');
+const { isOpen: openStockMerge, toggleDialog: toggleStockMerge } = dialogState('StockMerge');
 
 const page = usePage();
 const { user } = page.props.auth;

@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { getDistributor, listAllDistributors } from '@/services/api/distributors';
 import renderToast from '@/components/renderPromiseToast';
 import { cn, utf8Decode } from '@/util';
-import DistributorCombobox from '../reports/DistributorCombobox.vue';
 import { Skeleton } from '@/components/ui/skeleton';
+import DistributorCombobox from './DistributorCombobox.vue';
 
 const props = defineProps({
   isOpen: { type: Boolean, required: false, default: null },

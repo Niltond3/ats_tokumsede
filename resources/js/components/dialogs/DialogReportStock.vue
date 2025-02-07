@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { getDistributor, listAllDistributors } from '@/services/api/distributors';
 import renderToast from '@/components/renderPromiseToast';
 import { cn, utf8Decode } from '@/util';
-import DistributorCombobox from './DistributorCombobox.vue';
+import DistributorCombobox from './DialogStockMerge/DistributorCombobox.vue';
 import { jsPDF } from 'jspdf';
 import { Skeleton } from '@/components/ui/skeleton';
 import 'jspdf-autotable';

@@ -7,13 +7,13 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { dialogState } from '@/hooks/useToggleDialog';
-import DialogTrigger from './DialogTrigger.vue';
 
 const emits = defineEmits(['update:dataTable']);
 
-const { isOpen, toggleDialog } = dialogState();
+const { isOpen, toggleDialog } = dialogState('RegisterClient');
 
 const handleDialogOutsideInteract = (event) => {
   const classes = [];
@@ -33,7 +33,19 @@ const handleSucess = () => {
 
 <template>
   <Dialog :open="isOpen" @update:open="(op) => toggleDialog()">
-    <DialogTrigger icon="ri-user-add-fill" title="Cliente" />
+    <DialogTrigger as-child>
+      <Button
+        data-long-press-delay="500"
+        class="rounded-md py-2 px-4 bg-info/70 hover:bg-info/100 transition-all text-base shadow-lg hover:shadow-sm"
+      >
+        <i class="ri-user-add-fill" />
+        <span
+          class="hidden min-[426px]:block font-semibold text-sm group-hover:scale-125 transition-all"
+        >
+          {{ title }}
+        </span>
+      </Button>
+    </DialogTrigger>
     <DialogContent class="sm:max-w-[440px]" @interact-outside="handleDialogOutsideInteract">
       <DialogHeader>
         <DialogTitle class="text-info gap-1 flex items-center"

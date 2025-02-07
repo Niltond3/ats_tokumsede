@@ -15,8 +15,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { MoreVertical } from 'lucide-vue-next';
-import DialogConfirmAction from './DialogConfirmAction.vue';
-import DialogEditClient from './DialogEditClient.vue';
+import DialogConfirmAction from '@/components/dialogs/DialogConfirmAction.vue';
+import DialogEditClient from '@/components/dialogs/DialogEditClient.vue';
 import renderToast from '@/components/renderPromiseToast';
 
 const props = defineProps({
@@ -43,7 +43,7 @@ const handleStatusClientChange = ({ id, status }) => {
   const promise = axios.put(url, { status: id });
   renderToast(
     promise,
-    'alterando status do cliente',
+    'alt erando status do cliente',
     `O cliente ${idCliente} foi ${status} com sucesso!`,
     'Erro ao alterar status do cliente',
     handleUpdateDataTable,
@@ -56,7 +56,7 @@ const handleStatusClientChange = ({ id, status }) => {
     <DropdownMenuTrigger as-child>
       <Button variant="ghost" class="transition-colors text-cyan-700 p-0">
         <span class="sr-only">Abrir Menú</span>
-        <MoreVertical class="w-6 h-6" />
+        <i class="ri-menu-fill"></i>
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" class="border border-slate-200">

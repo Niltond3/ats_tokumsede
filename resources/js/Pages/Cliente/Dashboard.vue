@@ -15,21 +15,22 @@ import {
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ChevronsUpDown } from 'lucide-vue-next';
-import { DialogCreateOrder } from './components/DialogCreateOrder';
+import { DialogCreateOrder } from '@/components/dialogs/DialogClientCreateOrder';
 import { TablePedidos } from '../Management/DataTablePedidos';
 import renderToast from '@/components/renderPromiseToast';
 import { cn } from '@/lib/utils';
 import { dialogState } from '@/hooks/useToggleDialog';
 import { Check } from 'lucide-vue-next';
-import DialogRegisterAddress from '../Management/DataTableClientes/components/DialogRegisterAddress.vue';
+import DialogRegisterAddress from '../../components/dialogs/DialogRegisterAddress.vue';
 import Separator from '@/components/ui/separator/Separator.vue';
-import DialogConfirmAddressDelete from '../Management/DataTableClientes/components/DialogConfirmAddressDelete.vue';
+import DialogConfirmAddressDelete from '../../components/dialogs/DialogConfirmAddressDelete.vue';
 
-const { isOpen, toggleDialog } = dialogState();
-const { isOpen: isOpenDialogRegisterAddress, toggleDialog: toggleDialogRegisterAddress } =
-  dialogState();
-const { isOpen: isOpenDialogConfirmDeleAddress, toggleDialog: toggleDialogConfirmDeleAddress } =
-  dialogState();
+const { isOpen: isOpenCreateOrderDialog, toggleDialog: toggleCreateOrderDialog } =
+  dialogState('CreateOrder');
+const { isOpen: isOpenRegisterAddressDialog, toggleDialog: toggleDialogRegisterAddress } =
+  dialogState('RegisterAddress');
+const { isOpen: isOpenConfirmDeleAddressDialog, toggleDialog: toggleDialogConfirmDeleAddress } =
+  dialogState('ConfirmAddressDelete');
 
 const page = usePage();
 
@@ -102,13 +103,13 @@ watch(
   },
 );
 watch(
-  () => isOpenDialogRegisterAddress.value,
+  () => isOpenRegisterAddressDialog.value,
   (newValue) => {
     if (!newValue) setDefaultValues();
   },
 );
 watch(
-  () => isOpen.value,
+  () => isOpenCreateOrderDialog.value,
   (newValue) => {
     if (!newValue) setDefaultValues();
   },
@@ -171,7 +172,7 @@ watch(
                         <div class="flex gap-2 items-center">
                           <button
                             class="group hover:text-white hover:bg-info/90 transition-colors border-white border-2 py-1 px-2 rounded-md text-info/80"
-                            @click="toggleDialog"
+                            @click="toggleCreateOrderDialog"
                           >
                             <div
                               class="flex items-start flex-col justify-start pointer-events-none select-none"
@@ -224,15 +225,15 @@ watch(
         </div>
       </template>
       <DialogCreateOrder
-        :open="isOpen"
-        :toggleDialog="toggleDialog"
+        :open="isOpenCreateOrderDialog"
+        :toggleDialog="toggleCreateOrderDialog"
         :id-cliente-address="clientIdAddress"
         :client-name="utf8Decode(client.nome)"
         :value="value"
         @update:dataTable="(date) => (updateDataTable = date)"
       />
       <DialogRegisterAddress
-        :open="isOpenDialogRegisterAddress"
+        :open="isOpenRegisterAddressDialog"
         :toggle-dialog="toggleDialogRegisterAddress"
         :id-client="client.id"
         :address-details="addressDetails"
@@ -242,7 +243,7 @@ watch(
         variant="danger"
         dialog-title="Excluir Endereço"
         dialog-description="Tem certeza que deseja excluir o endereço?"
-        :open="isOpenDialogConfirmDeleAddress"
+        :open="isOpenConfirmDeleAddressDialog"
         :id-address="clientIdAddress"
         @delete:confirm="handleDeleteAddress"
       />

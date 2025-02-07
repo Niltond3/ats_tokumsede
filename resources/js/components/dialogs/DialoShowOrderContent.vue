@@ -17,18 +17,21 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { utf8Decode, formatMoney } from '@/util';
-import { formatOrder, orderToClipboard } from '../utils';
+import { formatOrder, orderToClipboard } from '../../Pages/Management/utils';
 import renderToast from '@/components/renderPromiseToast';
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 import { useQzTray } from '@/composables/useQzTray';
 import { connectPrinter, printMobileData } from '@/services/printer/MobilePrinterService';
-import getPrintData from './config/printOrder';
+// import getPrintData from '../../Pages/Management/components/config/printOrder';
+import usePrintOrder from '@/composables/usePrintOrders';
 import useIsMobile from '@/composables/useIsMobile';
 import ReminderManager from '@/components/ReminderManager.vue';
 import { useReminders } from '@/composables/useReminders';
+import { viewOrder } from '@/services/api/orders';
 
 const { checkConnection, selectedPrinter, findPrinter, listPrinters, print } = useQzTray();
 const { isMobile, detectDevice } = useIsMobile();
+const { imprimirPedido } = usePrintOrder();
 
 const props = defineProps({
   orderId: { type: Number, required: true },
@@ -49,14 +52,15 @@ onMounted(() => {
 const { toCurrency } = formatMoney();
 
 const fetchOrder = () => {
-  var url = `pedidos/visualizar/${props.orderId}`;
-  const promise = axios.get(url);
+  console.log(props.orderId);
   renderToast(
-    promise,
+    viewOrder(props.orderId),
     `carregando pedido ${props.orderId}`,
     'Pedido carregado',
     'Erro ao carregar pedido',
     async (response) => {
+      console.log(response.data);
+      console.log(response);
       const formatedOrder = formatOrder(response.data);
 
       const itensPedido = response.data.itensPedido.map((order) => {
@@ -80,6 +84,7 @@ const fetchOrder = () => {
 watch(
   () => props.isOpen,
   (isOpen) => {
+    console.log(isOpen);
     fetchOrder();
   },
 );
@@ -88,7 +93,7 @@ const handleCopyOrder = (order) => orderToClipboard(order);
 
 const handlePrint = async () => {
   try {
-    const printerData = getPrintData(data.value, selectedPrinter.value);
+    const printerData = imprimirPedido(data.value, selectedPrinter.value);
     await print(printerData);
   } catch (error) {
     console.error(error);
@@ -102,7 +107,7 @@ const handlePrintOrder = () => {
       'Conectado',
       'Erro ao conectar-se a impressora',
       () => {
-        const printerData = getPrintData(data.value, selectedPrinter.value);
+        const printerData = imprimirPedido(data.value, selectedPrinter.value);
         renderToast(
           printMobileData(printerData),
           'imprimindo pedido',

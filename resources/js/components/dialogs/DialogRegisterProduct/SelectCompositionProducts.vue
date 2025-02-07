@@ -1,32 +1,7 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
-import * as z from 'zod';
-import { Form, FormField } from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { NavigationMenuLink } from '@/components/ui/navigation-menu';
-import { dialogState } from '@/hooks/useToggleDialog';
-import { toTypedSchema } from '@vee-validate/zod';
-import renderToast from '../../../renderPromiseToast';
-import { FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '../../../ui/form';
-import { useDropzone } from 'vue3-dropzone';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { computed, ref } from 'vue';
+import renderToast from '../../renderPromiseToast';
 import { onMounted } from 'vue';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import {
   TagsInput,

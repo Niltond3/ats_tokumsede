@@ -19,18 +19,14 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import { CommandItem } from '@/components/ui/command';
 import { dateToDayMonthYearFormat, dateToISOFormat, formatMoney, utf8Decode } from '@/util';
 import { toast } from 'vue-sonner';
-import { cn } from '@/lib/utils';
-import { dialogState } from '@/hooks/useToggleDialog';
 import NumberField from './components/NumberField.vue';
 import Separator from '@/components/ui/separator/Separator.vue';
 import SelectPayment from '@/components/orderComponents/SelectPayment.vue';
 import ExchangeInput from '@/components/orderComponents/ExchangeInput.vue';
 import DateTimePicker from '@/components/orderComponents/DateTimePicker.vue';
-import DialogCreateOrderNote from '../../../../components/orderComponents/DialogCreateOrderNote.vue';
-import { Check } from 'lucide-vue-next';
+import DialogCreateOrderNote from '@/components/dialogs/DialogCreateOrderNote.vue';
 import renderToast from '@/components/renderPromiseToast';
 import { useTableProductsState } from '@/composables/tableProductsState';
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';

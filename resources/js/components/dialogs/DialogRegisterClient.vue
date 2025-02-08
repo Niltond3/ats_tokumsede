@@ -33,19 +33,21 @@ const handleSucess = () => {
 
 <template>
   <Dialog :open="isOpen" @update:open="(op) => toggleDialog()">
-    <DialogTrigger as-child>
-      <Button
-        data-long-press-delay="500"
-        class="rounded-md py-2 px-4 bg-info/70 hover:bg-info/100 transition-all text-base shadow-lg hover:shadow-sm"
-      >
-        <i class="ri-user-add-fill" />
-        <span
-          class="hidden min-[426px]:block font-semibold text-sm group-hover:scale-125 transition-all"
+    <slot>
+      <DialogTrigger as-child>
+        <Button
+          data-long-press-delay="500"
+          class="rounded-md py-2 px-4 bg-info/70 hover:bg-info/100 transition-all text-base shadow-lg hover:shadow-sm"
         >
-          {{ title }}
-        </span>
-      </Button>
-    </DialogTrigger>
+          <i class="ri-user-add-fill" />
+          <span
+            class="hidden min-[426px]:block font-semibold text-sm group-hover:scale-125 transition-all"
+          >
+            Registrar cliente
+          </span>
+        </Button>
+      </DialogTrigger>
+    </slot>
     <DialogContent class="sm:max-w-[440px]" @interact-outside="handleDialogOutsideInteract">
       <DialogHeader>
         <DialogTitle class="text-info gap-1 flex items-center"

@@ -109,7 +109,7 @@ export default {
                 document.location = 'intent:#Intent;scheme=rawbt;component=ru.a402d.rawbtprinter.activity.PrintDownloadActivity;package=ru.a402d.rawbtprinter;end;';                //Abre download caso app não estiver instalado ou abre o app para configurar caso não estiver como serviço, mas deixa espaço entre logo e nome distribuição
                 document.location = 'rawbt:base64,' + window.btoa(printData);
             } else {
-                var printData = '';
+                var wprintData = '';
                 printData += '\x1B' + '\x40'; 				// init
                 printData += '\x1B' + '\x61' + '\x31'; 		// center align
                 printData += '\x1B' + '\x21' + '\x01';         // font B

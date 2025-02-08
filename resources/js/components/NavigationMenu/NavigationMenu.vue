@@ -144,7 +144,9 @@ const homeLinks = [
               <DialogRegisterProduct />
             </li>
             <li key="client_register" class="self-center justify-self-center">
-              <DialogRegisterClient />
+              <DialogRegisterClient>
+                <DialogTrigger icon="ri-user-add-fill" title="Registrar Cliente" />
+              </DialogRegisterClient>
             </li>
             <li key="client_price" class="self-center justify-self-center">
               <DialogRegisterPrices
@@ -192,7 +194,7 @@ const homeLinks = [
               >
                 <template #trigger>
                   <DialogTrigger
-                    icon="ri-file-list-3-line"
+                    icon="ri-newspaper-fill"
                     title="Relatório de Pedidos"
                     description="Visualize todos os pedidos por período e status"
                   />

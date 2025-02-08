@@ -2,13 +2,13 @@
 import { computed } from 'vue';
 import { CalendarDate, getLocalTimeZone, parseDate, today } from '@internationalized/date';
 import { useWindowSize } from '@vueuse/core';
-import { getClientFormat } from '@/Pages/Management/utils';
 import {
   RiLoginBoxLine as LoginIcon,
   RiGenderlessLine as GenderlessIcon,
   RiCalendarLine as CalendarIcon,
 } from 'vue-remix-icons';
 import { vAutoAnimate } from '@formkit/auto-animate/vue';
+import {ClientUtil} from '@/util';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
@@ -24,7 +24,7 @@ const emit = defineEmits(['update:birthDatePicker']);
 
 const { width } = useWindowSize();
 
-const { getSexo } = getClientFormat();
+const { getSexo } =ClientUtil.getClientFormat();
 
 const formatMask = width > 639 ? "dd'º de' MMM',' yyyy" : 'dd/MM/yyyy';
 

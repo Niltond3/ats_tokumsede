@@ -7,7 +7,7 @@ import {
 import {
     listProductsByDistributor,
 } from "@/services/api/products";
-import { utf8Decode } from "@/util";
+import { StringUtil } from "@/util";
 import renderToast from "@/components/renderPromiseToast";
 
 export function useDistributorsAndProducts() {
@@ -30,7 +30,7 @@ export function useDistributorsAndProducts() {
             (response) => {
                 const formatResponse = {
                     ...response.data.data,
-                    nome: utf8Decode(response.data.data.nome),
+                    nome: StringUtil.utf8Decode(response.data.data.nome),
                 };
                 distributor.value = formatResponse;
                 tableIdentifier.value = formatResponse.nome;
@@ -53,7 +53,7 @@ export function useDistributorsAndProducts() {
             (response) => {
                 distributors.value = response.data.data.map((distributor) => ({
                     ...distributor,
-                    nome: utf8Decode(distributor.nome),
+                    nome: StringUtil.utf8Decode(distributor.nome),
                 }));
                 loadingDistributors.value = false;
             }

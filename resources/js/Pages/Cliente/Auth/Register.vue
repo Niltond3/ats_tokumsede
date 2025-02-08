@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Head } from '@inertiajs/vue3';
-import { getClientFormat } from "@/Pages/Management/utils";
+import { ClientUtil} from "@/util";
 import { RiLoginBoxLine as LoginIcon } from "vue-remix-icons";
 import { CheckIcon, CircleIcon, DotIcon } from '@radix-icons/vue'
 import { useForm } from 'vee-validate'

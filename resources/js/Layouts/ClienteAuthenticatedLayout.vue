@@ -6,13 +6,13 @@ import Dropdown from '@/components/Dropdown.vue';
 import DropdownLink from '@/components/DropdownLink.vue';
 import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import { utf8Decode } from '@/util';
+import { StringUtil } from '@/util';
 import renderToast from '@/components/renderPromiseToast';
 import { logout } from '@/services/api/clientAuth';
 
 const page = usePage();
 
-const name = utf8Decode(page.props.auth.user.nome);
+const name = StringUtil.utf8Decode(page.props.auth.user.nome);
 
 const handleLogout = () => {
   renderToast(

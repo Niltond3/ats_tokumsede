@@ -19,7 +19,7 @@ import { useTableState } from './composables/useTableState';
 import { useDistributorsAndProducts } from './composables/useDistributorsAndProducts';
 import { useResponsiveColumns } from './composables/useResponsiveColumns';
 import { getClient } from '@/services/api/client';
-import { utf8Decode } from '@/util';
+import { StringUtil } from '@/util';
 
 const props = defineProps({
   clientId: { type: [String, Number], required: false, default: null },
@@ -127,7 +127,7 @@ watch(
 
 const fetchClientName = async () => {
   const clientRequest = await getClient(props.clientId);
-  clientName.value = utf8Decode(clientRequest.data.nome);
+  clientName.value = StringUtil.utf8Decode(clientRequest.data.nome);
 };
 
 const fetchDistributorProductsList = async (addressId, userId) => {

@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { utf8Decode } from '@/util';
+import {StringUtil} from '@/util';
 // ['distributors', 'default']
 const props = defineProps({
   distributors: {
@@ -37,7 +37,7 @@ const handleSelectDistributor = (distributor) => emit('update:distributor', dist
           :key="distributor.id"
           :value="`${distributor.id}`"
         >
-          {{ utf8Decode(distributor.nome) }}
+          {{ StringUtil.utf8Decode(distributor.nome) }}
         </SelectItem>
       </SelectGroup>
     </SelectContent>

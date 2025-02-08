@@ -1,4 +1,4 @@
-import { dateToDayMonthYearFormat } from "@/util";
+import { DateUtil } from "@/util";
 import { toast } from "vue-sonner";
 
 export const useEventHandlers = (
@@ -28,7 +28,7 @@ export const useEventHandlers = (
     handleScheduling: (date) => {
         if (date) {
             const { date: formattedDate, time } =
-                dateToDayMonthYearFormat(date);
+                DateUtil.dateToDayMonthYearFormat(date);
 
             const dataAgendada = formattedDate;
 

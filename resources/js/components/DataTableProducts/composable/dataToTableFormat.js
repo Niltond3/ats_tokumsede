@@ -1,7 +1,7 @@
 // Utilities
-import { formatMoney } from "@/util";
+import { MoneyUtil } from "@/util";
 
-const { toFloat } = formatMoney();
+const { toFloat } = MoneyUtil.formatMoney();
 
 const getPrice = (product, orderItem) => {
     return {

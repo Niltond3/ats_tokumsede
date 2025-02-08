@@ -1,6 +1,6 @@
 <script setup>
 import { usePage } from '@inertiajs/vue3';
-import { getClientFormat } from '@/Pages/Management/utils';
+import { ClientUtil} from "@/util";
 import { RiEyeFill as EyeIcon, RiEyeCloseFill as EyeOffIcon } from 'vue-remix-icons';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -23,7 +23,7 @@ const { values } = defineProps({ values: Object });
 
 const emit = defineEmits(['update:CheckboxToggle']);
 
-const { getSexo, getTipoPessoaPayload } = getClientFormat();
+const { getSexo, getTipoPessoaPayload } =ClientUtil.getClientFormat();
 
 const { CNPJ } = getTipoPessoaPayload(values.tipoPessoa).documento;
 
@@ -94,7 +94,7 @@ function handleCopyClient() {
         ></i>
       </button>
       <div
-        v-for="(value, key) in interatedValues"
+        v-for="(value, key) in interatedValues" :key="key"
         class="flex items-center gap-4 cursor-pointer opacity-70 hover:opacity-100"
       >
         <span class="flex h-2 w-2 rounded-full bg-sky-500" />
@@ -113,7 +113,7 @@ function handleCopyClient() {
       </div>
       <Separator label="Endereço" />
       <div
-        v-for="(value, key) in newAddressValues"
+        v-for="(value, key) in newAddressValues" :key="key"
         class="flex items-center gap-4 cursor-pointer opacity-70 hover:opacity-100"
       >
         <span class="flex h-2 w-2 rounded-full bg-sky-500" />

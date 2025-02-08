@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { Switch } from '@/components/ui/switch';
-import { cn } from '@/util';
+import { cn } from '@/lib/utils';
 import { updateProductStatus } from '@/services/api/products';
 import renderToast from '@/components/renderPromiseToast';
 

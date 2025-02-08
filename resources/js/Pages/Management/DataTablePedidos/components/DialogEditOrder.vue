@@ -8,9 +8,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { utf8Decode, formatMoney } from '@/util';
+import { StringUtil, MoneyUtil } from '@/util';
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
-import { formatOrder, orderToClipboard } from '../../utils';
+import { ClipboardUtil } from '@/util';
 import { DataTableProducts } from '@/components/DataTableProducts';
 import { dialogState } from '@/hooks/useToggleDialog';
 import renderToast from '@/components/renderPromiseToast';
@@ -46,7 +46,7 @@ const distributorExpedient = ref();
 const distributorTaxes = ref();
 const products = ref();
 
-const { toCurrency } = formatMoney();
+const { toCurrency } = MoneyUtil.formatMoney();
 
 const fetchOrder = () => {
   const urlOrder = `pedidos/editar/${props.orderId}`;
@@ -63,7 +63,7 @@ const fetchOrder = () => {
       const { data: orderEditData } = responseOrder;
       const orderData = orderEditData[0];
       const distributorsData = orderEditData[1];
-      const clientName = utf8Decode(orderEditData[0].cliente.nome);
+      const clientName = StringUtil.utf8Decode(orderEditData[0].cliente.nome);
 
       distributors.value = distributorsData.filter((distributor) => distributor.status == 1);
 
@@ -88,7 +88,7 @@ const fetchOrder = () => {
               ...order,
               preco: toCurrency(order.preco),
               subtotal: toCurrency(order.subtotal),
-              produto: { ...order.produto, nome: utf8Decode(order.produto.nome) },
+              produto: { ...order.produto, nome: StringUtil.utf8Decode(order.produto.nome) },
             };
           });
           products.value = productsData[0].map((product) => {
@@ -101,7 +101,7 @@ const fetchOrder = () => {
             };
           });
 
-          const formatedOrder = formatOrder(orderData);
+          const formatedOrder = OrderUtil.formatOrder(orderData);
 
           const order = {
             ...formatedOrder,
@@ -132,7 +132,7 @@ watch(
   () => fetchOrder(),
 );
 
-const handleCopyOrder = (order) => orderToClipboard(order);
+const handleCopyOrder = (order) => ClipboardUtil.orderToClipboard(order);
 
 const handleDialogOpen = (op) => {
   if (props.controlled) {

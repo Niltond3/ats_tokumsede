@@ -1,4 +1,4 @@
-import { errorUtils } from "@/util";
+import { ErrorUtil } from "@/util";
 import { ref } from "vue";
 import { toast } from "vue-sonner";
 import audio from "@/Layouts/config/audio";
@@ -32,7 +32,7 @@ const newOrder = async () => {
         if (response.data !== ultimoPedido.value)
             ultimoPedido.value = response.data;
     } catch (error) {
-        toast.error(errorUtils.getError(error));
+        toast.error(ErrorUtil.getError(error));
     }
 };
 
@@ -46,7 +46,7 @@ const getNewOrders = async (successCallback) => {
             successCallback(novosPedidos.length);
         }
     } catch (error) {
-        toast.error(errorUtils.getError(error));
+        toast.error(ErrorUtil.getError(error));
     }
 };
 

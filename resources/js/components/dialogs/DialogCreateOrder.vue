@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useForwardPropsEmits } from 'radix-vue';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { DataTableProducts } from '@/components/DataTableProducts';
-import { utf8Decode } from '@/util';
+import { StringUtil } from '@/util';
 import renderToast from '@/components/renderPromiseToast';
 import ReminderManager from '@/components/ReminderManager.vue';
 import { useReminders } from '@/composables/useReminders';
@@ -42,22 +42,22 @@ const whenDialogOpen = () => {
       const responseAddress = orderData[2];
       const address = {
         ...responseAddress,
-        logradouro: utf8Decode(responseAddress.logradouro || ''),
-        bairro: utf8Decode(responseAddress.bairro || ''),
-        complemento: utf8Decode(responseAddress.complemento || ''),
-        cidade: utf8Decode(responseAddress.cidade || ''),
-        referencia: utf8Decode(responseAddress.referencia || ''),
-        apelido: utf8Decode(responseAddress.apelido || ''),
-        observacao: utf8Decode(responseAddress.observacao || ''),
+        logradouro: StringUtil.utf8Decode(responseAddress.logradouro || ''),
+        bairro: StringUtil.utf8Decode(responseAddress.bairro || ''),
+        complemento: StringUtil.utf8Decode(responseAddress.complemento || ''),
+        cidade: StringUtil.utf8Decode(responseAddress.cidade || ''),
+        referencia: StringUtil.utf8Decode(responseAddress.referencia || ''),
+        apelido: StringUtil.utf8Decode(responseAddress.apelido || ''),
+        observacao: StringUtil.utf8Decode(responseAddress.observacao || ''),
       };
 
       const distributor = {
         ...responseDistributor,
-        nome: utf8Decode(responseDistributor.nome),
+        nome: StringUtil.utf8Decode(responseDistributor.nome),
       };
       const products = orderData[0]
         .map((product) => {
-          return { ...product, nome: utf8Decode(product.nome) };
+          return { ...product, nome: StringUtil.utf8Decode(product.nome) };
         })
         .filter((product) => product.id != 3 && product.id != 334)
         .sort();

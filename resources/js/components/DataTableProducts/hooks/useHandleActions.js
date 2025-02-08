@@ -1,8 +1,8 @@
 import { toast } from "vue-sonner";
-import { dateToDayMonthYearFormat, formatMoney } from "@/util";
+import { MoneyUtil } from "@/util";
 
 export const handleActions = (props) => {
-    const { toFloat } = formatMoney();
+    const { toFloat } = MoneyUtil.formatMoney();
 
     const {
         emit,
@@ -34,7 +34,7 @@ export const handleActions = (props) => {
     const handleScheduling = (date) => {
         if (date) {
             const { date: formattedDate, time } =
-                dateToDayMonthYearFormat(date);
+                DateUtil.dateToDayMonthYearFormat(date);
             const dataAgendada = formattedDate;
             const horaInicio = time;
             return setPayload({

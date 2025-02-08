@@ -17,10 +17,10 @@ onMounted(() => {
 </script>
 
 <script>
-import { formatMoney } from '@/util';
+import { MoneyUtil } from '@/util';
 import { onMounted } from 'vue';
 
-const { toCurrency } = formatMoney();
+const { toCurrency } = MoneyUtil.formatMoney();
 
 export default {
   data() {

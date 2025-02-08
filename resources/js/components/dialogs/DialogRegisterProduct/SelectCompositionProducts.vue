@@ -17,7 +17,7 @@ import {
   ComboboxPortal,
   ComboboxRoot,
 } from 'radix-vue';
-import { utf8Decode } from '@/util';
+import { StringUtil } from '@/util';
 
 const products = ref([]);
 const modelValue = ref([]);
@@ -36,7 +36,7 @@ const getProducts = () => {
     'Erro ao carregar produtos',
     (response) => {
       const recomposeProducts = response.data.map((product) => {
-        const nome = utf8Decode(product.nome);
+        const nome = StringUtil.utf8Decode(product.nome);
         return {
           ...product,
           nome,

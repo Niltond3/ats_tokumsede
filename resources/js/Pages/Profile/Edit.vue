@@ -16,7 +16,8 @@ defineProps({
 </script>
 
 <template>
-  <Head title="Profile" />
+  <div>
+    <Head title="Profile" />
 
   <AuthenticatedLayout>
     <template #header>
@@ -43,4 +44,5 @@ defineProps({
       </div>
     </div>
   </AuthenticatedLayout>
+  </div>
 </template>

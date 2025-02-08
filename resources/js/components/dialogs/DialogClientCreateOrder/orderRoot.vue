@@ -19,7 +19,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import { dateToDayMonthYearFormat, dateToISOFormat, formatMoney, utf8Decode } from '@/util';
+import { DateUtil, StringUtil } from '@/util';
 import { toast } from 'vue-sonner';
 import NumberField from './components/NumberField.vue';
 import Separator from '@/components/ui/separator/Separator.vue';
@@ -34,7 +34,7 @@ import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 const tableProductsState = useTableProductsState();
 const isLoading = ref(true);
 
-const { toCurrency, toFloat } = formatMoney();
+const { toCurrency, toFloat } = MoneyUtil.formatMoney();
 
 const props = defineProps({
   open: { type: Boolean, required: false },
@@ -83,22 +83,22 @@ const whenDialogOpen = () => {
 
       const address = {
         ...orderData[2],
-        logradouro: utf8Decode(responseAddress.logradouro || ''),
-        bairro: utf8Decode(responseAddress.bairro || ''),
-        complemento: utf8Decode(responseAddress.complemento || ''),
-        cidade: utf8Decode(responseAddress.cidade || ''),
-        referencia: utf8Decode(responseAddress.referencia || ''),
-        apelido: utf8Decode(responseAddress.apelido || ''),
-        observacao: utf8Decode(responseAddress.observacao || ''),
+        logradouro: StringUtil.utf8Decode(responseAddress.logradouro || ''),
+        bairro: StringUtil.utf8Decode(responseAddress.bairro || ''),
+        complemento: StringUtil.utf8Decode(responseAddress.complemento || ''),
+        cidade: StringUtil.utf8Decode(responseAddress.cidade || ''),
+        referencia: StringUtil.utf8Decode(responseAddress.referencia || ''),
+        apelido: StringUtil.utf8Decode(responseAddress.apelido || ''),
+        observacao: StringUtil.utf8Decode(responseAddress.observacao || ''),
       };
       const distributor = {
         ...orderData[1],
-        nome: utf8Decode(orderData[1].nome),
+        nome: StringUtil.utf8Decode(orderData[1].nome),
       };
 
       const products = orderData[0]
         .map((product) => {
-          return { ...product, nome: utf8Decode(product.nome) };
+          return { ...product, nome: StringUtil.utf8Decode(product.nome) };
         })
         .filter((product) => product.id != 3 && product.id != 334)
         .sort();
@@ -230,7 +230,7 @@ const handleExchange = ({ value }) =>
 
 const handleScheduling = (date) => {
   if (date) {
-    const { date: formattedDate, time } = dateToDayMonthYearFormat(date);
+    const { date: formattedDate, time } = DateUtil.dateToDayMonthYearFormat(date);
 
     const dataAgendada = formattedDate;
 
@@ -422,7 +422,7 @@ useDialogObserver();
           <Separator orientation="vertical" class="hidden sm:block" />
           <DateTimePicker
             :default:scheduling="
-              dateToISOFormat(
+              DateUtil.dateToISOFormat(
                 `${tableProductsState.payload.dataAgendada} ${tableProductsState.payload.horaInicio}`,
               )
             "

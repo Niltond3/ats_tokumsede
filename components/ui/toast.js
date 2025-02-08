@@ -1,4 +1,4 @@
-import { defineComponent, h, ref } from 'vue'
+import { ref } from 'vue'
 
 export const useToast = () => {
     const toasts = ref([])

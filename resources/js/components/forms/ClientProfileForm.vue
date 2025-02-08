@@ -218,13 +218,12 @@ import validator from 'validator';
 import { useWindowSize } from '@vueuse/core';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { generatePassword } from '@/util';
+import { PasswordUtil, ClientUtil } from '@/util';
+import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { vAutoAnimate } from '@formkit/auto-animate/vue';
-import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { getClientFormat } from '@/Pages/Management/utils';
 import { RiGenderlessLine as GenderlessIcon } from 'vue-remix-icons';
 import Button from '@/components/Button.vue';
 import VueDatePicker from '@vuepic/vue-datepicker';
@@ -252,10 +251,11 @@ const labelClass = `
 `;
 const emit = defineEmits(['update:birthDatePicker', 'update:generatePassword']);
 
-const { getSexo, getTipoPessoaPayload } = getClientFormat();
+const { getSexo, getTipoPessoaPayload } = ClientUtil.getClientFormat();
 const { width } = useWindowSize();
 
-const handleGeneratePassword = () => emit('update:generatePassword', generatePassword());
+const handleGeneratePassword = () =>
+  emit('update:generatePassword', PasswordUtil.generatePassword());
 // Receber os detalhes do cliente via prop
 const props = defineProps({
   clientDetails: { type: Object, required: true },

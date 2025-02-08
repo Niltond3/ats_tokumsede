@@ -1,8 +1,7 @@
 import { h } from "vue";
-import { utf8Decode, formatMoney } from "@/util";
+import { StringUtil, MoneyUtil, ClipboardUtil } from "@/util";
 import { toFloat } from "validator";
 import { COLUMN_SIZES } from "./constants";
-import { formatProductForClipboard } from "@/utils/clipboard";
 import {
     SortableColumnHeader,
     DropDownOrderActions,
@@ -11,7 +10,7 @@ import {
 } from "../components";
 import { toast } from 'vue-sonner';
 
-const { toCurrency } = formatMoney();
+const { toCurrency } = MoneyUtil.formatMoney();
 
 export const imageColumn = {
     id: "img",
@@ -30,7 +29,7 @@ export const nameColumn = {
     id: "nome",
     accessorKey: "nome",
     filterFn: "fuzzy",
-    accessorFn: ({ nome }) => utf8Decode(nome),
+    accessorFn: ({ nome }) => StringUtil.utf8Decode(nome),
     header: ({ column }) => {
         return h(SortableColumnHeader, {
             label: "nome",
@@ -44,7 +43,7 @@ export const nameColumn = {
                 class: "flex gap-2 group cursor-pointer",
                 onClick: () => {
                     navigator.clipboard.writeText(
-                        formatProductForClipboard(row.original)
+                        ClipboardUtil.formatProductForClipboard(row.original)
                     )
                     toast.info('Produto copiado para a área de transferência')
                 }
@@ -52,7 +51,7 @@ export const nameColumn = {
             },
             h("span", {
                 class: "font-medium hover:text-info transition-colors",
-                innerHTML: utf8Decode(row.getValue("nome")),
+                innerHTML: StringUtil.utf8Decode(row.getValue("nome")),
             }),
             h("i", {
                 class: "ri-file-copy-2-fill opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-info",

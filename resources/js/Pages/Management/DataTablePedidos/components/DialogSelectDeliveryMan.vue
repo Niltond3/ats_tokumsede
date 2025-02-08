@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { utf8Decode } from '@/util';
+import { StringUtil } from '@/util';
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
 import { dialogState } from '@/hooks/useToggleDialog';
 
@@ -67,7 +67,7 @@ const handleDialogOpen = (op) => {
         >
           <div>
             <i class="ri-e-bike-fill opacity-0 group-hover:opacity-100 transition-opacity"></i>
-            {{ utf8Decode(entregador.nome) }}
+            {{ StringUtil.utf8Decode(entregador.nome) }}
           </div>
           <Separator class="my-2" />
         </button>

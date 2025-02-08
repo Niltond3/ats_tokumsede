@@ -6,7 +6,7 @@ import 'datatables.net-buttons-dt';
 import 'datatables.net-responsive-dt';
 import 'datatables.net-searchpanes-dt';
 import 'datatables.net-select-dt';
-import { utf8Decode } from '@/util';
+import { StringUtil } from '@/util';
 import { tableConfig } from './config/tableConfig';
 import { shallowRef } from 'vue';
 import observeStockChanges from './components/observeStockChanges';
@@ -15,7 +15,7 @@ import { Switch } from '@/components/ui/switch';
 import ActionStock from './components/ActionStock.vue';
 import { POLLING_INTERVAL } from './config/constants';
 import StatusStock from './components/StatusStock.vue';
-import { cn } from '@/util';
+import { cn } from '@/lib/utils';
 import { getStockReport } from '@/services/api/stock';
 
 DataTable.use(DataTablesLib);
@@ -42,11 +42,11 @@ const transformStock = (item) => {
     ...item,
     distribuidor: {
       ...item.distribuidor,
-      nome: utf8Decode(item.distribuidor.nome),
+      nome: StringUtil.utf8Decode(item.distribuidor.nome),
     },
     produto: {
       ...item.produto,
-      nome: utf8Decode(item.produto.nome),
+      nome: StringUtil.utf8Decode(item.produto.nome),
     },
   };
 };

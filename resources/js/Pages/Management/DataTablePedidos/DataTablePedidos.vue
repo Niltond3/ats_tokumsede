@@ -6,8 +6,7 @@ import 'datatables.net-buttons-dt';
 import 'datatables.net-responsive-dt';
 import 'datatables.net-searchpanes-dt';
 import 'datatables.net-select-dt';
-import { utf8Decode, dateToDayMonthYearFormat, dateToISOFormat } from '@/util';
-import { getStatusString } from '../utils';
+import { StringUtil, DateUtil, OrderUtil } from '@/util';
 import DropDownPedidos from './components/DropDownPedidos.vue';
 import ActionOrders from './components/ActionOrders.vue';
 import observeNewOrders from './components/observeNewOrders';
@@ -41,20 +40,20 @@ const entregadores = ref([]);
 const getFormatedScheduleDate = (dataAgendada, horaInicio) => {
   if (!dataAgendada) return dataAgendada;
   const rawScheduleDate = `${dataAgendada} ${horaInicio}`;
-  const { dateTime } = dateToDayMonthYearFormat(rawScheduleDate);
+  const { dateTime } = DateUtil.dateToDayMonthYearFormat(rawScheduleDate);
   return dateTime;
 };
 
 const transformOrder = (pedido) => {
-  const status = getStatusString(
+  const status = OrderUtil.getStatusString(
     pedido.agendado,
     pedido.dataAgendada,
     pedido.horaInicio,
     pedido.status,
   );
-  const distribuidorNome = utf8Decode(pedido.distribuidor.nome);
-  const clienteNome = utf8Decode(pedido.cliente.nome);
-  const rawOrderDate = dateToDayMonthYearFormat(pedido.horarioPedido);
+  const distribuidorNome = StringUtil.utf8Decode(pedido.distribuidor.nome);
+  const clienteNome = StringUtil.utf8Decode(pedido.cliente.nome);
+  const rawOrderDate = DateUtil.dateToDayMonthYearFormat(pedido.horarioPedido);
   const { dateTime } = rawOrderDate;
   const order = {
     ...pedido,
@@ -166,7 +165,7 @@ onMounted(() => {
   props.isNestedTable && dt.on('search.dt', () => getAllFilteredData());
   const getScheduleOrder = () => {
     return orders.value.filter((order) => {
-      const dateIso = dateToISOFormat(`${order.dataAgendada} ${order.horaInicio}`);
+      const dateIso = DateUtil.dateToISOFormat(`${order.dataAgendada} ${order.horaInicio}`);
       const currentDate = new Date();
       const scheduleDate = new Date(dateIso);
 

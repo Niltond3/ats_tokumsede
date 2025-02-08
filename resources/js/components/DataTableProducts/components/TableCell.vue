@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { formatMoney } from '@/util';
+import { MoneyUtil} from '@/util';
 
 const props = defineProps({
   cellValue: { type: [Number, String], required: false },
@@ -8,7 +8,7 @@ const props = defineProps({
   offer: { type: Boolean, required: false, default: false },
 });
 
-const { toCurrency, config } = formatMoney();
+const { toCurrency, config } =MoneyUtil.formatMoney();
 const inputElement = ref();
 const initialValue = ref(toCurrency(parseFloat(props.cellValue).toFixed(2)));
 const showInput = ref(false);

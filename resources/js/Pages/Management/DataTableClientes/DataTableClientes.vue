@@ -21,10 +21,10 @@ import 'datatables.net-select-dt';
 import 'datatables.net-staterestore-dt';
 
 // Utility imports
-import { errorUtils, utf8Decode } from '@/util';
+import { ErrorUtil, StringUtil } from '@/util';
 import { dialogState } from '@/hooks/useToggleDialog';
 import languagePtBR from './dataTablePtBR.mjs';
-import { formatOrder } from '../utils';
+import { OrderUtil } from '@/util';
 import rowChildtable from './components/rowChildTable/index';
 import DialogShowOrder from '@/components/dialogs/DialogShowOrder.vue';
 import DialogCreateOrder from '@/components/dialogs/DialogCreateOrder.vue';
@@ -159,7 +159,7 @@ const setupChildRowHandler = (dt, format) => {
         );
       }
 
-      const pedidos = clientData.pedidos.map((pedido) => formatOrder(pedido));
+      const pedidos = clientData.pedidos.map((pedido) => OrderUtil.formatOrder(pedido));
       const childData = { ...client, pedidos };
       row.child(format(childData)).show();
     } finally {
@@ -364,15 +364,15 @@ const options = {
           });
           const fullData = response.data.data.map((client) => ({
             ...client,
-            nome: utf8Decode(client.nome),
+            nome: StringUtil.utf8Decode(client.nome),
             enderecos: client.enderecos.map((address) => ({
               ...address,
-              logradouro: utf8Decode(address.logradouro || ''),
-              bairro: utf8Decode(address.bairro || ''),
-              cidade: utf8Decode(address.cidade || ''),
-              observacao: utf8Decode(address.observacao || ''),
-              referencia: utf8Decode(address.referencia || ''),
-              apelido: utf8Decode(address.apelido || ''),
+              logradouro: StringUtil.utf8Decode(address.logradouro || ''),
+              bairro: StringUtil.utf8Decode(address.bairro || ''),
+              cidade: StringUtil.utf8Decode(address.cidade || ''),
+              observacao: StringUtil.utf8Decode(address.observacao || ''),
+              referencia: StringUtil.utf8Decode(address.referencia || ''),
+              apelido: StringUtil.utf8Decode(address.apelido || ''),
             })),
           }));
 
@@ -389,16 +389,16 @@ const ajax = {
   dataFilter: function (data) {
     const obj = JSON.parse(data);
     const newData = obj.data.map((client) => {
-      const nome = utf8Decode(client.nome);
+      const nome = StringUtil.utf8Decode(client.nome);
       const enderecos = client.enderecos.map((address) => {
         return {
           ...address,
-          logradouro: utf8Decode(address.logradouro || ''),
-          bairro: utf8Decode(address.bairro || ''),
-          cidade: utf8Decode(address.cidade || ''),
-          observacao: utf8Decode(address.observacao || ''),
-          referencia: utf8Decode(address.referencia || ''),
-          apelido: utf8Decode(address.apelido || ''),
+          logradouro: StringUtil.utf8Decode(address.logradouro || ''),
+          bairro: StringUtil.utf8Decode(address.bairro || ''),
+          cidade: StringUtil.utf8Decode(address.cidade || ''),
+          observacao: StringUtil.utf8Decode(address.observacao || ''),
+          referencia: StringUtil.utf8Decode(address.referencia || ''),
+          apelido: StringUtil.utf8Decode(address.apelido || ''),
         };
       });
 
@@ -411,8 +411,8 @@ const ajax = {
     return JSON.stringify(newObj);
   },
   error: function (err) {
-    console.error(errorUtils.getError(err));
-    toast.error('Ocorreu um erro ao carregar os clientes!' + errorUtils.getError(err));
+    console.error(ErrorUtil.getError(err));
+    toast.error('Ocorreu um erro ao carregar os clientes!' + ErrorUtil.getError(err));
   },
 };
 
@@ -492,8 +492,10 @@ const handleDeleteAddress = (confirm) => {
       language="language"
     >
       <template #actions="data">
-        <ClientActionsDropdown v-if="width >= 768" :payload-data="data" :data-table="dt" />
-        <ClientActionsWrapper v-else :payloadData="data" :data-table="dt" />
+        <div class="w-full flex items-center justify-center">
+          <ClientActionsDropdown v-if="width >= 768" :payload-data="data" :data-table="dt" />
+          <ClientActionsWrapper v-else :payloadData="data" :data-table="dt" />
+        </div>
       </template>
       <template #dt-control>
         <div class="relative group m-auto w-[14px] h-[14px] bg-info rounded-full p-2">

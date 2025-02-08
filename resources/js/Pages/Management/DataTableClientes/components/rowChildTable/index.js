@@ -1,4 +1,4 @@
-import { utf8Decode } from "@/util";
+import { StringUtil } from "@/util";
 import { twMerge } from "tailwind-merge";
 import components from "./components";
 
@@ -6,7 +6,7 @@ export default (d) => {
     const { customLiAddress, customLiOrder } = components();
 
     const rowChildData = d;
-    const clientName = utf8Decode(rowChildData.nome);
+    const clientName = StringUtil.utf8Decode(rowChildData.nome);
     const containerClasses = `p-2 md:flex-1`;
     const containerAddressClasses = twMerge(
         "md:!max-h-[11rem]",

@@ -2,14 +2,13 @@
 import { computed } from 'vue';
 import { CalendarDate, getLocalTimeZone, parseDate, today } from '@internationalized/date';
 import { useWindowSize } from '@vueuse/core';
-import { getClientFormat } from '@/Pages/Management/utils';
 import {
   RiLoginBoxLine as LoginIcon,
   RiGenderlessLine as GenderlessIcon,
   RiCalendarLine as CalendarIcon,
 } from 'vue-remix-icons';
 import { vAutoAnimate } from '@formkit/auto-animate/vue';
-import { cn } from '@/lib/utils';
+import { ClassNamesUtil, ClientUtil } from '@/util';
 import { format, parseISO } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -18,7 +17,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
 import DatePicker from './datePicker.vue';
 import Button from '@/components/Button.vue';
-import { generatePassword } from '@/util';
+import { PasswordUtil } from '@/util';
 import DialogOthersContacts from '../../../dialogs/DialogOthersContacts.vue';
 
 const { values } = defineProps({ values: Object });
@@ -27,7 +26,7 @@ const emit = defineEmits(['update:birthDatePicker', 'update:generatePassword']);
 
 const { width } = useWindowSize();
 
-const { getSexo } = getClientFormat();
+const { getSexo } = ClientUtil.getClientFormat();
 
 const formatMask = width > 639 ? "dd'º de' MMM',' yyyy" : 'dd/MM/yyyy';
 
@@ -42,7 +41,8 @@ const value = computed({
 
 const handleBirthDateChange = (value) => emit('update:birthDatePicker', value);
 
-const handleGeneratePassword = () => emit('update:generatePassword', generatePassword());
+const handleGeneratePassword = () =>
+  emit('update:generatePassword', PasswordUtil.generatePassword());
 
 const inputClass =
   'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded  bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary text-slate-600';
@@ -63,10 +63,10 @@ const labelClass =
             autocomplete="name"
             type="text"
             placeholder="Nome completo"
-            :class="cn(inputClass)"
+            :class="ClassNamesUtil.merge(inputClass)"
           />
         </FormControl>
-        <FormLabel :class="cn(labelClass)"> Nome </FormLabel>
+        <FormLabel :class="ClassNamesUtil.merge(labelClass)"> Nome </FormLabel>
         <FormMessage />
       </FormItem>
     </FormField>
@@ -135,10 +135,10 @@ const labelClass =
               autocomplete="username"
               type="text"
               placeholder="Número de telefone"
-              :class="cn(inputClass)"
+              :class="ClassNamesUtil.merge(inputClass)"
             />
           </FormControl>
-          <FormLabel :class="cn(labelClass)"> Telefone </FormLabel>
+          <FormLabel :class="ClassNamesUtil.merge(labelClass)"> Telefone </FormLabel>
           <FormMessage />
         </FormItem>
       </FormField>
@@ -153,10 +153,10 @@ const labelClass =
             type="text"
             placeholder="CPF ou CNPJ"
             label="CPF/CNPJ"
-            :class="cn(inputClass)"
+            :class="ClassNamesUtil.merge(inputClass)"
           />
         </FormControl>
-        <FormLabel :class="cn(labelClass)"> CPF/CNPJ </FormLabel>
+        <FormLabel :class="ClassNamesUtil.merge(labelClass)"> CPF/CNPJ </FormLabel>
         <FormMessage />
       </FormItem>
     </FormField>
@@ -168,10 +168,10 @@ const labelClass =
             autocomplete="username"
             type="email"
             placeholder="E-mail válido"
-            :class="cn(inputClass)"
+            :class="ClassNamesUtil.merge(inputClass)"
           />
         </FormControl>
-        <FormLabel :class="cn(labelClass)"> email </FormLabel>
+        <FormLabel :class="ClassNamesUtil.merge(labelClass)"> email </FormLabel>
         <FormMessage />
       </FormItem>
     </FormField>
@@ -183,7 +183,7 @@ const labelClass =
               <Button
                 variant="outline"
                 :class="
-                  cn(
+                  ClassNamesUtil.merge(
                     'text-slate-500 text-sm !p-2 min-h-[22px] !rounded-sm font-normal flex justify-start !px-3',
                     !value && 'text-muted-foreground',
                   )
@@ -208,7 +208,7 @@ const labelClass =
             />
           </PopoverContent>
         </Popover>
-        <FormLabel :class="cn(labelClass)">
+        <FormLabel :class="ClassNamesUtil.merge(labelClass)">
           <span class="sm:hidden">Data de</span>Nascimento
         </FormLabel>
         <FormMessage />
@@ -223,10 +223,10 @@ const labelClass =
               autocomplete="new-password"
               type="password"
               placeholder="Senha"
-              :class="cn(inputClass)"
+              :class="ClassNamesUtil.merge(inputClass)"
             />
           </FormControl>
-          <FormLabel :class="cn(labelClass, '-top-2')"> Senha </FormLabel>
+          <FormLabel :class="ClassNamesUtil.merge(labelClass, '-top-2')"> Senha </FormLabel>
           <Button
             class="rounded-none absolute icon text-xl hover:bg-transparent text-info/60 hover:text-info transition-colors top-1/2 -translate-y-1/2 border-l-input border-l-[1px] py-1 px-2 border-t-0 border-b-0 border-r-0 right-0 bg-transparent outline-none ring-transparent !m-0"
             @click="handleGeneratePassword"
@@ -245,10 +245,10 @@ const labelClass =
             autocomplete="new-password"
             type="password"
             placeholder="Confirme sua senha"
-            :class="cn(inputClass)"
+            :class="ClassNamesUtil.merge(inputClass)"
           />
         </FormControl>
-        <FormLabel :class="cn(labelClass)"> Confirmação de senha </FormLabel>
+        <FormLabel :class="ClassNamesUtil.merge(labelClass)"> Confirmação de senha </FormLabel>
         <FormMessage />
       </FormItem>
     </FormField>

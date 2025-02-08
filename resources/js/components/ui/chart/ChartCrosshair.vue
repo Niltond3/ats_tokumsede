@@ -38,6 +38,8 @@ function color(d, i) {
 </script>
 
 <template>
-  <VisTooltip :horizontal-shift="20" :vertical-shift="20" />
+  <div>
+    <VisTooltip :horizontal-shift="20" :vertical-shift="20" />
   <VisCrosshair :template="template" :color="color" />
+  </div>
 </template>

@@ -3,7 +3,7 @@ import { ref, watch } from 'vue';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import { startOfTomorrow } from 'date-fns';
 import '@vuepic/vue-datepicker/dist/main.css';
-import { dateToDayMonthYearFormat } from '@/util';
+import { DateUtil } from '@/util';
 
 const props = defineProps(['default:scheduling']);
 
@@ -25,7 +25,7 @@ const presetDates = ref([
 ]);
 
 const format = (date) => {
-  const { date: formattedDate, time } = dateToDayMonthYearFormat(date);
+  const { date: formattedDate, time } = DateUtil.dateToDayMonthYearFormat(date);
   return `${formattedDate}, ${time}`;
 };
 

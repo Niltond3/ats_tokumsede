@@ -1,6 +1,6 @@
 
 
-import { utf8Decode } from '@/util'
+import { StringUtil } from '@/util'
 
 
 
@@ -17,7 +17,7 @@ export default () => {
             if (endereco[value]) return /*html*/`
                 <span class="font-bold text-sm text-white border-t border-slate-300">
                     <span class="hidden">${value}</span>
-                    <span class="font-medium">${utf8Decode(endereco[value])}</span>
+                    <span class="font-medium">${StringUtil.utf8Decode(endereco[value])}</span>
                 </span>
             `
             return ''
@@ -35,11 +35,11 @@ export default () => {
     const renderAddress = (endereco) => {
         return /*html*/`<span
         class="flex flex-col ${typographyBaseStyles}">
-        ${utf8Decode(endereco.logradouro)}, <span class="hidden">nº</span> ${endereco.numero}
+        ${StringUtil.utf8Decode(endereco.logradouro)}, <span class="hidden">nº</span> ${endereco.numero}
         <span
-            class="${typographySmStyles}">${utf8Decode(endereco.bairro)}</span>
+            class="${typographySmStyles}">${StringUtil.utf8Decode(endereco.bairro)}</span>
         <span
-            class="${typographySmStyles}">${utf8Decode(endereco.cidade)}
+            class="${typographySmStyles}">${StringUtil.utf8Decode(endereco.cidade)}
             -
             ${endereco.estado}</span>
             ${renderComplementAddress(endereco)}

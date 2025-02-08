@@ -93,6 +93,9 @@ export default [
             'vue/no-multiple-template-root': 'error',
             'vue/script-setup-uses-vars': 'error',
             'vue/comment-directive': 'off', // Ensure this is explicitly set
+            'vue/no-unused-vars': ['error', {
+                ignorePattern: '^_'
+            }]
         },
     },
     {

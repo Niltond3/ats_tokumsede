@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ReminderForm from './ReminderForm.vue';
-import draggable from 'vuedraggable';
 
 const props = defineProps({
   reminders: { type: Array, required: false, default: null },
@@ -38,7 +37,6 @@ const loadLocalReminders = async (clientId) => {
     localFetchingReminders.value = fetchReminders;
 
     await fetchReminders().then((count) => {
-      // Sync values with local refs
       localReminders.value = reminders.value;
       localIsLoading.value = isLoading.value;
       localCurrentPage.value = currentPage.value;
@@ -82,10 +80,6 @@ const handleDelete = async (id) => {
   }
 };
 
-const handleDragEnd = async (evt) => {
-  await fetchReminders(localCurrentPage.value);
-};
-
 const handleEdit = (index) => {
   editingIndex.value = index;
 };
@@ -118,19 +112,13 @@ const handleSaved = async () => {
             {{ status }}
           </h3>
 
-          <draggable
-            :model-value="filteredReminders"
-            group="reminders"
-            item-key="id"
-            class="space-y-2"
-            @end="handleDragEnd"
-          >
-            <template #item="{ element: filteredReminders, index }">
+          <div class="space-y-2">
+            <template v-for="(reminder, index) in filteredReminders" :key="reminder.id">
               <div class="transition-all duration-300 ease-in-out">
                 <Transition name="fade" mode="out-in">
                   <ReminderForm
                     v-if="editingIndex === index"
-                    :reminder="filteredReminders"
+                    :reminder="reminder"
                     :client-id="clientId"
                     :client-name="clientName"
                     class="bg-white/10 rounded-lg shadow-lg"
@@ -140,9 +128,9 @@ const handleSaved = async () => {
                   <Card v-else class="bg-white/10 hover:bg-white/20 transition-colors duration-300">
                     <CardContent class="p-4 flex justify-between items-start">
                       <div>
-                        <p class="font-medium text-white">{{ filteredReminders.descricao }}</p>
-                        <p v-if="filteredReminders.data_limite" class="text-sm text-white/70">
-                          Prazo: {{ new Date(filteredReminders.data_limite).toLocaleDateString() }}
+                        <p class="font-medium text-white">{{ reminder.descricao }}</p>
+                        <p v-if="reminder.data_limite" class="text-sm text-white/70">
+                          Prazo: {{ new Date(reminder.data_limite).toLocaleDateString() }}
                         </p>
                       </div>
                       <div class="flex gap-2">
@@ -158,7 +146,7 @@ const handleSaved = async () => {
                           variant="ghost"
                           size="icon"
                           class="text-destructive hover:bg-destructive/20"
-                          @click="handleDelete(filteredReminders.id)"
+                          @click="handleDelete(reminder.id)"
                         >
                           <i class="ri-delete-bin-line" />
                         </Button>
@@ -168,7 +156,7 @@ const handleSaved = async () => {
                 </Transition>
               </div>
             </template>
-          </draggable>
+          </div>
         </div>
       </template>
     </TransitionGroup>

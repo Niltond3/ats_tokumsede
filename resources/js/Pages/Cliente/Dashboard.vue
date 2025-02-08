@@ -3,7 +3,7 @@ import { onMounted, ref, watch } from 'vue';
 import AuthenticatedLayout from '@/Layouts/ClienteAuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { usePage } from '@inertiajs/vue3';
-import { utf8Decode } from '@/util';
+import { StringUtil } from '@/util';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -18,9 +18,7 @@ import { ChevronsUpDown } from 'lucide-vue-next';
 import { DialogCreateOrder } from '@/components/dialogs/DialogClientCreateOrder';
 import { TablePedidos } from '../Management/DataTablePedidos';
 import renderToast from '@/components/renderPromiseToast';
-import { cn } from '@/lib/utils';
 import { dialogState } from '@/hooks/useToggleDialog';
-import { Check } from 'lucide-vue-next';
 import DialogRegisterAddress from '../../components/dialogs/DialogRegisterAddress.vue';
 import Separator from '@/components/ui/separator/Separator.vue';
 import DialogConfirmAddressDelete from '../../components/dialogs/DialogConfirmAddressDelete.vue';
@@ -41,8 +39,8 @@ const updateDataTable = ref(false);
 const addressTarget = ref({});
 const welcome = ref(
   client.sexo == 1
-    ? 'Bem vindo senhor ' + utf8Decode(client.nome)
-    : 'Bem vinda senhora ' + utf8Decode(client.nome),
+    ? 'Bem vindo senhor ' + StringUtil.utf8Decode(client.nome)
+    : 'Bem vinda senhora ' + StringUtil.utf8Decode(client.nome),
 );
 
 const formatAddresses = ref([]);
@@ -67,8 +65,8 @@ const fetchAddresses = () => {
           id,
           value: `${utf8Decode(logradouro)}, ${numero} - ${utf8Decode(bairro)}`,
           city: `${utf8Decode(cidade)} - ${utf8Decode(estado)}`,
-          complement: utf8Decode(complemento) || '',
-          referency: utf8Decode(referencia) || '',
+          complement: StringUtil.utf8Decode(complemento) || '',
+          referency: StringUtil.utf8Decode(referencia) || '',
         };
       });
     },

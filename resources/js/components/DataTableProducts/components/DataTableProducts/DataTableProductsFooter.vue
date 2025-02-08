@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import SelectPayment from '@/components/orderComponents/SelectPayment.vue';
 import ExchangeInput from '@/components/orderComponents/ExchangeInput.vue';
 import DateTimePicker from '@/components/orderComponents/DateTimePicker.vue';
-import { dateToISOFormat, formatMoney } from '@/util';
+import { MoneyUtil, DateUtil } from '@/util';
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -15,7 +15,7 @@ const props = defineProps({
   addressNote: String,
 });
 
-const { toCurrency } = formatMoney();
+const { toCurrency } = MoneyUtil.formatMoney();
 
 const emit = defineEmits([
   'update:paymentForm',
@@ -47,7 +47,11 @@ const values = computed(() => [
       <div class="w-full flex flex-col items-center justify-center">
         <Separator class="mt-1 mb-[0.35rem]" />
         <div class="flex gap-8">
-          <span v-for="value in values" class="text-sm font-medium relative text-info">
+          <span
+            v-for="value in values"
+            :key="value.label"
+            class="text-sm font-medium relative text-info"
+          >
             <p class="absolute -top-5 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">
               {{ value.label }}
             </p>
@@ -71,7 +75,9 @@ const values = computed(() => [
       />
       <Separator orientation="vertical" class="hidden sm:block" />
       <DateTimePicker
-        :default:scheduling="dateToISOFormat(`${payload.dataAgendada} ${payload.horaInicio}`)"
+        :default:scheduling="
+          DateUtil.dateToISOFormat(`${payload.dataAgendada} ${payload.horaInicio}`)
+        "
         @update:scheduling="$emit('update:scheduling', $event)"
       />
     </div>

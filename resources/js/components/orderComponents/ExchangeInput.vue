@@ -1,11 +1,11 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { Label } from '@/components/ui/label';
-import { formatMoney } from '@/util';
+import { MoneyUtil } from '@/util';
 import { Money3Component } from 'v-money3';
 import { twMerge } from 'tailwind-merge';
 
-const { config } = formatMoney();
+const { config } = MoneyUtil.formatMoney();
 
 const emits = defineEmits(['update:exchange']);
 

@@ -1,5 +1,5 @@
 import { toast } from "vue-sonner";
-import { formatMoney } from "@/util";
+import { MoneyUtil } from "@/util";
 import renderToast from "@/components/renderPromiseToast";
 import axios from "axios";
 
@@ -15,7 +15,7 @@ const createSpecialOffer = (payload, emit) => {
     );
 };
 export const useUpdateData = (tableProductsState, emit) => {
-    const { toFloat } = formatMoney();
+    const { toFloat } = MoneyUtil.formatMoney();
 
     const updateData = (rowIndex, columnId, value) => {
         const oldRow = tableProductsState.tableData[rowIndex];

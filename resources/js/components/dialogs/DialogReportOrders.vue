@@ -10,7 +10,8 @@ import '@vuepic/vue-datepicker/dist/main.css';
 import { Button } from '@/components/ui/button';
 import { getDistributor, listAllDistributors } from '@/services/api/distributors';
 import renderToast from '@/components/renderPromiseToast';
-import { cn, utf8Decode } from '@/util';
+import { StringUtil } from '@/util';
+import { cn } from '@/lib/utils';
 import DistributorCombobox from './DialogStockMerge/DistributorCombobox.vue';
 import { jsPDF } from 'jspdf';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -180,7 +181,7 @@ async function getDistributors() {
       onSuccess: (response) => {
         console.log(response.data.data);
         selectedDistributors.value = [response.data.data.id];
-        distributorName.value = utf8Decode(response.data.data.nome);
+        distributorName.value = StringUtil.utf8Decode(response.data.data.nome);
         isLoading.value = false;
       },
     },
@@ -192,7 +193,7 @@ async function getDistributors() {
       onSuccess: (response) => {
         distributors.value = response.data.data.map((d) => ({
           id: d.id,
-          nome: utf8Decode(d.nome),
+          nome: StringUtil.utf8Decode(d.nome),
         }));
         isLoading.value = false;
       },

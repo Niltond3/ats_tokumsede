@@ -1,5 +1,5 @@
 <script setup>
-import { getClientFormat } from '@/Pages/Management/utils';
+import { ClientUtil} from '@/util';
 import { RiEyeFill as EyeIcon, RiEyeCloseFill as EyeOffIcon } from 'vue-remix-icons';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -17,7 +17,7 @@ const { values } = defineProps({ values: Object });
 
 const emit = defineEmits(['update:CheckboxToggle']);
 
-const { getSexo, getTipoPessoaPayload } = getClientFormat();
+const { getSexo, getTipoPessoaPayload } =ClientUtil.getClientFormat();
 
 const { CNPJ } = getTipoPessoaPayload(values.tipoPessoa).documento;
 
@@ -59,7 +59,7 @@ const interatedValues = !values.tipoPessoa
   <section>
     <div id="v-for-object" class="gap-3 flex flex-col p-4 text-sm capitalize">
       <div
-        v-for="(value, key) in interatedValues"
+        v-for="(value, key) in interatedValues" :key="key"
         class="flex items-center gap-4 cursor-pointer opacity-70 hover:opacity-100"
       >
         <span class="flex h-2 w-2 rounded-full bg-sky-500" />
@@ -78,7 +78,7 @@ const interatedValues = !values.tipoPessoa
       </div>
       <Separator label="Endereço" />
       <div
-        v-for="(value, key) in newAddressValues"
+        v-for="(value, key) in newAddressValues" 
         class="flex items-center gap-4 cursor-pointer opacity-70 hover:opacity-100"
       >
         <span class="flex h-2 w-2 rounded-full bg-sky-500" />

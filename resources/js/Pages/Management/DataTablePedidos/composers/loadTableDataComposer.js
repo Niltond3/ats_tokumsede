@@ -1,4 +1,4 @@
-import { dateToISOFormat } from "@/util";
+import { DateUtil } from "@/util";
 
 export const useLoadTableDataComposer = (orders, entregadores = null) => {
     const compose = (response) => {
@@ -17,7 +17,7 @@ export const useLoadTableDataComposer = (orders, entregadores = null) => {
 
         const scheduledOrders = response.data[5].filter(pedido => {
             if (orderMap.has(pedido.id)) return false;
-            const scheduleDate = dateToISOFormat(`${pedido.dataAgendada} ${pedido.horaInicio}`);
+            const scheduleDate = DateUtil.dateToISOFormat(`${pedido.dataAgendada} ${pedido.horaInicio}`);
             return scheduleDate >= today;
         })
 

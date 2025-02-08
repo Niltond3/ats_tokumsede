@@ -16,8 +16,7 @@ import {
   SelectLabel,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { utf8Decode, formatMoney } from '@/util';
-import { formatOrder, orderToClipboard } from '../../Pages/Management/utils';
+import { StringUtil, ClipboardUtil, OrderUtil, MoneyUtil } from '@/util';
 import renderToast from '@/components/renderPromiseToast';
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 import { useQzTray } from '@/composables/useQzTray';
@@ -49,7 +48,7 @@ onMounted(() => {
   detectDevice();
 });
 
-const { toCurrency } = formatMoney();
+const { toCurrency } = MoneyUtil.formatMoney();
 
 const fetchOrder = () => {
   console.log(props.orderId);
@@ -61,14 +60,14 @@ const fetchOrder = () => {
     async (response) => {
       console.log(response.data);
       console.log(response);
-      const formatedOrder = formatOrder(response.data);
+      const formatedOrder = OrderUtil.formatOrder(response.data);
 
       const itensPedido = response.data.itensPedido.map((order) => {
         return {
           ...order,
           preco: toCurrency(order.preco),
           subtotal: toCurrency(order.subtotal),
-          produto: { ...order.produto, nome: utf8Decode(order.produto.nome) },
+          produto: { ...order.produto, nome: StringUtil.utf8Decode(order.produto.nome) },
         };
       });
 
@@ -89,7 +88,7 @@ watch(
   },
 );
 
-const handleCopyOrder = (order) => orderToClipboard(order);
+const handleCopyOrder = (order) => ClipboardUtil.orderToClipboard(order);
 
 const handlePrint = async () => {
   try {
@@ -187,7 +186,7 @@ const handlePrintOrder = () => {
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Impressoras</SelectLabel>
-                  <SelectItem v-for="printer in printerList" :value="printer">
+                  <SelectItem v-for="printer in printerList" :key="printer" :value="printer">
                     {{ printer }}
                   </SelectItem>
                 </SelectGroup>
@@ -216,7 +215,12 @@ const handlePrintOrder = () => {
     </div>
     <Separator label="endereço de entrega" />
     <div v-if="isLoading" class="flex-col">
-      <Skeleton v-for="(_, index) in 3" :id="`address-skeleton-${index}`" class="w-96 h-5" />
+      <Skeleton
+        v-for="(_, index) in 3"
+        :id="`address-skeleton-${index}`"
+        :key="index"
+        class="w-96 h-5"
+      />
     </div>
     <div v-else class="flex-col">
       <span
@@ -238,7 +242,12 @@ const handlePrintOrder = () => {
     </div>
     <Separator label="outros detalhes" />
     <div v-if="isLoading" class="flex-col relative gap-2 content-start">
-      <div v-for="(_, index) in 3" :id="`detail-skeleton-${index}`" class="flex gap-1 items-center">
+      <div
+        v-for="(_, index) in 3"
+        :id="`detail-skeleton-${index}`"
+        :key="index"
+        class="flex gap-1 items-center"
+      >
         <Skeleton class="w-96 h-5" />
       </div>
     </div>
@@ -260,7 +269,7 @@ const handlePrintOrder = () => {
         {{ data.horaInicio }}
       </div>
 
-      <div v-for="detail in data.details" class="flex gap-1 items-center">
+      <div v-for="detail in data.details" :key="detail.id" class="flex gap-1 items-center">
         <span class="w-[5.9rem] flex text-xs opacity-70 justify-start">
           {{ detail.label.long }}
         </span>
@@ -277,14 +286,14 @@ const handlePrintOrder = () => {
     </div>
     <Separator label="produtos " />
     <div v-if="isLoading">
-      <div v-for="(_, index) in 3" :id="`products-skeleton-${index}`">
+      <div v-for="(_, index) in 3" :id="`products-skeleton-${index}`" :key="index">
         <Skeleton class="w-72 h-5" />
       </div>
     </div>
     <div v-else>
-      <div v-for="order in data.itensPedido">
+      <div v-for="order in data.itensPedido" :key="order.id">
         <p>
-          {{ order.qtd }} {{ utf8Decode(order.produto.nome) }}
+          {{ order.qtd }} {{ StringUtil.utf8Decode(order.produto.nome) }}
           <span class="text-xs opacity-70 justify-start">un</span>
           {{ toCurrency(order.preco) }}
           <span class="text-xs opacity-70 justify-start">subtotal</span>

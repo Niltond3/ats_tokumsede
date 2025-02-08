@@ -11,7 +11,7 @@ import * as z from 'zod'
 import validator from 'validator'
 import { toTypedSchema } from '@vee-validate/zod'
 import { User, BookUser, Check } from 'lucide-vue-next'
-import { getClientFormat } from "@/Pages/Management/utils";
+import { ClientUtil} from "@/util";
 import renderToast from '@/components/renderPromiseToast';
 
 const props = defineProps({})
@@ -94,7 +94,7 @@ const steps = [
     },
 ]
 
-const { getTipoPessoaPayload } = getClientFormat();
+const { getTipoPessoaPayload } = ClientUtil.getClientFormat();
 
 
 const onSubmit = (values) => {

@@ -6,7 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { getDistributor, listAllDistributors } from '@/services/api/distributors';
 import renderToast from '@/components/renderPromiseToast';
-import { cn, utf8Decode } from '@/util';
+import { StringUtil } from '@/util';
+import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import DistributorCombobox from './DistributorCombobox.vue';
 
@@ -76,7 +77,7 @@ async function getDistributors() {
     (response) => {
       distributors.value = response.data.data.map((d) => ({
         id: d.id,
-        nome: utf8Decode(d.nome),
+        nome: StringUtil.utf8Decode(d.nome),
       }));
       isLoading.value = false;
     },

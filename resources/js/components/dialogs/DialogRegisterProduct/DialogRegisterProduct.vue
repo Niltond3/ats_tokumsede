@@ -35,7 +35,7 @@ import { Link } from '@inertiajs/vue3';
 import { useDropzone } from 'vue3-dropzone';
 import { dialogState } from '@/hooks/useToggleDialog';
 import renderToast from '../../renderPromiseToast';
-import { utf8Decode } from '@/util';
+import { StringUtil } from '@/util';
 import SelectImages from './SelectImages.vue';
 import SelectCompositionProducts from './SelectCompositionProducts.vue';
 import { event } from 'jquery';
@@ -90,7 +90,7 @@ const getCategorie = () => {
     'Ocorreu um erro ao carregar as categorias',
     (response) => {
       const dataToUtf8 = response.data.map((category) => {
-        return { ...category, nome: utf8Decode(category.nome) };
+        return { ...category, nome: StringUtil.utf8Decode(category.nome) };
       });
       categories.value = dataToUtf8;
       isLoading.value = false;
@@ -272,7 +272,11 @@ const handleImageLoad = (setFieldValue) => {
                       </FormControl>
                       <SelectContent>
                         <SelectGroup>
-                          <SelectItem v-for="categorie in categories" :value="`${categorie.id}`">
+                          <SelectItem
+                            v-for="categorie in categories"
+                            :key="categorie.id"
+                            :value="`${categorie.id}`"
+                          >
                             {{ categorie.nome }}
                           </SelectItem>
                         </SelectGroup>

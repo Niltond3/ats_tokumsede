@@ -1,4 +1,4 @@
-import { errorUtils } from "@/util";
+import { ErrorUtil } from "@/util";
 import { defineComponent, h, markRaw } from "vue";
 import { toast } from "vue-sonner";
 
@@ -76,7 +76,7 @@ const renderToast = (
             return markRaw(CustomDiv("sucesso", sucessMessage));
         },
         error: (error) => {
-            const getError = errorUtils.getError(error);
+            const getError = ErrorUtil.getError(error);
             result = errorCallback && errorCallback(getError);
             return markRaw(
                 CustomDiv(

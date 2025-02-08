@@ -299,19 +299,26 @@ onMounted(() => {
 
 const columns = [
   {
-    className: 'dt-control',
+    className: 'dt-control all',
     orderable: false,
     data: null,
     defaultContent: '',
     render: '#dt-control',
     responsivePriority: 1,
   },
-  { data: 'nome', title: 'Nome', responsivePriority: 2 },
+  { data: 'nome', title: 'Nome', responsivePriority: 1, className: 'all' },
   { data: 'tipoPessoa', title: 'CPF/CNPJ', searchable: false, responsivePriority: 6 },
   { data: 'telefone', title: 'Telefone', responsivePriority: 3 },
   { data: 'outrosContatos', title: 'Outros Contatos', responsivePriority: 4 },
   { data: 'rating', title: 'Rating', searchable: false, responsivePriority: 5 },
-  { data: 'opcoes', title: 'Opções', render: '#actions', searchable: false, responsivePriority: 1 },
+  {
+    data: 'opcoes',
+    title: 'Opções',
+    render: '#actions',
+    searchable: false,
+    responsivePriority: 1,
+    className: 'all',
+  },
   { data: 'enderecos[].logradouro', name: 'enderecos.logradouro', visible: false },
   { data: 'enderecos[].bairro', name: 'enderecos.bairro', visible: false },
   { data: 'enderecos[].numero', name: 'enderecos.numero', visible: false },
@@ -492,7 +499,7 @@ const handleDeleteAddress = (confirm) => {
       language="language"
     >
       <template #actions="data">
-        <div class="w-full flex items-center justify-center">
+        <div class="max-w-3/4 flex items-center justify-center">
           <ClientActionsDropdown v-if="width >= 768" :payload-data="data" :data-table="dt" />
           <ClientActionsWrapper v-else :payloadData="data" :data-table="dt" />
         </div>

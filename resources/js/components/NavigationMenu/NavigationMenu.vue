@@ -138,17 +138,26 @@ const homeLinks = [
         </NavigationMenuTrigger>
         <NavigationMenuContent>
           <ul
-            class="grid w-[90vw] gap-3 p-4 md:w-[500px] md:grid-cols-3 lg:w-[600px] max-h-[64vh] overflow-auto"
+            class="grid w-[90vw] gap-3 p-4 md:w-[500px] md:grid-cols-3 lg:w-[600px] max-h-[64vh] overflow-auto group"
           >
-            <li key="product_register" class="self-center justify-self-center">
+            <li
+              key="product_register"
+              class="self-center justify-self-center w-full transition-all duration-300 group-hover:[&:not(:hover)]:blur-[1px] group-hover:[&:not(:hover)]:opacity-70"
+            >
               <DialogRegisterProduct />
             </li>
-            <li key="client_register" class="self-center justify-self-center">
+            <li
+              key="client_register"
+              class="self-center justify-self-center w-full transition-all duration-300 group-hover:[&:not(:hover)]:blur-[1px] group-hover:[&:not(:hover)]:opacity-70"
+            >
               <DialogRegisterClient>
                 <DialogTrigger icon="ri-user-add-fill" title="Registrar Cliente" />
               </DialogRegisterClient>
             </li>
-            <li key="client_price" class="self-center justify-self-center">
+            <li
+              key="client_price"
+              class="self-center justify-self-center w-full transition-all duration-300 group-hover:[&:not(:hover)]:blur-[1px] group-hover:[&:not(:hover)]:opacity-70"
+            >
               <DialogRegisterPrices
                 :isOpen="openRegisterPrices"
                 :toggleDialog="toggleRegisterPrices"
@@ -162,7 +171,7 @@ const homeLinks = [
             <li
               v-if="tipoAdministrador === 'Administrador'"
               key="stock_merge"
-              class="self-center justify-self-center"
+              class="self-center justify-self-center w-full transition-all duration-300 group-hover:[&:not(:hover)]:blur-[1px] group-hover:[&:not(:hover)]:opacity-70"
             >
               <DialogStockMerge :isOpen="openStockMerge" :toggleDialog="toggleStockMerge">
                 <template #trigger>
@@ -185,9 +194,12 @@ const homeLinks = [
         </NavigationMenuTrigger>
         <NavigationMenuContent>
           <ul
-            class="grid w-[90vw] gap-5 p-4 md:w-[500px] md:grid-cols-3 lg:w-[600px] max-h-[64vh] overflow-auto"
+            class="grid w-[90vw] gap-5 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] max-h-[64vh] overflow-auto group"
           >
-            <li key="orders_report" class="self-center justify-self-center">
+            <li
+              key="orders_report"
+              class="self-center justify-self-center transition-all duration-300 group-hover:[&:not(:hover)]:blur-[1px] group-hover:[&:not(:hover)]:opacity-70"
+            >
               <DialogReportOrders
                 :isOpen="openRegisterReportOrders"
                 :toggleDialog="toggleReportOrders"
@@ -201,7 +213,10 @@ const homeLinks = [
                 </template>
               </DialogReportOrders>
             </li>
-            <li key="stock_report" class="self-center justify-self-center">
+            <li
+              key="stock_report"
+              class="self-center justify-self-center transition-all duration-300 group-hover:[&:not(:hover)]:blur-[1px] group-hover:[&:not(:hover)]:opacity-70"
+            >
               <DialogReportStock
                 :isOpen="openRegisterReportStock"
                 :toggleDialog="toggleReportStock"

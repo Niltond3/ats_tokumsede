@@ -65,13 +65,11 @@ const handleStatusChange = (checked) => {
 </script>
 
 <template>
-  <div class="flex gap-3 items-center">
-    <!-- <DialogShowClient :client-details="rowData" /> -->
-    <!-- Add this before your existing buttons -->
-    <div class="flex flex-col w-1/2">
+  <div class="flex flex-col sm:flex-row gap-3 items-center w-full p-2">
+    <div class="flex flex-col w-full sm:w-1/2">
       <Separator class="w-full" />
 
-      <div class="flex items-center justify-around gap-3">
+      <div class="flex items-center justify-center sm:justify-around gap-2 sm:gap-3">
         <TooltipProvider :delay-duration="100">
           <Tooltip>
             <TooltipTrigger as-child>
@@ -97,13 +95,13 @@ const handleStatusChange = (checked) => {
           </Tooltip>
         </TooltipProvider>
 
-        <Separator orientation="vertical" class="h-8" />
+        <Separator orientation="vertical" class="h-6 sm:h-8" />
         <TooltipProvider :delay-duration="100">
           <Tooltip>
             <TooltipTrigger as-child>
               <button @click="() => confirmActionsDialogController.toggleDialog()">
                 <i
-                  class="ri-delete-bin-6-fill transition-colors text-3xl text-danger/60 hover:text-danger"
+                  class="ri-delete-bin-6-fill transition-colors text-2xl sm:text-3xl text-danger/60 hover:text-danger"
                 />
               </button>
             </TooltipTrigger>
@@ -115,19 +113,20 @@ const handleStatusChange = (checked) => {
       </div>
     </div>
 
-    <Separator orientation="vertical" class="h-8" />
+    <Separator orientation="vertical" class="h-6 sm:h-8 hidden sm:block" />
+    <Separator class="w-full sm:hidden" />
 
-    <div class="flex flex-col w-1/2 gap-1">
-      <Separator class="w-full" />
-      <div class="flex items-center justify-around gap-3">
+    <div class="flex flex-col w-full sm:w-1/2 gap-1">
+      <Separator class="w-full hidden sm:block" />
+      <div class="flex items-center justify-center sm:justify-around gap-2 sm:gap-3">
         <TooltipProvider :delay-duration="100">
           <Tooltip>
             <TooltipTrigger as-child>
               <button
-                class="bg-info/40 py-1 px-2 size-8 rounded-full whitespace-nowrap gap-2 flex hover:bg-info transition-colors focus-visible:outline-info"
+                class="bg-info/40 py-1 px-2 size-7 sm:size-8 rounded-full whitespace-nowrap gap-1 sm:gap-2 flex hover:bg-info transition-colors focus-visible:outline-info"
                 @click="() => editClientDialogController.toggleDialog()"
               >
-                <i class="ri-pencil-fill text-white" />
+                <i class="ri-pencil-fill text-white text-sm sm:text-base" />
               </button>
             </TooltipTrigger>
             <TooltipContent class="bg-success border-none text-white">
@@ -135,15 +134,15 @@ const handleStatusChange = (checked) => {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        <Separator orientation="vertical" class="h-8" />
+        <Separator orientation="vertical" class="h-6 sm:h-8" />
         <TooltipProvider :delay-duration="100">
           <Tooltip>
             <TooltipTrigger as-child>
               <button
-                class="bg-info/40 py-1 px-2 size-8 rounded-full whitespace-nowrap gap-2 flex hover:bg-info transition-colors focus-visible:outline-info"
+                class="bg-info/40 py-1 px-2 size-7 sm:size-8 rounded-full whitespace-nowrap gap-1 sm:gap-2 flex hover:bg-info transition-colors focus-visible:outline-info"
                 @click="() => editClientDialogController.toggleDialog()"
               >
-                <i class="ri-eye-fill text-white" />
+                <i class="ri-eye-fill text-white text-sm sm:text-base" />
               </button>
             </TooltipTrigger>
             <TooltipContent class="bg-success border-none text-white">

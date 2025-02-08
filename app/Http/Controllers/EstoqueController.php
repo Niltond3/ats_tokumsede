@@ -117,4 +117,10 @@ class EstoqueController extends Controller
         }
     }
 
+    private function getEffectiveDistributorId($distributorId)
+{
+    $distributor = Distribuidor::find($distributorId);
+    return $distributor->getMainDistributorIdAttribute() ?? $distributorId;
+}
+
 }

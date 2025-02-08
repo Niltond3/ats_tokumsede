@@ -14,13 +14,14 @@ import renderToast from '@/components/renderPromiseToast';
 import { tableConfig } from './config/tableConfig';
 import { shallowRef } from 'vue';
 import { getOrder } from '@/services/api/orders';
-import { POLLING_INTERVAL } from './config/constants';
+import { POLLING_INTERVAL_MIN } from './config/constants';
 
 DataTable.use(DataTablesLib);
 
 const props = defineProps({
   orderResponse: { type: Function, required: false },
   setTab: { type: Function, required: false },
+  onSetTab: { type: Function, required: false },
   ajustClass: { type: String, required: false },
   isNestedTable: { type: Boolean, required: false },
   updatedTable: { type: Boolean, required: false },
@@ -75,7 +76,6 @@ const transformOrder = (pedido) => {
 const transformedOrders = computed(() => orders.value.map((pedido) => transformOrder(pedido)));
 
 const loadTableData = (response) => {
-  console.log(response);
   entregadores.value = response.data[7];
   scheduleOrder.value = response.data[5]; // agendados
   const concatArray = [].concat(
@@ -145,6 +145,7 @@ watch(
 );
 
 onMounted(() => {
+  props.onSetTab();
   dt = table.value.dt;
   $('.dt-search').addClass(
     'flex items-center py-2 px-1 gap-2 !text-info/80 !mb-[30px] min-[768px]:!mb-[10px]',
@@ -176,14 +177,12 @@ onMounted(() => {
       }
     });
   };
+  //   window.setInterval(async () => {
+  //     await observeNewOrders(fetchOrders);
+  //   }, POLLING_INTERVAL);
   window.setInterval(async () => {
-    await observeNewOrders(handleLoadTableData);
-    const currentScheduleOrders = getScheduleOrder();
-    const isEqual = JSON.stringify(scheduleOrder.value) === JSON.stringify(currentScheduleOrders);
-    if (!isEqual) {
-      await fetchOrders();
-    }
-  }, POLLING_INTERVAL);
+    fetchOrders();
+  }, POLLING_INTERVAL_MIN);
 });
 
 const badgeClasses =

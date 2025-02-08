@@ -8,10 +8,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { StringUtil, MoneyUtil } from '@/util';
+import { StringUtil, MoneyUtil, OrderUtil } from '@/util';
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
 import { ClipboardUtil } from '@/util';
-import { DataTableProducts } from '@/components/DataTableProducts';
+import { DataTableProducts } from '@/components/dataTables/DataTableProducts';
 import { dialogState } from '@/hooks/useToggleDialog';
 import renderToast from '@/components/renderPromiseToast';
 import { Skeleton } from '@/components/ui/skeleton';

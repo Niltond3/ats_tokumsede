@@ -1,5 +1,4 @@
 <script setup>
-import AtsLogo from '@/../../public/images/ats-logo.svg?raw';
 import ApplicationLogo from '@/components/ApplicationLogo.vue';
 import Button from '@/components/Button.vue';
 import { RiArrowRightWideLine as ArrowRightIcon } from 'vue-remix-icons';

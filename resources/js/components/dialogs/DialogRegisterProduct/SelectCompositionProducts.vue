@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import renderToast from '../../renderPromiseToast';
+import renderToast from '@/components/renderPromiseToast';
 import { onMounted } from 'vue';
 import { CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import {

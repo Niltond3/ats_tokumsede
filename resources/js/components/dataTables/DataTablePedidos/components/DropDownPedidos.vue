@@ -19,7 +19,7 @@ import DialogEditOrder from './DialogEditOrder.vue';
 import DialogShowOrder from './DialogShowOrder.vue';
 import DialogConfirmAction from './DialogConfirmAction.vue';
 import { usePage } from '@inertiajs/vue3';
-import { useOrderActions } from '../composers/useOrderActions';
+import { useOrderActions } from '@/composables/useOrderActions';
 
 const page = usePage();
 

@@ -32,9 +32,8 @@ import DialogRegisterAddress from '@/components/dialogs/DialogRegisterAddress.vu
 import DialogConfirmAddressDelete from '@/components/dialogs/DialogConfirmAddressDelete.vue';
 import DialogRegisterClient from '@/components/dialogs/DialogRegisterClient.vue';
 import { DialogRegisterPrices } from '@/components/dialogs/DialogRegisterPrices';
-import observeNewOrders from '../DataTablePedidos/components/observeNewOrders';
 import renderToast from '@/components/renderPromiseToast';
-import DialogEditOrder from '../DataTablePedidos/components/DialogEditOrder.vue';
+import DialogEditOrder from '@/components/dataTables/DataTablePedidos/components/DialogEditOrder.vue';
 import ClientActionsWrapper from '@/components/wrapper/ClientActionsWrapper.vue';
 import ClientActionsDropdown from '@/components/dropdowns/ClientActionsDropdown.vue';
 
@@ -292,9 +291,9 @@ ${address.referencia ? 'Referência: ' + address.referencia : ''}
 onMounted(() => {
   dt = table.value.dt;
   initializeDataTable(dt);
-  window.setInterval(async () => {
-    await observeNewOrders;
-  }, 10000);
+  //   window.setInterval(async () => {
+  //     await observeNewOrders;
+  //   }, 10000);
 });
 
 const columns = [

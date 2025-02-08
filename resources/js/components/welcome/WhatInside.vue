@@ -154,7 +154,7 @@ const handleNext = () => {
 <template>
   <div class="relative w-full p-4 my-40 min-[425px]:my-44 md:my-48 lg:my-60 xl:my-96 flex">
     <div
-      v-for="{ index, url, ph, title, mineralsLeft, mineralsRight } in whaterTypes"
+      v-for="{ index, url, ph, mineralsLeft, mineralsRight } in whaterTypes"
       :key="index"
       class="border-none absolute shadow-none bg-transparent *:shadow-none *:bg-transparent left-1/2 -translate-x-1/2 -translate-y-1/2 top-1/2 transition-all duration-300 [transition-behavior:allow-discrete]"
       :class="selectedIndex === index ? 'opacity-100 block' : 'opacity-0 hidden'"

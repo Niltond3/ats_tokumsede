@@ -6,19 +6,11 @@ import {
   DashboardAvatar,
   DashboardDonutChart,
 } from '@/components/dashboardColumn';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import observeNewOrders from '@/Pages/Management/DataTablePedidos/components/observeNewOrders';
 
-onMounted(() => {
-  window.setInterval(async () => {
-    await observeNewOrders();
-  }, 10000);
-});
 </script>
 
 <script>
 import { MoneyUtil } from '@/util';
-import { onMounted } from 'vue';
 
 const { toCurrency } = MoneyUtil.formatMoney();
 

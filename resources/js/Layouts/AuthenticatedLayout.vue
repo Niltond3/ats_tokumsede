@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, provide, computed } from 'vue';
 import { Toaster } from '@/components/ui/sonner';
 import ApplicationLogo from '@/components/ApplicationLogo.vue';
 import Dropdown from '@/components/Dropdown.vue';
@@ -9,10 +9,36 @@ import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { Toggle } from '@/components/ui/toggle';
 import NavigationMenu from '@/components/NavigationMenu/NavigationMenu.vue';
+import { useOrderNotifications } from '@/composables/useOrderNotifications';
+
 const page = usePage();
 // const isAuth = computed(() => page.props.auth.user)
 
 const showingNavigationDropdown = ref(false);
+const soundEnabled = ref(true);
+
+// Initialize order notifications with sound control
+const { notificationCount, isPolling, checkNewOrders, newOrders, resetNotificationCount } =
+  useOrderNotifications({
+    soundEnabled: computed(() => soundEnabled.value),
+    onNewOrders: (orders) => {
+      // Handle new orders globally if needed
+    },
+  });
+
+// Provide values to child components
+provide('orderNotifications', {
+  notificationCount,
+  isPolling,
+  newOrders,
+  soundEnabled,
+  resetNotificationCount,
+});
+
+// Handle sound toggle
+const handleSoundToggle = (value) => {
+  soundEnabled.value = value;
+};
 </script>
 
 <template>
@@ -154,8 +180,9 @@ const showingNavigationDropdown = ref(false);
                 <Toggle
                   id="toggleSound"
                   aria-label="Toggle sound"
-                  :default-value="true"
+                  :model-value="soundEnabled"
                   class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 group"
+                  @update:model-value="handleSoundToggle"
                 >
                   <i
                     class="ri-volume-mute-fill group-aria-pressed:hidden text-info/50 pointer-events-none select-none"

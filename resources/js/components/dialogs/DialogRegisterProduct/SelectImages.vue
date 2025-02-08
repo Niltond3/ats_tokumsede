@@ -75,7 +75,7 @@ import {
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { createReusableTemplate, useMediaQuery } from '@vueuse/core';
-import renderToast from '../../renderPromiseToast';
+import renderToast from '@/components/renderPromiseToast';
 
 const selectedImage = ref(null);
 const images = ref([]);

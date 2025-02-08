@@ -11,7 +11,7 @@ import DialogBody from './components/DialogBody.vue';
 import DialogFooter from './components/DialogFooter.vue';
 
 // Table related
-import { useUpdateData } from '@/components/DataTableProducts/composable/useUpdateData';
+import { useUpdateData } from '@/components/dataTables/DataTableProducts/composable/useUpdateData';
 import { useTableProductsState } from '@/composables/tableProductsState';
 
 // Local utilities and composables

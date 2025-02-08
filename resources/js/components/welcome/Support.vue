@@ -1,5 +1,4 @@
 <script setup>
-import Button from '../Button.vue';
 import { RiWhatsappLine as WhatsappIcon } from 'vue-remix-icons';
 import { RiPagesLine as WebIcon } from 'vue-remix-icons';
 import { RiShoppingCartLine as CartIcon } from 'vue-remix-icons';

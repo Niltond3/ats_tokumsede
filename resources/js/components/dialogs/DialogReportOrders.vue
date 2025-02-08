@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { toast } from 'vue-sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import DataTablePedidos from '@/Pages/Management/DataTablePedidos/DataTablePedidos.vue';
+import DataTablePedidos from '@/components/dataTables/DataTablePedidos/DataTablePedidos.vue';
 import { Form } from '@/components/ui/form';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';

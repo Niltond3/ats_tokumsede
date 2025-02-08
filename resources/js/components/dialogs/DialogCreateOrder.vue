@@ -3,7 +3,7 @@ import { ref, watch } from 'vue';
 import axios from 'axios';
 import { useForwardPropsEmits } from 'radix-vue';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { DataTableProducts } from '@/components/DataTableProducts';
+import { DataTableProducts } from '@/components/dataTables/DataTableProducts';
 import { StringUtil } from '@/util';
 import renderToast from '@/components/renderPromiseToast';
 import ReminderManager from '@/components/ReminderManager.vue';
@@ -27,7 +27,6 @@ const emits = defineEmits(['update:modelValue', 'update:dataTable']);
 const forwarded = useForwardPropsEmits(props, emits);
 
 const whenDialogOpen = () => {
-  console.log('open dialog');
   const url = `produtos/${props.idClienteAddress}`;
   const promise = axios.get(url);
 
@@ -70,10 +69,8 @@ const whenDialogOpen = () => {
         distributorExpedient: orderData[6],
         distributorTaxes: orderData[4],
       };
-      console.log(address?.idCliente);
       const { fetchReminders, activeRemindersCount } = useReminders(address?.idCliente);
       await fetchReminders(1);
-      console.log('activeRemindersCount', activeRemindersCount.value);
     },
   );
 };

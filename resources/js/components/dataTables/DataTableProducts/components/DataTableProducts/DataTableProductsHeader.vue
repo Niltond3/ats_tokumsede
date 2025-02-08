@@ -1,7 +1,7 @@
 <script setup>
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 import { SelectDistributor } from '..';
-import DebouncedInput from '../DebouncedInput.vue';
+import DebouncedInput from '@/components/inputs/DebouncedInput.vue';
 
 const props = defineProps({
   distributors: { type: Array, required: false, default: [] },

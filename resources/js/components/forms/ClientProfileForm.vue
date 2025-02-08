@@ -228,7 +228,7 @@ import { RiGenderlessLine as GenderlessIcon } from 'vue-remix-icons';
 import Button from '@/components/Button.vue';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import ptBR from 'date-fns/locale/pt-BR';
-import Separator from '../ui/separator/Separator.vue';
+import Separator from '@/components/ui/separator/Separator.vue';
 
 const inputClass = `
   peer w-full rounded-md border-gray-300 py-3 px-4

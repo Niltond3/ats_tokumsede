@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import Button from '@/components/Button.vue';
 import { RiShoppingCartLine as ShoppingCart } from 'vue-remix-icons';
-import Separator from '../ui/separator/Separator.vue';
+import { Separator } from '@/components/ui/separator';
 import Aos from 'aos';
 
 onMounted(() => {

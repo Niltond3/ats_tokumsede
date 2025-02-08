@@ -78,7 +78,7 @@ const interatedValues = !values.tipoPessoa
       </div>
       <Separator label="Endereço" />
       <div
-        v-for="(value, key) in newAddressValues" 
+        v-for="(value, key) in newAddressValues" :key="key"
         class="flex items-center gap-4 cursor-pointer opacity-70 hover:opacity-100"
       >
         <span class="flex h-2 w-2 rounded-full bg-sky-500" />

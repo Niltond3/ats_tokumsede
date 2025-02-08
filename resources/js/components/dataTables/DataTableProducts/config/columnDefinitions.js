@@ -117,7 +117,6 @@ export const priceColumn = {
         }
         const rowValue = getValue();
         const rowEndArray = rowValue.length - 1;
-        console.log(rowValue[rowEndArray]);
         const value = rowValue[rowEndArray].val;
         return getPriceComponent(value, column.id);
     },

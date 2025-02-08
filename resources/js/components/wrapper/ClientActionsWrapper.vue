@@ -5,7 +5,7 @@ import DialogConfirmAction from '@/components/dialogs/DialogConfirmAction.vue';
 import DialogEditClient from '@/components/dialogs/DialogEditClient.vue';
 import renderToast from '@/components/renderPromiseToast';
 import { Switch } from '@/components/ui/switch';
-import Separator from '../ui/separator/Separator.vue';
+import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { dialogState } from '@/hooks/useToggleDialog';
 

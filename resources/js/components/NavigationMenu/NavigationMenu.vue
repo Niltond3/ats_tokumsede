@@ -13,15 +13,15 @@ import { usePage } from '@inertiajs/vue3';
 import { Link } from '@inertiajs/vue3';
 import logo from '@/../../public/images/tokumsede-logo.png';
 import { useRoute } from 'vue-router';
-import { DialogRegisterProduct } from '../dialogs/DialogRegisterProduct';
-import DialogRegisterClient from '../dialogs/DialogRegisterClient.vue';
+import { DialogRegisterProduct } from '@/components/dialogs/DialogRegisterProduct';
+import DialogRegisterClient from '@/components/dialogs/DialogRegisterClient.vue';
 import { DialogRegisterPrices } from '@/components/dialogs/DialogRegisterPrices';
-import DialogTrigger from '../dialogs/DialogTrigger.vue';
-import DialogReportStock from '../dialogs/DialogReportStock.vue';
-import DialogReportOrders from '../dialogs/DialogReportOrders.vue';
+import DialogTrigger from '@/components/dialogs/DialogTrigger.vue';
+import DialogReportStock from '@/components/dialogs/DialogReportStock.vue';
+import DialogReportOrders from '@/components/dialogs/DialogReportOrders.vue';
 
 import { dialogState } from '@/hooks/useToggleDialog.js';
-import DialogStockMerge from '../dialogs/DialogStockMerge/DialogStockMerge.vue';
+import DialogStockMerge from '@/components/dialogs/DialogStockMerge/DialogStockMerge.vue';
 
 const { isOpen: openRegisterPrices, toggleDialog: toggleRegisterPrices } =
   dialogState('RegisterPrices');

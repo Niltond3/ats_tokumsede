@@ -7,7 +7,7 @@ import * as z from 'zod';
 import axios from 'axios';
 import { RiMailSendLine as MailIcon } from 'vue-remix-icons';
 
-import Button from '../Button.vue';
+import Button from '@/components/Button.vue';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import {
   Dialog,

@@ -1,17 +1,15 @@
 <script setup>
 // Vue core
 import { ref, onMounted } from 'vue';
-
 // Form validation
 import * as z from 'zod';
 import { toTypedSchema } from '@vee-validate/zod';
-
 // UI Components
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormField } from '@/components/ui/form';
-import { FormItem, FormLabel, FormControl, FormMessage } from '../../ui/form';
+import { FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import {
   Dialog,
   DialogContent,
@@ -19,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import DialogTrigger from '../DialogTrigger.vue';
+import DialogTrigger from '@/components/dialogs/DialogTrigger.vue';
 import {
   Select,
   SelectContent,
@@ -29,16 +27,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Link } from '@inertiajs/vue3';
-
 // Utilities
 import { useDropzone } from 'vue3-dropzone';
 import { dialogState } from '@/hooks/useToggleDialog';
-import renderToast from '../../renderPromiseToast';
+import renderToast from '@/components/renderPromiseToast';
 import { StringUtil } from '@/util';
 import SelectImages from './SelectImages.vue';
 import SelectCompositionProducts from './SelectCompositionProducts.vue';
-import { event } from 'jquery';
 
 const isLoading = ref(true);
 const categories = ref([]);

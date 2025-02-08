@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { toast } from 'vue-sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import DataTablePedidos from '@/Pages/Management/DataTablePedidos/DataTablePedidos.vue';
+import DataTablePedidos from '@/components/dataTables/DataTablePedidos/DataTablePedidos.vue';
 import { Form } from '@/components/ui/form';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
@@ -16,7 +16,7 @@ import DistributorCombobox from './DialogStockMerge/DistributorCombobox.vue';
 import { jsPDF } from 'jspdf';
 import { Skeleton } from '@/components/ui/skeleton';
 import 'jspdf-autotable';
-import DataTableStock from '@/Pages/Management/DataTableStock/DataTableStock.vue';
+import DataTableStock from '@/components/dataTables/DataTableStock/DataTableStock.vue';
 import { getStockReport } from '@/services/api/stock';
 
 const props = defineProps({

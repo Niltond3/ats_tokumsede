@@ -1,12 +1,12 @@
 <script setup>
 // Vue core
-import { onMounted } from 'vue';
+import { onMounted, inject, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 
 // Components
-import Dashboard from '../Dashboard.vue';
-import { TableClientes } from './DataTableClientes';
-import { TablePedidos } from './DataTablePedidos';
+import Dashboard from '@/Pages/Dashboard.vue';
+import { TableClientes } from '@/components/dataTables/DataTableClientes';
+import { TablePedidos } from '@/components/dataTables/DataTablePedidos';
 
 // UI Components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +21,7 @@ import renderToast from '@/components/renderPromiseToast';
 const { connect } = useQzTray();
 const { detectDevice, isMobile } = useIsMobile();
 const page = usePage();
+const { notificationCount, resetNotificationCount } = inject('orderNotifications');
 
 const typeAdmin = page.props.auth.user.tipoAdministrador;
 
@@ -75,9 +76,10 @@ onMounted(() => {
         >
           <span class="relative">
             <div
-              class="absolute hidden items-center justify-center w-6 h-6 text-xs font-bold text-white bg-danger border-2 border-white rounded-full -top-3 -right-6 -end-2 dark:border-gray-900 animate-pulse m-auto transition-all [transition-behavior:allow-discrete]"
+              v-if="notificationCount > 0"
+              class="absolute items-center flex justify-center w-6 h-6 text-xs font-bold text-white bg-danger border-2 border-white rounded-full -top-3 -right-6 -end-2 dark:border-gray-900 animate-pulse m-auto transition-all [transition-behavior:allow-discrete]"
             >
-              !
+              <span>{{ notificationCount }}</span>
             </div>
             Pedidos
           </span>
@@ -110,7 +112,7 @@ onMounted(() => {
           <CardContent
             class="[&_.dtsp-titleRow]:h-0 [&_.dtsp-nameColumn]:border-none [&_.dtsp-nameColumn>div]:flex [&_.dtsp-nameColumn>div]:items-center"
           >
-            <TablePedidos :set-tab="setActiveTab" />
+            <TablePedidos :set-tab="setActiveTab" :on-set-tab="resetNotificationCount" />
           </CardContent>
         </Card>
       </TabsContent>

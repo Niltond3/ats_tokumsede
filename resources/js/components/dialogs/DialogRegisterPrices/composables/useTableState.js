@@ -1,7 +1,7 @@
 import { ref, reactive } from "vue";
-import { createTableOptions } from "@/components/DataTableProducts/config/tableConfig";
+import { createTableOptions } from "@/components/dataTables/DataTableProducts/config/tableConfig";
 import { useVueTable } from "@tanstack/vue-table";
-import { columns } from "@/components/DataTableProducts/config/Columns";
+import { columns } from "@/components/dataTables/DataTableProducts/config/Columns";
 
 export function useTableState(tableProductsState, updateData) {
     const sorting = ref([]);

@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import DatePicker from './datePicker.vue';
 import Button from '@/components/Button.vue';
 import { PasswordUtil } from '@/util';
-import DialogOthersContacts from '../../../dialogs/DialogOthersContacts.vue';
+import DialogOthersContacts from '@/components/dialogs/DialogOthersContacts.vue';
 
 const { values } = defineProps({ values: Object });
 

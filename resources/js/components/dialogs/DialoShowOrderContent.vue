@@ -21,11 +21,9 @@ import renderToast from '@/components/renderPromiseToast';
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 import { useQzTray } from '@/composables/useQzTray';
 import { connectPrinter, printMobileData } from '@/services/printer/MobilePrinterService';
-// import getPrintData from '../../Pages/Management/components/config/printOrder';
 import usePrintOrder from '@/composables/usePrintOrders';
 import useIsMobile from '@/composables/useIsMobile';
 import ReminderManager from '@/components/ReminderManager.vue';
-import { useReminders } from '@/composables/useReminders';
 import { viewOrder } from '@/services/api/orders';
 
 const { checkConnection, selectedPrinter, findPrinter, listPrinters, print } = useQzTray();

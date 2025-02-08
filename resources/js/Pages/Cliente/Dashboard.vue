@@ -16,12 +16,12 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ChevronsUpDown } from 'lucide-vue-next';
 import { DialogCreateOrder } from '@/components/dialogs/DialogClientCreateOrder';
-import { TablePedidos } from '../Management/DataTablePedidos';
+import { TablePedidos } from '@/components/dataTables/DataTablePedidos';
 import renderToast from '@/components/renderPromiseToast';
 import { dialogState } from '@/hooks/useToggleDialog';
-import DialogRegisterAddress from '../../components/dialogs/DialogRegisterAddress.vue';
+import DialogRegisterAddress from '@/components/dialogs/DialogRegisterAddress.vue';
 import Separator from '@/components/ui/separator/Separator.vue';
-import DialogConfirmAddressDelete from '../../components/dialogs/DialogConfirmAddressDelete.vue';
+import DialogConfirmAddressDelete from '@/components/dialogs/DialogConfirmAddressDelete.vue';
 
 const { isOpen: isOpenCreateOrderDialog, toggleDialog: toggleCreateOrderDialog } =
   dialogState('CreateOrder');

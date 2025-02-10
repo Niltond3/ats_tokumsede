@@ -219,15 +219,18 @@ const setupAddressHandlers = (dt) => {
 
   $('#datatable-clientes').on('click', '.novoEndereco', function () {
     idClient.value = this.id;
+    console.log(this.id);
     toggleRegisterAddress();
   });
 
-  $('#datatable-clientes').on('click', '.excluirEndereco', toggleConfirmDialog);
-
   $('#datatable-clientes').on('click', '.novoPrecoEspecial', (event) => {
+    console.log(event.target);
+    console.log(event.target.id);
     idClient.value = event.target.id;
     toggleRegisterPrices();
   });
+  $('#datatable-clientes').on('click', '.excluirEndereco', toggleConfirmDialog);
+
   //
   $('#datatable-clientes').on('click', '.atualizarCoordenadas', (event) => {
     //idAddress
@@ -390,7 +393,6 @@ const options = {
               apelido: StringUtil.utf8Decode(address.apelido || ''),
             })),
           }));
-
         } catch (error) {
           console.error('Error fetching complete dataset:', error);
         }

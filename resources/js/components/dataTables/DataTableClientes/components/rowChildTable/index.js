@@ -14,21 +14,25 @@ export default (d) => {
             action: 'copiarEndereco',
             icon: 'ri-file-copy-2-fill',
             iconSize: 'text-sm',
+            clientId: rowChildData.id
         },
         {
             action: 'excluirEndereco',
             icon: 'ri-delete-bin-2-fill',
             iconSize: 'text-sm',
+            clientId: rowChildData.id
         },
         {
             action: 'novoPrecoEspecial',
             icon: 'ri-price-tag-3-fill',
             iconSize: 'text-sm',
+            clientId: rowChildData.id
         },
         {
             action: 'atualizarCoordenadas',
             icon: 'ri-refresh-fill',
             iconSize: '!text-md',
+            clientId: rowChildData.id
         },
     ]
     const containerAddressClasses = twMerge(

@@ -106,7 +106,7 @@ watch(
 
 watch(
   () => width.value,
-  (newWidth) => (resizebleColumns.value = useResponsiveColumns(columns, newWidth).value),
+  (newWidth) => (resizebleColumns.value = useResponsives(columns, newWidth).value),
 );
 
 watch(
@@ -189,6 +189,7 @@ watch(
       @update:order-note="handleUpdateOrderNote"
     />
     <DataTableProducts.Footer
+      :products="tableProductsState.tableData"
       :payload="tableProductsState.payload"
       :is-update="isUpdate"
       :disabled-button="disabledButton"

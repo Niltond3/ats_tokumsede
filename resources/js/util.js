@@ -380,6 +380,56 @@ ${order.obs ? `obs: ${order.obs}` : ""}
             console.error("Erro ao copiar para a área de transferência", error);
         }
     },
+    orderProductsToClipboard: (payload, products) => {
+        try {
+            // Get money formatter
+            const { toCurrency } = MoneyUtil.formatMoney();
+
+            // Map items with product details
+            const orderItems = payload.itens.map((item, index) => {
+                // Find corresponding product details
+                const product = products.find(p => p.id === item.idProduto);
+                if (!product) return null;
+
+                return {
+                    index: index + 1,
+                    quantidade: item.quantidade,
+                    nome: StringUtil.utf8Decode(product.nome),
+                    preco: toCurrency(item.preco),
+                    subtotal: toCurrency(item.subtotal)
+                };
+            }).filter(Boolean); // Remove null entries
+
+            // Format header
+            const header = "*Pedido* ----------------------------------------\n";
+
+            // Format each product line
+            const productsText = orderItems
+                .map(item =>
+                    `*${item.quantidade}* ${item.nome} un ${item.preco} subtotal: ${item.subtotal}`
+                )
+                .join('\n');
+
+            // Format total
+            const total = `\nValor total: *${toCurrency(payload.totalProdutos)}*`;
+
+            // Format footer
+            const footer = "\n---------------------------------------------------";
+
+            // Combine all parts
+            const clipboardText = `${header}${productsText}${total}${footer}`;
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(clipboardText);
+            toast.info('Produtos copiados para a área de transferência');
+
+            return true;
+        } catch (error) {
+            console.error('Erro ao copiar produtos para área de transferência:', error);
+            toast.error('Erro ao copiar produtos');
+            return false;
+        }
+    }
 };
 
 // ==================

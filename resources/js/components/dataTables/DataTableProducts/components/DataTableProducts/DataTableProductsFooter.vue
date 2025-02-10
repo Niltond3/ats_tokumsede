@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import SelectPayment from '@/components/orderComponents/SelectPayment.vue';
 import ExchangeInput from '@/components/orderComponents/ExchangeInput.vue';
 import DateTimePicker from '@/components/orderComponents/DateTimePicker.vue';
-import { MoneyUtil, DateUtil } from '@/util';
+import { MoneyUtil, DateUtil, ClipboardUtil } from '@/util';
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -13,6 +13,7 @@ const props = defineProps({
   isUpdate: Boolean,
   disabledButton: Boolean,
   addressNote: String,
+  products: Object,
 });
 
 const { toCurrency } = MoneyUtil.formatMoney();
@@ -39,26 +40,40 @@ const values = computed(() => [
     value: toCurrency(props.payload.total),
   },
 ]);
+
+const orderProductsToClipboard = () => {
+  ClipboardUtil.orderProductsToClipboard(props.payload, props.products);
+};
 </script>
 
 <template>
   <div class="flex mt-3 gap-3 flex-col sm:grid sm:grid-cols-12 sm:grid-rows-2">
-    <div class="flex items-center h-11 justify-around sm:col-span-4">
-      <div class="w-full flex flex-col items-center justify-center">
+    <div class="flex items-center h-11 justify-around sm:col-span-4 mt-3">
+      <button
+        class="w-full flex flex-col items-center justify-center bg-info py-3 px-4 rounded-md transition-colors duration-300 group relative group"
+        @click="orderProductsToClipboard"
+      >
+        <p
+          class="absolute opacity-0 group-hover:opacity-100 size-8 text-white bg-dispatched border-2 border-white rounded-full bottom-1/2 -translate-y-1/2 -left-3 transition-opacity duration-300"
+        >
+          <i class="ri-file-copy-2-fill"></i>
+        </p>
         <Separator class="mt-1 mb-[0.35rem]" />
-        <div class="flex gap-8">
+        <div class="flex gap-5">
           <span
             v-for="value in values"
             :key="value.label"
             class="text-sm font-medium relative text-info"
           >
-            <p class="absolute -top-5 text-gray-500 text-xs -translate-x-1/2 left-1/2 bg-white p-1">
+            <p
+              class="absolute -top-5 text-white text-xs -translate-x-1/2 left-1/2 bg-info p-1 rounded-md"
+            >
               {{ value.label }}
             </p>
-            <p class="text-nowrap">{{ value.value }}</p>
+            <p class="text-nowrap text-white font-bold">{{ value.value }}</p>
           </span>
         </div>
-      </div>
+      </button>
     </div>
     <div
       class="flex flex-wrap gap-2 px-2 pb-2 sm:h-14 justify-center sm:row-start-2 sm:col-start-1 sm:col-span-10"

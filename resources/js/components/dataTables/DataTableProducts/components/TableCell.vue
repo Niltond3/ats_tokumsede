@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { MoneyUtil} from '@/util';
+import { MoneyUtil } from '@/util';
 
 const props = defineProps({
   cellValue: { type: [Number, String], required: false },
@@ -8,7 +8,7 @@ const props = defineProps({
   offer: { type: Boolean, required: false, default: false },
 });
 
-const { toCurrency, config } =MoneyUtil.formatMoney();
+const { toCurrency, config } = MoneyUtil.formatMoney();
 const inputElement = ref();
 const initialValue = ref(toCurrency(parseFloat(props.cellValue).toFixed(2)));
 const showInput = ref(false);
@@ -40,11 +40,14 @@ onMounted(() => (originalValue.value = props.cellValue));
 
 <template>
   <div
-    class="relative cursor-pointer font-semibold"
+    class="relative cursor-pointer font-semibold flex"
     :class="valueChange ? 'text-warning' : 'text-info'"
     @click="handleClick"
   >
-    <p v-if="!showInput">
+    <p
+      v-if="!showInput"
+      class="bg-info rounded-md text-white py-0.5 px-1 hover:bg-info/80 transition-colors duration-300"
+    >
       <slot />
     </p>
 

@@ -126,7 +126,9 @@ watch(
 );
 
 const fetchClientName = async () => {
+  console.log(props.clientId);
   const clientRequest = await getClient(props.clientId);
+  console.log(clientRequest);
   clientName.value = StringUtil.utf8Decode(clientRequest.data.nome);
 };
 

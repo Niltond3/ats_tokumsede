@@ -8,9 +8,17 @@ use App\Models\Cliente;
 use App\Models\Distribuidor;
 use App\Models\Administrador;
 use Illuminate\Http\Request;
+use App\Traits\UsesDistributorService;
 
 class CreatePedidoAction extends BasePedidoAction
 {
+    use UsesDistributorService;
+
+    public function __construct()
+    {
+        $this->initializeDistributorService();
+    }
+
     public function execute(Request $request)
     {
         $dataAgendada = $request->dataAgendada == "" ? null : implode("-", array_reverse(explode("/", $request->dataAgendada)));
@@ -75,13 +83,4 @@ class CreatePedidoAction extends BasePedidoAction
 
         $this->fcmService->sendOrderNotification($administradores, $msg);
     }
-        /**
- * Gets the effective distributor ID considering stock unions
- * @param int $distributorId Original distributor ID
- * @return int Main distributor ID or original ID if no union exists
- */
-private function getEffectiveDistributorId($distributorId) {
-    $distributor = Distribuidor::find($distributorId);
-    return $distributor->getMainDistributorIdAttribute() ?? $distributorId;
-}
 }

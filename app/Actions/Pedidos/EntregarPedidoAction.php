@@ -4,11 +4,24 @@ namespace App\Actions\Pedidos;
 
 use App\Models\Pedido;
 use App\Models\Cliente;
+use App\Models\EnderecoCliente;
 use App\Models\Distribuidor;
 use App\Models\ItemPedido;
+use App\Traits\UsesDistributorService;
+use App\Traits\UsesStockService;
+use App\Traits\UsesNotificationService;
 
 class EntregarPedidoAction extends BasePedidoAction
 {
+    use UsesDistributorService, UsesStockService, UsesNotificationService;
+
+    public function __construct()
+    {
+        $this->initializeDistributorService();
+        $this->initializeStockService();
+        $this->initializeNotificationService();
+    }
+
     public function execute($idPedido)
     {
         $pedido = Pedido::find($idPedido);

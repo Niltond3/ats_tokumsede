@@ -8,9 +8,16 @@ use App\Models\Distribuidor;
 use Debugbar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Traits\UsesDistributorService;
 
 class EstoqueController extends Controller
 {
+    use UsesDistributorService;
+
+    public function __construct()
+    {
+        $this->initializeDistributorService();
+    }
     /**
      * Display a listing of the resource.
      *
@@ -116,11 +123,4 @@ class EstoqueController extends Controller
             return response('Não foi possível alterar o estoque. Valor igual ao estoque anterior.', 400);
         }
     }
-
-    private function getEffectiveDistributorId($distributorId)
-{
-    $distributor = Distribuidor::find($distributorId);
-    return $distributor->getMainDistributorIdAttribute() ?? $distributorId;
-}
-
 }

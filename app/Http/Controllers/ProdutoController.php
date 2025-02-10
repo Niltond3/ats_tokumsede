@@ -16,14 +16,21 @@ use App\Models\Estoque;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use \Barryvdh\Debugbar\Facades\Debugbar;
+use App\Traits\UsesDistributorService;
 
 class ProdutoController extends Controller
 {
+    use UsesDistributorService;
+
+    public function __construct()
+    {
+        $this->initializeDistributorService();
+    }
     private function getEffectiveDistributorId($distributorId)
-{
-    $distributor = Distribuidor::find($distributorId);
-    return $distributor->getMainDistributorIdAttribute() ?? $distributorId;
-}
+    {
+        $distributor = Distribuidor::find($distributorId);
+        return $distributor->getMainDistributorIdAttribute() ?? $distributorId;
+    }
     /**
      * Display a listing of the resource.
      *

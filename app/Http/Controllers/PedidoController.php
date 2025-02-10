@@ -13,6 +13,7 @@ use App\Actions\Pedidos\{
     DespacharPedidoAction,
     EntregarPedidoAction,
     CancelarPedidoAction,
+    RecusarPedidoAction,
     RelatorioVendasAction,
     RelatorioPedidosAction,
     RelatorioVendasProdutoAction,
@@ -51,6 +52,7 @@ class PedidoController extends Controller
         AtualizarPedidoAction $atualizarPedido,
         UltimoPedidoAction $ultimoPedido,
         VisualizarPedidoAction $visualizarPedido,
+        RecusarPedidoAction $recusarPedido,
     ) {
         $this->actions = compact(
             'listPedidos',
@@ -73,6 +75,7 @@ class PedidoController extends Controller
             'atualizarPedido',
             'ultimoPedido',
             'visualizarPedido',
+            'recusarPedido'
         );
     }
 
@@ -124,6 +127,10 @@ class PedidoController extends Controller
         return $this->actions['cancelar']->execute($request, $id);
     }
 
+    public function recusar(Request $request, $idPedido)
+    {
+        return $this->actions['recusarPedido']->execute($idPedido, $request);
+    }
     public function relatorioVendas(Request $request)
     {
         return $this->actions['relatorioVendas']->execute($request);

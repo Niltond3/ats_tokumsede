@@ -12,6 +12,8 @@ use App\Traits\UsesDistributorService;
 use App\Traits\UsesStockService;
 use Illuminate\Http\Request;
 
+date_default_timezone_set('America/Sao_Paulo');
+
 class CreatePedidoAction extends BasePedidoAction
 {
     use UsesDistributorService, UsesStockService;

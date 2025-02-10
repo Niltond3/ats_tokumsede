@@ -66,19 +66,22 @@ const { updateData } = useUpdateData(tableProductsState, emit);
 const computedOrderTotals = computed(() => {
   const itens = tableProductsState.tableData
     .filter((product) => product.quantidade > 0)
-    .map((product) => ({
-      idProduto: product.id,
-      quantidade: product.quantidade,
-      preco: product.precoEspecial
-        ? product.precoEspecial[product.precoEspecial.length - 1].val
-        : product.preco[product.preco.length - 1].val,
-      subtotal:
-        product.quantidade *
-        (product.precoEspecial
+    .map((product) => {
+      console.log(product);
+      return {
+        idProduto: product.id,
+        quantidade: product.quantidade,
+        preco: product.precoEspecial
           ? product.precoEspecial[product.precoEspecial.length - 1].val
-          : product.preco[product.preco.length - 1].val),
-      precoAcertado: null,
-    }));
+          : product.preco[product.preco.length - 1].val,
+        subtotal:
+          product.quantidade *
+          (product.precoEspecial
+            ? product.precoEspecial[product.precoEspecial.length - 1].val
+            : product.preco[product.preco.length - 1].val),
+        precoAcertado: null,
+      };
+    });
 
   return {
     itens,
@@ -155,7 +158,8 @@ watch(
       idEndereco,
       order,
     );
-
+    console.log(rawProducts);
+    console.log(products);
     clientName.value = rawClientName;
     isUpdate.value = updateOrder;
     tableProductsState.payload = { ...tableProductsState.payload, ...orderPayload };
@@ -183,6 +187,7 @@ watch(
       @update:distributor="handleDistributor"
     />
     <DataTableProducts.Table
+      :products="tableProductsState.tableData"
       :obs="tableProductsState.payload.obs"
       :resizeble-columns="resizebleColumns"
       :table="table"

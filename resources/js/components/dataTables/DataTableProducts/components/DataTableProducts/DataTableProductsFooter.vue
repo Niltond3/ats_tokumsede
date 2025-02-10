@@ -54,7 +54,7 @@ const orderProductsToClipboard = () => {
         @click="orderProductsToClipboard"
       >
         <p
-          class="absolute opacity-0 group-hover:opacity-100 size-8 text-white bg-dispatched border-2 border-white rounded-full bottom-1/2 -translate-y-1/2 -left-3 transition-opacity duration-300"
+          class="z-10 absolute opacity-0 group-hover:opacity-100 size-8 text-white bg-dispatched border-2 border-white rounded-full bottom-1/2 -translate-y-1/2 -left-3 transition-opacity duration-300"
         >
           <i class="ri-file-copy-2-fill"></i>
         </p>

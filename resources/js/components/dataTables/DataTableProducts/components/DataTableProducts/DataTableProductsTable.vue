@@ -11,8 +11,13 @@ import {
 import { FlexRender } from '@tanstack/vue-table';
 import { DialogCreateOrderNote } from '..';
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const props = defineProps({
+  products: {
+    type: Array,
+    required: true,
+  },
   table: {
     type: Object,
     required: true,
@@ -40,7 +45,46 @@ const emits = defineEmits(['update:order-note']);
     <Table
       class="rounded-md [&_tbody]:h-[235px] [&_tbody]:table-fixed [&_tbody]:block [&_tbody]:overflow-y-auto [&_tbody]:overflow-x-hidden [&_tr]:table [&_tr]:w-full [&_tr]:table-fixed"
     >
-      <TableHeader class="bg-info rounded-md">
+      <!-- <TooltipProvider :delay-duration="100">
+        <Tooltip>
+          <TooltipTrigger as-child>
+            <TableHeader
+              class="bg-info rounded-md"
+              @click="
+                () => {
+                  console.log(props.products);
+                }
+              "
+            >
+              <TableRow v-for="headerGroup in props.table.getHeaderGroups()" :key="headerGroup.id">
+                <TableHead
+                  v-for="header in headerGroup.headers"
+                  :key="header.id"
+                  :style="{ width: header.getSize() + 'px' }"
+                >
+                  <FlexRender
+                    v-if="!header.isPlaceholder"
+                    :render="header.column.columnDef.header"
+                    :props="header.getContext()"
+                  />
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+          </TooltipTrigger>
+          <TooltipContent class="border-none text-white bg-info font-bold flex gap-2">
+            <i class="ri-file-copy-2-fill"></i>
+            clique para copiar os preços
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider> -->
+      <TableHeader
+        class="bg-info rounded-md"
+        @click="
+          () => {
+            console.log(props.products);
+          }
+        "
+      >
         <TableRow v-for="headerGroup in props.table.getHeaderGroups()" :key="headerGroup.id">
           <TableHead
             v-for="header in headerGroup.headers"

@@ -30,13 +30,11 @@ onMounted(() => {
     'Dados carregados com sucesso!',
     'Erro ao carregar dados do cliente!',
     (response) => {
-      console.log(response.data);
       clientDetails.value = {
         ...response.data,
         telefone: response.data.dddTelefone + response.data.telefone,
         outrosContatos: JSON.parse(response.data.outrosContatos),
       };
-      console.log(clientDetails.value);
     },
   );
 });

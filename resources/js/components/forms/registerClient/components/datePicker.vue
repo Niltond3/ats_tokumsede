@@ -56,8 +56,6 @@ const props = defineProps({
 
 const emits = defineEmits(['update:modelValue', 'update:placeholder']);
 
-console.log(props);
-
 const delegatedProps = computed(() => {
   const { class: _, placeholder: __, ...delegated } = props;
 

@@ -66,9 +66,6 @@ const { handleSubmit, isSubmitting, resetForm } = useForm({
 });
 
 const onSubmit = handleSubmit((values) => {
-  console.log('Starting form submission');
-  //   const values = form.values;
-  console.log('Form submitted with values:', values);
   const phoneRaw = values.telefone.replace(/\D/g, '');
   const credentials = {
     ddd: phoneRaw.slice(0, 2),
@@ -94,7 +91,6 @@ const onSubmit = handleSubmit((values) => {
   });
 });
 const handleSuccessLogin = (response) => {
-  console.log('Login successful:', response);
   location.reload();
 };
 </script>

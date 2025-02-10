@@ -46,17 +46,12 @@ async function fetchStockReport() {
     .filter((id) => id)
     .join(',');
 
-  console.log(distributors.value);
-  console.log(selectedDistributors.value);
-  console.log(selectedDistributorIds.value);
-
   renderToast(
     getStockReport(selectedDistributorIds.value),
     'Carregando relatório...',
     'Relatório gerado com sucesso!',
     'Erro ao gerar relatório',
     (response) => {
-      console.log(response);
       stockResponse.value = response;
       isLoadingReport.value = false;
     },

@@ -63,7 +63,6 @@ const onSubmit = handleSubmit((formValues) => {
   };
 
   // Here you can use your API call or Inertia form submission
-  console.log(payload);
   renderToast(
     updatePassword(clientId, payload),
     'Atualizando Senha ...',

@@ -49,15 +49,12 @@ onMounted(() => {
 const { toCurrency } = MoneyUtil.formatMoney();
 
 const fetchOrder = () => {
-  console.log(props.orderId);
   renderToast(
     viewOrder(props.orderId),
     `carregando pedido ${props.orderId}`,
     'Pedido carregado',
     'Erro ao carregar pedido',
     async (response) => {
-      console.log(response.data);
-      console.log(response);
       const formatedOrder = OrderUtil.formatOrder(response.data);
 
       const itensPedido = response.data.itensPedido.map((order) => {
@@ -72,7 +69,6 @@ const fetchOrder = () => {
       data.value = { ...formatedOrder, itensPedido };
       clientId.value = data.value.cliente.id;
       clientName.value = data.value.cliente.nome;
-      console.log();
       isLoading.value = false;
     },
   );
@@ -81,7 +77,6 @@ const fetchOrder = () => {
 watch(
   () => props.isOpen,
   (isOpen) => {
-    console.log(isOpen);
     fetchOrder();
   },
 );

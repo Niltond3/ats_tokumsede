@@ -36,15 +36,7 @@ watch(
     date.value = newDate;
   },
 );
-const handleOpen = (e) => {
-  console.log('event', e);
-  console.log('datePicker open');
-};
 
-const handleClose = (e) => {
-  console.log('event', e);
-  console.log('datePicker close');
-};
 </script>
 
 <template>

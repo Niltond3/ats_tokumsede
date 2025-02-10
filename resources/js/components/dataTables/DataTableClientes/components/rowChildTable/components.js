@@ -126,6 +126,12 @@ export default () => {
                  </button>
              </div>
              </li>`
+        },
+        addressActionsButtons: (action, btClasses) => {
+            return /*html*/`<button
+            class="${btClasses} ${action.action} hover:text-white hover:bg-dispatched flex justify-center items-center text-dispatched/60 transition-all hover:shadow-lg">
+            <i class="${action.icon} ${action.iconSize} pointer-events-none select-none"></i>
+        </button>`
         }
     }
 

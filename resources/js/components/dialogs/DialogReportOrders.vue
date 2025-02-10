@@ -179,7 +179,6 @@ async function getDistributors() {
       successText: 'Informações carregadas com sucesso!',
       errorText: 'Erro ao carregar informações',
       onSuccess: (response) => {
-        console.log(response.data.data);
         selectedDistributors.value = [response.data.data.id];
         distributorName.value = StringUtil.utf8Decode(response.data.data.nome);
         isLoading.value = false;

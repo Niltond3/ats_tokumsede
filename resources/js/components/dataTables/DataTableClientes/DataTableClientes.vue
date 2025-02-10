@@ -36,6 +36,7 @@ import renderToast from '@/components/renderPromiseToast';
 import DialogEditOrder from '@/components/dataTables/DataTablePedidos/components/DialogEditOrder.vue';
 import ClientActionsWrapper from '@/components/wrapper/ClientActionsWrapper.vue';
 import ClientActionsDropdown from '@/components/dropdowns/ClientActionsDropdown.vue';
+import { updateCoordinates } from '@/services/api/addresses';
 
 DataTable.use(DataTablesCore);
 
@@ -195,7 +196,6 @@ const setupOrderHandlers = () => {
   });
 
   $('#datatable-clientes').on('click', '.visualizarPedido', function () {
-    console.log('visualizar pedido');
     idOrder.value = parseInt(this.id);
     toggleShowOrderDialog();
   });
@@ -228,7 +228,16 @@ const setupAddressHandlers = (dt) => {
     idClient.value = event.target.id;
     toggleRegisterPrices();
   });
-
+  //
+  $('#datatable-clientes').on('click', '.atualizarCoordenadas', (event) => {
+    //idAddress
+    renderToast(
+      updateCoordinates(idAddress.value),
+      'Atualizando coordenadas',
+      'Coordenadas atualizadas',
+      'Falha ao atualizar coordenadas',
+    );
+  });
   $('#datatable-clientes').on('long-press', '.selectOrder', function (e) {
     idClient.value = e.target.getAttribute('client_id');
     idOrder.value = e.target.getAttribute('order_id');
@@ -382,7 +391,6 @@ const options = {
             })),
           }));
 
-          console.log('Complete filtered dataset:', fullData);
         } catch (error) {
           console.error('Error fetching complete dataset:', error);
         }

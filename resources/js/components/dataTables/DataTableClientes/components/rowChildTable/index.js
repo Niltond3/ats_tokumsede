@@ -3,11 +3,33 @@ import { twMerge } from "tailwind-merge";
 import components from "./components";
 
 export default (d) => {
-    const { customLiAddress, customLiOrder } = components();
+    const { customLiAddress, customLiOrder, addressActionsButtons } = components();
 
     const rowChildData = d;
     const clientName = StringUtil.utf8Decode(rowChildData.nome);
     const containerClasses = `p-2 md:flex-1`;
+    const addressActions = [
+        {
+            action: 'copiarEndereco',
+            icon: 'ri-file-copy-2-fill',
+            iconSize: 'text-sm',
+        },
+        {
+            action: 'excluirEndereco',
+            icon: 'ri-delete-bin-2-fill',
+            iconSize: 'text-sm',
+        },
+        {
+            action: 'novoPrecoEspecial',
+            icon: 'ri-price-tag-3-fill',
+            iconSize: 'text-sm',
+        },
+        {
+            action: 'atualizarCoordenadas',
+            icon: 'ri-refresh-fill',
+            iconSize: '!text-md',
+        },
+    ]
     const containerAddressClasses = twMerge(
         "md:!max-h-[11rem]",
         "hover:bg-info/5  flex flex-col px-3 py-2bg-slate-100 ",
@@ -16,7 +38,7 @@ export default (d) => {
     );
 
     const btClasses =
-        "min-w-[32px] min-h-[32px] w-[32px] h-[32px] text-2xl shadow-md rounded-full ";
+        "min-w-8 min-h-8 size-8 text-base shadow-md rounded-full ";
 
     return /*html*/ `
 <div class="flex flex-col md:flex-row justify-between w-full">
@@ -24,7 +46,7 @@ export default (d) => {
         <div class="flex justify-between text-sm py-2 px-4 border-b border-slate-300 mb-1 items-center h-[50px]">
             <button class="accordionController text-white gap-2 text-base bg-info/80 hover:bg-info hover:shadow-md transition-all font-semibold py-1 px-2 rounded-md md:after:!hidden after:content-['+'] after:text-slate-100 after:font-bold after:ml-1 after:w-4 after:h-4 after:inline-block after:text-center flex">
                 <i class="ri-map-fill pointer-events-none select-none"></i>
-                <span class="group-has-[li[aria-selected='true']]:hidden min-[405px]:group-has-[li[aria-selected='true']]:block pointer-events-none select-none">Endereços</span>
+                <span class="group-has-[li[aria-selected='true']]:hidden min-[405px]:group-has-[li[aria-selected='true']]:block overflow-hidden transition-all duration-1000 transition-discrete pointer-events-none select-none">Endereços</span>
             </button>
 
             <div class="flex gap-2">
@@ -48,19 +70,7 @@ export default (d) => {
                 </button>
                 <div
                     class="relative transition-max-width max-w-0 group-has-[li[aria-selected='true']]:max-w-40 ease-in-out delay-150 overflow-x-hidden overflow-y-visible flex gap-2 group-has-[li[aria-selected='true']]:delay-75">
-                    <button
-                        class="${btClasses} copiarEndereco hover:text-white hover:bg-dispatched flex justify-center items-center text-dispatched/60 transition-all hover:shadow-lg">
-                        <i class="ri-file-copy-2-fill text-sm pointer-events-none select-none"></i>
-                    </button>
-                    <button
-                        class="${btClasses} excluirEndereco hover:text-white hover:bg-dispatched flex justify-center items-center text-dispatched/60 transition-all group-hover/line:bg-white group-aria-selected/line:!bg-white hover:shadow-lg">
-                        <i class="ri-delete-bin-2-fill text-sm pointer-events-none select-none"></i>
-                    </button>
-                    <button
-                        class="${btClasses} flex novoPrecoEspecial hover:text-white hover:bg-dispatched justify-center items-center text-dispatched/60 transition-all group-hover/line:bg-white group-aria-selected/line:!bg-white hover:shadow-lg"
-                        id="${rowChildData.id}">
-                        <i class="ri-price-tag-3-fill text-sm pointer-events-none select-none"></i>
-                    </button>
+                    ${addressActions.map((action) => addressActionsButtons(action, btClasses)).join("")}
                 </div>
             </div>
         </div>

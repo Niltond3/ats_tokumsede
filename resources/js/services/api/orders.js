@@ -174,3 +174,34 @@ export const getLastOrder = async () => {
 export const getCustomerList = async () => {
     return await axios.get("pedidos/listaClientes");
 };
+/**
+ * Get order report
+ * @param {Object} filters - Report filters
+ * @returns {Promise} Report data
+ */
+export const getOrderReport = (filters) =>
+    axios.post('pedidos/relatorio', filters);
+
+/**
+ * Get sales report by product
+ * @param {Object} filters - Report filters
+ * @returns {Promise} Product sales report
+ */
+export const getProductSalesReport = (filters) =>
+    axios.post('pedidos/relatorio/vendas/produto', filters);
+
+/**
+ * Get sales report by delivery person
+ * @param {Object} filters - Report filters
+ * @returns {Promise} Delivery person sales report
+ */
+export const getDeliveryPersonSalesReport = (filters) =>
+    axios.post('pedidos/relatorio/vendas/entregador', filters);
+
+/**
+ * Get sales report
+ * @param {Object} filters - Report filters
+ * @returns {Promise} Sales report data
+ */
+export const getSalesReport = (filters) =>
+    axios.post('pedidos/relatorio/vendas', filters);

@@ -73,6 +73,8 @@ Route::middleware('auth')->group(function () {
 
     //ENDERECOS CLIENTES
     Route::resource('enderecos', EnderecoClienteController::class, ['except' => 'create']);
+    Route::put('/enderecos/{id}/coordinates', [EnderecoClienteController::class, 'updateCoordinates'])
+        ->name('enderecos.coordinates.update');
 
     //PEDIDOS
     Route::group(['prefix' => 'pedidos'], function () {

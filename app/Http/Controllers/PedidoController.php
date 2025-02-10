@@ -2,1564 +2,175 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pedido;
-use App\Models\Distribuidor;
-use App\Models\Administrador;
-use App\Models\EnderecoCliente;
-use App\Models\Entregador;
-use App\Models\Cliente;
-use App\Models\Produto;
-use App\Models\ItemPedido;
-use App\Models\Preco;
-use App\Models\DistributorStockUnion;
-use App\Services\FCMNotificationService;
-use Yajra\DataTables\DataTables;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use \Barryvdh\Debugbar\Facades\Debugbar;
-use Illuminate\database\query\JoinClause;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Auth\AuthenticationException;
-use Carbon\Carbon;
-use App\Enums\TipoAdministrador;
-
-
-date_default_timezone_set('America/Sao_Paulo');
+use App\Actions\Pedidos\{
+    ListPedidosAction,
+    CreatePedidoAction,
+    UpdatePedidoAction,
+    ShowPedidoAction,
+    SetPendentePedidoAction,
+    AceitarPedidoAction,
+    DespacharPedidoAction,
+    EntregarPedidoAction,
+    CancelarPedidoAction,
+    RelatorioVendasAction,
+    RelatorioPedidosAction,
+    RelatorioVendasProdutoAction,
+    RelatorioVendasEntregadorAction,
+    BuscarNovosPedidosAction,
+    AjustarCoordenadasAction,
+    ListaClientesAction,
+    EditarPedidoAction,
+    AtualizarPedidoAction,
+    UltimoPedidoAction,
+    VisualizarPedidoAction,
+};
 
 class PedidoController extends Controller
 {
-    /**
- * Gets the effective distributor ID considering stock unions
- * @param int $distributorId Original distributor ID
- * @return int Main distributor ID or original ID if no union exists
- */
-    private function getEffectiveDistributorId($distributorId) {
-        $distributor = Distribuidor::find($distributorId);
-        return $distributor->getMainDistributorIdAttribute() ?? $distributorId;
+    private $actions;
+
+    public function __construct(
+        ListPedidosAction $listPedidos,
+        CreatePedidoAction $createPedido,
+        UpdatePedidoAction $updatePedido,
+        ShowPedidoAction $showPedido,
+        SetPendentePedidoAction $setPendente,
+        AceitarPedidoAction $aceitar,
+        DespacharPedidoAction $despachar,
+        EntregarPedidoAction $entregar,
+        CancelarPedidoAction $cancelar,
+        RelatorioVendasAction $relatorioVendas,
+        RelatorioPedidosAction $relatorioPedidos,
+        RelatorioVendasProdutoAction $relatorioVendasProduto,
+        RelatorioVendasEntregadorAction $relatorioVendasEntregador,
+        BuscarNovosPedidosAction $buscarNovosPedidos,
+        AjustarCoordenadasAction $ajustarCoordenadas,
+        ListaClientesAction $listaClientes,
+        EditarPedidoAction $editarPedido,
+        AtualizarPedidoAction $atualizarPedido,
+        UltimoPedidoAction $ultimoPedido,
+        VisualizarPedidoAction $visualizarPedido,
+    ) {
+        $this->actions = compact(
+            'listPedidos',
+            'createPedido',
+            'updatePedido',
+            'showPedido',
+            'setPendente',
+            'aceitar',
+            'despachar',
+            'entregar',
+            'cancelar',
+            'relatorioVendas',
+            'relatorioPedidos',
+            'relatorioVendasProduto',
+            'relatorioVendasEntregador',
+            'buscarNovosPedidos',
+            'ajustarCoordenadas',
+            'listaClientes',
+            'editarPedido',
+            'atualizarPedido',
+            'ultimoPedido',
+            'visualizarPedido',
+        );
     }
-/**
- * Builds distributor query scope based on user type and stock unions
- * @param User $user Authenticated user
- * @return Closure Query scope function
- */
-    private function getDistributorQueryScope($user)
-{
-    if ($user->tipoAdministrador == "Distribuidor") {
-        $distributor = Distribuidor::find($user->idDistribuidor);
 
-        // Se for distribuidor principal, vê todos os pedidos da união
-        if ($distributor->stockUnionsAsMain()->exists()) {
-            $unionIds = $distributor->stockUnionsAsMain()
-                ->pluck('secondary_distributor_id')
-                ->push($distributor->id)
-                ->toArray();
-
-            return function($query) use ($unionIds) {
-                $query->whereIn('pedido.idDistribuidor', $unionIds);
-            };
-        }
-
-        // Se for distribuidor secundário, vê apenas seus próprios pedidos
-        return function($query) use ($user) {
-            $query->where('pedido.idDistribuidor', $user->idDistribuidor);
-        };
-    }
-
-    // Para outros tipos de usuário, não aplica filtro
-    return function($query) {
-        return $query;
-    };
-}
-
-/**
- * Lists all orders with status-based filtering
- * Includes relationships: distributor, address, delivery person, items
- * @return JsonResponse Orders grouped by status
- */
     public function index()
     {
         if (!auth()->check()) {
             return response('Sua sessão expirou. Por favor, refaça seu login.', 400);
         }
-
-        $user = auth()->user();
-        Debugbar::info($user);
-        $baseQueryCallback = $this->getBaseQueryCallbackStructure($user);
-        $queries = $this->buildQueriesArray($baseQueryCallback, $user);
-
-        // Debug the query before execution
-        Debugbar::info($queries['agendados']->toSql());
-        Debugbar::info($queries['agendados']->getBindings());
-
-        $this->loadOrderProducts($queries);
-
-        $ultimoPedido = Pedido::orderBy('id', 'DESC')->first();
-
-        $entregadores = Entregador::where("status", Entregador::ATIVO)
-        ->when($user->tipoAdministrador === 'Distribuidor', function($query) use ($user) {
-            return $query->where('idDistribuidor', $user->idDistribuidor);
-        })
-        ->select('id', 'nome')
-        ->get();
-    // Get results using the original query structure
-
-        $result = response()->json([
-            $queries['pendentes']->orderBy('horarioPedido', 'desc')->get(),
-            $queries['aceitos']->orderBy('horarioPedido', 'desc')->get(),
-            $queries['despachados']->orderBy('horarioPedido', 'desc')->get(),
-            $queries['entregues']->orderBy('horarioPedido', 'desc')->get(),
-            $queries['cancelados']->orderBy('horarioPedido', 'desc')->get(),
-            $queries['agendados']->orderBy('horarioPedido', 'desc')->get(),
-            $ultimoPedido->id,
-            $entregadores
-        ]);
-        Debugbar::info($result);
-        return $result;
+        return $this->actions['listPedidos']->execute(auth()->user());
     }
-/**
- * Creates new order with items and notifications
- * @param Request $request Order data
- * @return mixed Order ID or error response
- */
+
     public function store(Request $request)
     {
-
-        $dataAgendada = $request->dataAgendada == "" ? null : implode("-", array_reverse(explode("/", $request->dataAgendada)));
-        //$itens = json_decode($request->itens);
-
-        //*Recupera o id do usuário logado
-        $idAdministrador = auth()->user()->id;//$this->escape("user");
-
-        $effectiveDistributorId = $this->getEffectiveDistributorId($request->idDistribuidor);
-
-        //*Faz o cadastro
-        $pedido = new Pedido($request->all());
-        $pedido->idDistribuidor = $effectiveDistributorId;
-        $pedido->trocoPara = $request->trocoPara ? $request->trocoPara : 0;
-        $pedido->obs = $request->obs ? $request->obs : "";
-        $pedido->horarioPedido = date('Y-m-d H:i:s');
-        $pedido->status = Pedido::PENDENTE;
-        $pedido->origem = $request->origem ? $request->origem : Pedido::PLATAFORMA;
-        $pedido->dataAgendada = $dataAgendada;
-        $pedido->idAdministrador = $request->origem ? null : $idAdministrador;
-        $distribuidor = Distribuidor::find($effectiveDistributorId);
-        $administradores = Administrador::where(function($query) use ($distribuidor) {
-            $query->where('idDistribuidor', $distribuidor->id)
-                  ->orWhereIn('idDistribuidor',
-                      $distribuidor->stockUnionsAsMain()
-                          ->pluck('secondary_distributor_id')
-                  );
-        })
-        ->orWhere('tipoAdministrador', 'Administrador')
-        ->orwhere([['tipoAdministrador', 'Atendente'], ['status', 'Ativo'], ['id', '!=', $idAdministrador]])->get();
-        $endereco = EnderecoCliente::find($request->idEndereco);
-        $endereco->update($request->all());
-        $cliente = Cliente::find($endereco->idCliente);
-        $valorAgua = null;
-
-        //$request->idDistribuidor==23?$pedido->idDistribuidor=14:'';//PASSAR PEDIDOS DA TKS PRAIA PARA O TREZE DE MAIO
-        if ($pedido->save()) {
-
-            foreach ($request->itens as $item) {
-
-                //Cria novo objeto referente ao Item
-                $itemPedido = new Itempedido();
-
-                //Atribui os valores do formulário ao objeto
-                $itemPedido->idPedido = $pedido->id;
-                $itemPedido->idProduto = $item['idProduto'];
-                $itemPedido->qtd = $item['quantidade'];
-                $itemPedido->preco = $item['preco'];
-                $itemPedido->subtotal = $item['subtotal'];
-                $cliente->precoAcertado ? $itemPedido->precoAcertado = $item['precoAcertado'] : null;
-
-                //PREMIAÇÕES PONTUAÇÃO DO PEDIDO
-                // if($premiacoes && $cliente->tipoPessoa==1){
-                //     if($itemPedido->idProduto==1){//PL
-                //         $pedido->pontuacao+=$itemPedido->qtd;
-                //         $valorAgua=$itemPedido->preco;
-                //         $aguaPl=true;
-                //     }else if($itemPedido->idProduto==4 && !$valorAgua){//RICA
-                //         $pedido->pontuacao+=$itemPedido->qtd;
-                //         $valorAgua=$itemPedido->preco;
-                //     }else if($itemPedido->idProduto==5){//PL+GARRAFAO
-                //         $pedido->pontuacao+=$itemPedido->qtd;
-                //         $aguaPl=true;
-                //     }else if($itemPedido->idProduto==6){//RICA+GARRAFAO
-                //         $pedido->pontuacao+=$itemPedido->qtd;
-                //         $aguaRica=true;
-                //     }
-                // }
-                //**************************** */
-                //Salva o Item
-                $itemPedido->save();
-            }
-            //PREMIAÇÕES DESCONTO NO PEDIDO
-            // if($premiacoes && $cliente->tipoPessoa==1){
-            //     $pedido->pontuacaoAcumulada=$cliente->pontuacao+$pedido->pontuacao;
-            //     if($pedido->pontuacaoAcumulada>=10){
-            //         $premios=intval($pedido->pontuacaoAcumulada/10);
-            //         if($valorAgua){
-            //             $pedido->descontoPremiacao=$premios*$valorAgua;
-            //         }else{
-            //             //buscar valor
-            //             $aguaPl?$preco=Preco::where([['idProduto',1],['idDistribuidor',$request->idDistribuidor],['valor','>',0],['status',Preco::ATIVO],])->first():$preco=Preco::where([['idProduto',4],['idDistribuidor',$request->idDistribuidor],['valor','>',0],['status',Preco::ATIVO],])->first();
-            //             $pedido->descontoPremiacao=$premios*$preco->valor;
-            //         }
-            //         $pedido->total-=$pedido->descontoPremiacao;
-            //     }
-            //     $pedido->save();
-            // }
-            //****************************** */
-            $fcmService = new FCMNotificationService();
-
-            $msg = [
-                'title' => "Pedido {$pedido->id} - {$cliente->nome}",
-                'body' => $endereco ? "{$endereco->logradouro} {$endereco->numero}, {$endereco->bairro} - {$endereco->cidade}/{$endereco->estado}" : "Novo pedido recebido",
-                'tag' => $pedido->id,
-                'icon' => '/images/logo-icon.png',
-                'click_action' => 'https://tks.tokumsede.com.br'
-            ];
-
-            $fcmService->sendOrderNotification($administradores, $msg);
-
-            return $pedido->id;//return response('Pedido '.$pedido.' cadastrado com sucesso.', 200);
-        } else {
-            Debugbar::error('Erro ao cadastrar o pedido. Tente novamente ou contate a central');
-            return response("Erro ao cadastrar o pedido. Tente novamente ou contate a central.");
-        }
-        return $itens;
-        //CADASTRAR PEDIDO
+        return $this->actions['createPedido']->execute($request);
     }
-  /**
- * Shows detailed order information
- * @param int $id Order ID
- * @return Pedido Order with relationships
- */
+
     public function show($id)
     {
-        $pedido = Pedido::find($id);
-        $pedido = $this->formatPedidoDates($pedido);
-        $pedido->itensPedido = ItemPedido::where('idPedido', $id)->where('qtd', ">", 0)->with('produto')->get();
-        $pedido->clientePedido = Cliente::find($pedido->endereco->idCliente);
-        return $pedido;
-        //
+        return $this->actions['showPedido']->execute($id);
     }
-/**
- * Updates order status and related data
- * @param Request $request Update data
- * @param int $id Order ID
- * @return Response Status update result
- */
+
     public function update(Request $request, $id)
     {
-        $pedido = Pedido::find($id);
-        $pedido->status = $request->status;
-        $date = new \DateTime();//**APENAS PARA O ENTREGAR*/
-        if ($pedido->horarioEntrega == null) {
-            $pedido->horarioEntrega = $date->format('Y-m-d H:i:s');
-        }
-        $pedido->save();
-        return response($pedido->id, 200);
+        return $this->actions['updatePedido']->execute($request, $id);
     }
 
-    // Order Status Management
-    /**
- * Resets order to pending status
- * @param int $idPedido Order ID
- * @return \Response Operation result
- */
-    function setPendente($idPedido)
-{
-    $date = new \DateTime();
-    $pedido = Pedido::find($idPedido);
-    $pedido->statusChange = 1;
-    $pedido->save();
-
-    $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
-    $cliente = Cliente::find($enderecoCliente->idCliente);
-
-    $pedido->status = Pedido::PENDENTE;
-    $pedido->editadoPor = auth()->user()->nome;
-    $pedido->horarioAceito = null;
-    $pedido->horarioDespache = null;
-    $pedido->horarioEntrega = null;
-    $pedido->horarioCancelado = null;
-    $pedido->aceitoPor = null;
-    $pedido->despachadoPor = null;
-    $pedido->entreguePor = null;
-    $pedido->canceladoPor = null;
-    $pedido->idEntregador = null;
-    $pedido->agendado = 0;
-    $pedido->dataAgendada = null;
-    $pedido->horaInicio = null;
-    $pedido->horaFim = null;
-
-    if ($pedido->save()) {
-        if ($cliente->regId != null) {
-            $this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
-        }
-        return response($pedido->id, 200);
-    }
-
-    return response("Erro ao retornar pedido para pendente. Tente novamente.", 400);
-}
-/**
- * Accepts order and assigns to delivery person
- * @param Request $request Delivery person data
- * @param int $idPedido Order ID
- * @return \Response Operation result
- */
-    function aceitar(Request $request, $idPedido)
+    public function setPendente($id)
     {
-        $date = new \DateTime();
-        $pedido = Pedido::find($idPedido);
-        if ($pedido->status == Pedido::PENDENTE) {
-            $pedido->statusChange = 1;
-            // if($request->entregador){
-            //     $pedido->idEntregador = $request->entregador;
-            // }else{
-            //     $pedido->idEntregador = Entregador::where("nome", auth()->user()->nome)->select('id')->first()->id;
-            // }
-            $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
-            $cliente = Cliente::find($enderecoCliente->idCliente);
-            $pedido->status = Pedido::ACEITO;
-            $pedido->aceitoPor = auth()->user()->nome;
-            $pedido->horarioAceito = $date->format('Y-m-d H:i:s');
-            if ($pedido->save()) {
-
-                if ($cliente->regId != null) {
-                    $this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
-                }
-
-                return response($pedido->id, 200);//$this->success("Pedido aceito com sucesso.");
-            } else {
-                return response("Erro ao aceitar o pedido. Tente novamente ou contate o suporte.", 400);//$this->error();
-            }
-        } else {
-            return response("Esse pedido foi cancelado pelo usuário ou já foi aceito por outro administrador!", 400);//$this->error("Esse pedido foi cancelado pelo usuário ou não estava pendente!");
-        }
-
+        return $this->actions['setPendente']->execute($id);
     }
-    /**
- * Dispatches order for delivery
- * @param Request $request Delivery details
- * @param int $idPedido Order ID
- * @return \Response Operation result
- */
-    function despachar(Request $request, $idPedido)
+
+    public function aceitar(Request $request, $id)
     {
-        Debugbar::info($request);
-        $date = new \DateTime();
-        $pedido = Pedido::find($idPedido);
-        if ($pedido->status == Pedido::ACEITO) {
-            $pedido->statusChange = 1;
-            if ($request->entregador) {
-                $pedido->idEntregador = $request->entregador;
-            } else {
-                $pedido->idEntregador = Entregador::where("nome", auth()->user()->nome)->select('id')->first()->id;
-            }
-            $pedido->save();
-            $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
-            $cliente = Cliente::find($enderecoCliente->idCliente);
-            $pedido->status = Pedido::DESPACHADO;
-            $pedido->despachadoPor = auth()->user()->nome;
-            $pedido->horarioDespache = $date->format('Y-m-d H:i:s');
-            if ($pedido->save()) {
-
-                if ($cliente->regId != null) {
-                    $this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
-                }
-
-                return response($pedido->id, 200);//$this->success("Pedido aceito com sucesso.");
-            } else {
-                return response("Erro ao despachar o pedido. Tente novamente ou contate o administrador.", 400);//$this->error();
-            }
-        } else {
-            return response("Esse pedido foi cancelado pelo usuário ou não estava mais como aceito!", 400);//$this->error("Esse pedido foi cancelado pelo usuário ou não estava pendente!");
-        }
-
+        return $this->actions['aceitar']->execute($request, $id);
     }
-    /**
- * Rejects order with reason
- * @param Request $request Rejection reason
- * @param int $idPedido Order ID
- * @return \Response Operation result
- */
-    function recusar(Request $request, $idPedido)
+
+    public function despachar(Request $request, $id)
     {
-        $date = new \DateTime();
-        $pedido = Pedido::find($idPedido);
-        $pedido->statusChange = 1;
-        $pedido->save();
-        $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
-        $cliente = Cliente::find($enderecoCliente->idCliente);
-        $pedido->status = Pedido::RECUSADO;
-        $pedido->retorno = $request->retorno;
-        $pedido->canceladoPor = auth()->user()->nome;
-        $pedido->horarioCancelado = $date->format('Y-m-d H:i:s');
-        if ($pedido->save()) {
-
-            if ($cliente->regId != null) {
-                $this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
-            }
-
-            return response($pedido->id, 200);//$this->success("Pedido recusado com sucesso.");
-        } else {
-            return response("Erro ao recusar o pedido. Tente novamente ou contate o administrador.", 400);//$this->error();
-        }
+        return $this->actions['despachar']->execute($request, $id);
     }
-    /**
- * Marks order as delivered
- * @param int $idPedido Order ID
- * @return Response Operation result
- */
-    function entregar($idPedido)
+
+    public function entregar($id)
     {
-        $date = new \DateTime();
-        $pedido = Pedido::find($idPedido);
-        $effectiveDistributorId = $this->getEffectiveDistributorId($pedido->idDistribuidor);
-
-        $pedido->statusChange = 1;
-        $pedido->save();
-        $distribuidor = Distribuidor::find($pedido->idDistribuidor);
-        $itensPedido = ItemPedido::with('produto')->where("idPedido", $idPedido)->get();
-        //ALTERA OS ESTOQUES
-        if ($pedido->status == Pedido::DESPACHADO) {
-            $itensPedido = ItemPedido::with('produto')->where("idPedido", $idPedido)->get();
-
-            foreach ($itensPedido as $itemPedido) {
-                $this->atualizaEstoque($effectiveDistributorId, $itemPedido->Produto, $itemPedido->qtd, false);
-            }
-            $this->atualizaComposicoes($effectiveDistributorId);
-        }
-
-        $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
-        $cliente = Cliente::find($enderecoCliente->idCliente);
-
-        $cliente->rating = $cliente->rating + 1;
-
-        $pedido->status = Pedido::ENTREGUE;
-        $pedido->entreguePor = auth()->user()->nome;
-        $pedido->horarioEntrega = $date->format('Y-m-d H:i:s');
-
-        if ($pedido->save()) {
-            //PREMIAÇÕES
-            // if($premiacoes && $cliente->tipoPessoa==1){
-            //     $cliente->pontuacaoAcumulada+=$pedido->pontuacao;
-            //     $cliente->pontuacao+=$pedido->pontuacao;
-            //     if($cliente->pontuacao>=10){
-            //         $distribuidor->premiacoesEntregues+=intval($cliente->pontuacao/10);
-            //         $cliente->premios+=intval($cliente->pontuacao/10);
-            //         $cliente->pontuacao%=10;
-            //         $distribuidor->save();
-            //     }
-            // }
-            //*****
-            $cliente->save();
-            if ($cliente->regId != null) {
-                $this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
-            }
-            response($pedido->id, 200);//$this->success("Pedido entregue com sucesso.");
-        } else {
-            response("Erro ao entregar o pedido. Tente novamente ou contate o administrador.", 200);//$this->error();
-        }
+        return $this->actions['entregar']->execute($id);
     }
-    /**
- * Cancels order with specified reason
- * @param Request $request Cancellation reason
- * @param int $idPedido Order ID
- * @return Response Operation result
- */
-    function cancelar(Request $request, $idPedido)
+
+    public function cancelar(Request $request, $id)
     {
-        $date = new \DateTime();
-        $pedido = Pedido::find($idPedido);
-        $pedido->statusChange = 1;
-        $pedido->save();
-        $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
-        $cliente = Cliente::find($enderecoCliente->idCliente);
-
-        if ($request->motivo == Pedido::CANCELADO_NAO_LOCALIZADO) {
-            $pedido->status = Pedido::CANCELADO_NAO_LOCALIZADO;
-            $cliente->rating = $cliente->rating - 1;
-        } else if ($request->motivo == Pedido::CANCELADO_TROTE) {
-            $pedido->status = Pedido::CANCELADO_TROTE;
-            $cliente->rating = $cliente->rating - 3;
-        }
-        $pedido->horarioCancelado = $date->format('Y-m-d H:i:s');
-        $pedido->canceladoPor = auth()->user()->nome;
-        if ($pedido->save()) {
-            $cliente->save();
-
-            if ($cliente->regId != null) {
-                $this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
-            }
-
-            return response($pedido->id, 200);//$this->success("Pedido cancelado com sucesso.");
-        } else {
-            return response("Erro ao cancelar o pedido. Tente novamente ou contate o administrador.", 400);//$this->error();
-        }
+        return $this->actions['cancelar']->execute($request, $id);
     }
 
-    // Report Methods
-
-/**
- * Generates sales report based on filters
- * @param Request $request Report filters
- * @return array Sales data and totals
- */
-    function relatorioVendas(Request $request)
+    public function relatorioVendas(Request $request)
     {
-        $u = auth()->user();//Administrador::find($idUsuario);
-        $request['dataInicial'] = implode("-", array_reverse(explode("/", $request->dataInicial)));
-        $request['dataFinal'] = implode("-", array_reverse(explode("/", $request->dataFinal)));
-
-        $filtroData = "";
-        if ($request->dataInicial != null && $request->dataInicial != "") {
-            $filtroData .= "and pedido.horarioEntrega >= '$request->dataInicial 00:00:00'";
-        }
-        if ($request->dataFinal != null && $request->dataFinal != "") {
-            $filtroData .= "and pedido.horarioEntrega <= '$request->dataFinal 23:59:59'";
-        }
-
-        //Variável que irá armazenar o conteúdo dinâmico da SQL
-        $complementoSql = "";
-
-        //Adiciona o filtro do Movimento na SQL dinâmica
-        //Verifica se o filtro foi enviado
-        if ($request->idDistribuidores != "" && $request->idDistribuidores != null) {
-            //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
-            $escolhidos = explode(",", $request->idDistribuidores);
-            //Contador de movimentos escolhidos
-            $contDistribuidor = 0;
-
-            $complementoSql = $complementoSql . " and (";
-
-            //Adiciona todos os movimentos escolhidos à SQL
-            for ($i = 0; $i < sizeof($escolhidos); $i++) {
-
-                //Verifica se já foi adicionado algum movimento à SQL, se sim, adiciona um OR
-                if ($contDistribuidor > 0) {
-                    //Adiciona o filtro à SQL
-                    $complementoSql = $complementoSql . " or pedido.idDistribuidor = " . $escolhidos[$i] . "";
-                    //Incrementa o contador de movimentos
-                    $contDistribuidor++;
-                } else {
-                    //Adiciona o filtro à SQL
-                    $complementoSql = $complementoSql . "pedido.idDistribuidor = " . $escolhidos[$i] . "";
-                    //Incrementa o contador de movimentos
-                    $contDistribuidor++;
-                }
-            }
-
-            $complementoSql = $complementoSql . ") ";
-        }
-
-        if (strcmp($u->tipoAdministrador, "Distribuidor") == 0) {
-            $pedidos = DB::table('pedido')->join('distribuidor', 'pedido.idDistribuidor', '=', 'distribuidor.id')
-                ->select(DB::raw("pedido.idDistribuidor as idDist, distribuidor.nome as distribuidor, date_format(pedido.horarioEntrega, '%d/%m/%Y') as dataEntrega, sum(pedido.total) as valorTotal"))
-                ->whereRaw("pedido.status = 7 $filtroData $complementoSql and pedido.idDistribuidor = " . $u->idDistribuidor . " ")
-                ->groupBy('idDist', 'dataEntrega', 'distribuidor')
-                ->get();
-        } else {
-            $pedidos = DB::table('pedido')->join('distribuidor', 'pedido.idDistribuidor', '=', 'distribuidor.id')
-                ->select(DB::raw("pedido.idDistribuidor as idDist, distribuidor.nome as distribuidor, date_format(pedido.horarioEntrega, '%d/%m/%Y') as dataEntrega, sum(pedido.total) as valorTotal"))
-                ->whereRaw("pedido.status = 7 $filtroData $complementoSql")
-                ->groupBy('idDist', 'dataEntrega', 'distribuidor')
-                ->get();
-        }
-
-        $valorTotal = 0;
-
-        $valorTotalGeral = 0;
-        foreach ($pedidos as $pedido) {
-            setlocale(LC_MONETARY, "pt_BR", "ptb");
-            $valorTotalGeral += $pedido->valorTotal;
-            $pedido->valorTotal = 'R$ ' . number_format($pedido->valorTotal, 2, ',', '.');
-        }
-        // for ($i = 0; $i < sizeof($pedidos); $i++) {
-        //     setlocale(LC_MONETARY, "pt_BR", "ptb");
-        //     $valorTotalGeral += $pedidos[$i]->valorTotal;
-        //     $pedidos[$i]->valorTotal = 'R$ ' . number_format($pedidos[$i]->valorTotal, 2, ',', '.');
-        // }
-        $valorTotalGeral = 'R$ ' . number_format($valorTotalGeral, 2, ',', '.');
-
-        return [$pedidos, $valorTotalGeral];
+        return $this->actions['relatorioVendas']->execute($request);
     }
-    /**
- * Generates product-based sales report
- * @param Request $request Report filters
- * @return array Product sales data
- */
-    function relatorioVendasProduto(Request $request)
-    {
-        $u = auth()->user();
-        $request['dataInicial'] = implode("-", array_reverse(explode("/", $request->dataInicial)));
-        $request['dataFinal'] = implode("-", array_reverse(explode("/", $request->dataFinal)));
-
-        $filtroData = "";
-        if ($request->dataInicial != null && $request->dataInicial != "") {
-            $filtroData .= "and pedido.horarioEntrega >= '$request->dataInicial 00:00:00'";
-        }
-        if ($request->dataFinal != null && $request->dataFinal != "") {
-            $filtroData .= $filtroData == "" ? " pedido.horarioEntrega <= '$request->dataFinal 23:59:59'" : "AND pedido.horarioEntrega <= '$request->dataFinal 23:59:59'";
-        }
-
-        //Variável que irá armazenar o conteúdo dinâmico da SQL
-        $complementoSql = "";
-
-        //Adiciona o filtro do Movimento na SQL dinâmica
-        //Verifica se o filtro foi enviado
-        if ($request->idDistribuidores != "" && $request->idDistribuidores != null) {
-            //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
-            $escolhidos = explode(",", $request->idDistribuidores);
-            //Contador de movimentos escolhidos
-            $contDistribuidor = 0;
-
-            $complementoSql = $complementoSql . " and (";
-
-            //Adiciona todos os movimentos escolhidos à SQL
-            for ($i = 0; $i < sizeof($escolhidos); $i++) {
-
-                //Verifica se já foi adicionado algum movimento à SQL, se sim, adiciona um OR
-                if ($contDistribuidor > 0) {
-                    //Adiciona o filtro à SQL
-                    $complementoSql = $complementoSql . " or pedido.idDistribuidor = " . $escolhidos[$i] . "";
-                    //Incrementa o contador de movimentos
-                    $contDistribuidor++;
-                } else {
-                    //Adiciona o filtro à SQL
-                    $complementoSql = $complementoSql . "pedido.idDistribuidor = " . $escolhidos[$i] . "";
-                    //Incrementa o contador de movimentos
-                    $contDistribuidor++;
-                }
-            }
-
-            $complementoSql = $complementoSql . ") ";
-        }
-
-        if ($request->selectProdutos != "") {
-            //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
-            $escolhidos = explode(",", $request->selectProdutos);
-            //Contador de movimentos escolhidos
-            $contProdutos = 0;
-
-            $complementoSql = $complementoSql . " and (";
-
-            //Adiciona todos os movimentos escolhidos à SQL
-            for ($i = 0; $i < sizeof($escolhidos); $i++) {
-
-                //Verifica se já foi adicionado algum movimento à SQL, se sim, adiciona um OR
-                if ($contProdutos > 0) {
-                    //Adiciona o filtro à SQL
-                    $complementoSql = $complementoSql . " or itemPedido.idProduto = " . $escolhidos[$i] . "";
-                    //Incrementa o contador de movimentos
-                    $contProdutos++;
-                } else {
-                    //Adiciona o filtro à SQL
-                    $complementoSql = $complementoSql . "itemPedido.idProduto = " . $escolhidos[$i] . "";
-                    //Incrementa o contador de movimentos
-                    $contProdutos++;
-                }
-            }
-
-            $complementoSql = $complementoSql . ") ";
-        }
-        if (strcmp($u->tipoAdministrador, "Distribuidor") == 0) {
-            $pedidos = DB::table('pedido')
-                ->from(DB::raw("((itemPedido itemPedido left join pedido pedido on itemPedido.idPedido = pedido.id)left join distribuidor distribuidor on pedido.idDistribuidor = distribuidor.id)left join produto produto on itemPedido.idProduto = produto.id"))
-                ->select(DB::raw("itemPedido.idProduto as idProd, produto.nome as produto, distribuidor.nome as distribuidor, date_format(pedido.horarioEntrega, '%d/%m/%Y') as dataEntrega, sum(itemPedido.subtotal) as valorTotal, sum(itemPedido.qtd) as quantidadeTotal"))
-                ->whereRaw("pedido.status = 7 $filtroData $complementoSql and pedido.idDistribuidor = " . $u->idDistribuidor . " ")
-                ->groupBy('idProd', 'dataEntrega', 'distribuidor', 'produto')
-                ->get();
-        } else {
-            $pedidos = DB::table('pedido')
-                ->from(DB::raw("((itemPedido itemPedido left join pedido pedido on itemPedido.idPedido = pedido.id)left join distribuidor distribuidor on pedido.idDistribuidor = distribuidor.id)left join produto produto on itemPedido.idProduto = produto.id"))
-                ->select(DB::raw("itemPedido.idProduto as idProd, produto.nome as produto, distribuidor.nome as distribuidor, date_format(pedido.horarioEntrega, '%d/%m/%Y') as dataEntrega, sum(itemPedido.subtotal) as valorTotal, sum(itemPedido.qtd) as quantidadeTotal"))
-                ->whereRaw("pedido.status = 7 $filtroData $complementoSql")
-                ->groupBy('idProd', 'dataEntrega', 'distribuidor', 'produto')
-                ->get();
-        }
-        $valorTotal = 0;
-
-        $valorTotalGeral = 0;
-        foreach ($pedidos as $pedido) {
-            setlocale(LC_MONETARY, "pt_BR", "ptb");
-            $valorTotalGeral += $pedido->valorTotal;
-            $pedido->valorTotal = 'R$ ' . number_format($pedido->valorTotal, 2, ',', '.');
-        }
-        $valorTotalGeral = 'R$ ' . number_format($valorTotalGeral, 2, ',', '.');
-
-        return [$pedidos, $valorTotalGeral];
-    }
-    /**
- * Generates delivery person sales report
- * @param Request $request Report filters
- * @return array Delivery person performance data
- */
-    function relatorioVendasEntregador(Request $request)
-    {
-        $u = auth()->user();
-        $request['dataInicial'] = implode("-", array_reverse(explode("/", $request->dataInicial)));
-        $request['dataFinal'] = implode("-", array_reverse(explode("/", $request->dataFinal)));
-
-        $filtroData = "";
-        if ($request->dataInicial != null && $request->dataInicial != "") {
-            $filtroData .= "and pedido.horarioEntrega >= '$request->dataInicial 00:00:00'";
-        }
-        if ($request->dataFinal != null && $request->dataFinal != "") {
-            $filtroData .= $filtroData == "" ? " pedido.horarioEntrega <= '$request->dataFinal 23:59:59'" : "AND pedido.horarioEntrega <= '$request->dataFinal 23:59:59'";
-        }
-
-        //Variável que irá armazenar o conteúdo dinâmico da SQL
-        $complementoSql = "";
-
-        //Adiciona o filtro do Movimento na SQL dinâmica
-        //Verifica se o filtro foi enviado
-        if ($request->idEntregadores != "" && $request->idEntregadores != null) {
-            //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
-            $escolhidos = explode(",", $request->idEntregadores);
-            //Contador de movimentos escolhidos
-            $contEntregador = 0;
-
-            $complementoSql = $complementoSql . " and (";
-
-            //Adiciona todos os movimentos escolhidos à SQL
-            for ($i = 0; $i < sizeof($escolhidos); $i++) {
-
-                //Verifica se já foi adicionado algum movimento à SQL, se sim, adiciona um OR
-                if ($contEntregador > 0) {
-                    //Adiciona o filtro à SQL
-                    $complementoSql = $complementoSql . " or pedido.idEntregador = " . $escolhidos[$i] . "";
-                    //Incrementa o contador de movimentos
-                    $contEntregador++;
-                } else {
-                    //Adiciona o filtro à SQL
-                    $complementoSql = $complementoSql . "pedido.idEntregador = " . $escolhidos[$i] . "";
-                    //Incrementa o contador de movimentos
-                    $contEntregador++;
-                }
-            }
-
-            $complementoSql = $complementoSql . ") ";
-        }
-
-        if ($request->selectProdutos != "") {
-            //Separa a String oriunda do filtro, obtendo todos os movimentos escolhidos
-            $escolhidos = explode(",", $request->selectProdutos);
-            //Contador de movimentos escolhidos
-            $contProdutos = 0;
-
-            $complementoSql = $complementoSql . " and (";
-
-            //Adiciona todos os movimentos escolhidos à SQL
-            for ($i = 0; $i < sizeof($escolhidos); $i++) {
-
-                //Verifica se já foi adicionado algum movimento à SQL, se sim, adiciona um OR
-                if ($contProdutos > 0) {
-                    //Adiciona o filtro à SQL
-                    $complementoSql = $complementoSql . " or itemPedido.idProduto = " . $escolhidos[$i] . "";
-                    //Incrementa o contador de movimentos
-                    $contProdutos++;
-                } else {
-                    //Adiciona o filtro à SQL
-                    $complementoSql = $complementoSql . "itemPedido.idProduto = " . $escolhidos[$i] . "";
-                    //Incrementa o contador de movimentos
-                    $contProdutos++;
-                }
-            }
-
-            $complementoSql = $complementoSql . ") ";
-        }
-        if (strcmp($u->tipoAdministrador, "Distribuidor") == 0) {
-            $pedidos = DB::table('pedido')
-                ->from(DB::raw("(((itemPedido itemPedido left join pedido pedido on itemPedido.idPedido = pedido.id)left join distribuidor distribuidor on pedido.idDistribuidor = distribuidor.id)left join entregador entregador on pedido.idEntregador = entregador.id)left join produto produto on itemPedido.idProduto = produto.id"))
-                ->select(DB::raw("itemPedido.idProduto as idProd, itemPedido.precoAcertado as precoAcertado, produto.nome as produto, distribuidor.nome as distribuidor, entregador.nome as entregador, sum(itemPedido.subtotal) as valorTotal, sum(itemPedido.qtd) as quantidadeTotal"))
-                ->whereRaw("pedido.status = 7 $filtroData $complementoSql and pedido.idDistribuidor = " . $u->idDistribuidor . " ")
-                ->groupBy('idProd', 'distribuidor', 'entregador', 'produto', 'precoAcertado')
-                ->get();
-        } else {
-            $pedidos = DB::table('pedido')
-                ->from(DB::raw("(((itemPedido itemPedido left join pedido pedido on itemPedido.idPedido = pedido.id)left join distribuidor distribuidor on pedido.idDistribuidor = distribuidor.id)left join entregador entregador on pedido.idEntregador = entregador.id)left join produto produto on itemPedido.idProduto = produto.id"))
-                ->select(DB::raw("itemPedido.idProduto as idProd, itemPedido.precoAcertado as precoAcertado, produto.nome as produto, distribuidor.nome as distribuidor, entregador.nome as entregador, sum(itemPedido.subtotal) as valorTotal, sum(itemPedido.qtd) as quantidadeTotal"))
-                ->whereRaw("pedido.status = 7 $filtroData $complementoSql")
-                ->groupBy('idProd', 'distribuidor', 'entregador', 'produto', 'precoAcertado')
-                ->get();
-        }
-        $valorTotal = 0;
-
-        $valorTotalGeral = 0;
-        foreach ($pedidos as $pedido) {
-            setlocale(LC_MONETARY, "pt_BR", "ptb");
-            $valorTotalGeral += $pedido->valorTotal;
-            $pedido->valorTotal = 'R$ ' . number_format($pedido->valorTotal, 2, ',', '.');
-        }
-        $valorTotalGeral = 'R$ ' . number_format($valorTotalGeral, 2, ',', '.');
-
-        return [$pedidos, $valorTotalGeral];
-    }
-    /**
- * Generates filtered orders report
- * @param Request $request Report filters
- * @return array Filtered orders data
- */
     public function relatorioPedidos(Request $request)
     {
-        if (!auth()->check()) {
-            return response('Sua sessão expirou. Por favor, refaça seu login.', 400);
-        }
-
-        $queries = [
-            'pendentes' => Pedido::withBasicRelations()->withFormattedDates()
-            ->whereRaw("((pedido.agendado = 1 AND (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) <= 30)
-            OR DATE(pedido.dataAgendada) < CURDATE()) OR pedido.agendado = 0)")
-            ->where('status', Pedido::PENDENTE),
-            'aceitos' => Pedido::withBasicRelations()->withFormattedDates()->where('status', Pedido::ACEITO),
-            'despachados' => Pedido::withBasicRelations()->withFormattedDates()->where('status', Pedido::DESPACHADO),
-            'entregues' => Pedido::withBasicRelations()->withFormattedDates()->where('status', Pedido::ENTREGUE),
-            'cancelados' => Pedido::withBasicRelations()->withFormattedDates()->whereIn('status', [
-                Pedido::CANCELADO_USUARIO,
-                Pedido::CANCELADO_NAO_LOCALIZADO,
-                Pedido::CANCELADO_TROTE,
-                Pedido::RECUSADO
-            ]),
-            'agendados' => Pedido::withBasicRelations()->withFormattedDates()
-            ->where([
-                ['status', Pedido::PENDENTE],
-                ['agendado', 1]
-            ])
-            ->whereRaw("DATE(pedido.dataAgendada) > CURDATE() OR (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) > 30)")
-        ];
-
-        $this->applyDateFilters($queries, $request);
-        $this->applyDistribuidorFilter($queries, $request);
-        $this->loadOrderProducts($queries);
-
-        $ultimoPedido = Pedido::orderBy('id', 'DESC')->first();
-        $entregadores = Entregador::where("status", Entregador::ATIVO)
-    ->select('id', 'nome')
-    ->get();
-
-        return [
-            $queries['pendentes']->orderBy('horarioPedido', 'desc')->get(),
-            $queries['aceitos']->orderBy('horarioPedido', 'desc')->get(),
-            $queries['despachados']->orderBy('horarioPedido', 'desc')->get(),
-            $queries['entregues']->orderBy('horarioPedido', 'desc')->get(),
-            $queries['cancelados']->orderBy('horarioPedido', 'desc')->get(),
-            $queries['agendados']->orderBy('horarioPedido', 'desc')->get(),
-            $ultimoPedido->id,
-            $entregadores
-        ];
+    return $this->actions['relatorioPedidos']->execute($request);
     }
-    // Helper Methods
-
-/**
- * Applies date range filters to queries
- * @param array $queries Query collection
- * @param Request $request Filter parameters
- */
-    private function applyDateFilters(&$queries, $request)
+    public function relatorioVendasProduto(Request $request)
     {
-        if ($request->dataInicial) {
-            $dataInicial = implode("-", array_reverse(explode("/", $request->dataInicial)));
-            $whereClause = "horarioPedido >= '$dataInicial 00:00:00'";
-            foreach ($queries as $query) {
-                $query->whereRaw($whereClause);
-            }
-        }
-
-        if ($request->dataFinal) {
-            $dataFinal = implode("-", array_reverse(explode("/", $request->dataFinal)));
-            $whereClause = "horarioPedido <= '$dataFinal 23:59:59'";
-            foreach ($queries as $query) {
-                $query->whereRaw($whereClause);
-            }
-        }
+        return $this->actions['relatorioVendasProduto']->execute($request);
     }
-    /**
- * Applies distributor filters to queries
- * @param array $queries Query collection
- * @param Request $request Filter parameters
- */
-    private function applyDistribuidorFilter(&$queries, $request)
+
+    public function relatorioVendasEntregador(Request $request)
     {
-        if ($request->idDistribuidores) {
-            $distribuidores = explode(',', $request->idDistribuidores);
-            foreach ($queries as $query) {
-                $query->whereIn('idDistribuidor', $distribuidores);
-            }
-        }
+        return $this->actions['relatorioVendasEntregador']->execute($request);
     }
-    /**
- * Loads and formats product information for orders
- * @param array $queries Order queries
- */
-    private function loadOrderProducts(&$queries)
+
+    public function buscarNovosPedidos($ultimoPedidoId)
     {
-        foreach ($queries as $query) {
-            $query->get()->map(function ($pedido) {
-                $pedido = $this->formatPedidoDates($pedido);
-                $pedido->produtos = $this->formatProductsOutput(
-                    $pedido->itens->map(function ($item) {
-                        return (object) [
-                            'id' => $item->id,
-                            'idProd' => $item->produto->id,
-                            'nome' => $item->produto->nome,
-                            'img' => $item->produto->img,
-                            'qtdMin' => $item->qtd,
-                            'valor' => $item->preco
-                        ];
-                    })->toArray()
-                );
-                unset($pedido->itens);
-                return $pedido;
-            });
-        }
+        return $this->actions['buscarNovosPedidos']->execute($ultimoPedidoId);
     }
-    /**
- * Formats product output structure
- * @param array $produtos Raw product data
- * @return array Formatted product structure
- */
-    private function formatProductsOutput($produtos)
+
+    public function ajustarCoordenadas(Request $request, $idEndereco)
     {
-        if (empty($produtos[0]->idProd)) {
-            return [];
-        }
-
-        $out = [];
-        $currentProduct = null;
-        $indexProduto = -1;
-
-        foreach ($produtos as $prod) {
-            if ($currentProduct !== $prod->idProd) {
-                $indexProduto++;
-                $currentProduct = $prod->idProd;
-
-                $out[$indexProduto] = [
-                    "nome" => $prod->nome,
-                    "id" => $prod->idProd,
-                    "img" => $prod->img,
-                    "preco" => [],
-                    "precoEspecial" => [],
-                ];
-            }
-
-            $out[$indexProduto]['preco'][] = [
-                'precoId' => $prod->id,
-                'qtd' => $prod->qtdMin,
-                'val' => $prod->valor
-            ];
-
-            $out[$indexProduto]['preco'] = $this->sortPriceArrayByPrecoId($out[$indexProduto]['preco']);
-
-            if (!empty($out[$indexProduto]['precoEspecial'])) {
-                $out[$indexProduto]['precoEspecial'] = $this->sortPriceArrayByPrecoId($out[$indexProduto]['precoEspecial']);
-            } else {
-                unset($out[$indexProduto]['precoEspecial']);
-            }
-        }
-
-        return $out;
+        return $this->actions['ajustarCoordenadas']->execute($request, $idEndereco);
     }
-    /**
- * Sorts price array by price ID
- * @param array $prices Price data
- * @return array Sorted prices
- */
-    private function sortPriceArrayByPrecoId(array $prices): array
+
+    public function listaClientes()
     {
-        usort($prices, function ($a, $b) {
-            return $a['precoId'] - $b['precoId'];
-        });
-        return $prices;
-    }
-
-/**
- * Formats datetime to d/m/Y H:i
- * @param string $datetime Raw datetime
- * @return string Formatted datetime
- */
-    private function formatDateTime($datetime) {
-        return date('d/m/Y H:i', strtotime($datetime));
-    }
-    /**
- * Formats all dates in order object
- * @param Pedido $pedido Order object
- * @return Pedido Order with formatted dates
- */
-    private function formatPedidoDates($pedido) {
-        $pedido->horarioPedido = $this->formatDateTime($pedido->horarioPedido);
-        $pedido->horarioAceito = $this->formatDateTime($pedido->horarioAceito);
-        $pedido->horarioDespache = $this->formatDateTime($pedido->horarioDespache);
-        $pedido->horarioEntrega = $this->formatDateTime($pedido->horarioEntrega);
-        $pedido->dataAgendada = $this->formatDateTime($pedido->dataAgendada);
-        return $pedido;
-    }
-    /**
- * Gets order with formatted products
- * @param Builder $query Base query
- * @return Collection Formatted orders
- */
-    private function getFormattedPedidoWithProducts($query)
-    {
-        return $query->with([
-            'distribuidor',
-            'endereco',
-            'entregador',
-            'itens' => function ($q) {
-                $q->where('qtd', '>', 0)->with('produto');
-            }
-        ])
-            ->get()
-            ->map(function ($pedido) {
-                $pedido->produtos = $this->formatProductsOutput(
-                    $pedido->itens->map(function ($item) {
-                        return (object) [
-                            'id' => $item->id,
-                            'idProd' => $item->produto->id,
-                            'nome' => $item->produto->nome,
-                            'img' => $item->produto->img,
-                            'qtdMin' => $item->qtd,
-                            'valor' => $item->preco
-                        ];
-                    })->toArray()
-                );
-                unset($pedido->itens);
-                return $pedido;
-            });
-    }
-    /**
- * Builds base query structure for orders
- * @param User $user Authenticated user
- * @return Closure Query builder function
- */
-    private function getBaseQueryCallbackStructure($user) {
-        return function() use ($user) {
-            $query = Pedido::query()
-                ->withBasicRelations()
-                ->withCoreFields()
-                ->when($user->tipoAdministrador === 'Distribuidor', function($q) use ($user) {
-                    $distributor = Distribuidor::find($user->idDistribuidor);
-
-                    if ($distributor->stockUnionsAsMain()->exists()) {
-                        $unionIds = $distributor->stockUnionsAsMain()
-                            ->pluck('secondary_distributor_id')
-                            ->push($distributor->id)
-                            ->toArray();
-
-                        return $q->whereIn('pedido.idDistribuidor', $unionIds);
-                    }
-
-                    return $q->where('pedido.idDistribuidor', $user->idDistribuidor);
-                })
-                ->when($user->tipoAdministrador === null, function($q) use ($user) {
-                    $q->join('enderecoCliente', 'pedido.idEndereco', 'enderecoCliente.id')
-                      ->where('enderecoCliente.idCliente', $user->id);
-                });
-
-            return $query;
-        };
-    }
-/**
- * Builds array of queries for different order statuses
- * @param Closure $baseQueryCallback Base query builder
- * @param User $user Authenticated user
- * @return array Status-based queries
- */
-    private function buildQueriesArray($baseQueryCallback, $user)
-{
-    // Get union IDs if distributor is main
-    $unionDistributorIds = [];
-    if ($user->tipoAdministrador === 'Distribuidor') {
-        $distributor = Distribuidor::find($user->idDistribuidor);
-        if ($distributor->stockUnionsAsMain()->exists()) {
-            $unionDistributorIds = $distributor->stockUnionsAsMain()
-                ->pluck('secondary_distributor_id')
-                ->push($user->idDistribuidor)
-                ->toArray();
-        }
-    }
-
-    $distributorFilter = function($query) use ($user, $unionDistributorIds) {
-        if ($user->tipoAdministrador === 'Distribuidor') {
-            if (!empty($unionDistributorIds)) {
-                $query->whereIn('pedido.idDistribuidor', $unionDistributorIds);
-            } else {
-                $query->where('pedido.idDistribuidor', $user->idDistribuidor);
-            }
-        }
-    };
-
-    $queries = [
-        'pendentes' => $baseQueryCallback()->tap($distributorFilter)
-        ->where('pedido.status', Pedido::PENDENTE)
-        ->whereRaw("((pedido.agendado = 1 AND (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) <= 30) OR DATE(pedido.dataAgendada) < CURDATE()) OR pedido.agendado = 0)"),
-
-        'aceitos' => $baseQueryCallback()->tap($distributorFilter)
-            ->where('pedido.status', Pedido::ACEITO),
-
-        'despachados' => $baseQueryCallback()->tap($distributorFilter)
-            ->where('pedido.status', Pedido::DESPACHADO),
-
-        'entregues' => $baseQueryCallback()->tap($distributorFilter)
-            ->where('pedido.status', Pedido::ENTREGUE)
-            ->whereRaw("DATE(pedido.horarioEntrega) = CURDATE()"),
-
-        'cancelados' => $baseQueryCallback()->tap($distributorFilter)
-            ->whereIn('pedido.status', [
-                Pedido::CANCELADO_USUARIO,
-                Pedido::CANCELADO_NAO_LOCALIZADO,
-                Pedido::CANCELADO_TROTE,
-                Pedido::RECUSADO
-            ])
-            ->whereRaw("DATE(pedido.horarioPedido) = CURDATE()"),
-
-        'agendados' => $baseQueryCallback()->tap($distributorFilter)
-            ->where([
-                ['pedido.status', Pedido::PENDENTE],
-                ['agendado', 1]
-            ])
-            ->whereRaw("DATE(pedido.dataAgendada) > CURDATE() OR (DATE(pedido.dataAgendada) = CURDATE() AND ((pedido.horaInicio - CURTIME())/100) > 30)")
-    ];
-
-    return $queries;
-}
-    function notification($msg, $administradores)
-    {
-        $fcmService = new FCMNotificationService();
-        $fcmService->sendOrderNotification($administradores, $msg);
-    }
-    private const TEMPO_LIMITE_AGENDAMENTO = 30; // minutos
-    /**
-     * Busca novos pedidos pendentes baseado em critérios específicos por tipo de usuário
-     *
-     * @param int $ultimoPedidoId ID do último pedido verificado
-     * @return Collection
-     * @throws AuthenticationException
-     */
-    public function buscarNovosPedidos($ultimoPedidoId): Collection
-    {
-        $ultimoPedidoId = (int) $ultimoPedidoId;
-        $usuario = $this->getAuthenticatedUser();
-        Debugbar::info("Tipo de Usuário", $usuario->tipoAdministrador);
-
-        return match (TipoAdministrador::from($usuario->tipoAdministrador)) {
-            TipoAdministrador::ADMIN => $this->buscarPedidosAdministrador($ultimoPedidoId),
-            default => $this->buscarPedidosDistribuidor($ultimoPedidoId, $usuario),
-        };
-    }
-
-    /**
-     * Retorna o usuário autenticado ou lança uma exceção
-     *
-     * @throws AuthenticationException
-     */
-    private function getAuthenticatedUser(): Administrador
-{
-    if (!auth()->check()) {
-        throw new AuthenticationException('Usuário não autenticado');
-    }
-
-    return auth()->user();
-}
-
-    /**
-     * Busca pedidos pendentes para administradores
-     *
-     * @param int $ultimoPedidoId
-     * @return Collection
-     */
-    private function buscarPedidosAdministrador(int $ultimoPedidoId): Collection
-    {
-        Debugbar::info('Entrando na função buscarPedidosAdministrador');
-        return Pedido::query()
-        ->where('pedido.status', Pedido::PENDENTE)
-        ->where('id', '>', $ultimoPedidoId)
-            ->where(function ($query) {
-                $query->where($this->getCriteriosAgendamento())
-                    ->orWhere('agendado', false);
-            })
-            ->with(['distribuidor', 'endereco.clientePedido'])
-            ->orderBy('id', 'asc')
-            ->get();
-    }
-    /**
-     * Busca pedidos pendentes para distribuidores
-     *
-     * @param int $ultimoPedidoId
-     * @param Administrador $usuario
-     * @return Collection
-     */
-    private function buscarPedidosDistribuidor(int $ultimoPedidoId, Administrador $usuario): Collection
-    {
-        Debugbar::info('Entrando na função buscarPedidosDistribuidor');
-        $distribuidor = Distribuidor::findOrFail($usuario->idDistribuidor);
-        $distribuidorIds = $this->getDistribuidorIds($distribuidor);
-        Debugbar::info('Distribuidor IDs', $distribuidorIds);
-
-        $query = Pedido::query()
-            ->where('id', '>', $ultimoPedidoId)
-            ->where('pedido.status', Pedido::PENDENTE)
-            ->whereIn('idDistribuidor', $distribuidorIds)
-            ->where(function($query) {
-                $now = Carbon::now();
-                $query->where([
-                    ['agendado', '=', true],
-                    ['dataAgendada', '>=', $now->format('Y-m-d')]
-                ])
-                ->orWhere('agendado', false);
-            })
-            ->with(['endereco.cliente']);
-
-        // Log the SQL query for debugging
-        Debugbar::info('SQL Query:', $query->toSql());
-        Debugbar::info('SQL Bindings:', $query->getBindings());
-
-        return $query->orderBy('id', 'asc')->get();
-    }
-
-    /**
-     * Retorna os critérios para pedidos agendados
-     */
-    private function getCriteriosAgendamento(): \Closure
-    {
-        return function ($query) {
-            $now = Carbon::now();
-            $query->where('agendado', true)
-                ->where(function ($subquery) use ($now) {
-                    $subquery->whereDate('dataAgendada', $now)
-                        ->whereRaw(
-                            'TIME_TO_SEC(TIMEDIFF(horaInicio, ?)) / 3600 <= ?',
-                            [$now->format('H:i:s'), self::TEMPO_LIMITE_AGENDAMENTO / 60]
-                        )
-                        ->orWhereDate('dataAgendada', '<', $now);
-                });
-        };
-    }
-
-    /**
-     * Retorna array com IDs dos distribuidores (incluindo uniões de estoque)
-     *
-     * @param Distribuidor $distribuidor
-     * @return array
-     */
-    private function getDistribuidorIds(Distribuidor $distribuidor): array
-{
-    if ($distribuidor->stockUnionsAsMain()->exists()) {
-        return $distribuidor->stockUnionsAsMain()
-            ->pluck('secondary_distributor_id')
-            ->push($distribuidor->id)
-            ->toArray();
-    }
-
-    return [$distribuidor->id];
-}
-    function ultimoPedido()
-    {
-        $u = auth()->user();
-        if (strcmp($u->tipoAdministrador, "Administrador") == 0 || strcmp($u->tipoAdministrador, "Atendente") == 0) {
-            $ultimoPedido = Pedido::orderBy("pedido.id", "DESC")
-                ->limit(1)
-                ->get();
-        } else {
-            $ultimoPedido = Pedido::where('idDistribuidor', $u->idDistribuidor)
-                ->orderBy("pedido.id", "DESC")
-                ->limit(1)
-                ->get();
-        }
-        return $ultimoPedido[0]->id;
-    }
-    public function atualizar(Request $request, $idPedido)
-    {
-        $request['dataAgendada'] = $request->dataAgendada == "" ? null : implode("-", array_reverse(explode("/", $request->dataAgendada)));
-        $request['trocoPara'] = $request->trocoPara ? $request->trocoPara : 0;
-        $pedido = Pedido::find($idPedido);
-        $enderecoCliente = Enderecocliente::find($pedido->idEndereco);
-        $cliente = Cliente::find($enderecoCliente->idCliente);
-        $distribuidor = Distribuidor::find($pedido->idDistribuidor);
-        $itensPedido = ItemPedido::with('produto')->where("idPedido", $idPedido)->get();
-        if ($pedido->status == Pedido::ENTREGUE) {
-            //somar quantidades ao estoque do distribuidor pra depois subtrair novamente caso pedido continue em entregue
-            //VERIFICA SE OS PRODUTOS SAO COMPOSICOES OU COMPONENTES ANTES DE ATUALIZAR
-            $this->composicoesArray = array();// Zera array
-            if ($distribuidor->tipoDistribuidor == "revendedor") {
-                foreach ($itensPedido as $itemPedido) {
-                    $this->atualizaEstoque($distribuidor->idDistribuidor, $itemPedido->Produto, $itemPedido->qtd, true);
-                }
-                $this->atualizaComposicoes($distribuidor->idDistribuidor);
-            } else {
-                foreach ($itensPedido as $itemPedido) {
-                    $this->atualizaEstoque($pedido->idDistribuidor, $itemPedido->Produto, $itemPedido->qtd, true);
-                }
-                $this->atualizaComposicoes($pedido->idDistribuidor);
-            }
-        }
-        if ($request->idDistribuidor != $pedido->idDistribuidor) {
-            if ($pedido->status == Pedido::ENTREGUE) {
-                $cliente->rating--;
-                $cliente->save();
-            } else if ($pedido->status == Pedido::CANCELADO_NAO_LOCALIZADO) {
-                $cliente->rating++;
-                $cliente->save();
-            } else if ($pedido->status == Pedido::CANCELADO_TROTE) {
-                $cliente->rating += 3;
-                $cliente->save();
-            }
-            $pedido->status = Pedido::PENDENTE;
-            $administradores = Administrador::where('idDistribuidor', $pedido->idDistribuidor)->orwhere('idDistribuidor', $request->idDistribuidor)->orwhere('tipoAdministrador', 'Administrador');
-            $msg = array(
-                'title' => 'Distribuidor Alterado: ' . $pedido->id . ' - ' . $cliente->nome,
-                'body' => '[Distribuição ' . $pedido->idDistribuidor . ' para ' . $request->idDistribuidor . '] ' . $enderecoCliente->logradouro . ' ' . $enderecoCliente->numero . ', ' . $enderecoCliente->bairro . ' - ' . $enderecoCliente->cidade . '/' . $enderecoCliente->estado,
-                // 'tag' => $pedido->id,
-                'icon' => '/images/logo-icon.png',
-                'click_action' => 'https://adm.tokumsede.com'
-            );
-        } else if ($request->status != $pedido->status) {
-            $administradores = Administrador::where('idDistribuidor', $pedido->idDistribuidor)->orwhere('tipoAdministrador', 'Administrador');
-            $msg = array(
-                'title' => 'Status Alterado: ' . $pedido->id . ' - ' . $cliente->nome,
-                'body' => $enderecoCliente->logradouro . ' ' . $enderecoCliente->numero . ', ' . $enderecoCliente->bairro . ' - ' . $enderecoCliente->cidade . '/' . $enderecoCliente->estado,
-                // 'tag' => $pedido->id,
-                'icon' => '/images/logo-icon.png',
-                'click_action' => 'https://adm.tokumsede.com'
-            );
-        } else {
-            //*Recupera o id do usuário logado
-
-        }
-        $idAdministrador = auth()->user()->id;//$this->escape("user");
-        $administradores = Administrador::where([['idDistribuidor', $request->idDistribuidor], ['status', 'Ativo'], ['id', '!=', $idAdministrador]])->orwhere([['tipoAdministrador', 'Administrador'], ['status', 'Ativo'], ['id', '!=', $idAdministrador]])->orwhere([['tipoAdministrador', 'Atendente'], ['status', 'Ativo'], ['id', '!=', $idAdministrador]])->get();
-
-        // $administradores = Administrador::where('idDistribuidor', $pedido->idDistribuidor)->orwhere('tipoAdministrador', 'Administrador');
-        $msg = array(
-            'title' => 'Pedido Alterado: ' . $pedido->id . ' - ' . $cliente->nome,
-            'body' => $enderecoCliente->logradouro . ' ' . $enderecoCliente->numero . ', ' . $enderecoCliente->bairro . ' - ' . $enderecoCliente->cidade . '/' . $enderecoCliente->estado,
-            // 'tag' => $pedido->id,
-            'icon' => '/images/logo-icon.png',
-            'click_action' => 'https://adm.tokumsede.com'
-        );
-
-        $fcmService = new FCMNotificationService();
-        $fcmService->sendOrderNotification($administradores, $msg);
-
-        $pedido->editadoPor = auth()->user()->nome;
-        if ($pedido->update($request->all())) {
-            //Zerar todos os itens do pedido
-            $itensPedido = Itempedido::where('idPedido', $idPedido)->get();
-            foreach ($itensPedido as $item) {
-                $item->qtd = 0;
-                $item->preco = 0;
-                $item->subtotal = 0;
-                //Salva o Item
-                $item->save();
-            }
-
-            //update cada
-            foreach ($request->itens as $item) {
-                $itemPedido = Itempedido::where([['idPedido', $idPedido], ['idProduto', $item['idProduto']]])->first();
-                if ($itemPedido) {
-                    //Atribui os valores do formulário ao objeto
-                    $itemPedido->qtd = $item['quantidade'];
-                    $itemPedido->preco = $item['preco'];
-                    $itemPedido->subtotal = $item['subtotal'];
-
-                    //Salva o Item
-                    $itemPedido->save();
-                } else {//add os que não forem encontrados
-                    //Cria novo objeto referente ao Item
-                    $itemPedido = new Itempedido();
-                    //Atribui os valores do formulário ao objeto
-                    $itemPedido->idPedido = $idPedido;
-                    $itemPedido->idProduto = $item['idProduto'];
-                    $itemPedido->qtd = $item['quantidade'];
-                    $itemPedido->preco = $item['preco'];
-                    $itemPedido->subtotal = $item['subtotal'];
-
-                    //Salva o Item
-                    $itemPedido->save();
-                }
-            }
-            $itensPedido = ItemPedido::with('produto')->where("idPedido", $idPedido)->get();
-            if ($pedido->status == Pedido::ENTREGUE) {
-                //subtrair quantidades ao estoque do distribuidor caso depido ainda esteja como entregue
-                //VERIFICA SE OS PRODUTOS SAO COMPOSICOES OU COMPONENTES ANTES DE ATUALIZAR
-                $this->composicoesArray = array();// Zera array
-                if ($distribuidor->tipoDistribuidor == "revendedor") {
-                    foreach ($itensPedido as $itemPedido) {
-                        $this->atualizaEstoque($distribuidor->idDistribuidor, $itemPedido->Produto, $itemPedido->qtd, false);
-                    }
-                    $this->atualizaComposicoes($distribuidor->idDistribuidor);
-                } else {
-                    foreach ($itensPedido as $itemPedido) {
-                        $this->atualizaEstoque($pedido->idDistribuidor, $itemPedido->Produto, $itemPedido->qtd, false);
-                    }
-                    $this->atualizaComposicoes($pedido->idDistribuidor);
-                }
-            }
-            //Notificações Firebase
-            $this->notification($msg, $administradores);
-            if ($cliente->regId != null && $request->status != $pedido->status) {
-                $this->gcmSend($cliente->regId, $cliente->id, $idPedido, $pedido->status, $pedido->retorno, $pedido->origem, true);
-            }
-            return $pedido->id;//return response('Pedido '.$pedido.' cadastrado com sucesso.', 200);
-        } else {
-            return response("Erro ao atualizar o pedido. Tente novamente ou contate o suporte.");
-        }
-    }
-    public function visualizar($id)
-    {
-        $pedido = Pedido::withBasicRelations()->withFormattedDates()->find($id);
-        $u = auth()->user();
-        if ($u->tipoAdministrador == 'Distribuidor' && $u->idDistribuidor != $pedido->idDistribuidor) {
-            return false;
-        }
-        $pedido->itensPedido = ItemPedido::where('idPedido', $id)->where('qtd', "!=", 0)->with('produto')->get();
-        $pedido->clientePedido = Cliente::find($pedido->endereco->idCliente);
-        $pedido->distribuidor = Distribuidor::select('distribuidor.nome', 'distribuidor.dddTelefone', 'distribuidor.telefonePrincipal')->find($pedido->idDistribuidor);
-        $pedido->entregador = Entregador::select('nome', 'telefone')->find($pedido->idEntregador);
-        if ($pedido->idAdministrador != null) {
-            $administrador = Administrador::select('nome')->find($pedido->idAdministrador);
-            $pedido->administrador = $administrador->nome;
-        }
-        return $pedido;
-        //
+        return $this->actions['listaClientes']->execute();
     }
     public function editar($id)
     {
-        $pedido = Pedido::selectRaw("pedido.*, CONCAT('', REPLACE(REPLACE(REPLACE(FORMAT( (pedido.trocoPara - pedido.total) , 2),'.',';'),',','.'),';',',')) AS troco, date_format(pedido.horarioPedido, '%d/%m/%Y %H:%i') as horarioPedido, date_format(pedido.horarioAceito, '%d/%m/%Y %H:%i') as horarioAceito, date_format(pedido.horarioDespache, '%d/%m/%Y %H:%i') as horarioDespache, date_format(pedido.horarioEntrega, '%d/%m/%Y %H:%i') as horarioEntrega, date_format(pedido.dataAgendada, '%d/%m/%Y') as dataAgendada")->find($id);
-        $u = auth()->user();
-        if ($u->tipoAdministrador != 'Administrador' && $u->id != $pedido->idAdministrador && $u->id != 50 && $u->id != 51 && $u->id != 61 && $u->id != 48 && $u->id != 96) {
-            return false;
-        }
-        $pedido->itensPedido = ItemPedido::where('idPedido', $id)->where('qtd', "!=", 0)->with('produto')->get();
-        $pedido->clientePedido = Cliente::find($pedido->endereco->idCliente);
-        $pedido->distribuidor = Distribuidor::select('distribuidor.id', 'distribuidor.nome', 'distribuidor.dddTelefone', 'distribuidor.telefonePrincipal')->find($pedido->idDistribuidor);
-        $pedido->entregador = Entregador::select('nome', 'telefone')->find($pedido->idEntregador);
-        $distribuidores = Distribuidor::where('status', '!=', 3)->get();
-        if ($pedido->idAdministrador != null) {
-            $administrador = Administrador::select('nome')->find($pedido->idAdministrador);
-            $pedido->administrador = $administrador->nome;
-        }
-        return [$pedido, $distribuidores];
-        //
+        return $this->actions['editarPedido']->execute($id);
     }
 
-    // Address/Customer Methods
-    function ajustarCoordenadas(Request $request, $idEndereco)
+    public function atualizar(Request $request, $id)
     {
-        $enderecoCliente = EnderecoCliente::find($idEndereco);
-        $u = Administrador::find(auth()->user()->id);
-        if ($u->tipoAdministrador != "Entregador") {
-            $distribuidor = Distribuidor::with("enderecoDistribuidor")
-                ->where("id", $request->idDistribuidor ? $request->idDistribuidor : $u->idDistribuidor)
-                ->get();
-
-            $enderecoCliente->latitude = $distribuidor[0]->enderecoDistribuidor->latitude;
-            $enderecoCliente->longitude = $distribuidor[0]->enderecoDistribuidor->longitude;
-
-            if ($enderecoCliente->save()) {
-                return "Coordenadas ajustadas com sucesso.";
-            } else {
-                return "Erro ao processar coordenadas.";
-            }
-
-        } else {
-            return "Erro ao processar coordenadas.";
-        }
+        return $this->actions['atualizarPedido']->execute($request, $id);
     }
-    function listaClientes()
+    public function ultimoPedido()
     {
-        if (auth()->check()) {
-
-            // $enderecos = DB::table('enderecoCliente')
-            // ->select('id as idEndereco', 'logradouro', 'numero', 'bairro', 'complemento', 'cep', 'cidade', 'estado', 'referencia', 'apelido', 'atual', 'idCliente', 'latitude', 'longitude');
-
-            // $users = DB::table('users')
-//         ->joinSub($latestPosts, 'latest_posts', function (JoinClause $join) {
-//             $join->on('users.id', '=', 'latest_posts.user_id');
-//         })->get();
-
-            // $enderecos = DB::table('enderecoCliente')
-            // ->select('id as idEndereco', 'logradouro', 'numero', 'bairro', 'complemento', 'cep', 'cidade', 'estado', 'referencia', 'apelido', 'atual', 'idCliente','idCliente', 'latitude', 'latitude')
-            // ->whereColumn('idCliente', 'cliente.id');
-
-            // ->select('id','nome','tipoPessoa','cpf','cnpj','precoAcertado','dddTelefone','telefone','outrosContatos','status','email','rating')
-
-            $clientes = Cliente::with('enderecos')
-                ->where('status', 1)
-                ->select(['id', 'nome', 'tipoPessoa', 'cpf', 'cnpj', 'precoAcertado', 'dddTelefone', 'telefone', 'outrosContatos', 'status', 'email', 'rating'])
-                ->get();
-            return $clientes;
-
-            //$clientes = DB::table('cliente')
-            //->where('status',1)
-            //->get()->toArray();
-            //$enderecoCliente = DB::table('enderecoCliente')
-            //->where('status',1)
-            //->get()->toArray();
-            //foreach ($enderecoCliente as $endereco) {
-            //    foreach ($clientes as $cliente) {
-            //        if ($cliente->id == $endereco->idCliente ) {
-            //            if (!property_exists($cliente, 'enderecos')){
-            //                $cliente->enderecos = array();
-            //            }
-            //            array_push($cliente->enderecos, $endereco);
-            //            break;
-            //        }
-            //    }
-            //}
-            //return $clientes;
-
-            // ->join('enderecoCliente', 'pedido.idEndereco', '=','endereco.id''cliente.id', '=', 'enderecoCliente.idCliente')
-            // ->select('cliente.*','enderecoCliente.id as idEndereco', 'logradouro', 'numero', 'bairro', 'complemento', 'cep', 'cidade', 'estado', 'referencia', 'apelido', 'atual', 'idCliente', 'latitude', 'longitude')
-            // ->get();
-
-            // ->joinSub($enderecos, 'enderecos',function (JoinClause $join) {
-            //     $join->on('cliente.id', '=', 'enderecos.idCliente')
-            //     ->where('cliente.status',1);
-            // })->get();
-
-            //->where('cliente.status',1);
-            //'cliente.id', '=', 'enderecoCliente.idCliente'
-
-            // return Datatables::of($clientes)
-            //     ->editColumn('nome', function(Cliente $cliente) {
-            //         if($cliente->precoAcertado == 1){
-            //             return '<i class="far fa-handshake"></i> '.$cliente->nome;
-            //         }else{
-            //             return $cliente->nome;
-            //         }
-            //     })
-            //     ->editColumn('tipoPessoa', function(Cliente $cliente) {
-            //         if($cliente->tipoPessoa == 1){
-            //             return $cliente->cpf;
-            //         }else{
-            //             return $cliente->cnpj;
-            //         }
-            //     })
-            //     ->editColumn('telefone', '({{$dddTelefone}}) {{$telefone}}')
-            //     ->addColumn('rating', function(Cliente $cliente) {
-            //         if($cliente->rating > 0){
-            //             return '<span class="badge badge-success">'.$cliente->rating.'</span>';
-            //         }else if($cliente->rating == 0){
-            //             return '<span class="badge badge-secondary">'.$cliente->rating.'</span>';
-            //         }else if($cliente->rating < -2){
-            //             return '<span class="badge badge-danger">'.$cliente->rating.'</span>';
-            //         }else{
-            //             return '<span class="badge badge-warning">'.$cliente->rating.'</span>';
-            //         }
-            //     })
-            //     //->addColumn('endereco', '<button title="Endereços" id='.'{{$id}}'.' type="button" class="btn btn-circle btn-info"><i class="mdi mdi-map-marker-radius"></i></button>')
-            //     ->addColumn('endereco', function(Cliente $cliente) {
-            //         return '<button title="Endereços" id="'.$cliente->id.'" name="'.$cliente->nome.'" value="'.$cliente->precoAcertado.'" type="button" class="btn btn-circle btn-info"><i class="mdi mdi-map-marker-radius"></i></button>';
-            //     })
-            //     ->rawColumns(['rating','endereco','nome'])
-            //     ->make(true);
-
-        } else {
-            return response('Sua sessão expirou. Por favor, refaça seu login.', 400);
-        }
+    return $this->actions['ultimoPedido']->execute();
+    }
+    public function visualizar($id)
+    {
+    return $this->actions['visualizarPedido']->execute($id);
     }
 }

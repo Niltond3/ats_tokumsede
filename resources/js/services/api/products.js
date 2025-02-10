@@ -36,3 +36,28 @@ export const listProductsByClient = async (idDistribuidor, idCliente) => {
         `produtos/listarProdutos/${idDistribuidor}/${idCliente}`
     );
 };
+
+/**
+ * Create product
+ * @param {Object} productData - Product information
+ * @returns {Promise} Created product
+ */
+export const createProduct = (productData) =>
+    axios.post('/produtos', productData);
+
+/**
+ * Update product
+ * @param {number} productId - Product ID
+ * @param {Object} productData - Updated product data
+ * @returns {Promise} Updated product
+ */
+export const updateProduct = (productId, productData) =>
+    axios.put(`/produtos/${productId}`, productData);
+
+/**
+ * Delete product
+ * @param {number} productId - Product ID
+ * @returns {Promise} Deletion confirmation
+ */
+export const deleteProduct = (productId) =>
+    axios.delete(`/produtos/${productId}`);

@@ -7,16 +7,20 @@ use App\Models\ItemPedido;
 use App\Models\Cliente;
 use App\Models\Distribuidor;
 use App\Models\Administrador;
-use Illuminate\Http\Request;
+use App\Services\FCMNotificationService;
 use App\Traits\UsesDistributorService;
+use App\Traits\UsesStockService;
+use Illuminate\Http\Request;
 
 class CreatePedidoAction extends BasePedidoAction
 {
-    use UsesDistributorService;
+    use UsesDistributorService, UsesStockService;
 
-    public function __construct()
+    public function __construct(FCMNotificationService $fcmService)
     {
+        parent::__construct($fcmService);
         $this->initializeDistributorService();
+        $this->initializeStockService();
     }
 
     public function execute(Request $request)

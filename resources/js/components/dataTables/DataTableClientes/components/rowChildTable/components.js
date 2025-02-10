@@ -34,7 +34,7 @@ export default () => {
 
     const renderAddress = (endereco) => {
         return /*html*/`<span
-        class="flex flex-col ${typographyBaseStyles}">
+        class="flex flex-col ${typographyBaseStyles} w-full">
         ${StringUtil.utf8Decode(endereco.logradouro)}, <span class="hidden">nº</span> ${endereco.numero}
         <span
             class="${typographySmStyles}">${StringUtil.utf8Decode(endereco.bairro)}</span>
@@ -109,10 +109,12 @@ export default () => {
                 class="ri-truck-fill ${iconStyles} group-hover/line:opacity-0 group-aria-selected/line:!opacity-0 "></i>
         </button>
              <i class="ri-e-bike-fill group-hover/line:text-white group-aria-selected/line:!text-white transition-colors hidden select-none pointer-events-none"></i>
-             <div class="${separatorStyles} hidden select-none pointer-events-none"></div>
-             <div class="flex flex-col gap-2 text-info group-aria-selected/line!:!text-white group-hover/line:text-white select-none pointer-events-none">
+             <div class="${separatorStyles} group-hover/line:opacity-0 group-aria-selected/line:opacity-0 transition-all select-none pointer-events-none"></div>
+             <div class="flex flex-col gap-2 text-info group-aria-selected/line!:!text-white group-hover/line:text-white select-none pointer-events-none w-full">
                  ${renderOrderDetails(order.details)}
-                 <div class="h-px bg-slate-300 select-none pointer-events-none"></div>
+                 <div class="h-px bg-slate-300 select-none pointer-events-none relative my-2">
+                    <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-sm whitespace-nowrap bg-info text-white rounded-md py-0.5 px-1 group-hover/line:bg-white group-hover/line:!text-info group-aria-selected/line:text-dispatched group-aria-selected/line:bg-white">${order.distribuidor.nome}</span>
+                 </div>
                  <div
                      class='overflow-hidden flex gap-2 mt-2 transition-max-height max-h-0 group-hover/line:max-h-40 group-aria-selected/line:!max-h-40 ease-in-out delay-150 select-none pointer-events-none'>
                      <div class="flex flex-col select-none pointer-events-none">
@@ -120,7 +122,8 @@ export default () => {
                          </div>
                  </div>
              </div>
-             <div class="ml-auto border-l border-slate-300 pl-3">
+             <div class="${separatorStyles} group-hover/line:opacity-0 group-aria-selected/line:opacity-0 transition-all select-none pointer-events-none"></div>
+             <div class="ml-auto">
                  <button class="${buttonStyles} visualizarPedido hover:text-info/100 text-info/60 transition-all group-hover/line:bg-white group-aria-selected/line:!bg-white hover:shadow-lg flex justify-center items-center" id="${order.id}">
                      <i class="ri-eye-fill text-sm pointer-events-none"></i>
                  </button>

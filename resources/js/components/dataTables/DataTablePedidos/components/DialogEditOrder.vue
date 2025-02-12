@@ -12,9 +12,12 @@ import { StringUtil, MoneyUtil, OrderUtil } from '@/util';
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
 import { ClipboardUtil } from '@/util';
 import { DataTableProducts } from '@/components/dataTables/DataTableProducts';
-import { dialogState } from '@/hooks/useToggleDialog';
+import { dialogState } from '@/composables/useToggleDialog';
 import renderToast from '@/components/renderPromiseToast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { atualizarPedido } from '@/services/api/pedidos';
+import { editOrder } from '@/services/api/orders';
+import { listProductsByClient } from '@/services/api/products';
 
 const props = defineProps({
   orderId: { type: Number, required: true },
@@ -49,13 +52,10 @@ const products = ref();
 const { toCurrency } = MoneyUtil.formatMoney();
 
 const fetchOrder = () => {
-  const urlOrder = `pedidos/editar/${props.orderId}`;
-  const promise = axios.get(urlOrder);
-
   isLoading.value = true; // Atualiza o estado de carregamento para true
 
   renderToast(
-    promise,
+    editOrder(props.orderId),
     `carregando pedido #${props.orderId}`,
     'sucesso ao carregar pedido',
     'erro ao carregar pedido',
@@ -69,12 +69,9 @@ const fetchOrder = () => {
 
       const idDistribuidor = orderData.distribuidor.id;
       const idCliente = orderData.cliente.id;
-      const urlProducts = `produtos/listarProdutos/${idDistribuidor}/${idCliente}`;
-
-      const productsPromise = axios.get(urlProducts);
 
       renderToast(
-        productsPromise,
+        listProductsByClient(idDistribuidor, idCliente),
         'carregando produtos',
         'produtos carregados com sucesso',
         'erro ao carregar produtos',
@@ -161,10 +158,8 @@ watch(
 );
 
 const handleUpdateOrder = (payload) => {
-  const url = `pedidos/atualizar/${payload.idPedido}`;
-  const response = axios.put(url, payload);
   renderToast(
-    response,
+    atualizarPedido(payload.idPedido, payload),
     'atualizando pedido',
     'pedido atualizado',
     'erro ao atualizar pedido',

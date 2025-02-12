@@ -8,7 +8,7 @@ import NavLink from '@/components/NavLink.vue';
 import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { Toggle } from '@/components/ui/toggle';
-import NavigationMenu from '@/components/NavigationMenu/NavigationMenu.vue';
+import NavigationMenu from '@/components/navigation/NavigationMenu.vue';
 import { useOrderNotifications } from '@/composables/useOrderNotifications';
 
 const page = usePage();
@@ -199,11 +199,9 @@ const handleSoundToggle = (value) => {
 
         <!-- Page Content -->
         <main class="mt-16">
-          <div class="py-12">
+          <div class="pb-0.5 pt-[3.125rem]">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-              <div class="bg-white dark:bg-gray-800 overflow-hidden sm:rounded-lg">
-                <slot />
-              </div>
+              <slot />
             </div>
           </div>
         </main>

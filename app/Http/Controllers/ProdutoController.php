@@ -187,7 +187,8 @@ class ProdutoController extends Controller
             'preco.id as idPreco',
             'produto.id as idProd',
             'produto.nome as nome',
-            'produto.img as img'
+            'produto.img as img',
+            'produto.descricao as descricao',
         ])
         ->where([
             ['preco.status', '=', 1],
@@ -267,6 +268,7 @@ class ProdutoController extends Controller
         $indexProduto = -1;
 
         foreach ($produtos as $prod) {
+            Debugbar::info($prod);
             // Create new product entry if different from current
             if ($currentProduct !== $prod->idProd) {
                 $indexProduto++;
@@ -277,6 +279,7 @@ class ProdutoController extends Controller
                     "nome" => $prod->nome,
                     "id" => $prod->idProd,
                     "img" => $prod->img,
+                    "descricao" => $prod->descricao,
                     "preco" => [],
                     "precoEspecial" => [],
                     // "categoria" => $prod->categoria
@@ -322,7 +325,7 @@ class ProdutoController extends Controller
     public function show($idEnderecoCliente)
     {
         $enderecoCliente = EnderecoCliente::findOrFail($idEnderecoCliente);
-    $distribuidores = $this->getNearbyDistributors($enderecoCliente);
+        $distribuidores = $this->getNearbyDistributors($enderecoCliente);
 
 
         if (empty($distribuidores)) {

@@ -7,21 +7,21 @@
  * Fetch all clients from the system
  * @returns {Promise} Resolves with list of all clients
  */
-export const getClients = () => axios.get('clientes');
+export const getClients = () => axios.get('/clientes');
 
 /**
  * Fetch a single client by their ID
  * @param {number} clientId - The ID of the client to fetch
  * @returns {Promise} Resolves with the client data
  */
-export const getClient = async (clientId) => axios.get(`clientes/${clientId}`);
+export const getClient = async (clientId) => axios.get(`/clientes/${clientId}`);
 
 /**
  * Create a new client in the system
  * @param {Object} clientData - The client data to create
  * @returns {Promise} Resolves with the created client
  */
-export const createClient = (clientData) => axios.post('clientes', clientData);
+export const createClient = (clientData) => axios.post('/clientes', clientData);
 
 /**
  * Update an existing client's information

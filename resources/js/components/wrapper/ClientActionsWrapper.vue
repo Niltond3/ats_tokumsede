@@ -7,7 +7,8 @@ import renderToast from '@/components/renderPromiseToast';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { dialogState } from '@/hooks/useToggleDialog';
+import { dialogState } from '@/composables/useToggleDialog';
+import { updateClient } from '@/services/api/client';
 
 const props = defineProps({
   payloadData: { type: null, required: true },
@@ -33,11 +34,9 @@ const handleToggleDropdown = (op) => {
 };
 
 const handleStatusClientChange = ({ id, status }) => {
-  var url = `clientes/${idCliente}`;
   handleToggleDropdown(true);
-  const promise = axios.put(url, { status: id });
   renderToast(
-    promise,
+    updateClient(idCliente, { status: id }),
     'alterando status do cliente',
     `O cliente ${idCliente} foi ${status} com sucesso!`,
     'Erro ao alterar status do cliente',
@@ -49,10 +48,8 @@ const handleStatusChange = (checked) => {
   const newStatus = checked ? 1 : 2;
   const statusText = checked ? 'ativado' : 'inativado';
 
-  const promise = axios.put(`clientes/${idCliente}`, { status: newStatus });
-
   renderToast(
-    promise,
+    updateClient(idCliente, { status: newStatus }),
     'alterando status do cliente',
     `O cliente ${idCliente} foi ${statusText} com sucesso!`,
     'Erro ao alterar status do cliente',

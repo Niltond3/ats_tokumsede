@@ -10,7 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { StringUtil } from '@/util';
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
-import { dialogState } from '@/hooks/useToggleDialog';
+import { dialogState } from '@/composables/useToggleDialog';
 
 defineProps({
   entregadores: { type: Array, required: true },

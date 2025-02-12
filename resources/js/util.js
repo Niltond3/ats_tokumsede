@@ -429,7 +429,92 @@ ${order.obs ? `obs: ${order.obs}` : ""}
             toast.error('Erro ao copiar produtos');
             return false;
         }
-    }
+    },
+    // Add this new method inside ClipboardUtil
+    productsToClipboard: (products) => {
+        try {
+            // Get money formatter
+            const { toCurrency } = MoneyUtil.formatMoney();
+
+            // Helper function to check product name patterns
+            const hasPattern = (name, pattern) => name.toLowerCase().includes(pattern.toLowerCase());
+
+            // Custom sorting function based on requirements
+            const sortProducts = (a, b) => {
+                const nameA = StringUtil.utf8Decode(a.nome);
+                const nameB = StringUtil.utf8Decode(b.nome);
+
+                // 3.1 Alkalina first
+                if (hasPattern(nameA, 'Alkalina') && !hasPattern(nameB, 'Alkalina')) return -1;
+                if (!hasPattern(nameA, 'Alkalina') && hasPattern(nameB, 'Alkalina')) return 1;
+
+                // 3.2 20L second
+                if (hasPattern(nameA, '20L') && !hasPattern(nameB, '20L')) return -1;
+                if (!hasPattern(nameA, '20L') && hasPattern(nameB, '20L')) return 1;
+
+                // 3.3 10L third
+                if (hasPattern(nameA, '10L') && !hasPattern(nameB, '10L')) return -1;
+                if (!hasPattern(nameA, '10L') && hasPattern(nameB, '10L')) return 1;
+
+                // 3.4 5L fourth
+                if (hasPattern(nameA, '5L') && !hasPattern(nameB, '5L')) return -1;
+                if (!hasPattern(nameA, '5L') && hasPattern(nameB, '5L')) return 1;
+
+                // 3.5 Alphabetical order
+                if (nameA < nameB) return -1;
+                if (nameA > nameB) return 1;
+
+                // 3.6 Product ID
+                return a.id - b.id;
+            };
+
+            // Validate input
+            if (!Array.isArray(products) || products.length === 0) {
+                throw new Error('Invalid products array');
+            }
+
+            // Format header
+            const header = "*Temos:*\n__________________________________________________\n\n";
+
+            // Format products
+            const formattedProducts = products
+                .sort(sortProducts)
+                .map(product => {
+                    // Validate product structure
+                    if (!product.nome || !product.preco || !Array.isArray(product.preco)) {
+                        return null;
+                    }
+
+                    // Get lowest price from price array
+                    const lowestPrice = product.preco.reduce((min, p) =>
+                        p.val < min ? p.val : min,
+                        product.preco[0]?.val ?? 0
+                    );
+
+                    return `• *${StringUtil.utf8Decode(product.nome)}* ${StringUtil.utf8Decode(product.descricao || '')
+                        } por *${toCurrency(lowestPrice)}*;\n`;
+                })
+                .filter(Boolean) // Remove null entries
+                .join('\n');
+
+            // Format footer
+            const footer = "__________________________________________________";
+
+            // Combine all parts
+            const clipboardText = `${header}${formattedProducts}${footer}`;
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(clipboardText);
+            toast.info('Lista de produtos copiada para a área de transferência');
+
+            return true;
+        } catch (error) {
+            console.error('Erro ao copiar produtos para área de transferência:', error);
+            toast.error('Erro ao copiar lista de produtos');
+            return false;
+        }
+    },
+
 };
 
 // ==================

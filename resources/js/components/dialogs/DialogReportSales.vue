@@ -6,6 +6,7 @@ import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { getSalesReport } from '@/services/api/orders';
 
 const isOpen = ref(false);
 const dateRange = ref([null, null]);
@@ -13,7 +14,7 @@ const selectedDistributors = ref([]);
 
 async function fetchSalesReport() {
   const [startDate, endDate] = dateRange.value;
-  const response = await axios.post('/relatorio/vendas', {
+  const response = await getSalesReport({
     dataInicial: startDate?.toLocaleDateString('pt-BR'),
     dataFinal: endDate?.toLocaleDateString('pt-BR'),
     idDistribuidores: selectedDistributors.value.join(','),

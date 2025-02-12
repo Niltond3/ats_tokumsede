@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Dialog } from '@/components/ui/dialog';
 import DialogConfirmActionContent from '@/components/DialogConfirmActionContent.vue';
 import renderToast from '@/components/renderPromiseToast';
+import { updateAddress } from '@/services/api/addresses';
 
 const props = defineProps({
   idAddress: { type: String, required: true },
@@ -17,11 +18,12 @@ const emits = defineEmits(['delete:confirm']);
 const handleDeleteAddress = (confirm) => {
   if (confirm === false) return emits('delete:confirm', false);
 
-  var url = `enderecos/${props.idAddress}`;
-
-  const promise = axios.put(url, { status: 3 });
-  renderToast(promise, 'deletando endereço', 'Endereço deletado', 'Erro ao deletar endereço', () =>
-    emits('delete:confirm', true),
+  renderToast(
+    updateAddress({ status: 3 }),
+    'deletando endereço',
+    'Endereço deletado',
+    'Erro ao deletar endereço',
+    () => emits('delete:confirm', true),
   );
 };
 </script>

@@ -6,7 +6,6 @@ export default (d) => {
     const { customLiAddress, customLiOrder, addressActionsButtons } = components();
 
     const rowChildData = d;
-    console.log(rowChildData.pedidos)
     const clientName = StringUtil.utf8Decode(rowChildData.nome);
     const containerClasses = `p-2 md:flex-1`;
     const addressActions = [

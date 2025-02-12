@@ -30,6 +30,8 @@ import DialogCreateOrderNote from '@/components/dialogs/DialogCreateOrderNote.vu
 import renderToast from '@/components/renderPromiseToast';
 import { useTableProductsState } from '@/composables/tableProductsState';
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
+import { listProductsByClientAddress } from '@/services/api/products';
+import { createOrder } from '@/services/api/orders';
 
 const tableProductsState = useTableProductsState();
 const isLoading = ref(true);
@@ -69,11 +71,8 @@ const disabledButton = ref(true);
 const whenDialogOpen = () => {
   isLoading.value = true;
 
-  const url = `produtos/${props.idClienteAddress}`;
-  const promise = axios.get(url);
-
   renderToast(
-    promise,
+    listProductsByClientAddress(props.idClienteAddress),
     'carregando produtos',
     'Produtos carregados',
     'Erro ao carregar produtos',
@@ -266,7 +265,7 @@ watch(
 const handleCallbackPedido = () => {
   disabledButton.value = true;
   renderToast(
-    axios.post('pedidos', tableProductsState.payload),
+    createOrder(tableProductsState.payload),
     'Cadastrando pedido',
     'o pedido foi cadastrado com sucesso',
     'Ocorreu um erro ao cadastrar o pedido',

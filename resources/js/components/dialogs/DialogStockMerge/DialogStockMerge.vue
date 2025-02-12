@@ -10,6 +10,7 @@ import { StringUtil } from '@/util';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import DistributorCombobox from './DistributorCombobox.vue';
+import { unifyStock } from '@/services/api/stock';
 
 const props = defineProps({
   isOpen: { type: Boolean, required: false, default: null },
@@ -48,13 +49,8 @@ async function mergeStocks() {
     .map((name) => distributors.value.find((d) => d.nome === name)?.id)
     .filter((id) => id);
 
-  const promise = axios.post('/stock-unions', {
-    main_distributor_id: mainId,
-    secondary_distributor_ids: secondaryIds,
-  });
-
   renderToast(
-    promise,
+    unifyStock(mainId, secondaryIds),
     'Unificando estoques...',
     'Estoques unificados com sucesso!',
     'Erro ao unificar estoques',

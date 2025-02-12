@@ -180,7 +180,7 @@ export const getCustomerList = async () => {
  * @returns {Promise} Report data
  */
 export const getOrderReport = (filters) =>
-    axios.post('pedidos/relatorio', filters);
+    axios.post('/relatorio/pedidos', filters);
 
 /**
  * Get sales report by product
@@ -204,4 +204,4 @@ export const getDeliveryPersonSalesReport = (filters) =>
  * @returns {Promise} Sales report data
  */
 export const getSalesReport = (filters) =>
-    axios.post('pedidos/relatorio/vendas', filters);
+    axios.post('/relatorio/vendas', filters);

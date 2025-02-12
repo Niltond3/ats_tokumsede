@@ -22,7 +22,7 @@ import 'datatables.net-staterestore-dt';
 
 // Utility imports
 import { ErrorUtil, StringUtil } from '@/util';
-import { dialogState } from '@/hooks/useToggleDialog';
+import { dialogState } from '@/composables/useToggleDialog';
 import languagePtBR from './dataTablePtBR.mjs';
 import { OrderUtil } from '@/util';
 import rowChildtable from './components/rowChildTable/index';
@@ -37,6 +37,7 @@ import DialogEditOrder from '@/components/dataTables/DataTablePedidos/components
 import ClientActionsWrapper from '@/components/wrapper/ClientActionsWrapper.vue';
 import ClientActionsDropdown from '@/components/dropdowns/ClientActionsDropdown.vue';
 import { updateCoordinates } from '@/services/api/addresses';
+import { createClient, getClient } from '@/services/api/client';
 
 DataTable.use(DataTablesCore);
 
@@ -147,7 +148,7 @@ const setupChildRowHandler = (dt, format) => {
         clientData = clientCache.get(client.id);
       } else {
         await renderToast(
-          axios.get(`clientes/${client.id}`),
+          getClient(client.id),
           'Carregando Cliente...',
           'Cliente carregado',
           'Falha ao carregar cliente',
@@ -371,15 +372,7 @@ const options = {
       if (searchValue) {
         try {
           const dtParams = table.ajax.params();
-          const response = await axios.post('clientes', {
-            ...dtParams,
-            length: 999999,
-            start: 0,
-            search: {
-              value: searchValue,
-              regex: false,
-            },
-          });
+          const response = await createClient;
           const fullData = response.data.data.map((client) => ({
             ...client,
             nome: StringUtil.utf8Decode(client.nome),

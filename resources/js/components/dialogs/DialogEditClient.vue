@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { RegisterDetails } from '@/components/forms/registerClient';
-import { dialogState } from '@/hooks/useToggleDialog';
+import { dialogState } from '@/composables/useToggleDialog';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 const props = defineProps({
   clientDetails: { type: Object, required: false },

@@ -15,3 +15,9 @@ export const getStockReport = async (distributorIds) => {
         idDistribuidores: distributorIds
     });
 };
+export const unifyStock = async (mainId, secondaryIds) => {
+    return await axios.post('/stock-unions', {
+        main_distributor_id: mainId,
+        secondary_distributor_ids: secondaryIds,
+    })
+}

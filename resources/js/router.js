@@ -6,22 +6,13 @@ import Dashboard from './Pages/Dashboard.vue';
 import ClienteDashboard from './Pages/Cliente/Dashboard.vue';
 
 const routes = [
-    // Rota base para a área de gestão, com child route para dialogs.
     {
         path: '/home',
         name: 'home',
         component: Management,
-        // Permite que o componente Management receba props, se necessário.
-        props: true,
-        children: [
-            {
-                // Rota para abrir um dialog dentro de /home
-                path: 'dialog/:dialogName/:dialogId',
-                name: 'home-dialog',
-                component: Management, // Ou um componente específico para dialog, se desejar
-                props: true,
-            },
-        ],
+        props: (route) => ({
+            defaultTab: route.query.tab
+        })
     },
     // Rota de boas-vindas
     {

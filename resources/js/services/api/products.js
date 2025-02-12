@@ -37,6 +37,13 @@ export const listProductsByClient = async (idDistribuidor, idCliente) => {
     );
 };
 
+export const listProductsByClientAddress = async (idClientAddress) => {
+    return await axios.get(`produtos/${idClientAddress}`);
+};
+
+export const listProducts = async () => {
+    return await axios.get(`produtos`);
+};
 /**
  * Create product
  * @param {Object} productData - Product information

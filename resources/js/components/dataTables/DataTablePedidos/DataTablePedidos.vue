@@ -145,7 +145,7 @@ watch(
 );
 
 onMounted(() => {
-  props.onSetTab();
+  props.onSetTab && props.onSetTab();
   dt = table.value.dt;
   $('.dt-search').addClass(
     'flex items-center py-2 px-1 gap-2 !text-info/80 !mb-[30px] min-[768px]:!mb-[10px]',

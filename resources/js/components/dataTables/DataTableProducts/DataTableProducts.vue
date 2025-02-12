@@ -158,8 +158,6 @@ watch(
       idEndereco,
       order,
     );
-    console.log(rawProducts);
-    console.log(products);
     clientName.value = rawClientName;
     isUpdate.value = updateOrder;
     tableProductsState.payload = { ...tableProductsState.payload, ...orderPayload };

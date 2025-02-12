@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { dialogState } from '@/hooks/useToggleDialog';
+import { dialogState } from '@/composables/useToggleDialog';
 import { twMerge } from 'tailwind-merge';
 import { FormControl, FormField, FormItem } from '@/components/ui/form';
 

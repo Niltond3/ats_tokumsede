@@ -2,7 +2,7 @@
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import DialogShowOrderContent from '@/components/dialogs/DialoShowOrderContent.vue';
-import { dialogState } from '@/hooks/useToggleDialog';
+import { dialogState } from '@/composables/useToggleDialog';
 
 const { isOpen, toggleDialog } = dialogState('ShowOrder');
 

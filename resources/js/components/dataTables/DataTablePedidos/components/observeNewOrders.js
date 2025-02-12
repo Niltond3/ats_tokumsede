@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { toast } from "vue-sonner";
 import audio from "@/Layouts/config/audio";
 import axios from "axios";
+import { getLastOrder } from "@/services/api/orders";
 
 const ultimoPedido = ref(null);
 const callback = ref(null);
@@ -26,8 +27,7 @@ function playSound() {
 }
 const newOrder = async () => {
     try {
-        const urlUltimoPedido = "pedidos/ultimoPedido";
-        const response = await axios.get(urlUltimoPedido);
+        const response = await getLastOrder()
 
         if (response.data !== ultimoPedido.value)
             ultimoPedido.value = response.data;
@@ -38,8 +38,7 @@ const newOrder = async () => {
 
 const getNewOrders = async (successCallback) => {
     try {
-        const urlNovosPedidos = `/pedidos/buscarNovosPedidos/${ultimoPedido.value}`;
-        const response = await axios.get(urlNovosPedidos);
+        const response = await getNewOrders(ultimoPedido.value)
         const novosPedidos = response.data;
 
         if (novosPedidos.length > 0) {

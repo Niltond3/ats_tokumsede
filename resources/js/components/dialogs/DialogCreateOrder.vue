@@ -8,6 +8,8 @@ import { StringUtil } from '@/util';
 import renderToast from '@/components/renderPromiseToast';
 import ReminderManager from '@/components/ReminderManager.vue';
 import { useReminders } from '@/composables/useReminders';
+import { listProductsByClientAddress } from '@/services/api/products';
+import { getAllPedidos } from '@/services/api/pedidos';
 
 const props = defineProps({
   open: { type: Boolean, required: false },
@@ -27,11 +29,8 @@ const emits = defineEmits(['update:modelValue', 'update:dataTable']);
 const forwarded = useForwardPropsEmits(props, emits);
 
 const whenDialogOpen = () => {
-  const url = `produtos/${props.idClienteAddress}`;
-  const promise = axios.get(url);
-
   renderToast(
-    promise,
+    listProductsByClientAddress(props.idClienteAddress),
     'carregando produtos',
     'Produtos carregados',
     'Erro ao carregar produtos',
@@ -82,10 +81,8 @@ watch(
   },
 );
 const handleRealizarPedido = (payload) => {
-  var url = 'pedidos';
-  const promise = axios.post(url, payload);
   renderToast(
-    promise,
+    getAllPedidos(),
     'realizando pedido',
     'Pedido realizado com sucesso!',
     'Erro ao realizar pedido',

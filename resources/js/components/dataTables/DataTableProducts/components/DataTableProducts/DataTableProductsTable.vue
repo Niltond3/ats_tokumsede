@@ -12,6 +12,7 @@ import { FlexRender } from '@tanstack/vue-table';
 import { DialogCreateOrderNote } from '..';
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ClipboardUtil } from '@/util';
 
 const props = defineProps({
   products: {
@@ -45,14 +46,14 @@ const emits = defineEmits(['update:order-note']);
     <Table
       class="rounded-md [&_tbody]:h-[235px] [&_tbody]:table-fixed [&_tbody]:block [&_tbody]:overflow-y-auto [&_tbody]:overflow-x-hidden [&_tr]:table [&_tr]:w-full [&_tr]:table-fixed"
     >
-      <!-- <TooltipProvider :delay-duration="100">
+      <TooltipProvider :delay-duration="100">
         <Tooltip>
           <TooltipTrigger as-child>
             <TableHeader
               class="bg-info rounded-md"
               @click="
                 () => {
-                  console.log(props.products);
+                  ClipboardUtil.productsToClipboard(props.products);
                 }
               "
             >
@@ -76,29 +77,8 @@ const emits = defineEmits(['update:order-note']);
             clique para copiar os preços
           </TooltipContent>
         </Tooltip>
-      </TooltipProvider> -->
-      <TableHeader
-        class="bg-info rounded-md"
-        @click="
-          () => {
-            console.log(props.products);
-          }
-        "
-      >
-        <TableRow v-for="headerGroup in props.table.getHeaderGroups()" :key="headerGroup.id">
-          <TableHead
-            v-for="header in headerGroup.headers"
-            :key="header.id"
-            :style="{ width: header.getSize() + 'px' }"
-          >
-            <FlexRender
-              v-if="!header.isPlaceholder"
-              :render="header.column.columnDef.header"
-              :props="header.getContext()"
-            />
-          </TableHead>
-        </TableRow>
-      </TableHeader>
+      </TooltipProvider>
+
       <TableBody>
         <template v-if="props.table.getRowModel().rows?.length">
           <TableRow

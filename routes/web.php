@@ -40,8 +40,10 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/home', function () {
-    return Inertia::render('Home');
+Route::get('/home/{tab?}', function ($tab = null) {
+    return Inertia::render('Home', [
+        'currentTab' => $tab
+    ]);
 })->middleware(['auth', 'verified'])->name('home');
 
 Route::get('/home/dashboard', function () {
@@ -176,7 +178,6 @@ Route::middleware('auth')->group(function () {
 
 
 Route::get('/homepage', [HomeController::class, 'getHomepage'])->name('homepage');
-
 
 // //API
 // Route::group(['prefix' => 'api'], function () {

@@ -16,6 +16,7 @@ import DistributorCombobox from './DialogStockMerge/DistributorCombobox.vue';
 import { jsPDF } from 'jspdf';
 import { Skeleton } from '@/components/ui/skeleton';
 import 'jspdf-autotable';
+import { getOrderReport } from '@/services/api/orders';
 
 const props = defineProps({
   isOpen: { type: Boolean, required: false, default: null },
@@ -225,14 +226,12 @@ async function fetchOrdersReport() {
           .filter((id) => id) // Remove falsy values
           .join(',');
 
-  const promise = axios.post('/relatorio/pedidos', {
-    dataInicial: startDate?.toLocaleDateString('pt-BR'),
-    dataFinal: endDate?.toLocaleDateString('pt-BR'),
-    idDistribuidores: distributorIds || null, // Send null if no distributors selected
-  });
-
   renderToast(
-    promise,
+    getOrderReport({
+      dataInicial: startDate?.toLocaleDateString('pt-BR'),
+      dataFinal: endDate?.toLocaleDateString('pt-BR'),
+      idDistribuidores: distributorIds || null, // Send null if no distributors selected
+    }),
     'Carregando relatório...',
     'Relatório gerado com sucesso!',
     'Erro ao gerar relatório',

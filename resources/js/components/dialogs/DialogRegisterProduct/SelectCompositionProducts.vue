@@ -18,6 +18,7 @@ import {
   ComboboxRoot,
 } from 'radix-vue';
 import { StringUtil } from '@/util';
+import { listProducts } from '@/services/api/products';
 
 const products = ref([]);
 const modelValue = ref([]);
@@ -27,10 +28,8 @@ const searchTerm = ref('');
 const emits = defineEmits(['update:modelValue']);
 
 const getProducts = () => {
-  const url = '/produtos';
-  const promise = axios.get(url);
   renderToast(
-    promise,
+    listProducts(),
     'carregando produtos ...',
     'Produtos carregados',
     'Erro ao carregar produtos',

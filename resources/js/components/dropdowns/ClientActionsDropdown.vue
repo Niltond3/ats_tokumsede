@@ -18,6 +18,7 @@ import { MoreVertical } from 'lucide-vue-next';
 import DialogConfirmAction from '@/components/dialogs/DialogConfirmAction.vue';
 import DialogEditClient from '@/components/dialogs/DialogEditClient.vue';
 import renderToast from '@/components/renderPromiseToast';
+import { updateClient } from '@/services/api/client';
 
 const props = defineProps({
   payloadData: { type: null, required: true },
@@ -38,11 +39,8 @@ const handleToggleDropdown = (op) => {
 };
 
 const handleStatusClientChange = ({ id, status }) => {
-  var url = `clientes/${idCliente}`;
-  handleToggleDropdown(true);
-  const promise = axios.put(url, { status: id });
   renderToast(
-    promise,
+    updateClient(idCliente, { status: id }),
     'alt erando status do cliente',
     `O cliente ${idCliente} foi ${status} com sucesso!`,
     'Erro ao alterar status do cliente',

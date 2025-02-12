@@ -17,6 +17,7 @@ import { useToggleTabs } from './useTabs';
 import { useQzTray } from '@/composables/useQzTray';
 import useIsMobile from '@/composables/useIsMobile';
 import renderToast from '@/components/renderPromiseToast';
+import { useTabRouteSync } from '@/composables/useTabRouteSync';
 
 const { connect } = useQzTray();
 const { detectDevice, isMobile } = useIsMobile();
@@ -41,9 +42,15 @@ const getTypeAdmin = {
 
 const { tab, tabName, description } = getTypeAdmin[typeAdmin];
 
-const { activeTab, setActiveTab } = useToggleTabs(tab);
+const { activeTab, setActiveTab } = useTabRouteSync(tab);
 
-const handleSetActiveTab = (tab) => setActiveTab(tab);
+const handleSetActiveTab = async (newTab) => {
+  await setActiveTab(newTab);
+  // Reset notification count if switching to pedidos tab
+  if (newTab === 'pedidos') {
+    resetNotificationCount();
+  }
+};
 
 // Função para conectar ao QZ Tray
 const connectQZTray = () => {
@@ -64,7 +71,7 @@ onMounted(() => {
 
 <template>
   <div class="row">
-    <Tabs default-value="account" :default-value="tab" :model-value="activeTab">
+    <Tabs :default-value="tab ? tab : 'account'" :model-value="activeTab">
       <TabsList class="grid w-full grid-cols-2">
         <TabsTrigger :value="tab" @Click="handleSetActiveTab(tab)">
           {{ tabName }}

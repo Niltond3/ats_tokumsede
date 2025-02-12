@@ -1,13 +1,11 @@
 import { toast } from "vue-sonner";
 import { MoneyUtil } from "@/util";
 import renderToast from "@/components/renderPromiseToast";
-import axios from "axios";
+import { saveProductPrice } from "@/services/api/products";
 
 const createSpecialOffer = (payload, emit) => {
-    const url = "preco";
-    const promise = axios.post(url, payload);
     renderToast(
-        promise,
+        saveProductPrice(payload),
         "Salvando oferta ...",
         "oferta salva com sucesso!",
         "Erro ao Salvar oferta!",

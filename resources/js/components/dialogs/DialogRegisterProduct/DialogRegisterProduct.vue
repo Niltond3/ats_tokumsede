@@ -29,11 +29,13 @@ import {
 } from '@/components/ui/select';
 // Utilities
 import { useDropzone } from 'vue3-dropzone';
-import { dialogState } from '@/hooks/useToggleDialog';
+import { dialogState } from '@/composables/useToggleDialog';
 import renderToast from '@/components/renderPromiseToast';
 import { StringUtil } from '@/util';
 import SelectImages from './SelectImages.vue';
 import SelectCompositionProducts from './SelectCompositionProducts.vue';
+import { getCategories } from '@/services/api/categories';
+import { createProduct } from '@/services/api/products';
 
 const isLoading = ref(true);
 const categories = ref([]);
@@ -76,10 +78,8 @@ function onDrop(acceptFiles, rejectReasons) {
 }
 
 const getCategorie = () => {
-  const url = '/categorias';
-  const promise = axios.get(url);
   renderToast(
-    promise,
+    getCategories(),
     'carregando categorias ...',
     'Categorias carregadas',
     'Ocorreu um erro ao carregar as categorias',
@@ -115,10 +115,8 @@ onMounted(() => {
 const handleDefaultImage = () => (img.value = defaultImgValue);
 
 const registerProduct = (payload) => {
-  const url = '/produtos';
-  const promise = axios.post(url, payload);
   renderToast(
-    promise,
+    createProduct(payload),
     'Salvando produto ...',
     'Produto salvo',
     'Ocorreu um erro ao salvar o produto',

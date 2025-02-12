@@ -26,6 +26,7 @@ use App\Actions\Pedidos\{
     UltimoPedidoAction,
     VisualizarPedidoAction,
 };
+use Barryvdh\Debugbar\Facades\Debugbar;
 
 class PedidoController extends Controller
 {
@@ -89,6 +90,7 @@ class PedidoController extends Controller
 
     public function store(Request $request)
     {
+        Debugbar::info($request->all());
         return $this->actions['createPedido']->execute($request);
     }
 

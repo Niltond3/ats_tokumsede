@@ -19,7 +19,7 @@ const handleDeleteAddress = (confirm) => {
   if (confirm === false) return emits('delete:confirm', false);
 
   renderToast(
-    updateAddress({ status: 3 }),
+    updateAddress(props.idAddress, { status: 3 }),
     'deletando endereço',
     'Endereço deletado',
     'Erro ao deletar endereço',

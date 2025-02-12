@@ -23,6 +23,9 @@ trait DateProcessing
         }
     }
     private function formatDateTime($datetime) {
+        if ($datetime === null) {
+            return '';
+        }
         return date('d/m/Y H:i', strtotime($datetime));
     }
 }

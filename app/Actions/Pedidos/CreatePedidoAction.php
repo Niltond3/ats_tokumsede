@@ -10,6 +10,7 @@ use App\Models\Administrador;
 use App\Services\FCMNotificationService;
 use App\Traits\UsesDistributorService;
 use App\Traits\UsesStockService;
+use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Http\Request;
 
 date_default_timezone_set('America/Sao_Paulo');
@@ -27,6 +28,8 @@ class CreatePedidoAction extends BasePedidoAction
 
     public function execute(Request $request)
     {
+        Debugbar::info($request);
+
         $dataAgendada = $request->dataAgendada == "" ? null : implode("-", array_reverse(explode("/", $request->dataAgendada)));
         $idAdministrador = auth()->user()->id;
 
@@ -41,7 +44,7 @@ class CreatePedidoAction extends BasePedidoAction
         $pedido->origem = $request->origem ? $request->origem : Pedido::PLATAFORMA;
         $pedido->dataAgendada = $dataAgendada;
         $pedido->idAdministrador = $request->origem ? null : $idAdministrador;
-
+        Debugbar::info($pedido);
         if ($pedido->save()) {
             $this->createOrderItems($request->itens, $pedido->id);
             $this->sendNotifications($pedido, $effectiveDistributorId, $idAdministrador);

@@ -10,6 +10,7 @@ import ReminderManager from '@/components/ReminderManager.vue';
 import { useReminders } from '@/composables/useReminders';
 import { listProductsByClientAddress } from '@/services/api/products';
 import { getAllPedidos } from '@/services/api/pedidos';
+import { createOrder } from '@/services/api/orders';
 
 const props = defineProps({
   open: { type: Boolean, required: false },
@@ -82,7 +83,7 @@ watch(
 );
 const handleRealizarPedido = (payload) => {
   renderToast(
-    getAllPedidos(),
+    createOrder(payload),
     'realizando pedido',
     'Pedido realizado com sucesso!',
     'Erro ao realizar pedido',

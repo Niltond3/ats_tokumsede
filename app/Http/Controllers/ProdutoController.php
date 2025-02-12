@@ -435,7 +435,7 @@ class ProdutoController extends Controller
                 ->leftJoin('produto', 'produto.id', '=', 'preco.idProduto')
                 ->leftJoin('estoque', 'estoque.id', '=', 'preco.idEstoque')
                 //->leftJoin('produto.categoria', 'catedoria.id', '=', 'produto.idProduto')
-                ->select('preco.*', 'produto.id as idProd', 'produto.nome as nome', 'produto.img as img')//, 'categoria.nome as categoria')
+                ->select('preco.*', 'produto.id as idProd', 'produto.nome as nome', 'produto.img as img', 'produto.descricao as descricao')//, 'categoria.nome as categoria')
                 ->where([
                     ['preco.status', '=', 1],
                     ['preco.idDistribuidor', '=', $distribuidor->id],

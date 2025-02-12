@@ -120,6 +120,7 @@ export const DateUtil = {
     },
 
     dateToDayMonthYearFormat: (rawDate) => {
+        if (!rawDate) return rawDate;
         try {
             const date = new Date(rawDate);
             const YYYY = date.getFullYear();
@@ -241,71 +242,71 @@ export const ClipboardUtil = {
         const removeSeconds = (horario) =>
             /^\d{2}:\d{2}:\d{2}$/.test(horario) ? horario.slice(0, 5) : horario;
         const horaInicio = removeSeconds(order.horaInicio);
-        const status = OrderUtil.getStatusString(
+        const status = typeof order.status === 'object' ? order.status : OrderUtil.getStatusString(
             order.agendado,
             order.dataAgendada,
             horaInicio,
             order.status
         );
-        const details = [
-            {
-                classColor: "",
-                classIcon: "ri-calendar-fill",
-                label: { short: "Criado", long: "Horário Criado" },
-                data: order.horarioPedido,
-                author: order.administrador,
-            },
-            {
-                classColor: status.classes.text,
-                classIcon: status.classes.icon,
-                label: { short: "Status", long: "Status" },
-                data: status.label,
-                author: "",
-                reason: order.retorno,
-            },
-            {
-                classColor: "text-accepted",
-                classIcon: "ri-timer-fill",
-                label: { short: "Aceito", long: "Horário Aceito" },
-                data: order.horarioAceito,
-                author: order.aceitoPor,
-            },
-            {
-                classColor: "text-dispatched",
-                classIcon: "ri-timer-fill",
-                label: { short: "Despachado", long: "Horário Despachado" },
-                data: order.horarioDespache,
-                author: order.despachadoPor,
-            },
-            {
-                classColor: "text-info",
-                classIcon: "ri-timer-fill",
-                label: { short: "Entregue", long: "Horário Entregue" },
-                data: order.horarioEntrega,
-                author: order.entreguePor,
-            },
-            {
-                classColor: "text-danger",
-                classIcon: "ri-timer-fill",
-                label: { short: "Cancelado", long: "Horário Cancelado" },
-                data: order.horarioCancelado,
-                author: order.canceladoPor,
-            },
-            {
-                classColor: "",
-                classIcon: "ri-e-bike-fill",
-                label: { short: "entregador", long: "entregador" },
-                data: StringUtil.utf8Decode(order.entregador?.nome || ""),
-                author: "",
-            },
-            {
-                classColor: "",
-                classIcon: "ri-sticky-note-fill",
-                label: { short: "Observação", long: "Observação" },
-                data: StringUtil.utf8Decode(order.obs || ""),
-                author: "",
-            },
-        ].filter((item) => item.data);
+        // const details = [
+        //     {
+        //         classColor: "",
+        //         classIcon: "ri-calendar-fill",
+        //         label: { short: "Criado", long: "Horário Criado" },
+        //         data: order.horarioPedido,
+        //         author: order.administrador,
+        //     },
+        //     {
+        //         classColor: status.classes.text,
+        //         classIcon: status.classes.icon,
+        //         label: { short: "Status", long: "Status" },
+        //         data: status.label,
+        //         author: "",
+        //         reason: order.retorno,
+        //     },
+        //     {
+        //         classColor: "text-accepted",
+        //         classIcon: "ri-timer-fill",
+        //         label: { short: "Aceito", long: "Horário Aceito" },
+        //         data: order.horarioAceito,
+        //         author: order.aceitoPor,
+        //     },
+        //     {
+        //         classColor: "text-dispatched",
+        //         classIcon: "ri-timer-fill",
+        //         label: { short: "Despachado", long: "Horário Despachado" },
+        //         data: order.horarioDespache,
+        //         author: order.despachadoPor,
+        //     },
+        //     {
+        //         classColor: "text-info",
+        //         classIcon: "ri-timer-fill",
+        //         label: { short: "Entregue", long: "Horário Entregue" },
+        //         data: order.horarioEntrega,
+        //         author: order.entreguePor,
+        //     },
+        //     {
+        //         classColor: "text-danger",
+        //         classIcon: "ri-timer-fill",
+        //         label: { short: "Cancelado", long: "Horário Cancelado" },
+        //         data: order.horarioCancelado,
+        //         author: order.canceladoPor,
+        //     },
+        //     {
+        //         classColor: "",
+        //         classIcon: "ri-e-bike-fill",
+        //         label: { short: "entregador", long: "entregador" },
+        //         data: StringUtil.utf8Decode(order.entregador?.nome || ""),
+        //         author: "",
+        //     },
+        //     {
+        //         classColor: "",
+        //         classIcon: "ri-sticky-note-fill",
+        //         label: { short: "Observação", long: "Observação" },
+        //         data: StringUtil.utf8Decode(order.obs || ""),
+        //         author: "",
+        //     },
+        // ].filter((item) => item.data);
 
         const paymentFormToString = {
             1: "Dinheiro",
@@ -533,6 +534,7 @@ export const OrderUtil = {
                     ? 2
                     : status;
 
+
         const statusString = {
             1: { label: "Pendente", classes: { bg: "bg-warning", text: "text-warning", icon: "ri-error-warning-fill" } },
             2: { label: "Cancelado", classes: { bg: "bg-danger", text: "text-danger", icon: "ri-close-circle-fill" } },
@@ -565,12 +567,15 @@ export const OrderUtil = {
             horaInicio,
             order.status
         );
+
+        console.log(order)
+
         const details = [
             {
                 classColor: "",
                 classIcon: "ri-calendar-fill",
                 label: { short: "Criado", long: "Horário Criado" },
-                data: order.horarioPedido,
+                data: DateUtil.dateToDayMonthYearFormat(order.horarioPedido)?.dateTime,
                 author: order.administrador,
             },
             {
@@ -585,28 +590,28 @@ export const OrderUtil = {
                 classColor: "text-accepted",
                 classIcon: "ri-timer-fill",
                 label: { short: "Aceito", long: "Horário Aceito" },
-                data: order.horarioAceito,
+                data: DateUtil.dateToDayMonthYearFormat(order.horarioAceito)?.dateTime,
                 author: order.aceitoPor,
             },
             {
                 classColor: "text-dispatched",
                 classIcon: "ri-timer-fill",
                 label: { short: "Despachado", long: "Horário Despachado" },
-                data: order.horarioDespache,
+                data: DateUtil.dateToDayMonthYearFormat(order.horarioDespache)?.dateTime,
                 author: order.despachadoPor,
             },
             {
                 classColor: "text-info",
                 classIcon: "ri-timer-fill",
                 label: { short: "Entregue", long: "Horário Entregue" },
-                data: order.horarioEntrega,
+                data: DateUtil.dateToDayMonthYearFormat(order.horarioEntrega)?.dateTime,
                 author: order.entreguePor,
             },
             {
                 classColor: "text-danger",
                 classIcon: "ri-timer-fill",
                 label: { short: "Cancelado", long: "Horário Cancelado" },
-                data: order.horarioCancelado,
+                data: DateUtil.dateToDayMonthYearFormat(order.horarioCancelado)?.dateTime,
                 author: order.canceladoPor,
             },
             {

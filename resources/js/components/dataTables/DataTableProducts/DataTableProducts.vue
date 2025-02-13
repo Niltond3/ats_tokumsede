@@ -162,6 +162,7 @@ watch(
     isUpdate.value = updateOrder;
     tableProductsState.payload = { ...tableProductsState.payload, ...orderPayload };
     tableProductsState.status = orderStatus;
+    console.log(products);
     tableProductsState.tableData = products;
     clientId.value = idCliente;
     tableIdentifier.value = distributorName;

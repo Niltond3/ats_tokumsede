@@ -173,6 +173,7 @@ class ProdutoController extends Controller
     }
     private function getActiveProducts($distribuidorId)
 {
+    Debugbar::info("Distribuidor ID: " . $distribuidorId);
     // Get effective distributor ID (main distributor if in union)
     $effectiveDistributorId = $this->getEffectiveDistributorId($distribuidorId);
 
@@ -191,10 +192,14 @@ class ProdutoController extends Controller
             'produto.descricao as descricao',
         ])
         ->where([
+            ['produto.status', '=', Produto::ATIVO],
             ['preco.status', '=', 1],
-            ['preco.idDistribuidor', '=', $distribuidorId],
             ['estoque.quantidade', '>', 0]
         ])
+        ->where(function ($query) use ($distribuidorId) {
+            $query->where('preco.idDistribuidor', '=', $distribuidorId)
+                  ->orWhere('estoque.idDistribuidor', '=', $distribuidorId);
+        })
         ->where(function ($query) {
             $query->whereNull('preco.inicioValidade')
                 ->orWhere('preco.inicioValidade', '<=', DB::raw('curdate()'));
@@ -203,7 +208,12 @@ class ProdutoController extends Controller
             $query->whereNull('preco.fimValidade')
                 ->orWhere('preco.fimValidade', '>', DB::raw('curdate()'));
         })
-        ->orderby('produto.nome')
+        ->orderByRaw("CASE
+            WHEN produto.nome LIKE '%Alkalina%' THEN 1
+            WHEN produto.nome LIKE '%20L%' THEN 2
+            ELSE 3
+        END")
+        ->orderBy('produto.nome')
         ->orderBy('produto.id')
         ->orderBy('preco.valor')
         ->orderBy('preco.qtdMin')
@@ -364,6 +374,7 @@ class ProdutoController extends Controller
     public function showByDistribuidor($distribuidorId, $idCliente = null)
     {
         $produtos = $this->getActiveProducts($distribuidorId);
+        Debugbar::info($produtos);
         return $this->formatProductsOutput($produtos, $idCliente);
     }
     function calcDistancia($lat1, $long1, $lat2, $long2)

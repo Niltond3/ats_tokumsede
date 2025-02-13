@@ -185,26 +185,42 @@ class ClienteController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-{
-    if (!$request->status) {
-        $request['cpf'] = preg_replace("/[^0-9]/", "", $request->cpf);
-        $request['cnpj'] = preg_replace("/[^0-9]/", "", $request->cnpj);
-        $telefone = explode(" ", str_replace("-", "", $request->telefone));
-        $formatacaoTelefone = array("(", ")");
-        $request['dddTelefone'] = str_replace($formatacaoTelefone, "", $telefone[0]);
-        $request['telefone'] = $telefone[1];
-        $request['dataNascimento'] = $request->dataNascimento == "" ? null : implode("-", array_reverse(explode("/", $request->dataNascimento)));
+    {
+        if (!$request->status) {
+            $request['cpf'] = preg_replace("/[^0-9]/", "", $request->cpf);
+            $request['cnpj'] = preg_replace("/[^0-9]/", "", $request->cnpj);
+
+            if ($request->telefone) {
+                $telefone = explode(" ", str_replace("-", "", $request->telefone));
+                $formatacaoTelefone = array("(", ")");
+                Debugbar::info($formatacaoTelefone);
+                $request['dddTelefone'] = str_replace($formatacaoTelefone, "", $telefone[0]);
+
+
+                $request['telefone'] = $telefone[1];
+            }else {
+                $request['dddTelefone'] = null;
+            }
+
+            $request['dataNascimento'] = $request->dataNascimento == "" ? null : implode("-", array_reverse(explode("/", $request->dataNascimento)));
+        }
+
+        $cliente = Cliente::find($id);
+        if (!$cliente) {
+            return response('Cliente não encontrado', 404);
+        }
+
+        // Convert empty values to null
+        $updateData = array_map(function($value) {
+            return $value === '' || $value === 'undefined' ? null : $value;
+        }, $request->all());
+        Debugbar::info($request->all());
+
+        $cliente->update($updateData);
+        return response('Cliente ' . $cliente->nome, 200);
     }
 
-    $cliente = Cliente::find($id);
 
-    if (!$cliente) {
-        return response('Cliente não encontrado', 404);
-    }
-
-    $cliente->update($request->all());
-    return response('Cliente ' . $cliente->nome, 200);
-}
 
 /**
  * Update customer password with security best practices

@@ -145,7 +145,7 @@ getDistributors();
 </script>
 
 <template>
-  <Dialog :open="props.isOpen" @update:open="handleDialogOpen">
+  <Dialog :open="props.isOpen" @update:open="handleDialogOpen" @click.stop>
     <slot name="trigger" />
     <DialogContent
       class="max-w-[90vw] sm:max-w-3xl"

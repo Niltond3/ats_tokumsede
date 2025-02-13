@@ -30,83 +30,33 @@ const page = usePage();
 const { tipoAdministrador } = page.props.auth.user;
 
 const disabledButton = ref(false);
-
+console.log(tipoAdministrador);
 const formSchema = [
-  z
-    .object({
-      nome: z
-        .string({ required_error: 'Informar seu nome é obrigatório' })
-        .min(4, { message: 'Nome muito curto' }),
-      telefone: z
-        .string({ required_error: 'Número de telefone obrigatório' })
-        .refine(validator.isMobilePhone, { message: 'Número de telefone inválido' }),
-      senha: z
-        .string()
-        .refine(
-          (value) =>
-            validator.isStrongPassword(value, {
-              minLength: 5,
-              minLowercase: 1,
-              minUppercase: 1,
-              minNumbers: 1,
-              minSymbols: 0,
-              returnScore: false,
-              pointsPerUnique: 1,
-              pointsPerRepeat: 0.5,
-              pointsForContainingLower: 10,
-              pointsForContainingUpper: 10,
-              pointsForContainingNumber: 10,
-              pointsForContainingSymbol: 10,
-            }),
-          {
-            message:
-              'Senha fraca: precisa conter 5 caractéres, letra maiúscula e minúscula um número.',
-          },
-        )
-        .nullable()
-        .optional(),
-      confirmSenha: z
-        .string()
-        .refine(
-          (value) =>
-            validator.isStrongPassword(value, {
-              minLength: 5,
-              minLowercase: 1,
-              minUppercase: 1,
-              minNumbers: 1,
-              minSymbols: 0,
-              returnScore: false,
-              pointsPerUnique: 1,
-              pointsPerRepeat: 0.5,
-              pointsForContainingLower: 10,
-              pointsForContainingUpper: 10,
-              pointsForContainingNumber: 10,
-              pointsForContainingSymbol: 10,
-            }),
-          {
-            message:
-              'Senha fraca: precisa conter 5 caractéres, letra maiúscula e minúscula um número.',
-          },
-        )
-        .nullable()
-        .optional(),
-      sexo: z.enum([undefined, '1', '2']).nullable().optional(),
-      dataNascimento: z.string().nullable().optional(),
-      tipoPessoa: z.string().nullable().optional(),
-      email: z
-        .string({ required_error: 'e-mail obrigatório' })
-        .refine(validator.isEmail, { message: 'e-mail inválido' }),
-      outrosContatos: z.string().nullable().optional(),
-    })
-    .superRefine(({ confirmSenha, senha }, ctx) => {
-      if (confirmSenha !== senha) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'As senhas devem ser iguais',
-          path: ['confirmSenha'],
-        });
-      }
-    }),
+  z.object({
+    nome: z
+      .string({ required_error: 'Informar seu nome é obrigatório' })
+      .min(4, { message: 'Nome muito curto' }),
+    telefone: z
+      .string()
+      .refine((val) => !val || validator.isMobilePhone(val), {
+        message: 'Número de telefone inválido',
+      })
+      .optional()
+      .nullable(),
+    senha: z.string().optional().nullable(),
+    confirmSenha: z.string().optional().nullable(),
+    sexo: z.enum([undefined, '1', '2']).nullable().optional(),
+    dataNascimento: z.string().nullable().optional(),
+    tipoPessoa: z.string().nullable().optional(),
+    email: z
+      .string()
+      .refine((val) => !val || validator.isEmail(val), {
+        message: 'e-mail inválido',
+      })
+      .optional()
+      .nullable(),
+    outrosContatos: z.string().nullable().optional(),
+  }),
   z.object({
     validateInformations: z.boolean().refine((value) => value === true, {
       message: 'Confirme os dados para prosseguir',
@@ -146,7 +96,7 @@ const onSubmit = (values) => {
     email: values.email,
     senha: values.senha,
   };
-
+  console.log(payload);
   const promise =
     tipoAdministrador === 'Administrador'
       ? axios.put(`clientes/${id}`, payload)

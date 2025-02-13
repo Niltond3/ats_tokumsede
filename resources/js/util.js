@@ -492,7 +492,14 @@ ${order.obs ? `obs: ${order.obs}` : ""}
                         product.preco[0]?.val ?? 0
                     );
 
-                    return `• *${StringUtil.utf8Decode(product.nome)}* ${StringUtil.utf8Decode(product.descricao || '')
+                    // Format pH in description
+                    let description = product.descricao || '';
+                    const pHMatch = description.match(/pH\s*(\d+\.?\d*)/i);
+                    if (pHMatch) {
+                        description = `pH ${pHMatch[1]}`;
+                    }
+
+                    return `• *${StringUtil.utf8Decode(product.nome)}* ${StringUtil.utf8Decode(description)
                         } por *${toCurrency(lowestPrice)}*;\n`;
                 })
                 .filter(Boolean) // Remove null entries

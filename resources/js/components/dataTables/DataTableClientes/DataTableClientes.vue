@@ -442,7 +442,9 @@ const handleDeleteAddress = (confirm) => {
 </script>
 
 <template>
-  <div class="[&_.dt-search]:relative [&_.dt-search>label]:ri-search-2-fill">
+  <div
+    class="[&_.dt-search]:relative [&_.dt-search>label]:ri-search-2-fill [&_.dt-paging]:bg-info [&_.dt-paging]:rounded-md [&_.dt-paging]:font-bold [&_.dt-paging]:!text-white [&_.dt-layout-row]:flex [&_.dt-layout-row]:justify-between [&_.dt-layout-row]:items-center [&_.dt-info]:text-sm [&_.dt-info]:!text-info [&_.dt-info]:font-bold [&_.dt-paging]:flex [&_.dt-paging]:gap-1 [&_.dt-paging-button]:px-3 [&_.dt-paging-button]:py-1 [&_.dt-paging-button]:rounded [&_.dt-paging-button]:transition-colors [&_.dt-paging-button]:text-info [&_.dt-paging-button.disabled]:opacity-50 [&_.dt-paging-button.disabled]:cursor-not-allowed [&_.dt-paging-button.current]:bg-info [&_.dt-paging-button.current]:text-white [&_.dt-paging-button]:hover:bg-info/10 [&_.ellipsis]:px-2 [&_.ellipsis]:text-gray-500"
+  >
     <DialogRegisterPrices
       :addressId="idAddress"
       :clientId="idClient"
@@ -494,7 +496,7 @@ const handleDeleteAddress = (confirm) => {
     <DataTable
       id="datatable-clientes"
       ref="table"
-      class="display [&_thead]:bg-info [&_thead]:text-[#F3F9FD] [&_tbody>tr>td.dt-control]:before:hidden [&_tbody>tr.dt-hasChild_span.transition-all]:rotate-90 [&_tbody>tr.dt-hasChild_div.relative]:bg-danger"
+      class="display [&_thead]:bg-info [&_thead]:!rounded-t-md [&_thead]:text-[#F3F9FD] [&_tbody>tr>td.dt-control]:before:hidden [&_tbody>tr.dt-hasChild_span.transition-all]:rotate-90 [&_tbody>tr.dt-hasChild_div.relative]:bg-danger"
       :columns="columns"
       :ajax="ajax"
       :options="options"

@@ -487,10 +487,7 @@ ${order.obs ? `obs: ${order.obs}` : ""}
                     }
 
                     // Get lowest price from price array
-                    const lowestPrice = product.preco.reduce((min, p) =>
-                        p.val < min ? p.val : min,
-                        product.preco[0]?.val ?? 0
-                    );
+                    const price = product.preco[product.preco.length - 1].val
 
                     // Format pH in description
                     let description = product.descricao || '';
@@ -500,7 +497,7 @@ ${order.obs ? `obs: ${order.obs}` : ""}
                     }
 
                     return `• *${StringUtil.utf8Decode(product.nome)}* ${StringUtil.utf8Decode(description)
-                        } por *${toCurrency(lowestPrice)}*;\n`;
+                        } por *${toCurrency(price)}*;\n`;
                 })
                 .filter(Boolean) // Remove null entries
                 .join('\n');
@@ -654,7 +651,6 @@ export const OrderUtil = {
         const telefone = phoneMatch
             ? `(${phoneMatch[1]}) 9 ${phoneMatch[2]}-${phoneMatch[3]}`
             : order.cliente.telefone;
-        console.log(order)
 
         const total = toCurrency(order.total);
         const troco = order.trocoPara > 0 ? toCurrency(order.trocoPara - order.total) : "";

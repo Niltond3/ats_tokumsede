@@ -28,7 +28,7 @@ const handleUpdate = async () => {
         qtdMin: product.preco[product.preco.length - 1].qtd,
       };
       return !props.clientId
-        ? updateProductPrices({
+        ? saveProductPrice({
             ...requestData,
             id: product.preco[product.preco.length - 1].precoId,
             valor: product.preco[product.preco.length - 1].val,

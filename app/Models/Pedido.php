@@ -43,8 +43,6 @@ class Pedido extends Model
     {
         return $query->selectRaw("
         pedido.*,
-        date_format(pedido.horarioPedido, '%d/%m/%Y %h:%i') as horarioPedido,
-        date_format(pedido.horarioEntrega, '%d/%m/%Y %h:%i') as horarioEntrega,
         pedido.id, pedido.total, pedido.formaPagamento, pedido.origem,
         pedido.agendado, pedido.status
     ");

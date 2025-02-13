@@ -97,6 +97,7 @@ class PrecoController extends Controller
      */
     public function update(Request $request)
 {
+    Debugbar::info($request->all());
     $validated = $request->validate([
         'idProduto' => 'required|exists:produto,id',
         'idDistribuidor' => 'required|exists:distribuidor,id',

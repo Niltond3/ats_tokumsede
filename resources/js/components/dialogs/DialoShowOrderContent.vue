@@ -66,6 +66,7 @@ const fetchOrder = () => {
         };
       });
 
+      console.log(formatedOrder);
       data.value = { ...formatedOrder, itensPedido };
       clientId.value = data.value.cliente.id;
       clientName.value = data.value.cliente.nome;

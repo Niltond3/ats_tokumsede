@@ -575,7 +575,6 @@ export const OrderUtil = {
             order.status
         );
 
-        console.log(order)
 
         const details = [
             {
@@ -655,8 +654,10 @@ export const OrderUtil = {
         const telefone = phoneMatch
             ? `(${phoneMatch[1]}) 9 ${phoneMatch[2]}-${phoneMatch[3]}`
             : order.cliente.telefone;
+        console.log(order)
+
         const total = toCurrency(order.total);
-        const troco = toCurrency(order.troco);
+        const troco = order.trocoPara > 0 ? toCurrency(order.trocoPara - order.total) : "";
         const trocoPara = toCurrency(order.trocoPara);
         const responseEndereco = order.endereco;
         const cep =

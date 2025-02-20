@@ -1,9 +1,11 @@
-export { default as DataTableNumberField } from "./DataTableNumberField.vue";
-export { default as DateTimePicker } from "@/components/orderComponents/DateTimePicker.vue";
-export { default as DialogCreateOrderNote } from "@/components/dialogs/DialogCreateOrderNote.vue";
-export { default as DropDownOrderActions } from "./DropDownOrderActions.vue";
-export { default as ExchangeInput } from "@/components/orderComponents/ExchangeInput.vue";
-export { default as SelectDistributor } from "./SelectDistributor.vue";
-export { default as SelectPayment } from "@/components/orderComponents/SelectPayment.vue";
-export { default as TableCell } from "./TableCell.vue";
-export { default as SortableColumnHeader } from "./SortableColumnHeader.vue";
+
+import DataTableProductsFooter from "./DataTableProductsFooter.vue";
+import DataTableProductsHeader from "./DataTableProductsHeader.vue";
+import DataTableProductsTable from "./DataTableProductsTable.vue";
+
+const DataTableProducts = {
+    Header: DataTableProductsHeader,
+    Table: DataTableProductsTable,
+    Footer: DataTableProductsFooter,
+};
+export default DataTableProducts;

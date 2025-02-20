@@ -1,6 +1,6 @@
 import { twMerge } from "tailwind-merge";
-import languagePtBR from "./dataTablePtBR.mjs";
-import { COLUMN_SIZES } from "./constants";
+import languagePtBR from "../../config/dataTablePtBR.mjs";
+import { COLUMN_SIZES } from "@/constants/table";
 
 export const tableConfig = (ajustClass, isNestedTable = false) => {
     const columns = [
@@ -51,6 +51,7 @@ export const tableConfig = (ajustClass, isNestedTable = false) => {
         processing: true,
         deferRender: true,
         orderClasses: false,
+        dom: '<"top"lf>rt<"bottom"ip>', // Keeps elements within the table container
         responsive: {
             details: false,
             breakpoints: [

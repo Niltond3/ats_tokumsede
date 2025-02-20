@@ -147,19 +147,27 @@ watch(
 onMounted(() => {
   props.onSetTab && props.onSetTab();
   dt = table.value.dt;
-  $('.dt-search').addClass(
-    'flex items-center py-2 px-1 gap-2 !text-info/80 !mb-[30px] min-[768px]:!mb-[10px]',
-  );
 
+  const topClasses = 'block ';
+  const selectClasses = '!bg-info !text-white font-bold !border-info !rounded-md ring-info/40';
+  const optionClasses = '!bg-white !text-info !border-info';
+  const inputClasses =
+    'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded  bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary !border-input placeholder:text-info/50 !text-info/80';
+  const searchClasses =
+    'flex items-center py-2 px-1 gap-2 !text-info/80 !mb-[30px] min-[768px]:!mb-[10px] relative -top-11 max-w-60 mx-auto';
+  const bottomClasses =
+    '!bg-info py-0.5 px-2 !rounded-b-md !text-white flex justify-between  items-center font-bold !border-info';
+  //  flex justify-between  items-center font-bold !border-info
+  $('.top').addClass(topClasses);
+  $('.dt-length>select').addClass(selectClasses);
+  $('.dt-length>select>option').addClass(optionClasses);
+  $('.dt-search').addClass(searchClasses);
+  $('.dt-search > input').addClass(inputClasses);
   $('.dt-search > label').html(/*html*/ `
     <span class="hidden">pesquisar</span>
     <i class="ri-search-2-fill"></i>
     `);
-
-  const inputClasses =
-    'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded  bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary !border-input placeholder:text-info/50 !text-info/80';
-
-  $('.dt-search > input').addClass(inputClasses);
+  $('.bottom').addClass(bottomClasses);
 
   handleLoadTableData();
 

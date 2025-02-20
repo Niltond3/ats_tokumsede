@@ -1,6 +1,7 @@
 <script setup>
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
-import { SelectDistributor } from '..';
+import DistributorDropdown from '@/components/dropdowns/DistributorDropdown.vue';
+
 import DebouncedInput from '@/components/inputs/DebouncedInput.vue';
 
 const props = defineProps({
@@ -73,7 +74,7 @@ const handleStatusChange = () => {
           <Skeleton class="w-full h-10" />
         </template>
         <template v-else>
-          <SelectDistributor
+          <DistributorDropdown
             :distributors="distributors"
             :default="idDistribuidor ? `${idDistribuidor}` : null"
             @update:distributor="(value) => emits('update:distributor', value)"

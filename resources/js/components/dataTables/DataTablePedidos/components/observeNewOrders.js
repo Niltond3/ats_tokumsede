@@ -2,7 +2,6 @@ import { ErrorUtil } from "@/util";
 import { ref } from "vue";
 import { toast } from "vue-sonner";
 import audio from "@/Layouts/config/audio";
-import axios from "axios";
 import { getLastOrder } from "@/services/api/orders";
 
 const ultimoPedido = ref(null);

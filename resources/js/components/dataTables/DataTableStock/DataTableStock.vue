@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue';
 import DataTable from 'datatables.net-vue3';
 import DataTablesLib from 'datatables.net';
 import 'datatables.net-buttons-dt';
@@ -9,12 +9,11 @@ import 'datatables.net-select-dt';
 import { StringUtil } from '@/util';
 import { tableConfig } from './config/tableConfig';
 import { shallowRef } from 'vue';
-import observeStockChanges from './components/observeStockChanges';
 import renderToast from '@/components/renderPromiseToast';
 import { Switch } from '@/components/ui/switch';
-import ActionStock from './components/ActionStock.vue';
-import { POLLING_INTERVAL } from './config/constants';
-import StatusStock from './components/StatusStock.vue';
+import StockQuantityAdjuster from './components/StockQuantityAdjuster.vue';
+import { POLLING_INTERVAL } from '@/constants/table';
+import ProductStockStatusToggle from './components/ProductStockStatusToggle.vue';
 import { cn } from '@/lib/utils';
 import { getStockReport } from '@/services/api/stock';
 
@@ -106,25 +105,76 @@ watch(showActiveOnly, () => {
 
 onMounted(() => {
   dt = table.value.dt;
-  $('.dt-search').addClass(
-    'flex items-center py-2 px-1 gap-2 !text-info/80 !mb-[30px] min-[768px]:!mb-[10px]',
-  );
 
+  dt.on('draw', function () {
+    const container = dt.table().container();
+    container.querySelectorAll('.dt-paging-button').forEach((btn) => {
+      btn.removeEventListener('pointerdown', paginationHandler);
+      btn.addEventListener('pointerdown', paginationHandler, true);
+    });
+  });
+
+  function paginationHandler(e) {
+    if (e.target.closest('.dt-paging-button')) {
+      e.stopPropagation();
+      e.preventDefault();
+      console.log('Pagination pointerdown intercepted on draw');
+    }
+  }
+  const topClasses = 'block';
+  const selectClasses = '!bg-info !text-white font-bold !border-info !rounded-md ring-info/40';
+  const optionClasses = '!bg-white !text-info !border-info';
+  const searchClasses =
+    'flex items-center py-2 px-1 gap-2 !text-info/80 !mb-[30px] min-[768px]:!mb-[10px] relative -top-11 max-w-60 mx-auto';
+  const inputClasses =
+    'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded  bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary !border-input placeholder:text-info/50 !text-info/80';
+  // const bottomClasses =
+  //   '!bg-info !text-white flex justify-between py-0.5 px-2 items-center font-bold !border-info !rounded-b-md ring-info/40';
+
+  $('.top').addClass(topClasses);
+  $('.dt-length>select').addClass(selectClasses);
+  $('.dt-length>select>option').addClass(optionClasses);
+  $('.dt-search').addClass(searchClasses);
+  $('.dt-search > input').addClass(inputClasses);
   $('.dt-search > label').html(/*html*/ `
     <span class="hidden">pesquisar</span>
     <i class="ri-search-2-fill"></i>
-  `);
-
-  const inputClasses =
-    'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary !border-input placeholder:text-info/50 !text-info/80';
-
-  $('.dt-search > input').addClass(inputClasses);
+    `);
+  // $('.bottom').addClass(bottomClasses);
 
   handleLoadTableData();
 
   props.isNestedTable && dt.on('search.dt', () => getAllFilteredData());
 
+  const observeStockChanges = (callback) => {
+    return () => {
+      callback();
+    };
+  };
+
   window.setInterval(observeStockChanges(handleLoadTableData), POLLING_INTERVAL);
+  // Stop click propagation on pagination buttons
+  // Correct event delegation for dynamically added pagination buttons
+  const dialogContent = document.getElementById('radix-vue-dialog-content-v-68');
+  if (dialogContent) {
+    dialogContent.addEventListener(
+      'pointerdown',
+      (e) => {
+        if (e.target.closest('.dt-paging-button')) {
+          // Stop the event as early as possible
+          e.stopPropagation();
+          // Optionally also stop default if needed
+          e.preventDefault();
+          console.log('Pagination pointerdown intercepted');
+        }
+      },
+      true, // Use capturing phase
+    );
+  }
+});
+
+onBeforeUnmount(() => {
+  $(document).off('click', '.dt-paging-button');
 });
 </script>
 
@@ -149,14 +199,14 @@ onMounted(() => {
       language="language"
     >
       <template #action="data">
-        <ActionStock
+        <StockQuantityAdjuster
           :stockData="data.rowData"
           :loadTable="fetchStock"
           :isNestedTable="isNestedTable"
         />
       </template>
       <template #status="data">
-        <StatusStock :stockData="data.rowData" :loadTable="fetchStock" />
+        <ProductStockStatusToggle :stockData="data.rowData" :loadTable="fetchStock" />
       </template>
     </DataTable>
   </div>

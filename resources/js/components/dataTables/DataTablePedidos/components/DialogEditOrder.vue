@@ -172,11 +172,11 @@ const handleUpdateOrder = (payload) => {
 </script>
 
 <template>
-  <Dialog :open="controlled ? modelValue : isOpen" :modal="true" @update:open="handleDialogOpen">
+  <Dialog :open="controlled ? modelValue : isOpen" @update:open="handleDialogOpen">
     <template v-if="hasCustomTrigger">
       <slot name="trigger" />
     </template>
-    <DialogTrigger v-else as-child @click.stop>
+    <DialogTrigger v-else as-child>
       <DropdownMenuItem
         v-if="dropdown"
         class="cursor-pointer flex gap-2"
@@ -193,11 +193,7 @@ const handleUpdateOrder = (payload) => {
         <span class="sr-only">Editar Pedido</span>
       </button>
     </DialogTrigger>
-    <DialogContent
-      class="text-sm max-w-[22rem] sm:max-w-3xl"
-      @pointerDownOutside.prevent
-      @close.prevent
-    >
+    <DialogContent class="text-sm max-w-[22rem] sm:max-w-3xl">
       <DialogHeader>
         <DialogTitle class="font-medium text-info leading-none">
           <div v-if="isLoading" class="flex gap-3 justify-between mr-4">

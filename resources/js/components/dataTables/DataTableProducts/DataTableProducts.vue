@@ -8,17 +8,17 @@ import { useVueTable } from '@tanstack/vue-table';
 
 //composable
 import { useTableProductsState } from '@/composables/tableProductsState';
-import { useResponsiveColumns } from './composable/useResponsiveColumns';
-import { useEventHandlers } from './composable/useEventHandlers';
-import { useUpdateData } from './composable/useUpdateData';
+import { useResponsiveColumns } from '@/composables/useResponsiveColumns';
+import useDataToTableFormat from '@/composables/useDataToTableFormat';
+import { useEventHandlers } from '@/composables/useEventHandlers';
+import { useUpdateData } from '@/composables/useUpdateData';
 
 // Configuration
 import { columns } from './config/Columns';
 import { createTableOptions } from './config/tableConfig';
 
 // Utilities
-import useDataToTableFormat from './composable/dataToTableFormat';
-import DataTableProducts from './components/DataTableProducts';
+import DataTableProducts from './components';
 
 const props = defineProps({
   createOrderData: { type: null, required: false },

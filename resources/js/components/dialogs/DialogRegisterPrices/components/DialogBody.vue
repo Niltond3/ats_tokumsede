@@ -1,5 +1,5 @@
 <script setup>
-import DataTableProducts from '@/components/dataTables/DataTableProducts/components/DataTableProducts';
+import DataTableProducts from '@/components/dataTables/DataTableProducts/components';
 
 const props = defineProps({
   table: { type: null, Required: true },

@@ -36,6 +36,7 @@ export default [
             globals: {
                 // Common JavaScript globals
                 $: 'readonly',
+                jQuery: 'readonly', // Added jQuery global
                 axios: 'readonly',
                 window: 'readonly',
                 google: 'readonly',
@@ -53,6 +54,12 @@ export default [
                 exports: 'readonly',
                 Audio: 'readonly',
                 localStorage: 'readonly',
+                sessionStorage: 'readonly', // Added sessionStorage
+                location: 'readonly', // Added location
+                history: 'readonly', // Added history
+                fetch: 'readonly', // Added fetch
+                URL: 'readonly', // Added URL constructor
+                FormData: 'readonly', // Added FormData
 
                 // Vue.js 3 globals
                 defineComponent: 'readonly',
@@ -66,11 +73,16 @@ export default [
                 defineProps: 'readonly',
                 defineEmits: 'readonly',
                 defineExpose: 'readonly',
+                withDefaults: 'readonly', // Added withDefaults
+                toRef: 'readonly', // Added toRef
+                toRefs: 'readonly', // Added toRefs
+                provide: 'readonly', // Added provide
+                inject: 'readonly', // Added inject
 
-                // PHP-related globals (if applicable to your setup)
-                PHP: 'readonly', // For PHP-JS integration
-                ajaxurl: 'readonly', // Common in WordPress
-                wp: 'readonly', // WordPress global
+                // PHP-related globals
+                PHP: 'readonly',
+                ajaxurl: 'readonly',
+                wp: 'readonly',
 
                 // QZ Tray globals
                 qz: 'readonly',
@@ -92,7 +104,7 @@ export default [
             'vue/valid-template-root': 'error',
             'vue/no-multiple-template-root': 'error',
             'vue/script-setup-uses-vars': 'error',
-            'vue/comment-directive': 'off', // Ensure this is explicitly set
+            'vue/comment-directive': 'off',
             'vue/no-unused-vars': ['error', {
                 ignorePattern: '^_'
             }]
@@ -104,8 +116,9 @@ export default [
             ecmaVersion: 'latest',
             sourceType: 'module',
             globals: {
-                // Include JavaScript and PHP globals here as well
+                // Inherit all the same globals as Vue files
                 $: 'readonly',
+                jQuery: 'readonly',
                 axios: 'readonly',
                 window: 'readonly',
                 google: 'readonly',
@@ -131,6 +144,12 @@ export default [
                 stob64: 'readonly',
                 hextorstr: 'readonly',
                 localStorage: 'readonly',
+                sessionStorage: 'readonly',
+                location: 'readonly',
+                history: 'readonly',
+                fetch: 'readonly',
+                URL: 'readonly',
+                FormData: 'readonly'
             }
         },
         ...js.configs.recommended

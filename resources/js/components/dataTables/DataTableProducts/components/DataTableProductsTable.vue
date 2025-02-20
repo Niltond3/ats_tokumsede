@@ -9,7 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { FlexRender } from '@tanstack/vue-table';
-import { DialogCreateOrderNote } from '..';
+import DialogCreateOrderNote from '@/components/dialogs/DialogCreateOrderNote.vue';
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ClipboardUtil } from '@/util';

@@ -1,6 +1,6 @@
 <script setup>
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import DataTableProducts from '@/components/dataTables/DataTableProducts/components/DataTableProducts';
+import DataTableProducts from '@/components/dataTables/DataTableProducts/components';
 
 const props = defineProps({
   loadingDistributors: Boolean,

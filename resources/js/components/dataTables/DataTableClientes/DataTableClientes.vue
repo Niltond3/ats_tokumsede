@@ -23,7 +23,7 @@ import 'datatables.net-staterestore-dt';
 // Utility imports
 import { ErrorUtil, StringUtil } from '@/util';
 import { dialogState } from '@/composables/useToggleDialog';
-import languagePtBR from './dataTablePtBR.mjs';
+import languagePtBR from '../config/dataTablePtBR.mjs';
 import { OrderUtil } from '@/util';
 import rowChildtable from './components/rowChildTable/index';
 import DialogShowOrder from '@/components/dialogs/DialogShowOrder.vue';
@@ -304,6 +304,31 @@ ${address.referencia ? 'Referência: ' + address.referencia : ''}
 onMounted(() => {
   dt = table.value.dt;
   initializeDataTable(dt);
+
+  const topClasses = 'block py-1.5 px-3 rounded-t-md max-h-14';
+  const selectClasses = '!bg-info !text-white font-bold !border-info !rounded-md ring-info/40';
+  const optionClasses = '!bg-white !text-info !border-info';
+  const bottomClasses =
+    '!bg-info !text-white flex justify-between py-0.5 px-2 items-center font-bold !border-info !rounded-b-md ring-info/40';
+  const inputClasses =
+    'peer focus-visible:ring-info/60 block min-h-[auto] w-full rounded  bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear motion-reduce:transition-none dark:text-neutral-200 dark:autofill:shadow-autofill dark:peer-focus:text-primary !border-input placeholder:text-info/50 !text-info/80';
+  const searchClasses =
+    'flex items-center py-2 px-1 gap-2 !text-info/80 relative -top-11 max-w-60 mx-auto';
+
+  $('.top').addClass(topClasses);
+  $('.dt-length>select').addClass(selectClasses);
+  $('.dt-length>select>option').addClass(optionClasses);
+  $('.bottom').addClass(bottomClasses);
+  $('.dt-search').addClass(searchClasses);
+  $('.dt-search > input').addClass(inputClasses);
+  $('.dt-search > label').html(/*html*/ `
+    <span class="hidden">pesquisar</span>
+    <i class="ri-search-2-fill"></i>
+    `);
+  $('.bottom nav button[aria-disabled="true"]').addClass('!text-info/50');
+
+  // dt-paging-button disabled
+
   //   window.setInterval(async () => {
   //     await observeNewOrders;
   //   }, 10000);
@@ -343,6 +368,7 @@ const options = {
   language: languagePtBR,
   serverSide: true,
   processing: true,
+  dom: '<"top"lf>rt<"bottom"ip>', // Keeps elements within the table container
   responsive: {
     details: false,
     breakpoints: [
@@ -391,6 +417,87 @@ const options = {
         }
       }
     });
+    const stylePaginationButtons = () => {
+      // Aplica estilo direto nos desabilitados
+      $('.dt-paging-button.disabled, .dt-paging-button[aria-disabled="true"]').css({
+        color: 'rgb(255 255 255 / 55%) !important',
+        'background-color': 'rgb(30, 136, 229) !important',
+        cursor: 'not-allowed',
+        opacity: '0.7',
+      });
+
+      // Estilos para hover e active em todos os botões
+      $('.dt-paging-button:not(.disabled)')
+        .on('mouseover', function () {
+          $(this).css({
+            'background-color': 'rgba(59, 130, 246, 0.8)',
+            transform: 'scale(1.05)',
+          });
+        })
+        .on('mouseout', function () {
+          $(this).css({
+            'background-color': '',
+            transform: '',
+          });
+        })
+        .on('mousedown', function () {
+          $(this).css('transform', 'scale(0.95)');
+        })
+        .on('mouseup', function () {
+          $(this).css('transform', 'scale(1.05)');
+        });
+    };
+    const applyDynamicStyles = () => {
+      // Remove estilos anteriores se existirem
+      $('#dynamic-pagination-styles').remove();
+
+      // Cria nova tag de estilo
+      const styleTag = `
+    <style id="dynamic-pagination-styles">
+     .dt-paging-button{
+        color: 'rgb(255 255 255 / 55%) !important
+      }
+      .dt-paging-button:not(.disabled) {
+        transition: all 0.3s ease-in-out !important;
+      }
+      .dt-paging-button:not(.disabled):hover {
+        transform: scale(1.05) !important;
+      }
+      .dt-paging-button:not(.disabled):active {
+        transform: scale(0.95) !important;
+      }
+    </style>
+  `;
+
+      $('head').append(styleTag);
+
+      $('.dt-paging-button').on({
+        mouseenter: function () {
+          $(this).css('background-color', 'rgba(30, 136, 229, 0.8) !important');
+        },
+        mouseleave: function () {
+          // Reset to original background or specify another color
+          $(this).css('background-color', ''); // removes the inline style
+        },
+      });
+
+      $('.dt-paging-button.disabled, [aria-disabled="true"]').attr(
+        'style',
+        'color: rgba(255, 255, 255, 0.5) !important',
+      );
+      // Aplica estilo direto nos desabilitados
+      $('.dt-paging-button.disabled, [aria-disabled="true"]').css({
+        color: 'rgba(255, 255, 255, 0.5) !important',
+        'pointer-events': 'none',
+        'user-select': 'none',
+      });
+    };
+
+    // Aplicar estilos inicialmente
+    applyDynamicStyles();
+
+    // Re-aplicar estilos após cada atualização
+    table.on('draw', applyDynamicStyles);
   },
 };
 const ajax = {
@@ -443,7 +550,7 @@ const handleDeleteAddress = (confirm) => {
 
 <template>
   <div
-    class="[&_.dt-search]:relative [&_.dt-search>label]:ri-search-2-fill [&_.dt-paging]:bg-info [&_.dt-paging]:rounded-md [&_.dt-paging]:font-bold [&_.dt-paging]:!text-white [&_.dt-layout-row]:flex [&_.dt-layout-row]:justify-between [&_.dt-layout-row]:items-center [&_.dt-info]:text-sm [&_.dt-info]:!text-info [&_.dt-info]:font-bold [&_.dt-paging]:flex [&_.dt-paging]:gap-1 [&_.dt-paging-button]:px-3 [&_.dt-paging-button]:py-1 [&_.dt-paging-button]:rounded [&_.dt-paging-button]:transition-colors [&_.dt-paging-button]:text-info [&_.dt-paging-button.disabled]:opacity-50 [&_.dt-paging-button.disabled]:cursor-not-allowed [&_.dt-paging-button.current]:bg-info [&_.dt-paging-button.current]:text-white [&_.dt-paging-button]:hover:bg-info/10 [&_.ellipsis]:px-2 [&_.ellipsis]:text-gray-500"
+    class="[&_.dt-search]:relative [&_.dt-search>label]:ri-search-2-fill :font-bold [&_.dt-layout-row]:flex [&_.dt-layout-row]:justify-between [&_.dt-layout-row]:items-center [&_.ellipsis]:px-2 [&_.ellipsis]:text-gray-500"
   >
     <DialogRegisterPrices
       :addressId="idAddress"

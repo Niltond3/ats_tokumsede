@@ -145,7 +145,12 @@ getDistributors();
 </script>
 
 <template>
-  <Dialog :open="props.isOpen" @update:open="handleDialogOpen" @click.stop>
+  <Dialog
+    :open="props.isOpen"
+    :ignoreClickOutside="(e) => !!e.target.closest('.dt-paging-button')"
+    @update:open="handleDialogOpen"
+    @click.stop
+  >
     <slot name="trigger" />
     <DialogContent
       class="max-w-[90vw] sm:max-w-3xl"

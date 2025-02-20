@@ -368,7 +368,7 @@ getDistributors();
         <div class="nested-dialog-context" @click.stop>
           <DataTablePedidos
             :orderResponse="orderResponse"
-            ajustClass="!top-[100px] md:!top-[90px]"
+            ajustClass="!top-[100px] md:!top-[105px]"
             :isNestedTable="true"
             @update:filteredData="(data) => (filteredData = data)"
           />

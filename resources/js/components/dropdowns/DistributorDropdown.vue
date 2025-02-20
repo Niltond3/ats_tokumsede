@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {StringUtil} from '@/util';
+import { StringUtil } from '@/util';
 // ['distributors', 'default']
 const props = defineProps({
   distributors: {

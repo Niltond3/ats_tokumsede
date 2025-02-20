@@ -1,14 +1,12 @@
 import { h } from "vue";
 import { StringUtil, MoneyUtil, ClipboardUtil } from "@/util";
 import { toFloat } from "validator";
-import { COLUMN_SIZES } from "./constants";
-import {
-    SortableColumnHeader,
-    DropDownOrderActions,
-    DataTableNumberField,
-    TableCell,
-} from "../components";
+import { COLUMN_SIZES } from "@/constants/table";
 import { toast } from 'vue-sonner';
+import EditablePriceCell from "@/components/tableCell/EditablePriceCell.vue";
+import QuantitySpinner from "@/components/spinners/QuantitySpinner.vue";
+import ProductActionDropdown from "@/components/dropdowns/ProductActionDropdown.vue";
+import SortableHeader from "@/components/headers/SortableHeader.vue";
 
 const { toCurrency } = MoneyUtil.formatMoney();
 
@@ -31,7 +29,7 @@ export const nameColumn = {
     filterFn: "fuzzy",
     accessorFn: ({ nome }) => StringUtil.utf8Decode(nome),
     header: ({ column }) => {
-        return h(SortableColumnHeader, {
+        return h(SortableHeader, {
             label: "nome",
             onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
         });
@@ -67,7 +65,7 @@ export const priceColumn = {
     filterFn: "fuzzy",
     accessorFn: ({ preco }) => preco,
     header: ({ column }) => {
-        return h(SortableColumnHeader, {
+        return h(SortableHeader, {
             label: "preço",
             onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
         });
@@ -99,7 +97,7 @@ export const priceColumn = {
             const cellValue = getCellValue(value);
 
             return h(
-                TableCell,
+                EditablePriceCell,
                 {
                     cellValue,
                     cellkey: cell.id,
@@ -144,7 +142,7 @@ export const quantityColumn = {
                 ? 1
                 : 0;
 
-        return h(DataTableNumberField, {
+        return h(QuantitySpinner, {
             min: minQtd,
             value: payloadProduct.length > 0 ? payloadProduct[0].quantidade : 0,
             onExpand: row.toggleExpanded,
@@ -182,7 +180,7 @@ export const actionsColumn = {
         return h(
             "div",
             { class: "relative" },
-            h(DropDownOrderActions, {
+            h(ProductActionDropdown, {
                 payment,
                 offer,
                 onChanged: () => {

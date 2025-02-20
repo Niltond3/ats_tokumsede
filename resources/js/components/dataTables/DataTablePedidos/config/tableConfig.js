@@ -1,6 +1,6 @@
 // Move columns and options configurations to a separate config file
 import { twMerge } from "tailwind-merge";
-import languagePtBR from "./dataTablePtBR.mjs";
+import languagePtBR from "../../config/dataTablePtBR.mjs";
 
 export const tableConfig = (ajustClass, isNestedTable = false) => {
     const columns = [
@@ -55,6 +55,7 @@ export const tableConfig = (ajustClass, isNestedTable = false) => {
         processing: true,
         deferRender: true,
         orderClasses: false,
+        dom: '<"top"Plf>rt<"bottom"ip>',
         responsive: {
             details: false,
             breakpoints: [
@@ -129,8 +130,8 @@ export const tableConfig = (ajustClass, isNestedTable = false) => {
                         "[&_table]:flex",
                         "[&_table>colgroup]:hidden",
                         "[&_table>thead]:hidden",
-                        "absolute top-[55px] right-0",
-                        "min-[768px]:top-[50px]",
+                        "absolute top-[78px] right-0",
+                        "min-[768px]:top-[55px]",
                         "w-full",
                         "!overflow-hidden bg-transparent"
                     ),

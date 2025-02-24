@@ -1,7 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
-import renderToast from '@/components/renderPromiseToast';
-import { onMounted } from 'vue';
+import { watch } from 'vue';
 import { CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import {
   TagsInput,
@@ -19,67 +17,96 @@ import {
 } from 'radix-vue';
 import { StringUtil } from '@/util';
 import { listProducts } from '@/services/api/products';
-
-const products = ref([]);
-const modelValue = ref([]);
-const open = ref(false);
-const searchTerm = ref('');
+import { useProductSelector } from '@/composables/useProductSelector';
 
 const emits = defineEmits(['update:modelValue']);
 
-const getProducts = () => {
-  renderToast(
-    listProducts(),
-    'carregando produtos ...',
-    'Produtos carregados',
-    'Erro ao carregar produtos',
-    (response) => {
-      const recomposeProducts = response.data.map((product) => {
-        const nome = StringUtil.utf8Decode(product.nome);
-        return {
-          ...product,
-          nome,
-        };
-      });
-      products.value = recomposeProducts;
-    },
+const props = defineProps({
+  initialProducts: {
+    type: Array,
+    default: () => [],
+  },
+});
+
+const {
+  addProduct,
+  removeProduct,
+  searchTerm,
+  open,
+  filteredProducts,
+  selectedProducts,
+  setSelectedProducts,
+} = useProductSelector();
+
+// Delay para evitar que o combobox feche antes do clique ser processado
+const handleInputBlur = () => {
+  setTimeout(() => {
+    open.value = false;
+  }, 150);
+};
+
+// Atualiza o searchTerm conforme o usuário digita
+const updateSearchTerm = (e) => {
+  searchTerm.value = e.target.value;
+};
+
+// Watch for initial products and set them
+watch(
+  () => props.initialProducts,
+  (newProducts) => {
+    setSelectedProducts(newProducts);
+  },
+  { immediate: true },
+);
+
+const handleSelect = (product) => {
+  console.log('Produto selecionado:', product);
+  addProduct(product);
+  emits(
+    'update:modelValue',
+    selectedProducts.value.map((item) => `${item.id}-1`),
+  );
+  searchTerm.value = '';
+};
+
+const handleRemoveProduct = (id) => {
+  removeProduct(id);
+  emits(
+    'update:modelValue',
+    selectedProducts.value.map((item) => `${item.id}-1`),
   );
 };
 
-onMounted(() => {
-  getProducts();
-});
-
-const filteredProducts = computed(() =>
-  products.value.filter((i) => !modelValue.value.includes(i.nome)),
-);
-
-const handleModelValue = (value) => {
-  const compositionValue = value.map((item) => `${item.id}-1`);
-  emits('update:modelValue', compositionValue);
+const handleSelectionChange = (selectedIds) => {
+  emits(
+    'update:modelValue',
+    selectedIds.map((id) => `${id}-1`),
+  );
 };
 </script>
 
 <template>
-  <TagsInput
-    class="py-0 px-0 gap-0"
-    :model-value="modelValue"
-    @update:model-value="handleModelValue"
-  >
+  <TagsInput class="py-0 px-0 gap-0" :model-value="selectedProducts">
+    <!-- Renderização das tags dos produtos selecionados -->
     <div class="flex gap-2 flex-wrap items-center px-3">
-      <TagsInputItem v-for="item in modelValue" :key="item.id" :value="item.nome">
+      <TagsInputItem v-for="item in selectedProducts" :key="item.id" :value="item.nome">
         <TagsInputItemText />
-        <TagsInputItemDelete />
+        <!-- Utilize @click.stop para garantir que o clique não afete outros elementos -->
+        <TagsInputItemDelete @click.stop="() => handleRemoveProduct(item.id)" />
       </TagsInputItem>
     </div>
 
-    <ComboboxRoot v-model="modelValue" :open="open" :search-term="searchTerm" class="w-full">
+    <!-- Combobox para selecionar produtos -->
+    <ComboboxRoot :open="open" :search-term="searchTerm" class="w-full">
       <ComboboxAnchor as-child>
         <ComboboxInput placeholder="Produtos da composição..." as-child>
           <TagsInputInput
             class="w-full px-3"
-            :class="modelValue.length > 0 ? 'mt-2' : ''"
+            :class="selectedProducts.length > 0 ? 'mt-2' : ''"
             @keydown.enter.prevent
+            @focus="open = true"
+            @blur="handleInputBlur"
+            @input="updateSearchTerm"
           />
         </ComboboxInput>
       </ComboboxAnchor>
@@ -88,35 +115,22 @@ const handleModelValue = (value) => {
         <ComboboxContent>
           <CommandList
             position="popper"
-            class="w-[--radix-popper-anchor-width] rounded-md mt-2 border border-input bg-popover text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 scrollbar !scrollbar-w-1.5 !scrollbar-h-1.5 !scrollbar-thumb-slate-200 !scrollbar-track-tr!scrollbar-thumb-rounded scrollbar-track-rounded dark:scrollbar-track:!bg-slate-500/[0.16] dark:scrollbar-thumb:!bg-slate-500/50 lg:supports-scrollbars:pr-2"
+            class="w-[--radix-popper-anchor-width] rounded-md mt-2 border border-input bg-popover text-popover-foreground shadow-md outline-none"
           >
             <CommandEmpty />
             <CommandGroup>
               <div
                 v-if="filteredProducts.length === 0"
                 class="px-2 py-1 text-sm text-muted-foreground"
-              ></div>
+              >
+                Nenhum produto encontrado.
+              </div>
               <div v-else>
                 <CommandItem
                   v-for="product in filteredProducts"
                   :key="product.id"
                   :value="product.nome"
-                  @select.prevent="
-                    (ev) => {
-                      if (typeof ev.detail.value === 'string') {
-                        searchTerm = '';
-                        const modelObject = {
-                          id: product.id,
-                          nome: ev.detail.value,
-                        };
-                        modelValue.push(modelObject);
-                      }
-
-                      if (filteredProducts.length === 0) {
-                        open = false;
-                      }
-                    }
-                  "
+                  @mousedown.prevent="() => handleSelect(product)"
                 >
                   {{ product.nome }}
                 </CommandItem>

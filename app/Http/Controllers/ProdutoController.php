@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 
+use App\Actions\Products\UpdateProductAction;
+use App\Http\Requests\UpdateProductRequest;
 use App\Models\Produto;
 use App\Models\Composicao;
 use App\Models\Preco;
@@ -43,6 +45,9 @@ class ProdutoController extends Controller
 
             $produtos = Produto::where('status', '!=', Produto::EXCLUIDO)
                 ->with(['categoria:id,nome',
+                       'composicoes' => function($query) {
+                           $query->with('componente:id,nome');
+                       },
                        'estoque' => function($query) use ($effectiveDistributorId) {
                            $query->where('idDistribuidor', $effectiveDistributorId);
                        }
@@ -50,13 +55,69 @@ class ProdutoController extends Controller
                 ->withCount(['preco' => function($query) use ($effectiveDistributorId) {
                     $query->where('idDistribuidor', $effectiveDistributorId);
                 }])
-                ->get();
+                ->get()
+                ->map(function($produto) {
+                    $composicaoItens = [];
+                    if ($produto->composicoes->count() > 0) {
+                        $composicaoItens = $produto->composicoes->map(function($comp) {
+                            return [
+                                'id' => $comp->idComponente,
+                                'quantidade' => $comp->quantidade,
+                                'nome' => $comp->produto->nome
+                            ];
+                        });
+                    }
+
+                    return [
+                        'id' => $produto->id,
+                        'idCategoria' => $produto->idCategoria,
+                        'nome' => $produto->nome,
+                        'descricao' => $produto->descricao,
+                        'img' => $produto->img,
+                        'status' => $produto->status,
+                        'composicao' => $produto->composicao,
+                        'componente' => $produto->componente,
+                        'categoria' => $produto->categoria,
+                        'preco' => $produto->preco,
+                        'estoque' => $produto->estoque,
+                        'composicaoItens' => $composicaoItens
+                    ];
+                });
         } else {
             $produtos = Produto::where('status', '!=', Produto::EXCLUIDO)
-                ->with('categoria:id,nome')
-                ->get();
+                ->with(['categoria:id,nome',
+                       'composicoes' => function($query) {
+                           $query->with('componente:id,nome');
+                       }
+                ])
+                ->get()
+                ->map(function($produto) {
+                    $composicaoItens = [];
+                    if ($produto->composicoes->count() > 0) {
+                        $composicaoItens = $produto->composicoes->map(function($comp) {
+                            return [
+                                'id' => $comp->idComponente,
+                                'quantidade' => $comp->quantidade,
+                                'nome' => $comp->componente->nome
+                            ];
+                        });
+                    }
+
+                    return [
+                        'id' => $produto->id,
+                        'idCategoria' => $produto->idCategoria,
+                        'nome' => $produto->nome,
+                        'descricao' => $produto->descricao,
+                        'img' => $produto->img,
+                        'status' => $produto->status,
+                        'composicao' => $produto->composicao,
+                        'componente' => $produto->componente,
+                        'categoria' => $produto->categoria,
+                        'composicaoItens' => $composicaoItens
+                    ];
+                });
         }
-        return $produtos;
+        return response()->json($produtos);
     }
     /**
      * Store a newly created resource in storage.
@@ -110,6 +171,24 @@ class ProdutoController extends Controller
             return response("Erro ao cadastrar o produto. Tente novamente ou contate o produto.", 200);
         }
 
+    }
+    public function update(UpdateProductRequest $request, Produto $produto)
+    {
+        try {
+            $updateProduct = app(UpdateProductAction::class);
+            $updatedProduct = $updateProduct->execute($request, $produto);
+
+            return response()->json([
+                'message' => 'Produto atualizado com sucesso',
+                'data' => $updatedProduct
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro ao atualizar produto',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     private function calculateDistance($lat1, $long1, $lat2, $long2)
@@ -332,6 +411,19 @@ private function getAllActiveProducts($distribuidorId)
             if ($currentProduct !== $prod->idProd) {
                 $indexProduto++;
                 $currentProduct = $prod->idProd;
+                            // Get composition data
+            $composicao = Composicao::where('idComposicao', $prod->idProd)->with('componente')->get();
+            $componentes = [];
+
+            if ($composicao->count() > 0) {
+                foreach ($composicao as $comp) {
+                    $componentes[] = [
+                        'id' => $comp->idComponente,
+                        'quantidade' => $comp->quantidade,
+                        'nome' => Produto::find($comp->idComponente)->nome
+                    ];
+                }
+            }
                 Debugbar::info($prod);
                 // Initialize new product structure
                 $out[$indexProduto] = [
@@ -341,6 +433,7 @@ private function getAllActiveProducts($distribuidorId)
                     "descricao" => $prod->descricao,
                     "preco" => [],
                     "precoEspecial" => [],
+                    "composicao" => $componentes
                     // "categoria" => $prod->categoria
                 ];
             }

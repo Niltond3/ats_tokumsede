@@ -41,5 +41,13 @@ class Produto extends Model
     {
         return $this->hasMany(Estoque::class, 'idProduto')->where('idDistribuidor', auth()->user()->idDistribuidor);
     }
-    //
+    public function composicoes()
+{
+    return $this->hasMany(Composicao::class, 'idComposicao');
+}
+
+public function componentes()
+{
+    return $this->hasMany(Composicao::class, 'idComponente');
+}
 }

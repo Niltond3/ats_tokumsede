@@ -113,9 +113,9 @@ Route::middleware('auth')->group(function () {
                 'store' => 'produtos.store',
                 'show' => 'produtos.show',
                 'edit' => 'produtos.edit',
-                'update' => 'produtos.update',
                 'destroy' => 'produtos.destroy'
             ]);
+            Route::put('{produto}', [ProdutoController::class, 'update'])->name('produtos.update');
         Route::get('listarProdutos/{idDistribuidor}/{idCliente}', [ProdutoController::class, 'listarProdutos'])->name('produtos.listar');
         Route::get('listarPorDistribuidor/{idDistribuidor}/{idCliente?}', [ProdutoController::class, 'showByDistribuidor'])->name('produtos.por-distribuidor');
         Route::get('{idEnderecoCliente}', [ProdutoController::class, 'show'])->name('produtos.show-by-endereco');

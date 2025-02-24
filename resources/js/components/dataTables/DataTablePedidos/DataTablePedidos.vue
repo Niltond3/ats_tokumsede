@@ -156,8 +156,8 @@ onMounted(() => {
   const searchClasses =
     'flex items-center py-2 px-1 gap-2 !text-info/80 !mb-[30px] min-[768px]:!mb-[10px] relative -top-11 max-w-60 mx-auto';
   const bottomClasses =
-    '!bg-info py-0.5 px-2 !rounded-b-md !text-white flex justify-between  items-center font-bold !border-info';
-  //  flex justify-between  items-center font-bold !border-info
+    '!bg-info !text-white flex justify-between py-0.5 px-2 items-center font-bold !border-info !rounded-b-md ring-info/40';
+  // !text-white flex justify-between py-0.5 px-2 items-center font-bold !border-info !rounded-b-md ring-info/40
   $('.top').addClass(topClasses);
   $('.dt-length>select').addClass(selectClasses);
   $('.dt-length>select>option').addClass(optionClasses);
@@ -167,7 +167,7 @@ onMounted(() => {
     <span class="hidden">pesquisar</span>
     <i class="ri-search-2-fill"></i>
     `);
-  $('.bottom').addClass(bottomClasses);
+  !props.isNestedTable && $('.bottom').addClass(bottomClasses);
 
   handleLoadTableData();
 

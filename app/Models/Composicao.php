@@ -16,4 +16,9 @@ class Composicao extends Model
         'quantidade'
     ];
     public $timestamps = false;
+
+    public function componente()
+    {
+        return $this->belongsTo(Produto::class, 'idComponente', 'id');
+    }
 }

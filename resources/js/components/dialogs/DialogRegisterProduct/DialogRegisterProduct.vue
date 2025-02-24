@@ -68,6 +68,7 @@ const handleDialogOpen = (open) => {
     resetDialogValues();
     emits('update:dialogOpen', false);
   }
+  Promise.all([getCategorie(), getImages(), getProducts()]).catch(console.error);
   toggleDialog();
 };
 
@@ -111,8 +112,6 @@ const getImages = () => {
 };
 
 const getProducts = () => {
-  const url = '/api/listImages';
-  const promise = axios.get(url);
   renderToast(
     listProducts(),
     'carregando Produtos ...',
@@ -125,10 +124,6 @@ const getProducts = () => {
     },
   );
 };
-
-onMounted(() => {
-  Promise.all([getCategorie(), getImages(), getProducts()]).catch(console.error);
-});
 
 const handleDefaultImage = () => (img.value = defaultImgValue);
 
@@ -199,9 +194,7 @@ const onSubmit = (values) => {
   };
 
   submitProductData(productDetails.value, payload, fileImage);
-  //   if (fileImage) return uploadImage(fileImage, payload);
-
-  //   registerProduct(payload);
+  getProducts();
 };
 
 const handleSubmit = async (event, values, validate) => {

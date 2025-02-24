@@ -1,0 +1,43 @@
+diff --git a/resources/js/components/dialogs/DialogRegisterProduct/DialogRegisterProduct.vue b/resources/js/components/dialogs/DialogRegisterProduct/DialogRegisterProduct.vue
+index 4e1bc82..8f34f0e 100644
+--- a/resources/js/components/dialogs/DialogRegisterProduct/DialogRegisterProduct.vue
++++ b/resources/js/components/dialogs/DialogRegisterProduct/DialogRegisterProduct.vue
+@@ -68,6 +68,7 @@ const handleDialogOpen = (open) => {
+     resetDialogValues();
+     emits('update:dialogOpen', false);
+   }
++  Promise.all([getCategorie(), getImages(), getProducts()]).catch(console.error);
+   toggleDialog();
+ };
+ 
+@@ -111,8 +112,6 @@ const getImages = () => {
+ };
+ 
+ const getProducts = () => {
+-  const url = '/api/listImages';
+-  const promise = axios.get(url);
+   renderToast(
+     listProducts(),
+     'carregando Produtos ...',
+@@ -126,10 +125,6 @@ const getProducts = () => {
+   );
+ };
+ 
+-onMounted(() => {
+-  Promise.all([getCategorie(), getImages(), getProducts()]).catch(console.error);
+-});
+-
+ const handleDefaultImage = () => (img.value = defaultImgValue);
+ 
+ const registerProduct = (payload) => {
+@@ -199,9 +194,7 @@ const onSubmit = (values) => {
+   };
+ 
+   submitProductData(productDetails.value, payload, fileImage);
+-  //   if (fileImage) return uploadImage(fileImage, payload);
+-
+-  //   registerProduct(payload);
++  getProducts();
+ };
+ 
+ const handleSubmit = async (event, values, validate) => {

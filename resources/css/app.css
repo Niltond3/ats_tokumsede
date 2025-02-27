@@ -281,7 +281,9 @@
   .secure {
     -webkit-text-security: disc !important;
   }
-
+  div[data-reka-popper-content-wrapper] {
+    z-index: 99 !important;
+  }
   div[data-radix-popper-content-wrapper] {
     z-index: 50 !important;
   }

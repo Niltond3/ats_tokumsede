@@ -58,6 +58,7 @@ class EntregadorController extends Controller
         $entregador->nome = $request->nome;
         $entregador->telefone = $request->telefone;
         $entregador->placaVeiculo = $request->placaVeiculo;
+        $entregador->idDistribuidor= $request->idDistribuidor;
         $entregador->save();
         return $entregador->nome;
         //

@@ -17,13 +17,13 @@ class Entregador extends Model
         'status',
     ];
     public $timestamps = false;
-    //STATUS
+
     const ATIVO = 1;
     const INATIVO = 2;
     const EXCLUIDO = 3;
-    //
+
     public function distribuidor()
     {
-        return $this->belongsTo('App\Distribuidor', 'idDistribuidor');
+        return $this->belongsTo('App\Models\Distribuidor', 'idDistribuidor');
     }
 }

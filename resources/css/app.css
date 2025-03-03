@@ -20,7 +20,7 @@
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
 
-    --primary: 0 0% 9%; /* Main blue */
+    --primary: 209 78% 51%; /* Main blue */
     --primary-foreground: white;
     --accent: 0 0% 96.1%; /* Light blue accent */
     --accent-foreground: 0 0% 9%;
@@ -75,8 +75,8 @@
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
 
-    --primary: 0 0% 98%; /* Lighter blue for dark mode */
-    --primary-foreground: 0 0% 9%;
+    --primary: 209 78% 51%; /* Lighter blue for dark mode */
+    --primary-foreground: white;
     --accent: 0 0% 14.9%; /* Darker blue accent for dark mode */
     --accent-foreground: 0 0% 98%;
 

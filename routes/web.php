@@ -6,6 +6,7 @@ use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\DistribuidorController;
+use App\Http\Controllers\EntregadorController;
 use App\Http\Controllers\EnderecoClienteController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PedidoController;
@@ -140,6 +141,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/by-client-address/{clientAddressId}', [DistribuidorController::class, 'findDistributorByClientAddress'])->name('distribuidores.por-endereco-cliente');
     });
 
+    //ENTREGADORES
+Route::group(['prefix' => 'entregadores', 'middleware' => 'auth'], function () {
+    Route::get('/', [EntregadorController::class, 'index'])->name('entregadores.index');
+    Route::post('/', [EntregadorController::class, 'store'])->name('entregadores.store');
+    Route::get('/{id}', [EntregadorController::class, 'show'])->name('entregadores.show');
+    Route::put('/{id}', [EntregadorController::class, 'update'])->name('entregadores.update');
+    Route::delete('/{id}', [EntregadorController::class, 'destroy'])->name('entregadores.destroy');
+});
 
     //CATEGORIAS
     Route::resource('categorias', CategoriaController::class, ['except' => 'create']);

@@ -1,7 +1,6 @@
 <script setup>
 // Vue and Core imports
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
 import { toast } from 'vue-sonner';
 import { useWindowSize } from '@vueuse/core';
 
@@ -21,10 +20,9 @@ import 'datatables.net-select-dt';
 import 'datatables.net-staterestore-dt';
 
 // Utility imports
-import { ErrorUtil, StringUtil } from '@/util';
+import { ErrorUtil, StringUtil, OrderUtil } from '@/util';
 import { dialogState } from '@/composables/useToggleDialog';
 import languagePtBR from '../config/dataTablePtBR.mjs';
-import { OrderUtil } from '@/util';
 import rowChildtable from './components/rowChildTable/index';
 import DialogShowOrder from '@/components/dialogs/DialogShowOrder.vue';
 import DialogCreateOrder from '@/components/dialogs/DialogCreateOrder.vue';

@@ -11,6 +11,7 @@ import { Link } from '@inertiajs/vue3';
 import logo from '@/../../public/images/tokumsede-logo.png';
 import NavigationMenuItem from '@/components/navigation/NavigationMenuItem.vue';
 import { DialogRegisterProduct } from '@/components/dialogs/DialogRegisterProduct';
+import DialogRegisterDeliveryman from '@/components/dialogs/DialogManageDeliveryMan.vue';
 import DialogRegisterClient from '@/components/dialogs/DialogRegisterClient.vue';
 import { DialogRegisterPrices } from '@/components/dialogs/DialogRegisterPrices';
 import DialogTrigger from '@/components/dialogs/DialogTrigger.vue';
@@ -81,6 +82,12 @@ const { tipoAdministrador } = user;
             class="self-center justify-self-center w-full transition-all duration-300 group-hover:[&:not(:hover)]:blur-[1px] group-hover:[&:not(:hover)]:opacity-70"
           >
             <DialogRegisterProduct />
+          </li>
+          <li
+            key="product_register"
+            class="self-center justify-self-center w-full transition-all duration-300 group-hover:[&:not(:hover)]:blur-[1px] group-hover:[&:not(:hover)]:opacity-70"
+          >
+            <DialogRegisterDeliveryman />
           </li>
           <li
             key="client_register"

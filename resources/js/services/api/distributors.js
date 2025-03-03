@@ -2,6 +2,12 @@ export const listAllDistributors = async () => {
     return await axios.get("/distribuidores/all");
 };
 
+export const getDistribuidores = async () => {
+    const response = await axios.get('/distribuidores/all');
+    console.log(response)
+    return response.data.data;
+};
+
 export const getDistributor = async (distributorId) => {
     return await axios.get(`/distribuidores/${distributorId}`);
 };

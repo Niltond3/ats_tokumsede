@@ -204,6 +204,7 @@ class DistribuidorController extends Controller
      */
     public function update(Request $request, $id)
     {
+        Debugbar::info($request);
         if ($request->status) {//*Ativa ou Inativa
             $distribuidor = Distribuidor::find($id);
             $distribuidor->status = $request->status;

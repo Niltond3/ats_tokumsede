@@ -1,7 +1,6 @@
 <?php
 include 'cors.php';
 
-use App\Http\Controllers\Api\IndexController as Api;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ClienteController;
@@ -127,20 +126,35 @@ Route::middleware('auth')->group(function () {
 
     //DISTRIBUIDORES
     Route::group(['prefix' => 'distribuidores'], function () {
-        Route::get('/all', [DistribuidorController::class, 'getAllDistributors'])->name('distribuidores.todos');
-        Route::get('/{id}', [DistribuidorController::class, 'show'])->name('distribuidores.show');
-        Route::resource('/', DistribuidorController::class, ['except' => ['create', 'show']])
-            ->names([
-                'index' => 'distribuidores.index',
-                'store' => 'distribuidores.store',
-                'update' => 'distribuidores.update',
-                'destroy' => 'distribuidores.destroy',
-                'edit' => 'distribuidores.edit'
-            ]);
-        Route::get('/by-address/{addressId}', [DistribuidorController::class, 'findDistributorByAddress'])->name('distribuidores.por-endereco');
-        Route::get('/by-client-address/{clientAddressId}', [DistribuidorController::class, 'findDistributorByClientAddress'])->name('distribuidores.por-endereco-cliente');
-    });
+        // Rotas customizadas
+        Route::get('/all', [DistribuidorController::class, 'getAllDistributors'])
+            ->name('distribuidores.todos');
 
+        Route::get('/by-address/{addressId}', [DistribuidorController::class, 'findDistributorByAddress'])
+            ->name('distribuidores.por-endereco');
+
+        Route::get('/by-client-address/{clientAddressId}', [DistribuidorController::class, 'findDistributorByClientAddress'])
+            ->name('distribuidores.por-endereco-cliente');
+
+        // Rotas de recurso – as rotas que usam {id} são restringidas para aceitar somente números
+        Route::get('/', [DistribuidorController::class, 'index'])
+            ->name('distribuidores.index');
+
+        Route::get('/{id}', [DistribuidorController::class, 'show'])
+            ->name('distribuidores.show')
+            ->where('id', '[0-9]+');
+
+        Route::post('/', [DistribuidorController::class, 'store'])
+            ->name('distribuidores.store');
+
+        Route::put('/{id}', [DistribuidorController::class, 'update'])
+            ->name('distribuidores.update')
+            ->where('id', '[0-9]+');
+
+        Route::delete('/{id}', [DistribuidorController::class, 'destroy'])
+            ->name('distribuidores.destroy')
+            ->where('id', '[0-9]+');
+    });
     //ENTREGADORES
 Route::group(['prefix' => 'entregadores', 'middleware' => 'auth'], function () {
     Route::get('/', [EntregadorController::class, 'index'])->name('entregadores.index');
@@ -187,42 +201,6 @@ Route::group(['prefix' => 'entregadores', 'middleware' => 'auth'], function () {
 
 
 Route::get('/homepage', [HomeController::class, 'getHomepage'])->name('homepage');
-
-// //API
-// Route::group(['prefix' => 'api'], function () {
-    // Route::resource('/', Api::class, ['except' => 'create'])
-    //     ->names([
-    //         'index' => 'api.index',
-    //         'show' => 'api.show',
-    //         'store' => 'api.store',
-    //         'edit' => 'api.edit',
-    //         'update' => 'api.update',
-    //         'destroy' => 'api.destroy'
-    //     ]);
-//     // Demais rotas configuradas
-//     Route::get('verificaPedidoAlterado', [Api::class, 'verificaPedidoAlterado']);
-//     Route::get('verificaEmail', [Api::class, 'verificaEmail']);
-//     Route::get('consultaInicial', [Api::class, 'consultaInicial']);
-//     Route::get('solicitaContato', [Api::class, 'solicitaContato']);
-//     Route::get('enviaEmail', [Api::class, 'enviaEmail']);
-//     Route::get('removerEndereco', [Api::class, 'removerEndereco']);
-//     Route::get('listImages', [Api::class, 'listImages']);
-//     Route::get('consultaInicialSemCadastro', [Api::class, 'consultaInicialSemCadastro']);
-//     Route::get('clientePotencial', [Api::class, 'clientePotencial']);
-//     Route::get('login', [Api::class, 'login']);
-//     Route::get('refreshRegId', [Api::class, 'refreshRegId']);
-//     Route::get('notificacaoRecebida', [Api::class, 'notificacaoRecebida']);
-//     Route::get('senhaModoTeste', [Api::class, 'senhaModoTeste']);
-//     Route::get('alteraEnderecoAtual', [Api::class, 'alteraEnderecoAtual']);
-//     Route::get('cadastrarNovoEndereco', [Api::class, 'cadastrarNovoEndereco']);
-//     Route::get('cancelarPedido', [Api::class, 'cancelarPedido']);
-//     Route::get('pedidoRecebido', [Api::class, 'pedidoRecebido']);
-//     Route::get('alteraDadosCliente', [Api::class, 'alteraDadosCliente']);
-//     Route::get('verifyRecover', [Api::class, 'verifyRecover']);
-//     Route::get('alteraSenha', [Api::class, 'alteraSenha']);
-//     Route::get('novoPedido', [Api::class, 'novoPedido']);
-// });
-
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/cliente.php';

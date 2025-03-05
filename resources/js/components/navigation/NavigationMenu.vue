@@ -11,7 +11,7 @@ import { Link } from '@inertiajs/vue3';
 import logo from '@/../../public/images/tokumsede-logo.png';
 import NavigationMenuItem from '@/components/navigation/NavigationMenuItem.vue';
 import { DialogRegisterProduct } from '@/components/dialogs/DialogRegisterProduct';
-import DialogRegisterDeliveryman from '@/components/dialogs/DialogManageDeliveryMan.vue';
+import DialogManageDeliveryman from '@/components/dialogs/DialogManageDeliveryMan.vue';
 import DialogRegisterClient from '@/components/dialogs/DialogRegisterClient.vue';
 import { DialogRegisterPrices } from '@/components/dialogs/DialogRegisterPrices';
 import DialogTrigger from '@/components/dialogs/DialogTrigger.vue';
@@ -20,6 +20,7 @@ import DialogReportOrders from '@/components/dialogs/DialogReportOrders.vue';
 import { HOME_LINKS, NAVIGATION_ITEMS } from '@/constants/navigation';
 import { dialogState } from '@/composables/useToggleDialog.js';
 import DialogStockMerge from '@/components/dialogs/DialogStockMerge/DialogStockMerge.vue';
+import DialogManageDistributor from '../dialogs/DialogManageDistributor.vue';
 
 const { isOpen: openRegisterPrices, toggleDialog: toggleRegisterPrices } =
   dialogState('RegisterPrices');
@@ -81,13 +82,19 @@ const { tipoAdministrador } = user;
             key="product_register"
             class="self-center justify-self-center w-full transition-all duration-300 group-hover:[&:not(:hover)]:blur-[1px] group-hover:[&:not(:hover)]:opacity-70"
           >
+            <DialogManageDistributor />
+          </li>
+          <li
+            key="product_register"
+            class="self-center justify-self-center w-full transition-all duration-300 group-hover:[&:not(:hover)]:blur-[1px] group-hover:[&:not(:hover)]:opacity-70"
+          >
             <DialogRegisterProduct />
           </li>
           <li
             key="product_register"
             class="self-center justify-self-center w-full transition-all duration-300 group-hover:[&:not(:hover)]:blur-[1px] group-hover:[&:not(:hover)]:opacity-70"
           >
-            <DialogRegisterDeliveryman />
+            <DialogManageDeliveryman />
           </li>
           <li
             key="client_register"

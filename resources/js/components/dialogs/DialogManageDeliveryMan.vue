@@ -100,15 +100,21 @@
             </div>
             <!-- Botão para excluir o entregador -->
             <div class="ml-auto border-l border-slate-300 pl-3 flex gap-2">
-              <button
-                variant="destructive"
-                class="relative !size-10 text-2xl shadow-md rounded-full transition-all group-hover/line:bg-white hover:shadow-lg text-info/60 hover:text-info/100"
-                @click="deleteDeliveryman(deliveryman.id)"
+              <DialogConfirmAction
+                :dropdown="false"
+                dialog-title="Deletar Entregador"
+                variant="danger"
+                @on:confirm="deleteDeliveryman(distributor.id)"
               >
-                <i
-                  class="ri-delete-bin-6-fill text-sm pointer-events-none select-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                ></i>
-              </button>
+                <button
+                  variant="destructive"
+                  class="relative !size-10 text-2xl shadow-md rounded-full transition-all group-hover/line:bg-white hover:shadow-lg text-info/60 hover:text-info/100"
+                >
+                  <i
+                    class="ri-delete-bin-6-fill text-sm pointer-events-none select-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                  ></i>
+                </button>
+              </DialogConfirmAction>
             </div>
           </li>
         </ul>
@@ -243,6 +249,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import DialogTrigger from '@/components/dialogs/DialogTrigger.vue';
+import DialogConfirmAction from './DialogConfirmAction.vue';
 import {
   Form,
   FormField,
@@ -297,7 +304,7 @@ watch(
   (newId) => {
     if (tipoAdministrador === 'Distribuidor' && newId) {
       filterDistributorId.value = newId;
-      return
+      return;
     }
   },
   { immediate: true },

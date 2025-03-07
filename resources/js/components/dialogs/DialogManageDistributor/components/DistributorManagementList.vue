@@ -65,7 +65,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Input } from '@/components/ui/input';
-import DialogConfirmAction from '../../DialogConfirmAction.vue';
+import DialogConfirmAction from '@/components/dialogs/DialogConfirmAction.vue';
 
 const props = defineProps({
   editDistributor: {

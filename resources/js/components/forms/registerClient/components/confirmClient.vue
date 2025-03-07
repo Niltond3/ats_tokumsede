@@ -86,7 +86,7 @@ function handleCopyClient() {
 </script>
 
 <template>
-  <section>
+  <section class="flex flex-col gap-4">
     <div id="v-for-object" class="relative gap-3 flex flex-col p-4 text-sm capitalize">
       <button class="group absolute right-0 -top-1" @click="handleCopyClient">
         <i

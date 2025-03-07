@@ -5,14 +5,14 @@ export { default as Button } from "./Button.vue";
 export const buttonVariants = cva("btn", {
     variants: {
         variant: {
-            default: "bg-info text-primary-foreground hover:bg-info/90",
-            destructive: "bg-danger text-danger-foreground hover:bg-danger/90",
+            default: "bg-info text-white hover:bg-info/90 transition-all",
+            destructive: "bg-danger text-danger-foreground hover:bg-danger/90 transition-all",
             outline:
-                "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+                "border border-input text-info/80 bg-background hover:bg-accent hover:text-info transition-all",
             secondary:
-                "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-            ghost: "hover:bg-accent hover:text-accent-foreground",
-            link: "text-primary underline-offset-4 hover:underline",
+                "bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-all",
+            ghost: "hover:bg-accent hover:text-accent-foreground transition-all",
+            link: "text-primary underline-offset-4 hover:underline transition-all",
         },
         size: {
             default: "rounded-md",

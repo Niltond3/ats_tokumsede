@@ -62,7 +62,7 @@ const handleDialogOpen = (op) => {
       <slot>
         <DropdownMenuItem
           v-if="dropdown"
-          class="cursor-pointer group gap-1"
+          class="cursor-pointer group gap-1 relative"
           @select="(e) => e.preventDefault()"
         >
           <i

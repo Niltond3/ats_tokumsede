@@ -1,4 +1,6 @@
+<!-- DistributorAddressDetails.vue -->
 <script setup>
+import { onMounted } from 'vue';
 import { FormMessage, FormItem, FormField, FormControl, FormLabel } from '@/components/ui/form';
 import Button from '@/components/Button.vue';
 import { Input } from '@/components/ui/input';
@@ -43,7 +45,7 @@ const { handleLocatorButton } = useGoogleMapsAddress(updateAddressValue);
     </FormField>
 
     <FormField v-slot="{ componentField }" name="cep">
-      <FormItem class="relative sm:col-span-3">
+      <FormItem class="relative sm:col-span-4">
         <FormControl>
           <Input v-mask="['#####-###']" v-bind="componentField" type="text" />
         </FormControl>
@@ -52,7 +54,7 @@ const { handleLocatorButton } = useGoogleMapsAddress(updateAddressValue);
       </FormItem>
     </FormField>
     <FormField v-slot="{ componentField }" name="cidade">
-      <FormItem v-auto-animate class="relative sm:col-span-5">
+      <FormItem v-auto-animate class="relative sm:col-span-6">
         <FormControl>
           <Input v-bind="componentField" autocomplete="name" type="text" />
         </FormControl>
@@ -67,15 +69,6 @@ const { handleLocatorButton } = useGoogleMapsAddress(updateAddressValue);
           <Input v-bind="componentField" autocomplete="name" type="text" />
         </FormControl>
         <FormLabel> Estado </FormLabel>
-        <FormMessage />
-      </FormItem>
-    </FormField>
-    <FormField v-slot="{ componentField }" name="apelido">
-      <FormItem class="relative sm:col-span-2">
-        <FormControl>
-          <Input v-bind="componentField" autocomplete="name" type="text" />
-        </FormControl>
-        <FormLabel> Apelido </FormLabel>
         <FormMessage />
       </FormItem>
     </FormField>
@@ -123,16 +116,6 @@ const { handleLocatorButton } = useGoogleMapsAddress(updateAddressValue);
           <Input v-bind="componentField" autocomplete="name" type="text" />
         </FormControl>
         <FormLabel> Referência </FormLabel>
-        <FormMessage />
-      </FormItem>
-    </FormField>
-
-    <FormField v-slot="{ componentField }" name="observacao">
-      <FormItem class="relative sm:col-span-12">
-        <FormControl>
-          <Input v-bind="componentField" autocomplete="name" type="text" />
-        </FormControl>
-        <FormLabel> Observação </FormLabel>
         <FormMessage />
       </FormItem>
     </FormField>

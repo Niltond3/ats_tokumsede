@@ -20,7 +20,7 @@ import DialogReportOrders from '@/components/dialogs/DialogReportOrders.vue';
 import { HOME_LINKS, NAVIGATION_ITEMS } from '@/constants/navigation';
 import { dialogState } from '@/composables/useToggleDialog.js';
 import DialogStockMerge from '@/components/dialogs/DialogStockMerge/DialogStockMerge.vue';
-import DialogManageDistributor from '../dialogs/DialogManageDistributor.vue';
+import DialogManageDistributor from '@/components/dialogs/DialogManageDistributor/index.vue';
 
 const { isOpen: openRegisterPrices, toggleDialog: toggleRegisterPrices } =
   dialogState('RegisterPrices');

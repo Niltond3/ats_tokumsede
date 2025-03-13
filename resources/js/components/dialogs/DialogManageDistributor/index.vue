@@ -25,7 +25,7 @@
       <!-- Formulário multi‐etapas -->
       <Form
         ref="formRef"
-        v-slot="{ meta, values, setValues }"
+        v-slot="{ meta, values, setValues, setErrors }"
         :key="
           distributorDetails.id ? 'edit-distributor-' + distributorDetails.id : 'new-distributor'
         "
@@ -91,7 +91,7 @@
                 <Button
                   v-if="stepIndex !== steps.length"
                   size="sm"
-                  @click="handleNext(values, nextStep)"
+                  @click="handleNext(values, nextStep, setErrors)"
                 >
                   Próximo
                 </Button>
@@ -162,10 +162,12 @@ const steps = [
 ];
 
 /**
- * Ao clicar em "Próximo", validamos somente os campos do passo atual
- * utilizando a schema específica (formSchemas é um array com 3 schemas).
+ * Handles form validation and navigation between steps
+ * @param {Object} values - Current form values
+ * @param {Function} nextStep - Function to advance to next step
+ * @param {Function} setErrors - Form errors setter function
  */
-const handleNext = async (values, nextStep) => {
+const handleNext = async (values, nextStep, setErrors) => {
   const currentSchema = formSchemas[stepIndex.value - 1];
   const result = currentSchema.safeParse(values);
   if (result.success) {
@@ -173,6 +175,14 @@ const handleNext = async (values, nextStep) => {
   } else {
     // Aqui você pode integrar a exibição dos erros se desejar
     console.log(result.error.flatten());
+    console.log(result.error.issues);
+    const formErrors = {};
+    result.error.issues.forEach((issue) => {
+      formErrors[issue.path[0]] = issue.message;
+    });
+
+    // Update form errors
+    setErrors(formErrors);
   }
 };
 

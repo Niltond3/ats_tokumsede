@@ -11,12 +11,16 @@ import {
     getDistributor
 } from '@/services/api/distributors';
 import renderToast from '@/components/renderPromiseToast';
+import { usePixKeyValidation } from './usePixKeyValidation';
 
 /**
  * Composable para gerenciar as operações de CRUD dos distribuidores
  * e para fornecer os schemas de validação de um formulário multi‐etapas.
  */
 export function useDistributorManagement() {
+    // Validação do pixKey
+    const { validatePixKeyFormat } = usePixKeyValidation();
+
     // Dados para edição (quando um distribuidor é selecionado)
     const distributorDetails = ref({});
 
@@ -39,6 +43,12 @@ export function useDistributorManagement() {
             .string({ required_error: 'Informe o telefone' })
             .refine(validator.isMobilePhone, { message: 'Número de telefone inválido' }),
         outrosContatos: z.string().nullable().optional(),
+        pix_key: z.string()
+            .nullable()
+            .optional()
+            .refine(value => !value || validatePixKeyFormat(value), {
+                message: "Formato de chave PIX inválido"
+            })
     });
 
     // Etapa 2: Endereço

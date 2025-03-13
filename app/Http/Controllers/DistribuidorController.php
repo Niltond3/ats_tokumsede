@@ -58,6 +58,7 @@ class DistribuidorController extends Controller
             'telefonePrincipal' => $distribuidor->telefonePrincipal,
             'email' => $distribuidor->email,
             'outrosContatos' => $distribuidor->outrosContatos,
+            'pix_key' => $distribuidor->pix_key,
 
             // Address Info
             ...$distribuidor->enderecoDistribuidor->only([
@@ -239,6 +240,7 @@ class DistribuidorController extends Controller
                                     $distribuidor->cnpj = $request->cnpj;
                                     $distribuidor->email = $request->email;
                                     $distribuidor->outrosContatos = $request->outrosContatos;
+                                    $distribuidor->pix_key = $request->pix_key;
                                     $distribuidor->dddTelefone = str_replace($formatacaoTelefone, "", $telefone[0]);
                                     $distribuidor->telefonePrincipal = $telefone[1];
                                 }
@@ -336,6 +338,7 @@ class DistribuidorController extends Controller
                 'telefonePrincipal' => $distribuidor->telefonePrincipal,
                 'email' => $distribuidor->email,
                 'outrosContatos' => $distribuidor->outrosContatos,
+                'pix_key' => $distribuidor->pix_key,
                 'logradouro' => $distribuidor->enderecoDistribuidor->logradouro,
                 'numero' => $distribuidor->enderecoDistribuidor->numero,
                 'bairro' => $distribuidor->enderecoDistribuidor->bairro,

@@ -59,12 +59,42 @@
         <FormMessage />
       </FormItem>
     </FormField>
+
+    <!-- PIX Key field -->
+    <FormField v-slot="{ componentField }" name="pix_key">
+      <FormItem>
+        <FormControl>
+          <Input
+            v-bind="componentField"
+            :type="pixKeyType"
+            placeholder="Chave PIX"
+            @input="handlePixKeyInput"
+          />
+        </FormControl>
+        <FormLabel>Chave PIX</FormLabel>
+        <FormDescription>
+          Aceita: CPF/CNPJ, Email, Telefone (+55), UUID ou chave aleatória
+        </FormDescription>
+        <FormMessage />
+      </FormItem>
+    </FormField>
   </section>
 </template>
 
 <script setup>
+import { ref, computed } from 'vue';
 import { FormField, FormItem, FormControl, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { usePixKeyValidation } from '@/composables/usePixKeyValidation';
+
+const pixKeyType = ref('text');
+const { validatePixKeyFormat } = usePixKeyValidation();
+
+const handlePixKeyInput = (e) => {
+  const value = e.target.value;
+  const keyType = validatePixKeyFormat(value);
+  pixKeyType.value = keyType === 'phone' ? 'tel' : 'text';
+};
 
 const props = defineProps({
   values: { type: Object, required: true },

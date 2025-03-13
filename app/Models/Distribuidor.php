@@ -16,18 +16,19 @@ class Distribuidor extends Model
 
     protected $table = 'distribuidor';
     protected $fillable = [
-        'id',
-        'nome',
-        'cnpj',
-        'email',
-        'dddTelefone',
-        'telefonePrincipal',
-        'outrosContatos',
-        'status',
-        'idEnderecoDistribuidor',
-        'idHorarioFuncionamento',
-        'idTaxaEntrega',
-        'idNovoHorarioFuncionamento',
+    'id',
+    'nome',
+    'cnpj',
+    'email',
+    'dddTelefone',
+    'telefonePrincipal',
+    'outrosContatos',
+    'status',
+    'idEnderecoDistribuidor',
+    'idHorarioFuncionamento',
+    'idTaxaEntrega',
+    'idNovoHorarioFuncionamento',
+    'pix_key',
     ];
     public $timestamps = false;
     const ATIVO = 1;

@@ -9,6 +9,7 @@ import { MoneyUtil, DateUtil, ClipboardUtil } from '@/util';
 import { computed } from 'vue';
 
 const props = defineProps({
+  pix_key: String,
   payload: Object,
   isUpdate: Boolean,
   disabledButton: Boolean,
@@ -42,7 +43,7 @@ const values = computed(() => [
 ]);
 
 const orderProductsToClipboard = () => {
-  ClipboardUtil.orderProductsToClipboard(props.payload, props.products);
+  ClipboardUtil.orderProductsToClipboard(props.payload, props.products, props.pix_key);
 };
 </script>
 

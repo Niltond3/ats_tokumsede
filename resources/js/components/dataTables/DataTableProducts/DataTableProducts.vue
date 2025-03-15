@@ -45,6 +45,8 @@ const disabledButton = ref(true);
 
 const resizebleColumns = ref(columns);
 
+const pix_key = ref('');
+
 const { width } = useWindowSize();
 
 const emit = defineEmits(['callback:payloadPedido', 'update:specialOfferCreated']);
@@ -158,6 +160,8 @@ watch(
       idEndereco,
       order,
     );
+    pix_key.value = distributor.pix_key || '';
+    console.log(pix_key.value);
     clientName.value = rawClientName;
     isUpdate.value = updateOrder;
     tableProductsState.payload = { ...tableProductsState.payload, ...orderPayload };
@@ -193,6 +197,7 @@ watch(
       @update:order-note="handleUpdateOrderNote"
     />
     <DataTableProducts.Footer
+      :pix_key="pix_key"
       :products="tableProductsState.tableData"
       :payload="tableProductsState.payload"
       :is-update="isUpdate"

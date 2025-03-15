@@ -97,6 +97,7 @@
         "vaul-vue": "^0.2.0",
         "vee-validate": "^4.13.2",
         "vue-lazy-hydration": "^2.0.0-beta.4",
+        "vue-qrcode": "^2.2.2",
         "vue-router": "^4.4.5",
         "vue-sonner": "^1.2.5",
         "vue-the-mask": "^0.11.1",

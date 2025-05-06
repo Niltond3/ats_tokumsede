@@ -6,7 +6,8 @@ import SelectPayment from '@/components/orderComponents/SelectPayment.vue';
 import ExchangeInput from '@/components/orderComponents/ExchangeInput.vue';
 import DateTimePicker from '@/components/orderComponents/DateTimePicker.vue';
 import { MoneyUtil, DateUtil, ClipboardUtil } from '@/util';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { event } from 'jquery';
 
 const props = defineProps({
   pix_key: String,
@@ -16,6 +17,26 @@ const props = defineProps({
   addressNote: String,
   products: Object,
 });
+
+const paymentForm = ref(1);
+const disabledPixCodeButton = ref(props.disabledButton && paymentForm.value != 3);
+
+watch(
+  () => props.disabledButton,
+  (value) => {
+    console.log(disabledPixCodeButton);
+    disabledPixCodeButton.value = props.disabledButton && paymentForm.value != 3;
+  },
+);
+
+watch(
+  () => paymentForm.value,
+  (value) => {
+    console.log(`disabledButton: ${props.disabledButton}`);
+    console.log(`paymentForm: ${value} ${value == 3}`);
+    disabledPixCodeButton.value = props.disabledButton && value == 3;
+  },
+);
 
 const { toCurrency } = MoneyUtil.formatMoney();
 
@@ -45,14 +66,19 @@ const values = computed(() => [
 const orderProductsToClipboard = () => {
   ClipboardUtil.orderProductsToClipboard(props.payload, props.products, props.pix_key);
 };
+const copyPixCodeToClipboard = () => {
+  ClipboardUtil.copyPixCodeToClipboard(props.payload, props.pix_key);
+};
+const qrCodeToClipboard = () => {
+  ClipboardUtil.qrCodeToClipboard(props.payload, props.pix_key);
+};
 </script>
 
 <template>
-  <div class="flex mt-3 gap-3 flex-col sm:grid sm:grid-cols-12 sm:grid-rows-2">
+  <div class="flex mt-3 gap-7 sm:gap-4 flex-col sm:grid sm:grid-cols-12 sm:grid-rows-2">
     <div class="flex items-center h-11 justify-around sm:col-span-4 mt-3">
       <button
         class="w-full flex flex-col items-center justify-center bg-info py-3 px-4 rounded-md transition-colors duration-300 group relative group"
-        @click="orderProductsToClipboard"
       >
         <p
           class="z-10 absolute opacity-0 group-hover:opacity-100 size-8 text-white bg-dispatched border-2 border-white rounded-full bottom-1/2 -translate-y-1/2 -left-3 transition-opacity duration-300"
@@ -74,6 +100,28 @@ const orderProductsToClipboard = () => {
             <p class="text-nowrap text-white font-bold">{{ value.value }}</p>
           </span>
         </div>
+        <div class="flex gap-2">
+          <button
+            class="text-lg size-8 text-white hover:bg-white hover:text-info transition-all px-1 py-0.5 rounded-full"
+            @click="orderProductsToClipboard"
+          >
+            <i class="ri-info-card-fill"></i>
+          </button>
+          <button
+            :disabled="disabledPixCodeButton"
+            class="text-lg size-8 text-white hover:bg-white hover:text-info transition-all px-1 py-0.5 rounded-full disabled:opacity-50 disabled:select-none disabled:pointer-events-none"
+            @click="copyPixCodeToClipboard"
+          >
+            <i class="ri-pix-fill"></i>
+          </button>
+          <button
+            :disabled="paymentForm != 3"
+            class="text-lg size-8 text-white hover:bg-white hover:text-info transition-all px-1 py-0.5 rounded-full disabled:opacity-50 disabled:select-none disabled:pointer-events-none"
+            @click="qrCodeToClipboard"
+          >
+            <i class="ri-qr-code-fill"></i>
+          </button>
+        </div>
       </button>
     </div>
     <div
@@ -82,7 +130,12 @@ const orderProductsToClipboard = () => {
       <Separator label="Detalhes" class="z-100 my-1" />
       <SelectPayment
         :default="payload.formaPagamento.toString()"
-        @update:payment-form="$emit('update:paymentForm', $event)"
+        @update:payment-form="
+          (event) => {
+            paymentForm = event;
+            emit('update:paymentForm', event);
+          }
+        "
       />
       <Separator orientation="vertical" class="" />
       <ExchangeInput

@@ -3,7 +3,6 @@ import { toast } from "vue-sonner";
 import { MoneyUtil, StringUtil, OrderUtil, DateUtil } from "@/util";
 import { PAYMENT_METHODS } from "./Constants";
 import { usePixQrGenerator, generatePixPayload } from "@/composables/usePixQrGenerator";
-import QRCode from "qrcode";
 
 /**
  * Converts a Data URL to a Blob.
@@ -205,7 +204,7 @@ ${order.obs ? `obs: ${order.obs}` : ""}
  * @param {string} pix_key - A chave Pix para gerar o código "copia e cola".
  * @returns {Promise<boolean>} - Resolve para true se for bem-sucedido.
  */
-export async function orderProductsToClipboard(payload, products, pix_key) {
+export async function orderProductsToClipboard(payload, products) {
     try {
         const { toCurrency } = MoneyUtil.formatMoney();
 
@@ -234,25 +233,6 @@ export async function orderProductsToClipboard(payload, products, pix_key) {
         // Base do texto para clipboard
         let clipboardText = `${header}${productsText}${paymentInfo}${total}${footer}`;
 
-        // Se tiver chave Pix, adiciona o código "copia e cola"
-        if (pix_key) {
-            // Gera o payload Pix "código copia e cola" usando generatePixPayload
-            const formatAmount = (amountStr) => {
-                const cleaned = amountStr.replace(/[^\d,]/g, "").replace(",", ".");
-                return parseFloat(cleaned).toFixed(2);
-            };
-            const formattedAmount = formatAmount(toCurrency(payload.totalProdutos));
-            const pixPayload = generatePixPayload({
-                pixKey: pix_key,
-                amount: formattedAmount,
-                merchantName: "ALCALINA COMERCIO DE AGUA MINERAL EIRELI",
-                merchantCity: "JERICO",
-                txid: "*",
-            });
-
-            // Adiciona a mensagem do QR Code e o payload Pix ao texto do clipboard
-            clipboardText = `${header}${productsText}${paymentInfo}${total}\n\n*Código para pagamento, copia e cola*\n${pixPayload}\n${footer}`;
-        }
 
         // Copia apenas o texto para a área de transferência
         await navigator.clipboard.writeText(clipboardText);
@@ -262,6 +242,58 @@ export async function orderProductsToClipboard(payload, products, pix_key) {
     } catch (error) {
         console.error("Erro ao copiar detalhes do pedido para a área de transferência:", error);
         toast.error("Erro ao copiar os detalhes do pedido");
+        return false;
+    }
+}
+
+/**
+ * Copia somente o código Pix "copia e cola" para a área de transferência.
+ * Esta função gera o payload Pix de acordo com as especificações do Banco Central do Brasil
+ * e o copia como texto simples para a área de transferência.
+ *
+ * @param {Object} payload - O payload do pedido contendo as informações de pagamento.
+ * @param {number} payload.totalProdutos - O valor total dos produtos para o pagamento.
+ * @param {string} pix_key - A chave Pix (CPF, CNPJ, email, telefone ou UUID) para gerar o código.
+ * @returns {Promise<boolean>} - Resolve para true se o código Pix foi copiado com sucesso, false se não houver chave Pix.
+ */
+export async function copyPixCodeToClipboard(payload, pix_key) {
+    try {
+        // Se não houver chave Pix, retorna false imediatamente
+        if (!pix_key) {
+            toast.error("Chave Pix não fornecida. Impossível gerar código de pagamento.");
+            return false;
+        }
+
+        const { toCurrency } = MoneyUtil.formatMoney();
+
+        // Formata o valor para o padrão do Pix (com ponto decimal)
+        const formatAmount = (amountStr) => {
+            // Remove símbolos de moeda e converte vírgula para ponto decimal
+            const cleaned = amountStr.replace(/[^\d,]/g, "").replace(",", ".");
+            return parseFloat(cleaned).toFixed(2);
+        };
+
+        // Formata o valor do pagamento e gera o payload Pix
+        const formattedAmount = formatAmount(toCurrency(payload.totalProdutos));
+        const pixPayload = generatePixPayload({
+            pixKey: pix_key,
+            amount: formattedAmount,
+            merchantName: "ALCALINA COMERCIO DE AGUA MINERAL EIRELI",
+            merchantCity: "JERICO",
+            txid: "*",
+        });
+
+        // Copia apenas o código Pix para a área de transferência
+        await navigator.clipboard.writeText(pixPayload);
+        toast.info("Código de pagamento Pix copiado para a área de transferência");
+
+        // Log para debugging se necessário
+        console.info("Código Pix copiado:", pixPayload);
+
+        return true;
+    } catch (error) {
+        console.error("Erro ao copiar código Pix para a área de transferência:", error);
+        toast.error("Erro ao copiar o código de pagamento Pix");
         return false;
     }
 }
@@ -432,37 +464,6 @@ export function productsToClipboard(products) {
     } catch (error) {
         console.error("Erro ao copiar lista de produtos para a área de transferência:", error);
         toast.error("Erro ao copiar a lista de produtos");
-        return false;
-    }
-}
-
-/**
- * Copies the Pix "código copia e cola" to the clipboard.
- * This function generates the Pix payload string according to the official guidelines
- * and copies it as plain text. The payload remains in Brazilian Portuguese.
- *
- * @param {Object} params - The parameters for generating the Pix code.
- * @param {string} params.pixKey - A chave Pix (CPF, CNPJ, email, telefone ou UUID).
- * @param {string} params.amount - O valor da transação (ex: "R$ 26,00").
- * @param {string} [params.merchantName="COMERCIO TESTE"] - O nome do estabelecimento.
- * @param {string} [params.merchantCity="BRASILIA"] - A cidade do estabelecimento.
- * @param {string} [params.txid="*"] - O identificador da transação.
- * @returns {Promise<boolean>} - Resolves to true if the Pix code was copied successfully.
- */
-export async function copyPixCodeToClipboard({ pixKey, amount, merchantName = "COMERCIO TESTE", merchantCity = "BRASILIA", txid = "*" }) {
-    try {
-        const formatAmount = (amountStr) => {
-            const cleaned = amountStr.replace(/[^\d,]/g, "").replace(",", ".");
-            return parseFloat(cleaned).toFixed(2);
-        };
-        const formattedAmount = formatAmount(amount);
-        const pixPayload = generatePixPayload({ pixKey, amount: formattedAmount, merchantName, merchantCity, txid });
-        await navigator.clipboard.writeText(pixPayload);
-        toast.info("Código Pix copia e cola copiado para a área de transferência", { position: "top-center" });
-        return true;
-    } catch (error) {
-        console.error("Erro ao copiar o código Pix para a área de transferência", error);
-        toast.error("Erro ao copiar o código Pix");
         return false;
     }
 }

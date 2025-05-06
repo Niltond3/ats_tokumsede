@@ -112,6 +112,9 @@ export function useProductRegistration() {
                     ...product,
                     nome: StringUtil.utf8Decode(product.nome),
                 }));
+            },
+            (err)=>{
+                console.log(err)
             }
         );
     };

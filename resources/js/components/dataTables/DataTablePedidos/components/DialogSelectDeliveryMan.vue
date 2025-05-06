@@ -12,7 +12,7 @@ import { StringUtil } from '@/util';
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
 import { dialogState } from '@/composables/useToggleDialog';
 
-defineProps({
+const props = defineProps({
   entregadores: { type: Array, required: true },
   dropdown: { type: Boolean, required: false, default: true },
 });
@@ -29,6 +29,8 @@ const handleDeliveryManSelected = (deliveryMan) => {
 const handleDialogOpen = (op) => {
   !op && emits('update:dialogOpen', op);
   toggleDialog();
+  console.log(props.entregadores);
+  console.log(op);
 };
 </script>
 

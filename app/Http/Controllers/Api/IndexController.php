@@ -298,12 +298,15 @@ class IndexController extends Controller
 						$produtos = Preco::selectRaw("preco.*, produto.id as idProd, produto.nome as nome, produto.descricao as descricao, produto.img as img, categoria.nome as categoria, estoque.id as idEstoque")
     ->join("produto", "produto.id", "=", "preco.idProduto")
     ->join("categoria", "categoria.id", "=", "produto.idCategoria")
-    ->join("estoque", "estoque.id", "=", "preco.idEstoque")
+    ->join('estoque', function($join) use ($effectiveDistributorId) {
+            $join->on('estoque.idProduto', '=', 'produto.id')
+                 ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
+        })
     ->where("produto.status", Produto::ATIVO) // Filtra apenas produtos ativos
-    ->whereRaw(
-        "preco.status = ".Preco::ATIVO."
-        AND preco.idDistribuidor = ".$effectiveDistributorId.
-        " AND estoque.quantidade >= 1 ")
+    ->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$effectiveDistributorId.
+        " AND estoque.quantidade >= 1 ".
+        " AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
+        " AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
     ->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
     ->get();
 
@@ -623,8 +626,13 @@ class IndexController extends Controller
 				$produtos = Preco::selectRaw("preco.*, produto.id as idProd, produto.nome as nome, produto.descricao as descricao, produto.img as img, categoria.nome as categoria, estoque.id as idEstoque")
 					->Join("produto", 'produto.id', '=', 'preco.idProduto')
 					->Join('categoria', 'categoria.id', '=', 'produto.idCategoria')
-					->Join('estoque', 'estoque.id', '=', 'preco.idEstoque')
-					->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$effectiveDistributorId. " AND estoque.quantidade >= 1 ")
+					->Join('estoque', function($join) use ($effectiveDistributorId) {
+            $join->on('estoque.idProduto', '=', 'produto.id')
+                 ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
+        })
+					->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$idDistribuidor. " AND estoque.quantidade >= 1 ".
+					" AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
+					" AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
 					->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
 					->get();
 

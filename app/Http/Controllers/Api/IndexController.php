@@ -75,20 +75,7 @@ class IndexController extends Controller
      */
     private function getEffectiveDistributorId($distributorId)
     {
-        // Ensure Distribuidor model is correctly namespaced and available
         $distributor = Distribuidor::find($distributorId);
-
-        // Handle case where distributor might not be found, though original code doesn't show this.
-        if (!$distributor) {
-            // Log an error or throw an exception, or return $distributorId as a fallback.
-            // For now, mirroring the potential direct usage from produtoController:
-            // Debugbar::warning("Distribuidor with ID {$distributorId} not found in getEffectiveDistributorId.");
-            return $distributorId; // Fallback to the provided ID if not found
-        }
-
-        // Assumes getMainDistributorIdAttribute() is an accessor on your Distribuidor model
-        // like: public function getGetMainDistributorIdAttribute() { /* logic */ }
-        // Or it could be a direct property: $distributor->idUnidadePai or similar.
         return $distributor->getMainDistributorIdAttribute() ?? $distributorId;
     }
     function verificaPedidoAlterado(Request $request){
@@ -236,7 +223,7 @@ class IndexController extends Controller
         " AND estoque.quantidade >= 1 ".
         " AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
         " AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
-    ->orderByRaw("preco.id DESC, categoria.nome ASC, produto.nome, preco.qtdMin ASC")
+    ->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
     ->get();
 
 						if(count($produtos)){
@@ -562,7 +549,7 @@ class IndexController extends Controller
 					->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$idDistribuidor. " AND estoque.quantidade >= 1 ".
 					" AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
 					" AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
-					->orderByRaw("preco.id DESC, categoria.nome ASC, produto.nome, preco.qtdMin ASC")
+					->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
 					->get();
 
 				if(count($produtos)){

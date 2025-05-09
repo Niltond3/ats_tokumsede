@@ -14,6 +14,7 @@ use App\Models\Feriado;
 use App\Models\Administrador;
 use App\Models\ClientePotencial;
 use App\Models\Distribuidor;
+use App\Models\Categoria;
 use App\Models\Composicao;
 use App\Models\Produto;
 use App\Models\Estoque;
@@ -64,36 +65,7 @@ class IndexController extends Controller
     {
         //
     }
-
-    function verificaPedidoAlterado(Request $request){
-
-		$idCliente = $request->idCliente;
-		$cliente = Cliente::find($idCliente);
-
-		if($cliente){
-			$pedidos = Pedido::select("pedido.*")
-						->leftJoin('enderecoCliente', 'enderecoCliente.id', '=', 'pedido.idEndereco')
-						->leftJoin('cliente', 'cliente.id', '=', 'enderecoCliente.idCliente')
-						->where([["statusChange","1"],['cliente.id',$idCliente]])
-						->get();
-			if(count($pedidos)){
-				foreach($pedidos as $p){
-					$this->gcmSend($cliente->regId, $idCliente, $p["id"], $p["status"], $p["retorno"], $p["origem"], false);
-				}
-			}
-		}
-
-	}
-
-    function verificaEmail(Request $request) {
-
-        $users = Cliente::where([['email',$request->email],['status',Cliente::ATIVO]])->get();
-
-		$out["qtd"] = count($users);
-		echo json_encode($out);
-
-    }
-/**
+    /**
      * Retrieves active products for a given distributor, mirroring the original
      * indexController.php query structure and logic, but using a more
      * structured Query Builder approach.
@@ -123,44 +95,32 @@ class IndexController extends Controller
                 'categoria.nome as categoria',
                 'estoque.id as idEstoque'
             ])
-            ->join('produto', 'produto.id', '=', 'preco.idProduto')
-            ->join('categoria', 'categoria.id', '=', 'produto.idCategoria')
+            ->leftJoin('produto', 'produto.id', '=', 'preco.idProduto')            ->leftJoin('categoria', 'categoria.id', '=', 'produto.idCategoria')
             // The original join for estoque was on preco.idEstoque = estoque.id.
             // This implies that the preco table already has the correct estoque reference.
-            ->join('estoque', 'estoque.id', '=', 'preco.idEstoque')
+            ->leftJoin('estoque', function($join) use ($effectiveDistributorId) {
+            $join->on('estoque.idProduto', '=', 'produto.id')
+                 ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
+        })
 
             // Conditions from the original query
             ->where('produto.status', Produto::ATIVO) // Assuming Produto::ATIVO is defined
             ->where('preco.status', Preco::ATIVO)     // Assuming Preco::ATIVO is defined
             // Use the effectiveDistributorId for filtering by distributor
             ->where('preco.idDistribuidor', $effectiveDistributorId)
-            ->where('estoque.quantidade', '>=', 1)
+            ->where('estoque.quantidade', '>=', 0)
             ->whereNull('preco.idCliente')
 
-            // Date validity conditions
-            ->where(function ($q) {
-                $q->whereNull('preco.inicioValidade')
-                  ->orWhere('preco.inicioValidade', '<=', DB::raw('CURDATE()'));
-            })
-            ->where(function ($q) {
-                $q->whereNull('preco.fimValidade')
-                  ->orWhere('preco.fimValidade', '>=', DB::raw('CURDATE()')); // Original was >=
-            })
-
-            // Time validity conditions
-            ->where(function ($q) {
-                $q->whereNull('preco.inicioHora')
-                  ->orWhere('preco.inicioHora', '<=', DB::raw('CURTIME()'));
-            })
-            ->where(function ($q) {
-                $q->whereNull('preco.fimHora')
-                  ->orWhere('preco.fimHora', '>', DB::raw('CURTIME()')); // Original was >
-            })
-
             // Ordering from the original query
-            ->orderBy('categoria.nome', 'ASC')
-            ->orderBy('produto.nome', 'ASC') // Default is ASC, can be explicit
-            ->orderBy('preco.qtdMin', 'ASC');
+           ->orderByRaw("CASE
+            WHEN produto.nome LIKE '%Alkalina%' THEN 1
+            WHEN produto.nome LIKE '%20L%' THEN 2
+            ELSE 3
+        END")
+        ->orderBy('produto.nome')
+        ->orderBy('produto.id')
+        ->orderBy('preco.valor')
+        ->orderBy('preco.qtdMin');
 
         return $query->get();
     }
@@ -191,22 +151,35 @@ class IndexController extends Controller
         // Or it could be a direct property: $distributor->idUnidadePai or similar.
         return $distributor->getMainDistributorIdAttribute() ?? $distributorId;
     }
+    function verificaPedidoAlterado(Request $request){
 
-    // Example of how you might call it in one of your public methods
-    public function showProductsPage()
-    {
-        // Assuming $idDistribuidor is available, e.g., from session, route param, or auth user
-        $idDistribuidor = auth()->user()->distribuidor_id; // Example
+		$idCliente = $request->idCliente;
+		$cliente = Cliente::find($idCliente);
 
-        $produtos = $this->getActiveProducts($idDistribuidor);
+		if($cliente){
+			$pedidos = Pedido::select("pedido.*")
+						->leftJoin('enderecoCliente', 'enderecoCliente.id', '=', 'pedido.idEndereco')
+						->leftJoin('cliente', 'cliente.id', '=', 'enderecoCliente.idCliente')
+						->where([["statusChange","1"],['cliente.id',$idCliente]])
+						->get();
+			if(count($pedidos)){
+				foreach($pedidos as $p){
+					$this->gcmSend($cliente->regId, $idCliente, $p["id"], $p["status"], $p["retorno"], $p["origem"], false);
+				}
+			}
+		}
 
-        // Your original query was also assigning to $produtos, so this continues that pattern.
-        // You might have a different variable name in the original first line:
-        // $produtosFromOriginalMethod = $this->getActiveProducts($idDistribuidor);
+	}
 
-        return view('index.products', compact('produtos')); // Or however you use it
+    function verificaEmail(Request $request) {
+
+        $users = Cliente::where([['email',$request->email],['status',Cliente::ATIVO]])->get();
+
+		$out["qtd"] = count($users);
+		echo json_encode($out);
+
     }
-}
+
     function consultaInicial(Request $request){//$clie == null
 		$idCliente  = $request->idCliente;
 		$system 	= $request->system;
@@ -309,7 +282,7 @@ class IndexController extends Controller
 
 						$idDistribuidor = $distribuidores[$indexDistribuidor]["tipoDistribuidor"]=="revendedor"?$distribuidores[$indexDistribuidor]["idDistribuidor"]:$distribuidores[$indexDistribuidor]["id"];
 
-						$produtos =  $this->getActiveProducts($idDistribuidor);
+						$produtos = $this->getActiveProducts($idDistribuidor);
 
 						if(count($produtos)){
 							//MONTA JSON DE PRODUTOS
@@ -622,7 +595,7 @@ class IndexController extends Controller
 
 				$idDistribuidor = $distribuidores[$indexDistribuidor]["tipoDistribuidor"]=="revendedor"?$distribuidores[$indexDistribuidor]["idDistribuidor"]:$distribuidores[$indexDistribuidor]["id"];
 
-				$produtos =  $this->getActiveProducts($idDistribuidor);
+				$produtos = $this->getActiveProducts($idDistribuidor);
 
 				if(count($produtos)){
 					//MONTA JSON DE PRODUTOS

@@ -300,10 +300,10 @@ class IndexController extends Controller
     ->join("categoria", "categoria.id", "=", "produto.idCategoria")
     ->join("estoque", "estoque.id", "=", "preco.idEstoque")
     ->where("produto.status", Produto::ATIVO) // Filtra apenas produtos ativos
-    ->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$effectiveDistributorId.
-        " AND estoque.quantidade >= 1 ".
-        " AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
-        " AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
+    ->whereRaw(
+        "preco.status = ".Preco::ATIVO."
+        AND preco.idDistribuidor = ".$effectiveDistributorId.
+        " AND estoque.quantidade >= 1 ")
     ->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
     ->get();
 
@@ -624,9 +624,7 @@ class IndexController extends Controller
 					->Join("produto", 'produto.id', '=', 'preco.idProduto')
 					->Join('categoria', 'categoria.id', '=', 'produto.idCategoria')
 					->Join('estoque', 'estoque.id', '=', 'preco.idEstoque')
-					->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$effectiveDistributorId. " AND estoque.quantidade >= 1 ".
-					" AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
-					" AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
+					->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$effectiveDistributorId. " AND estoque.quantidade >= 1 ")
 					->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
 					->get();
 

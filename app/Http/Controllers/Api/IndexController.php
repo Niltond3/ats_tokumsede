@@ -296,8 +296,8 @@ class IndexController extends Controller
                         $effectiveDistributorId = $this->getEffectiveDistributorId($idDistribuidor);
 
 						$produtos = Preco::selectRaw("preco.*, produto.id as idProd, produto.nome as nome, produto.descricao as descricao, produto.img as img, categoria.nome as categoria, estoque.id as idEstoque")
-    ->join("produto", "produto.id", "=", "preco.idProduto")
-    ->join("categoria", "categoria.id", "=", "produto.idCategoria")
+    ->leftJoin("produto", "produto.id", "=", "preco.idProduto")
+    ->leftJoin("categoria", "categoria.id", "=", "produto.idCategoria")
     ->leftJoin('estoque', function($join) use ($effectiveDistributorId) {
             $join->on('estoque.idProduto', '=', 'produto.id')
                  ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
@@ -624,8 +624,8 @@ class IndexController extends Controller
                 $effectiveDistributorId = $this->getEffectiveDistributorId($idDistribuidor);
 
 				$produtos = Preco::selectRaw("preco.*, produto.id as idProd, produto.nome as nome, produto.descricao as descricao, produto.img as img, categoria.nome as categoria, estoque.id as idEstoque")
-					->Join("produto", 'produto.id', '=', 'preco.idProduto')
-					->Join('categoria', 'categoria.id', '=', 'produto.idCategoria')
+					->leftJoin("produto", 'produto.id', '=', 'preco.idProduto')
+					->leftJoin('categoria', 'categoria.id', '=', 'produto.idCategoria')
 					->leftJoin('estoque', function($join) use ($effectiveDistributorId) {
                         $join->on('estoque.idProduto', '=', 'produto.id')
                         ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);

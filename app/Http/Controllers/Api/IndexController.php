@@ -64,77 +64,6 @@ class IndexController extends Controller
     {
         //
     }
-    /**
-     * Retrieves active products for a given distributor, mirroring the original
-     * indexController.php query structure and logic, but using a more
-     * structured Query Builder approach.
-     *
-     * @param int $distribuidorId
-     * @return \Illuminate\Support\Collection
-     */
-    private function getActiveProducts($distribuidorId)
-    {
-        // Debugbar::info("IndexController - getActiveProducts - Distribuidor ID: " . $distribuidorId);
-
-        // Use the effective distributor ID logic
-        $effectiveDistributorId = $this->getEffectiveDistributorId($distribuidorId);
-        // Debugbar::info("IndexController - getActiveProducts - Effective Distribuidor ID: " . $effectiveDistributorId);
-
-
-        // Start with DB::table('preco') or Preco::query()
-        // Using DB::table() for closer structural similarity to produtoController,
-        // but Preco::query() would also work and might be slightly more Eloquent-idiomatic.
-        $query = DB::table('preco')
-            ->select([
-                'preco.*', // Selects all columns from preco
-                'produto.id as idProd',
-                'produto.nome as nome',
-                'produto.descricao as descricao',
-                'produto.img as img',
-                'categoria.nome as categoria',
-                'estoque.id as idEstoque'
-            ])
-            ->join('produto', 'produto.id', '=', 'preco.idProduto')
-            ->join('categoria', 'categoria.id', '=', 'produto.idCategoria')
-            // The original join for estoque was on preco.idEstoque = estoque.id.
-            // This implies that the preco table already has the correct estoque reference.
-            ->join('estoque', 'estoque.id', '=', 'preco.idEstoque')
-
-            // Conditions from the original query
-            ->where('produto.status', Produto::ATIVO) // Assuming Produto::ATIVO is defined
-            ->where('preco.status', Preco::ATIVO)     // Assuming Preco::ATIVO is defined
-            // Use the effectiveDistributorId for filtering by distributor
-            ->where('preco.idDistribuidor', $effectiveDistributorId)
-            ->where('estoque.quantidade', '>=', 1)
-            ->whereNull('preco.idCliente')
-
-            // Date validity conditions
-            ->where(function ($q) {
-                $q->whereNull('preco.inicioValidade')
-                  ->orWhere('preco.inicioValidade', '<=', DB::raw('CURDATE()'));
-            })
-            ->where(function ($q) {
-                $q->whereNull('preco.fimValidade')
-                  ->orWhere('preco.fimValidade', '>=', DB::raw('CURDATE()')); // Original was >=
-            })
-
-            // Time validity conditions
-            ->where(function ($q) {
-                $q->whereNull('preco.inicioHora')
-                  ->orWhere('preco.inicioHora', '<=', DB::raw('CURTIME()'));
-            })
-            ->where(function ($q) {
-                $q->whereNull('preco.fimHora')
-                  ->orWhere('preco.fimHora', '>', DB::raw('CURTIME()')); // Original was >
-            })
-
-            // Ordering from the original query
-            ->orderBy('categoria.nome', 'ASC')
-            ->orderBy('produto.nome', 'ASC') // Default is ASC, can be explicit
-            ->orderBy('preco.qtdMin', 'ASC');
-
-        return $query->get();
-    }
 
     /**
      * Get the effective distributor ID.
@@ -307,7 +236,7 @@ class IndexController extends Controller
         " AND estoque.quantidade >= 1 ".
         " AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
         " AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
-    ->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
+    ->orderByRaw("preco.id DESC, categoria.nome ASC, produto.nome, preco.qtdMin ASC")
     ->get();
 
 						if(count($produtos)){
@@ -633,7 +562,7 @@ class IndexController extends Controller
 					->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$idDistribuidor. " AND estoque.quantidade >= 1 ".
 					" AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
 					" AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
-					->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
+					->orderByRaw("preco.id DESC, categoria.nome ASC, produto.nome, preco.qtdMin ASC")
 					->get();
 
 				if(count($produtos)){

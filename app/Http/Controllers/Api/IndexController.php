@@ -95,10 +95,11 @@ class IndexController extends Controller
                 'categoria.nome as categoria',
                 'estoque.id as idEstoque'
             ])
-            ->leftJoin('produto', 'produto.id', '=', 'preco.idProduto')            ->leftJoin('categoria', 'categoria.id', '=', 'produto.idCategoria')
+            ->join('produto', 'produto.id', '=', 'preco.idProduto')
+            ->join('categoria', 'categoria.id', '=', 'produto.idCategoria')
             // The original join for estoque was on preco.idEstoque = estoque.id.
             // This implies that the preco table already has the correct estoque reference.
-            ->leftJoin('estoque', function($join) use ($effectiveDistributorId) {
+            ->join('estoque', function($join) use ($effectiveDistributorId) {
             $join->on('estoque.idProduto', '=', 'produto.id')
                  ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
         })

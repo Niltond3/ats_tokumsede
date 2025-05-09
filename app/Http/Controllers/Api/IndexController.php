@@ -93,7 +93,120 @@ class IndexController extends Controller
 		echo json_encode($out);
 
     }
+/**
+     * Retrieves active products for a given distributor, mirroring the original
+     * indexController.php query structure and logic, but using a more
+     * structured Query Builder approach.
+     *
+     * @param int $distribuidorId
+     * @return \Illuminate\Support\Collection
+     */
+    private function getActiveProducts($distribuidorId)
+    {
+        // Debugbar::info("IndexController - getActiveProducts - Distribuidor ID: " . $distribuidorId);
 
+        // Use the effective distributor ID logic
+        $effectiveDistributorId = $this->getEffectiveDistributorId($distribuidorId);
+        // Debugbar::info("IndexController - getActiveProducts - Effective Distribuidor ID: " . $effectiveDistributorId);
+
+
+        // Start with DB::table('preco') or Preco::query()
+        // Using DB::table() for closer structural similarity to produtoController,
+        // but Preco::query() would also work and might be slightly more Eloquent-idiomatic.
+        $query = DB::table('preco')
+            ->select([
+                'preco.*', // Selects all columns from preco
+                'produto.id as idProd',
+                'produto.nome as nome',
+                'produto.descricao as descricao',
+                'produto.img as img',
+                'categoria.nome as categoria',
+                'estoque.id as idEstoque'
+            ])
+            ->join('produto', 'produto.id', '=', 'preco.idProduto')
+            ->join('categoria', 'categoria.id', '=', 'produto.idCategoria')
+            // The original join for estoque was on preco.idEstoque = estoque.id.
+            // This implies that the preco table already has the correct estoque reference.
+            ->join('estoque', 'estoque.id', '=', 'preco.idEstoque')
+
+            // Conditions from the original query
+            ->where('produto.status', Produto::ATIVO) // Assuming Produto::ATIVO is defined
+            ->where('preco.status', Preco::ATIVO)     // Assuming Preco::ATIVO is defined
+            // Use the effectiveDistributorId for filtering by distributor
+            ->where('preco.idDistribuidor', $effectiveDistributorId)
+            ->where('estoque.quantidade', '>=', 1)
+            ->whereNull('preco.idCliente')
+
+            // Date validity conditions
+            ->where(function ($q) {
+                $q->whereNull('preco.inicioValidade')
+                  ->orWhere('preco.inicioValidade', '<=', DB::raw('CURDATE()'));
+            })
+            ->where(function ($q) {
+                $q->whereNull('preco.fimValidade')
+                  ->orWhere('preco.fimValidade', '>=', DB::raw('CURDATE()')); // Original was >=
+            })
+
+            // Time validity conditions
+            ->where(function ($q) {
+                $q->whereNull('preco.inicioHora')
+                  ->orWhere('preco.inicioHora', '<=', DB::raw('CURTIME()'));
+            })
+            ->where(function ($q) {
+                $q->whereNull('preco.fimHora')
+                  ->orWhere('preco.fimHora', '>', DB::raw('CURTIME()')); // Original was >
+            })
+
+            // Ordering from the original query
+            ->orderBy('categoria.nome', 'ASC')
+            ->orderBy('produto.nome', 'ASC') // Default is ASC, can be explicit
+            ->orderBy('preco.qtdMin', 'ASC');
+
+        return $query->get();
+    }
+
+    /**
+     * Get the effective distributor ID.
+     * This might be the ID of a main distributor if the current one is part of a union.
+     * This method should be identical to the one in produtoController.php or moved to a Trait/BaseController.
+     *
+     * @param int $distributorId
+     * @return int
+     */
+    private function getEffectiveDistributorId($distributorId)
+    {
+        // Ensure Distribuidor model is correctly namespaced and available
+        $distributor = Distribuidor::find($distributorId);
+
+        // Handle case where distributor might not be found, though original code doesn't show this.
+        if (!$distributor) {
+            // Log an error or throw an exception, or return $distributorId as a fallback.
+            // For now, mirroring the potential direct usage from produtoController:
+            // Debugbar::warning("Distribuidor with ID {$distributorId} not found in getEffectiveDistributorId.");
+            return $distributorId; // Fallback to the provided ID if not found
+        }
+
+        // Assumes getMainDistributorIdAttribute() is an accessor on your Distribuidor model
+        // like: public function getGetMainDistributorIdAttribute() { /* logic */ }
+        // Or it could be a direct property: $distributor->idUnidadePai or similar.
+        return $distributor->getMainDistributorIdAttribute() ?? $distributorId;
+    }
+
+    // Example of how you might call it in one of your public methods
+    public function showProductsPage()
+    {
+        // Assuming $idDistribuidor is available, e.g., from session, route param, or auth user
+        $idDistribuidor = auth()->user()->distribuidor_id; // Example
+
+        $produtos = $this->getActiveProducts($idDistribuidor);
+
+        // Your original query was also assigning to $produtos, so this continues that pattern.
+        // You might have a different variable name in the original first line:
+        // $produtosFromOriginalMethod = $this->getActiveProducts($idDistribuidor);
+
+        return view('index.products', compact('produtos')); // Or however you use it
+    }
+}
     function consultaInicial(Request $request){//$clie == null
 		$idCliente  = $request->idCliente;
 		$system 	= $request->system;
@@ -196,17 +309,7 @@ class IndexController extends Controller
 
 						$idDistribuidor = $distribuidores[$indexDistribuidor]["tipoDistribuidor"]=="revendedor"?$distribuidores[$indexDistribuidor]["idDistribuidor"]:$distribuidores[$indexDistribuidor]["id"];
 
-						$produtos = Preco::selectRaw("preco.*, produto.id as idProd, produto.nome as nome, produto.descricao as descricao, produto.img as img, categoria.nome as categoria, estoque.id as idEstoque")
-    ->join("produto", "produto.id", "=", "preco.idProduto")
-    ->join("categoria", "categoria.id", "=", "produto.idCategoria")
-    ->join("estoque", "estoque.id", "=", "preco.idEstoque")
-    ->where("produto.status", Produto::ATIVO) // Filtra apenas produtos ativos
-    ->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$idDistribuidor.
-        " AND estoque.quantidade >= 1 ".
-        " AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
-        " AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
-    ->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
-    ->get();
+						$produtos =  $this->getActiveProducts($idDistribuidor);
 
 						if(count($produtos)){
 							//MONTA JSON DE PRODUTOS
@@ -519,15 +622,7 @@ class IndexController extends Controller
 
 				$idDistribuidor = $distribuidores[$indexDistribuidor]["tipoDistribuidor"]=="revendedor"?$distribuidores[$indexDistribuidor]["idDistribuidor"]:$distribuidores[$indexDistribuidor]["id"];
 
-				$produtos = Preco::selectRaw("preco.*, produto.id as idProd, produto.nome as nome, produto.descricao as descricao, produto.img as img, categoria.nome as categoria, estoque.id as idEstoque")
-					->Join("produto", 'produto.id', '=', 'preco.idProduto')
-					->Join('categoria', 'categoria.id', '=', 'produto.idCategoria')
-					->Join('estoque', 'estoque.id', '=', 'preco.idEstoque')
-					->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$idDistribuidor. " AND estoque.quantidade >= 1 ".
-					" AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
-					" AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
-					->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
-					->get();
+				$produtos =  $this->getActiveProducts($idDistribuidor);
 
 				if(count($produtos)){
 					//MONTA JSON DE PRODUTOS

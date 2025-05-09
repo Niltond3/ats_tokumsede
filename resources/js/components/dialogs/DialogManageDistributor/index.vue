@@ -173,7 +173,6 @@ const handleNext = async (values, nextStep, setErrors) => {
   if (result.success) {
     nextStep();
   } else {
-    // Aqui você pode integrar a exibição dos erros se desejar
     console.log(result.error.flatten());
     console.log(result.error.issues);
     const formErrors = {};

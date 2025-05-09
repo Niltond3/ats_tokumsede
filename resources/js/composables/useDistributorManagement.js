@@ -126,6 +126,7 @@ export function useDistributorManagement() {
 
     // Função para submeter (criar ou atualizar) os dados do distribuidor
     const onSubmit = async (values) => {
+        console.log(values)
         if (distributorDetails.value && distributorDetails.value.id) {
             renderToast(
                 updateDistributor(distributorDetails.value.id, values),

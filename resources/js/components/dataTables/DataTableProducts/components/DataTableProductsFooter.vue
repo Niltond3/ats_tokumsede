@@ -7,7 +7,6 @@ import ExchangeInput from '@/components/orderComponents/ExchangeInput.vue';
 import DateTimePicker from '@/components/orderComponents/DateTimePicker.vue';
 import { MoneyUtil, DateUtil, ClipboardUtil } from '@/util';
 import { computed, ref, watch } from 'vue';
-import { event } from 'jquery';
 
 const props = defineProps({
   pix_key: String,
@@ -22,19 +21,11 @@ const paymentForm = ref(1);
 const disabledPixCodeButton = ref(props.disabledButton && paymentForm.value != 3);
 
 watch(
-  () => props.disabledButton,
-  (value) => {
-    console.log(disabledPixCodeButton);
-    disabledPixCodeButton.value = props.disabledButton && paymentForm.value != 3;
-  },
-);
-
-watch(
-  () => paymentForm.value,
-  (value) => {
-    console.log(`disabledButton: ${props.disabledButton}`);
-    console.log(`paymentForm: ${value} ${value == 3}`);
-    disabledPixCodeButton.value = props.disabledButton && value == 3;
+  () => props.payload,
+  (payload) => {
+    disabledPixCodeButton.value = !(
+      props.pix_key & (payload.itens.length > 0) && payload.formaPagamento == 3
+    );
   },
 );
 
@@ -115,7 +106,7 @@ const qrCodeToClipboard = () => {
             <i class="ri-pix-fill"></i>
           </button>
           <button
-            :disabled="paymentForm != 3"
+            :disabled="disabledPixCodeButton"
             class="text-lg size-8 text-white hover:bg-white hover:text-info transition-all px-1 py-0.5 rounded-full disabled:opacity-50 disabled:select-none disabled:pointer-events-none"
             @click="qrCodeToClipboard"
           >

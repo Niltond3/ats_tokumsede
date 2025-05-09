@@ -72,8 +72,8 @@
           />
         </FormControl>
         <FormLabel>Chave PIX</FormLabel>
-        <FormDescription>
-          Aceita: CPF/CNPJ, Email, Telefone (+55), UUID ou chave aleatória
+        <FormDescription class="text-xs text-danger">
+          * Aceita: CPF/CNPJ, Email, Telefone (+55), UUID ou chave aleatória
         </FormDescription>
         <FormMessage />
       </FormItem>

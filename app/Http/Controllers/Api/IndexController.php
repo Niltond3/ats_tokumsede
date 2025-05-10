@@ -219,10 +219,16 @@ class IndexController extends Controller
                  ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
         })
     ->where("produto.status", Produto::ATIVO) // Filtra apenas produtos ativos
+    ->where(function ($query) {
+            $query->whereNull('preco.inicioValidade')
+                ->orWhere('preco.inicioValidade', '<=', DB::raw('curdate()'));
+        })
+        ->where(function ($query) {
+            $query->whereNull('preco.fimValidade')
+                ->orWhere('preco.fimValidade', '>', DB::raw('curdate()'));
+        })
     ->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$effectiveDistributorId.
-        " AND estoque.quantidade >= 1 ".
-        " AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
-        " AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
+        " AND estoque.quantidade >= 1 ")
     ->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
     ->get();
 

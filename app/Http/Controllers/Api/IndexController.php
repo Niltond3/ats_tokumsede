@@ -220,11 +220,11 @@ class IndexController extends Controller
                             categoria.nome as categoria,
                             estoque.id as idEstoque")
                             ->leftJoin("produto", "produto.id", "=", "preco.idProduto")
+                             ->leftJoin("categoria", "categoria.id", "=", "produto.idCategoria")
                             ->leftJoin('estoque', function($join) use ($effectiveDistributorId) {
                                 $join->on('estoque.idProduto', '=', 'produto.id')
                                 ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
                             })
-                            ->leftJoin("categoria", "categoria.id", "=", "produto.idCategoria")
                             ->where("produto.status", Produto::ATIVO) // Filtra apenas produtos ativos
                             ->whereRaw(
                                 "preco.status = ".Preco::ATIVO." AND
@@ -560,11 +560,11 @@ class IndexController extends Controller
                     categoria.nome as categoria,
                     estoque.id as idEstoque")
 					->leftJoin("produto", 'produto.id', '=', 'preco.idProduto')
+                    ->leftJoin('categoria', 'categoria.id', '=', 'produto.idCategoria')
                     ->leftJoin('estoque', function($join) use ($effectiveDistributorId) {
                         $join->on('estoque.idProduto', '=', 'produto.id')
                         ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
                     })
-					->leftJoin('categoria', 'categoria.id', '=', 'produto.idCategoria')
 					->whereRaw(
                         "preco.status = ".Preco::ATIVO." AND
                         preco.idDistribuidor = ".$idDistribuidor. " AND

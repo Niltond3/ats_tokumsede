@@ -218,8 +218,13 @@ class IndexController extends Controller
             $join->on('estoque.idProduto', '=', 'produto.id')
                  ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
         })
-    ->where("produto.status", Produto::ATIVO) // Filtra apenas produtos ativos
-    ->where(function ($query) {
+    ->where([
+            ['produto.status', '=', Produto::ATIVO],
+            ['preco.idDistribuidor', '=', $idDistribuidor],
+            ['preco.status', '=', 1],
+            ['estoque.quantidade', '>', 0],
+        ])
+        ->where(function ($query) {
             $query->whereNull('preco.inicioValidade')
                 ->orWhere('preco.inicioValidade', '<=', DB::raw('curdate()'));
         })
@@ -227,8 +232,6 @@ class IndexController extends Controller
             $query->whereNull('preco.fimValidade')
                 ->orWhere('preco.fimValidade', '>', DB::raw('curdate()'));
         })
-    ->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$effectiveDistributorId.
-        " AND estoque.quantidade >= 1 ")
     ->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
     ->get();
 

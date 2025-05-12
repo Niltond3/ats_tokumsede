@@ -279,33 +279,7 @@ private function getAllActiveProducts($distribuidorId)
 
 						$idDistribuidor = $distribuidores[$indexDistribuidor]["tipoDistribuidor"]=="revendedor"?$distribuidores[$indexDistribuidor]["idDistribuidor"]:$distribuidores[$indexDistribuidor]["id"];
 
-                        $effectiveDistributorId = $this->getEffectiveDistributorId($idDistribuidor);
-
 						$produtos = $this->getActiveProducts($idDistribuidor);
-
-    // ->leftJoin("produto", "produto.id", "=", "preco.idProduto")
-    // ->leftJoin("categoria", "categoria.id", "=", "produto.idCategoria")
-    // ->leftJoin('estoque', function($join) use ($effectiveDistributorId) {
-    //         $join->on('estoque.idProduto', '=', 'produto.id')
-    //              ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
-    //     })
-    // ->where([
-    //         ['produto.status', '=', Produto::ATIVO],
-    //         ['preco.idDistribuidor', '=', $effectiveDistributorId],
-    //         ['preco.status', '=', 1],
-    //         ['estoque.quantidade', '>', 0],
-    //     ])
-    //     ->where(function ($query) {
-    //         $query->whereNull('preco.inicioValidade')
-    //             ->orWhere('preco.inicioValidade', '<=', DB::raw('curdate()'));
-    //     })
-    //     ->where(function ($query) {
-    //         $query->whereNull('preco.fimValidade')
-    //             ->orWhere('preco.fimValidade', '>', DB::raw('curdate()'));
-    //     })
-    // ->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
-    // ->get();
-    //
 
 						if(count($produtos)){
 							//MONTA JSON DE PRODUTOS

@@ -84,14 +84,14 @@ class IndexController extends Controller
     // Get effective distributor ID (main distributor if in union)
     $effectiveDistributorId = $this->getEffectiveDistributorId($distribuidorId);
 
-    return Preco::selectRaw("preco.*, produto.id as idProd, produto.nome as nome, produto.descricao as descricao, produto.img as img, categoria.nome as categoria, estoque.id as idEstoque")
-    ->leftJoin("produto", "produto.id", "=", "preco.idProduto")
-    ->leftJoin("categoria", "categoria.id", "=", "produto.idCategoria")
-    ->leftJoin('estoque', function($join) use ($effectiveDistributorId) {
+    return DB::table('preco')
+        ->leftJoin('produto', 'produto.id', '=', 'preco.idProduto')
+        ->leftJoin('estoque', function($join) use ($effectiveDistributorId) {
             $join->on('estoque.idProduto', '=', 'produto.id')
                  ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
         })
-    ->where([
+        ->selectRaw("preco.*, produto.id as idProd, produto.nome as nome, produto.descricao as descricao, produto.img as img, categoria.nome as categoria, estoque.id as idEstoque")
+        ->where([
             ['produto.status', '=', Produto::ATIVO],
             ['preco.idDistribuidor', '=', $distribuidorId],
             ['preco.status', '=', 1],
@@ -105,8 +105,16 @@ class IndexController extends Controller
             $query->whereNull('preco.fimValidade')
                 ->orWhere('preco.fimValidade', '>', DB::raw('curdate()'));
         })
-    ->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
-    ->get();
+        ->orderByRaw("CASE
+            WHEN produto.nome LIKE '%Alkalina%' THEN 1
+            WHEN produto.nome LIKE '%20L%' THEN 2
+            ELSE 3
+        END")
+        ->orderBy('produto.nome')
+        ->orderBy('produto.id')
+        ->orderBy('preco.valor')
+        ->orderBy('preco.qtdMin')
+        ->get();
 }
 private function getAllActiveProducts($distribuidorId)
 {

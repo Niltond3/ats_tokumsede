@@ -65,6 +65,7 @@ class IndexController extends Controller
         //
     }
 
+
     function verificaPedidoAlterado(Request $request){
 
 		$idCliente = $request->idCliente;
@@ -121,7 +122,6 @@ private function getActiveProducts($distribuidorId)
         ])
         ->where([
             ['produto.status', '=', Produto::ATIVO],
-            ['preco.idDistribuidor', '=', $distribuidorId],
             ['preco.status', '=', 1],
             ['estoque.quantidade', '>', 0],
         ])

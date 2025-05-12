@@ -122,6 +122,7 @@ private function getActiveProducts($distribuidorId)
         ])
         ->where([
             ['produto.status', '=', Produto::ATIVO],
+            ['preco.idDistribuidor', '=', $distribuidorId],
             ['preco.status', '=', 1],
             ['estoque.quantidade', '>', 0],
         ])

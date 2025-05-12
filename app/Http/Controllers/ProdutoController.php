@@ -267,10 +267,8 @@ class ProdutoController extends Controller
             'preco.id as idPreco',
             'produto.id as idProd',
             'produto.nome as nome',
-            'produto.descricao as descricao',
             'produto.img as img',
-            'categoria.nome as categoria',
-            'estoque.id as idEstoque'
+            'produto.descricao as descricao',
         ])
         ->where([
             ['produto.status', '=', Produto::ATIVO],

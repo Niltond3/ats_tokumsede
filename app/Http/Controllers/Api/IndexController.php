@@ -220,7 +220,7 @@ class IndexController extends Controller
         })
     ->where([
             ['produto.status', '=', Produto::ATIVO],
-            ['preco.idDistribuidor', '=', $idDistribuidor],
+            ['preco.idDistribuidor', '=', $effectiveDistributorId],
             ['preco.status', '=', 1],
             ['estoque.quantidade', '>', 0],
         ])

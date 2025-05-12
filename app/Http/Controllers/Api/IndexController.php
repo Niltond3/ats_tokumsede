@@ -78,6 +78,102 @@ class IndexController extends Controller
         $distributor = Distribuidor::find($distributorId);
         return $distributor->getMainDistributorIdAttribute() ?? $distributorId;
     }
+
+    private function getActiveProducts($distribuidorId)
+{
+    // Get effective distributor ID (main distributor if in union)
+    $effectiveDistributorId = $this->getEffectiveDistributorId($distribuidorId);
+
+    return DB::table('preco')
+        ->leftJoin('produto', 'produto.id', '=', 'preco.idProduto')
+        ->leftJoin('estoque', function($join) use ($effectiveDistributorId) {
+            $join->on('estoque.idProduto', '=', 'produto.id')
+                 ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
+        })
+        ->select([
+            'preco.*',
+            'preco.id as idPreco',
+            'produto.id as idProd',
+            'produto.nome as nome',
+            'produto.img as img',
+            'produto.descricao as descricao',
+        ])
+        ->where([
+            ['produto.status', '=', Produto::ATIVO],
+            ['preco.idDistribuidor', '=', $distribuidorId],
+            ['preco.status', '=', 1],
+            ['estoque.quantidade', '>', 0],
+        ])
+        ->where(function ($query) {
+            $query->whereNull('preco.inicioValidade')
+                ->orWhere('preco.inicioValidade', '<=', DB::raw('curdate()'));
+        })
+        ->where(function ($query) {
+            $query->whereNull('preco.fimValidade')
+                ->orWhere('preco.fimValidade', '>', DB::raw('curdate()'));
+        })
+        ->orderByRaw("CASE
+            WHEN produto.nome LIKE '%Alkalina%' THEN 1
+            WHEN produto.nome LIKE '%20L%' THEN 2
+            ELSE 3
+        END")
+        ->orderBy('produto.nome')
+        ->orderBy('produto.id')
+        ->orderBy('preco.valor')
+        ->orderBy('preco.qtdMin')
+        ->get();
+}
+private function getAllActiveProducts($distribuidorId)
+{
+    $effectiveDistributorId = $this->getEffectiveDistributorId($distribuidorId);
+
+    $products = DB::table('produto')
+        ->leftJoin('preco', function($join) use ($distribuidorId) {
+            $join->on('produto.id', '=', 'preco.idProduto')
+                 ->where('preco.idDistribuidor', '=', $distribuidorId);
+        })
+        ->leftJoin('estoque', function($join) use ($effectiveDistributorId) {
+            $join->on('estoque.idProduto', '=', 'produto.id')
+                 ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
+        })
+        ->select([
+            DB::raw('COALESCE(preco.id, 0) as id'),
+            DB::raw('COALESCE(preco.idProduto, produto.id) as idProduto'),
+            DB::raw('COALESCE(preco.idDistribuidor, ' . $distribuidorId . ') as idDistribuidor'),
+            DB::raw('COALESCE(preco.idCliente, NULL) as idCliente'),
+            DB::raw('COALESCE(preco.valor, 0) as valor'),
+            DB::raw('COALESCE(preco.qtdMin, 0) as qtdMin'),
+            'preco.inicioValidade',
+            'preco.fimValidade',
+            'preco.status',
+            DB::raw('COALESCE(preco.id, 0) as idPreco'),
+            'produto.id as idProd',
+            'produto.nome as nome',
+            'produto.img as img',
+            'produto.descricao as descricao'
+        ])
+        ->where('produto.status', '=', Produto::ATIVO)
+        ->where(function ($query) {
+            $query->whereNull('preco.inicioValidade')
+                ->orWhere('preco.inicioValidade', '<=', DB::raw('curdate()'));
+        })
+        ->where(function ($query) {
+            $query->whereNull('preco.fimValidade')
+                ->orWhere('preco.fimValidade', '>', DB::raw('curdate()'));
+        })
+        ->orderByRaw("CASE
+            WHEN produto.nome LIKE '%Alkalina%' THEN 1
+            WHEN produto.nome LIKE '%20L%' THEN 2
+            ELSE 3
+        END")
+        ->orderBy('produto.nome')
+        ->orderBy('produto.id')
+        ->orderBy('preco.valor')
+        ->orderBy('preco.qtdMin')
+        ->get();
+
+    return $products;
+}
     function verificaPedidoAlterado(Request $request){
 
 		$idCliente = $request->idCliente;
@@ -211,29 +307,31 @@ class IndexController extends Controller
 
                         $effectiveDistributorId = $this->getEffectiveDistributorId($idDistribuidor);
 
-						$produtos = Preco::selectRaw("preco.*, produto.id as idProd, produto.nome as nome, produto.descricao as descricao, produto.img as img, categoria.nome as categoria, estoque.id as idEstoque")
-    ->leftJoin("produto", "produto.id", "=", "preco.idProduto")
-    ->leftJoin("categoria", "categoria.id", "=", "produto.idCategoria")
-    ->leftJoin('estoque', function($join) use ($effectiveDistributorId) {
-            $join->on('estoque.idProduto', '=', 'produto.id')
-                 ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
-        })
-    ->where([
-            ['produto.status', '=', Produto::ATIVO],
-            ['preco.idDistribuidor', '=', $effectiveDistributorId],
-            ['preco.status', '=', 1],
-            ['estoque.quantidade', '>', 0],
-        ])
-        ->where(function ($query) {
-            $query->whereNull('preco.inicioValidade')
-                ->orWhere('preco.inicioValidade', '<=', DB::raw('curdate()'));
-        })
-        ->where(function ($query) {
-            $query->whereNull('preco.fimValidade')
-                ->orWhere('preco.fimValidade', '>', DB::raw('curdate()'));
-        })
-    ->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
-    ->get();
+						$produtos = $this->getActiveProducts($idDistribuidor);
+
+    // ->leftJoin("produto", "produto.id", "=", "preco.idProduto")
+    // ->leftJoin("categoria", "categoria.id", "=", "produto.idCategoria")
+    // ->leftJoin('estoque', function($join) use ($effectiveDistributorId) {
+    //         $join->on('estoque.idProduto', '=', 'produto.id')
+    //              ->where('estoque.idDistribuidor', '=', $effectiveDistributorId);
+    //     })
+    // ->where([
+    //         ['produto.status', '=', Produto::ATIVO],
+    //         ['preco.idDistribuidor', '=', $effectiveDistributorId],
+    //         ['preco.status', '=', 1],
+    //         ['estoque.quantidade', '>', 0],
+    //     ])
+    //     ->where(function ($query) {
+    //         $query->whereNull('preco.inicioValidade')
+    //             ->orWhere('preco.inicioValidade', '<=', DB::raw('curdate()'));
+    //     })
+    //     ->where(function ($query) {
+    //         $query->whereNull('preco.fimValidade')
+    //             ->orWhere('preco.fimValidade', '>', DB::raw('curdate()'));
+    //     })
+    // ->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
+    // ->get();
+    //
 
 						if(count($produtos)){
 							//MONTA JSON DE PRODUTOS

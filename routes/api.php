@@ -34,6 +34,7 @@ Route::middleware(['throttle:60,1'])->group(function () {
         Route::get('senhaModoTeste', 'senhaModoTeste');
         Route::get('alteraEnderecoAtual', 'alteraEnderecoAtual');
         Route::get('cadastrarNovoEndereco', 'cadastrarNovoEndereco');
+        Route::get('cadastraCliente', 'cadastraCliente');
         Route::get('cancelarPedido', 'cancelarPedido');
         Route::get('pedidoRecebido', 'pedidoRecebido');
         Route::get('alteraDadosCliente', 'alteraDadosCliente');

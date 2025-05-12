@@ -65,7 +65,6 @@ class IndexController extends Controller
         //
     }
 
-
     function verificaPedidoAlterado(Request $request){
 
 		$idCliente = $request->idCliente;

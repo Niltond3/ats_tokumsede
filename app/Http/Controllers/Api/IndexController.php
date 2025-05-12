@@ -307,7 +307,7 @@ private function getAllActiveProducts($distribuidorId)
 
                         $effectiveDistributorId = $this->getEffectiveDistributorId($idDistribuidor);
 
-						$produtos = $this->getActiveProducts($idDistribuidor);
+						$produtos = $this->getAllActiveProducts($idDistribuidor);
 
     // ->leftJoin("produto", "produto.id", "=", "preco.idProduto")
     // ->leftJoin("categoria", "categoria.id", "=", "produto.idCategoria")

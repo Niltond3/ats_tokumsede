@@ -88,8 +88,7 @@ class IndexController extends Controller
 							->Join("produto", 'produto.id', '=', 'preco.idProduto')
 							->Join('categoria', 'categoria.id', '=', 'produto.idCategoria')
 							->Join('estoque', 'estoque.id', '=', 'preco.idEstoque')
-							->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$distribuidorId. " AND estoque.quantidade >= 1 ".
-							" AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
+							->whereRaw("preco.status = ".Preco::ATIVO." AND preco.idDistribuidor = ".$distribuidorId. " AND ((preco.inicioValidade IS NULL OR preco.inicioValidade <= CURDATE()) AND (preco.fimValidade IS NULL OR preco.fimValidade >= CURDATE())) ".
 							" AND ((preco.inicioHora IS NULL OR preco.inicioHora <= CURTIME()) AND (preco.fimHora IS NULL OR preco.fimHora > CURTIME())) AND preco.idCliente IS NULL")
 							->orderByRaw("categoria.nome ASC, produto.nome, preco.qtdMin ASC")
 							->get();

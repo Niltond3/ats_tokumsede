@@ -58,10 +58,10 @@ watch(
         <DialogDescription>Adicione uma observação para o pedido</DialogDescription>
       </DialogHeader>
       <Textarea
-        :model-value="note"
-        class="border rounded-md border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
-      >
-      </Textarea>
+        v-model="note"
+        placeholder="Digite sua observação aqui..."
+        class="border rounded-md border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px]"
+      />
       <DialogFooter>
         <Button
           type="submit"

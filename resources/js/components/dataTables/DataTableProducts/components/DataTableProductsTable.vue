@@ -41,7 +41,11 @@ const emits = defineEmits(['update:order-note']);
     <DialogCreateOrderNote
       v-if="obs || obs == ''"
       :order-note="props.obs"
-      @callback:order-note="(value) => emits('update:order-note', value)"
+      @callback:order-note="
+        (value) => {
+          emits('update:order-note', value);
+        }
+      "
     />
     <Table
       class="rounded-md [&_tbody]:h-[235px] [&_tbody]:table-fixed [&_tbody]:block [&_tbody]:overflow-y-auto [&_tbody]:overflow-x-hidden [&_tr]:table [&_tr]:w-full [&_tr]:table-fixed"

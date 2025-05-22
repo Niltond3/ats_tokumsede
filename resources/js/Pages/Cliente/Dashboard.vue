@@ -63,8 +63,8 @@ const fetchAddresses = () => {
         return {
           ...address,
           id,
-          value: `${utf8Decode(logradouro)}, ${numero} - ${utf8Decode(bairro)}`,
-          city: `${utf8Decode(cidade)} - ${utf8Decode(estado)}`,
+          value: `${StringUtil.utf8Decode(logradouro)}, ${numero} - ${StringUtil.utf8Decode(bairro)}`,
+          city: `${StringUtil.utf8Decode(cidade)} - ${StringUtil.utf8Decode(estado)}`,
           complement: StringUtil.utf8Decode(complemento) || '',
           referency: StringUtil.utf8Decode(referencia) || '',
         };
@@ -226,7 +226,7 @@ watch(
         :open="isOpenCreateOrderDialog"
         :toggleDialog="toggleCreateOrderDialog"
         :id-cliente-address="clientIdAddress"
-        :client-name="utf8Decode(client.nome)"
+        :client-name="StringUtil.utf8Decode(client.nome)"
         :value="value"
         @update:dataTable="(date) => (updateDataTable = date)"
       />

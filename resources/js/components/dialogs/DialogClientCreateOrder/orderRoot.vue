@@ -19,7 +19,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import { DateUtil, StringUtil } from '@/util';
+import { DateUtil, MoneyUtil, StringUtil } from '@/util';
 import { toast } from 'vue-sonner';
 import NumberField from './components/NumberField.vue';
 import Separator from '@/components/ui/separator/Separator.vue';
@@ -35,7 +35,6 @@ import { createOrder } from '@/services/api/orders';
 
 const tableProductsState = useTableProductsState();
 const isLoading = ref(true);
-
 const { toCurrency, toFloat } = MoneyUtil.formatMoney();
 
 const props = defineProps({

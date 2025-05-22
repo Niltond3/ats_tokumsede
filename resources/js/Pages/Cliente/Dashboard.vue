@@ -65,10 +65,13 @@ const fetchAddresses = () => {
           id,
           value: `${StringUtil.utf8Decode(logradouro)}, ${numero} - ${StringUtil.utf8Decode(bairro)}`,
           city: `${StringUtil.utf8Decode(cidade)} - ${StringUtil.utf8Decode(estado)}`,
-          complement: StringUtil.utf8Decode(complemento) || '',
-          referency: StringUtil.utf8Decode(referencia) || '',
+          complement: complemento ? StringUtil.utf8Decode(complemento) : '',
+          referency: referencia ? StringUtil.utf8Decode(referencia) : '',
         };
       });
+    },
+    (err) => {
+      console.error(err);
     },
   );
 };

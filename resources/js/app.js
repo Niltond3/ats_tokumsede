@@ -42,7 +42,8 @@ createInertiaApp({
             .use(router)
             .use(VueGoogleMaps, {
                 load: {
-                    key: "AIzaSyD3A65oIloNfr-TA3EK8vERo2nnWEi1fxg",
+                    // key: "AIzaSyD3A65oIloNfr-TA3EK8vERo2nnWEi1fxg",
+                    key: "AIzaSyBxP_e0Xopzv9ptFJ_ZKkgjonXgx0TBivE",
                     libraries: "places",
                     loading: "async",
                 },

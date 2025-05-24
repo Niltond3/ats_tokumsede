@@ -18,7 +18,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD3A65oIloNfr-TA3EK8vERo2nnWEi1fxg&loading=async&libraries=places">
+        {{-- src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD3A65oIloNfr-TA3EK8vERo2nnWEi1fxg&loading=async&libraries=places"> --}}
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBxP_e0Xopzv9ptFJ_ZKkgjonXgx0TBivE&loading=async&libraries=places">
     </script>
 
     <!-- Styles -->

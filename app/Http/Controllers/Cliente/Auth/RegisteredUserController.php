@@ -104,7 +104,8 @@ class RegisteredUserController extends Controller
 
     function buscarLatitudeLongitude($logradouro, $numero, $cidade, $estado, $cep) {
         //$address = {nm_bairro}.", ".{nm_cidade}.", ".{nm_estado}.", ".{nm_brasil};
-        $key = "AIzaSyD3A65oIloNfr-TA3EK8vERo2nnWEi1fxg";
+        // $key = "AIzaSyD3A65oIloNfr-TA3EK8vERo2nnWEi1fxg";
+        $key = "AIzaSyBxP_e0Xopzv9ptFJ_ZKkgjonXgx0TBivE";
         $address = $logradouro . ", " . $numero . ", " . $cidade . ", " . $estado . ", " . $cep . "," . "Brasil";
         $request_url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $address . "&sensor=true&key=".$key; // A URL que vc manda pro google para pegar o XML
         // $context = stream_context_create(array('ssl'=>array(

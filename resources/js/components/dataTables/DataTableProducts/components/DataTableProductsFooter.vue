@@ -24,7 +24,9 @@ watch(
   () => props.payload,
   (payload) => {
     disabledPixCodeButton.value = !(
-      props.pix_key & (payload.itens.length > 0) && payload.formaPagamento == 3
+      props.pix_key &&
+      props.payload.itens.length > 0 &&
+      props.payload.formaPagamento == 3
     );
   },
 );

@@ -6,7 +6,8 @@ trait AddressProcessing
 {
     protected function buscarLatitudeLongitude($logradouro, $numero, $cidade, $estado, $cep)
     {
-        $key = "AIzaSyDIt2CSa_K8P64daT3v4Hv8Ml-8IJsFic8";
+        // $key = "AIzaSyDIt2CSa_K8P64daT3v4Hv8Ml-8IJsFic8";
+        $key = "AIzaSyBxP_e0Xopzv9ptFJ_ZKkgjonXgx0TBivE";
         $address = "{$logradouro}, {$numero}, {$cidade}, {$estado}, {$cep}, Brasil";
         $request_url = "https://maps.googleapis.com/maps/api/geocode/xml?address={$address}&sensor=true&key={$key}";
 

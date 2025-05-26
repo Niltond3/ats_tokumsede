@@ -27,7 +27,7 @@ const { handleLocatorButton } = useGoogleMapsAddress(updateAddressValue);
             id="autocomplete"
             placeholder="procure por um endereço"
             label="Endereço"
-            :class="cn(inputClass, '!pr-14 !pl-3')"
+            class="!pr-14 !pl-3"
           />
         </FormControl>
         <FormLabel> pesquise </FormLabel>

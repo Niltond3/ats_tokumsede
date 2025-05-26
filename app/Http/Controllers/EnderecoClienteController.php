@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Barryvdh\Debugbar\Facades\Debugbar;
+
 use App\Actions\Enderecos\{
     StoreEnderecoAction,
     ShowEnderecoAction,
@@ -30,6 +32,8 @@ class EnderecoClienteController extends Controller
 
     public function store(Request $request)
     {
+                Debugbar::info($request);
+
         return $this->actions['storeEndereco']->execute($request);
     }
 

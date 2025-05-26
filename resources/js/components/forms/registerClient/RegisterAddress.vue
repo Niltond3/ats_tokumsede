@@ -38,6 +38,8 @@ const formSchema = [
     complemento: z.string().nullable().optional(),
     referencia: z.string().nullable().optional(),
     observacao: z.string().nullable().optional(),
+    latitude: z.number(),
+    longitude: z.number(),
   }),
   z.object({
     validateInformations: z.boolean().refine((value) => value === true, {
@@ -62,6 +64,7 @@ const steps = [
 ];
 
 const onSubmit = (values) => {
+  console.log(values);
   const payload = {
     idCliente: props.idClient,
     logradouro: values.logradouro || '',
@@ -74,6 +77,8 @@ const onSubmit = (values) => {
     referencia: values.referencia || '',
     apelido: values.apelido || '',
     observacao: values.observacao || '',
+    latitude: values.latitude || 0,
+    longitude: values.longitude || 0,
   };
   const promise = props.addressDetails
     ? axios.put(`enderecos/${props.addressDetails.id}`, payload)
@@ -88,7 +93,8 @@ const onSubmit = (values) => {
   );
 };
 
-const handleUpdateAddress = (addressValue, setValues) =>
+const handleUpdateAddress = (addressValue, setValues) => {
+  console.log(addressValue);
   setValues({
     search: addressValue.search && addressValue.search,
     cep: addressValue.cep && addressValue.cep,
@@ -97,7 +103,10 @@ const handleUpdateAddress = (addressValue, setValues) =>
     logradouro: addressValue.logradouro && addressValue.logradouro,
     numero: addressValue.numero && addressValue.numero,
     bairro: addressValue.bairro && addressValue.bairro,
+    latitude: addressValue.latitude && addressValue.latitude,
+    longitude: addressValue.longitude && addressValue.longitude,
   });
+};
 </script>
 
 <template>

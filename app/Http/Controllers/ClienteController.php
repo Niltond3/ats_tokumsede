@@ -318,7 +318,8 @@ public function destroy(Request $request)
     function buscarLatitudeLongitude($logradouro, $numero, $cidade, $estado, $cep)
     {
         //$address = {nm_bairro}.", ".{nm_cidade}.", ".{nm_estado}.", ".{nm_brasil};
-        $key = "AIzaSyDIt2CSa_K8P64daT3v4Hv8Ml-8IJsFic8";
+        // $key = "AIzaSyDIt2CSa_K8P64daT3v4Hv8Ml-8IJsFic8";
+        $key = "AIzaSyBxP_e0Xopzv9ptFJ_ZKkgjonXgx0TBivE";
         $address = $logradouro . ", " . $numero . ", " . $cidade . ", " . $estado . ", " . $cep . "," . "Brasil";
         $request_url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $address . "&sensor=true&key=" . $key; // A URL que vc manda pro google para pegar o XML
         // $context = stream_context_create(array('ssl'=>array(

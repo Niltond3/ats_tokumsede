@@ -35,7 +35,10 @@ const handleSucess = () => {
 
 <template>
   <Dialog :open="open" @update:open="(op) => toggleDialog()">
-    <DialogContent class="sm:max-w-[440px]" @interact-outside="handleDialogOutsideInteract">
+    <DialogContent
+      class="sm:max-w-[440px] overflow-hidden"
+      @interact-outside="handleDialogOutsideInteract"
+    >
       <DialogHeader>
         <DialogTitle class="text-info gap-1 flex items-center"
           ><i class="ri-user-add-fill"></i>

@@ -26,7 +26,9 @@ export function useGoogleMapsAddress(onPlaceChanged) {
     };
 
     const setPlace = (place, handleChange) => {
-        const { address_components, formatted_address } = place;
+
+        const { address_components, formatted_address, geometry: { location: { lat, lng } } } = place;
+
         const addressComp = address_components.reduce((prev, addressItem) => {
             const { short_name, types } = addressItem;
             const type = types[0];
@@ -34,7 +36,7 @@ export function useGoogleMapsAddress(onPlaceChanged) {
             if (typeGetted) return typeGetted(prev, short_name);
             return prev;
         }, {});
-        handleChange({ ...addressComp, search: formatted_address });
+        handleChange({ ...addressComp, search: formatted_address, latitude: lat(), longitude: lng() });
     };
 
     const getUserLocation = (handleChange) => {

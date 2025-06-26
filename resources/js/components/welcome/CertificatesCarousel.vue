@@ -22,15 +22,19 @@ const emblaThumbnailApi = ref();
 const selectedIndex = ref(0);
 
 const certificates = [
-  { index: 0, url: '/images/certificates/aesa.png', title: 'AESA' },
-  { index: 1, url: '/images/certificates/agevisa.png', title: 'AGEVISA' },
+  { index: 0, url: '/images/certificates/aesa1.png', title: 'Alvará AESA. p1' },
+  { index: 1, url: '/images/certificates/aesa2.png', title: 'Alvará AESA. p2' },
+  { index: 2, url: '/images/certificates/agevisa.png', title: 'Alvará AGEVISA' },
+  { index: 3, url: '/images/certificates/santario.png', title: 'Alvará santario' },
+  { index: 4, url: '/images/certificates/Bombeiros.png', title: 'Certificado Bombeiros' },
+  { index: 5, url: '/images/certificates/conselho-de-quimica.png', title: 'Conselho de Química' },
   {
-    index: 2,
+    index: 6,
     url: '/images/certificates/Alvara-funcionamento-municipal.png',
-    title: 'Alvara de funcionamento municipal',
+    title: 'Licança para localização e funcionamento',
   },
-  { index: 3, url: '/images/certificates/conselho-de-quimica.png', title: 'Conselho de Química' },
-  { index: 4, url: '/images/certificates/Sudema.png', title: 'Sudema' },
+  { index: 7, url: '/images/certificates/Sudema1.png', title: 'Licença de operação SUDEMA. p1' },
+  { index: 8, url: '/images/certificates/Sudema2.png', title: 'Licença de operação SUDEMA. p2' },
 ];
 
 function onSelect() {

@@ -82,7 +82,7 @@ export const tableConfig = (ajustClass, isNestedTable = false) => {
                         <div class="flex items-center gap-1">
                             <i class="${icon} text-lg"></i>
                             <span class="w-0 opacity-0 pointer-events-none">${peso}</span>
-                             <span class="hidden @[768px]:block"> ${data} </span>
+                             <span class="hidden max-[500px]:absolute max-[500px]:-top-8 max-[500px]:!text-info z-50"> ${data} </span>
                         </div >
                      `;
                     const getType = {
@@ -115,21 +115,26 @@ export const tableConfig = (ajustClass, isNestedTable = false) => {
                         "[&_.dt-scroll]:!m-0",
                         "[&_.dts_label]:hidden",
                         "[&_tr]:cursor-pointer",
-                        "[&_td]:!pb-[14px]  [&_td]:rounded-t-md",
-                        "[&_tbody]:flex [&_tbody]:justify-center",
-                        "[&_input]:opacity-0 [&_input]:pointer-events-none",
-                        "[&_tr_div]:flex [&_tr_div]:gap-2 [&_tr_div]:transition-transform [&_tr_div]:text-[#1e88e5]/80",
-                        "[&_tr.selected>td]:!shadow-[inset_0_0_0_9999px_rgba(30,136,229,1)] [&_tr.selected>td]:font-bold",
-                        "[&_.dt-scroll-body]:!overflow-hidden [&_.dt-scroll-body]:!border-none",
-                        "[&_tr>.dtsp-nameCont>span>div]:bg-success",
-                        "[&_tr.selected_.dtsp-nameCont]:translate-y-[5px]",
-                        "[&_.dt-scroll-head]:hidden",
-                        "[&_tr.selected_div]:!text-white",
-                        "[&_tr.selected_span.hidden]:!block",
-                        "[&_.dt-scroll-body]:!h-[46px]",
                         "[&_table]:flex",
                         "[&_table>colgroup]:hidden",
                         "[&_table>thead]:hidden",
+                        "[&_tbody]:flex [&_tbody]:justify-center [&_tbody]:!relative",
+                        // MODIFICADO: Adicionado 'relative' para servir de âncora ao span flutuante
+                        "[&_td]:!pb-[14px]  [&_td]:rounded-t-md",
+                        "[&_input]:opacity-0 [&_input]:pointer-events-none",
+                        "[&_tr_div]:flex [&_tr_div]:gap-2 [&_tr_div]:transition-transform [&_tr_div]:text-[#1e88e5]/80",
+                        "[&_tr.selected>td]:!shadow-[inset_0_0_0_9999px_rgba(30,136,229,1)] [&_tr.selected>td]:font-bold",
+                        "[&_tr.selected_div]:!text-white",
+                        "[&_tr.selected_.dtsp-nameCont]:translate-y-[5px]",
+
+                        "[&_.dt-scroll-body]:!overflow-hidden [&_.dt-scroll-body]:!border-none",
+                        "[&_tr>.dtsp-nameCont>span>div]:bg-success",
+                        "[&_.dt-scroll-head]:hidden",
+                        "[&_tr.selected_span.hidden]:!block",
+                        // --- COMPORTAMENTO FLUTUANTE (Telas < 500px) ---
+                        // "max-[500px]:[&_tr.selected_.dtsp-name]:!absolute",
+                        // "max-[500px]:[&_tr.selected_.dtsp-name]:z-10",
+                        "[&_.dt-scroll-body]:!h-[46px]",
                         "absolute top-[78px] right-0",
                         "min-[768px]:top-[55px]",
                         "w-full",
